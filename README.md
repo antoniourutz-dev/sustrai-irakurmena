@@ -16,8 +16,12 @@ Plataforma de práctica de comprensión lectora de euskera C1 con modelos IVAP y
 ## Archivos
 
 ```text
-index.html          # Pantalla IVAP y navegación
-style.css           # Estilos comunes
+index.html          # Entrada guiada para elegir IVAP/HABE y modo
+start.css           # Estilos de la entrada
+start.js            # Lógica del selector inicial
+ivap/
+  index.html        # Pantalla IVAP
+style.css           # Estilos comunes de los exámenes
 app.js              # Lógica IVAP
 habe/
   index.html        # Pantalla HABE
@@ -34,7 +38,7 @@ Se puede abrir con un servidor estático. Por ejemplo, desde la raíz del proyec
 python -m http.server 8000
 ```
 
-Después visita `http://localhost:8000/` para IVAP o `http://localhost:8000/habe/` para HABE.
+Visita `http://localhost:8000/` para iniciar el flujo guiado. Las interfaces de examen quedan en `/ivap/` y `/habe/`; la portada transmite el modo elegido mediante `?mode=simulation` o `?mode=practice`.
 
 **Nota:** la función de corrección limita los orígenes permitidos a los dominios de la aplicación en Vercel. Para probarla desde localhost habría que habilitar explícitamente el origen de desarrollo en esa función, sin abrir los permisos de producción innecesariamente.
 

@@ -26,3 +26,15 @@
 .original-excerpt .excerpt-warning{font-size:11px;color:#758879;line-height:1.5}
 .original-excerpt pre{white-space:pre-wrap;overflow-wrap:anywhere;font:12px/1.65 ui-monospace,SFMono-Regular,Consolas,monospace;background:#f5f7f5;padding:16px;border:1px solid #e0e8df;border-radius:8px;max-height:420px;overflow:auto}
 @media(max-width:720px){.official-material{padding:15px}.official-material-grid{grid-template-columns:1fr}.extra-filters{padding:12px 14px}.official-note{padding:12px}}
+
+/* 2026-11-14: los recuadros del documento oficial son parte del enunciado y deben verse antes de la consigna. */
+.prompt .official-material{margin:16px 0 20px;padding:18px 20px;background:#f0f8ef;border:2px solid #91bf9e;border-radius:12px}
+.prompt .official-material-header .overline{color:#287248;font-size:10px}
+.prompt .official-material-header h4{font:700 22px/1.23 Georgia,'Times New Roman',serif;color:#17472c;margin:7px 0 10px}
+.prompt .official-material-header p{color:#365b41;font-size:13px;line-height:1.6;margin:0 0 16px}
+.prompt .official-note-count{display:inline-block;font:750 11px system-ui,sans-serif;white-space:nowrap;padding:5px 9px;background:#d6eedd;color:#225839;border-radius:99px;vertical-align:middle}
+.prompt .official-material-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.prompt .official-note{background:#fff;border:1px solid #bcd8c3;border-left:4px solid #258057;padding:15px;border-radius:10px;box-shadow:0 1px 4px #193d2212}
+.prompt .official-note p{font:15px/1.55 Georgia,'Times New Roman',serif;color:#213b2b;margin:7px 0 0}
+.prompt .official-note-index{font-size:10px;font-weight:850;color:#387650}
+@media(max-width:720px){.prompt .official-material{padding:14px;margin:14px 0 18px}.prompt .official-material-grid{grid-template-columns:1fr}.prompt .official-material-header h4{font-size:19px}}

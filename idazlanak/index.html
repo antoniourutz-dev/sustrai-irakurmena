@@ -6,9 +6,10 @@
   <meta name="theme-color" content="#163e30">
   <meta name="description" content="SUSTRAI Idazlanak: C1 mailako IVAP eta HABE idazmen-atazak, idazteko gunea eta behar duzunean zabaltzeko laguntza.">
   <title>SUSTRAI · Idazlanak C1</title>
-  <link rel="stylesheet" href="/idazlanak/style.css?v=20261114-display-fix-2">
+  <link rel="stylesheet" href="/idazlanak/style.css?v=20261114-integrated">
 </head>
 <body>
+<a class="skip-link" href="#writingTitle">Joan idazteko gunera</a>
 <div class="app" id="app">
   <header class="topbar">
     <a class="brand" href="/" aria-label="SUSTRAI hasiera">
@@ -17,7 +18,7 @@
     </a>
     <nav class="topnav" aria-label="Atalak">
       <a href="/">Hasiera</a>
-      <a href="/" title="Irakurmena praktikatzeko aukerak">Irakurmena</a>
+      <a href="/#irakurmena" title="Irakurmena praktikatzeko aukerak">Irakurmena</a>
       <span class="active" aria-current="page">Idazlanak</span>
     </nav>
   </header>
@@ -48,7 +49,7 @@
         <input type="search" id="taskSearch" placeholder="Adibidez: 2022, lana, kirola…" autocomplete="off">
         <span class="catalog-count" id="catalogCount" aria-live="polite"></span>
       </div>
-      <div id="taskList" class="task-list" aria-label="Idazteko atazak">
+      <div id="taskList" class="task-list" aria-label="Idazteko atazak" aria-busy="true">
         <p class="loading">Atazak kargatzen…</p>
       </div>
       <p class="catalog-footnote">Enuntziatuak eredu ofizialetan oinarrituta daude; laguntza pedagogikoa SUSTRAIk prestatu du.</p>
@@ -163,6 +164,6 @@
   <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
 </div>
 <noscript>Idazmen-tailerra erabiltzeko JavaScript beharrezkoa da.</noscript>
-<script src="/idazlanak/app.js?v=20261114-display-fix-2" defer></script>
+<script src="/idazlanak/app.js?v=20261114-integrated" defer></script>
 </body>
 </html>

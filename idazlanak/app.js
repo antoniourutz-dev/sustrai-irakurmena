@@ -187,11 +187,13 @@ async function start(){
     const organizations=new Map(organismData.map(x=>[x.id,x.code]));
     tasks=raw.filter(x=>organizations.has(x.organism_id)).map(x=>({...x,org_code:organizations.get(x.organism_id)})).sort((a,b)=>a.org_code.localeCompare(b.org_code)||b.exam_reference.localeCompare(a.exam_reference)||a.title_eu.localeCompare(b.title_eu,'eu'));
     supports=supportData.filter(x=>!x.is_official);
+    $('taskList').setAttribute('aria-busy','false');
     if(!tasks.length)throw Error('Oraindik ez dago idazlanik argitaratuta.');
     let previous;try{previous=sessionStorage.getItem('sustrai-writer-last')}catch{}
     let requested=null;try{requested=new URLSearchParams(window.location.search).get('ataza')}catch{}
     selectTaskBySlug(tasks.some(t=>t.slug===requested)?requested:(tasks.some(t=>t.slug===previous)?previous:tasks[0].slug));
   }catch(error){
+    $('taskList').setAttribute('aria-busy','false');
     $('taskList').textContent=error.message||'Ezin izan da kargatu.';
     notify('Arazoa atazak kargatzean. Freskatu orria.');
     console.error(error);

@@ -25,3 +25,15 @@ a:focus-visible,button:focus-visible,input:focus-visible+.choice-body{outline:3p
 @media(max-width:800px){.start-main{width:min(100% - 24px,1160px);padding-top:32px}.start-intro{align-items:flex-start;gap:24px}.intro-proof{flex-basis:190px;padding-left:16px}.practice-paths{gap:10px}.practice-path{padding:19px 17px}.path-header{gap:10px}.path-number{width:36px;height:36px}.path-header h2{font-size:24px}.path-description{min-height:4.8em;margin:14px 0}.path-stats{margin-bottom:17px}.path-stats li{padding:10px 5px}.choice-body{min-height:63px;padding:8px 7px;column-gap:5px}.path-action{grid-template-columns:1fr;gap:9px}.path-action button{width:100%}.start-help{grid-template-columns:1fr 1.2fr}}
 @media(max-width:560px){.start-header{padding-inline:12px}.start-brand-icon{width:32px;height:32px}.start-brand strong{font-size:13px}.start-brand small{font-size:8px}.start-nav{gap:1px}.start-nav a,.start-nav .active{padding:7px 6px;font-size:10px}.start-main{width:min(100% - 20px,1160px);padding-top:27px}.start-intro{display:block;margin-bottom:22px}.start-intro h1{font-size:39px}.start-intro p{font-size:14px}.intro-proof{grid-template-columns:repeat(3,1fr);margin-top:19px;padding:0;border-left:0;border-top:1px solid #c8d7cb}.intro-proof div{display:block;padding:10px 5px;border-right:1px solid #d8e2da;border-bottom:0}.intro-proof div:last-child{border-right:0}.intro-proof span{text-align:left;margin-top:3px;display:block}.practice-paths{grid-template-columns:1fr}.practice-path{padding:22px}.path-description{min-height:0}.start-help{grid-template-columns:1fr;gap:10px;padding:21px}.start-help p{font-size:11px}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.choice-body,.path-action button{transition:none}}
+
+/* Hirugarren prestaketa-bidea: Ahozkoa */
+.start-main{max-width:1480px;width:min(100% - 48px,1480px)}
+.practice-paths{grid-template-columns:repeat(3,minmax(0,1fr))}
+.speaking-path{--path:#287461;--path-soft:#e7f3ee}
+.speaking-path .writing-includes span::before{border-left-color:#287461;border-bottom-color:#287461}
+@media(max-width:1199px) and (min-width:801px){
+ .practice-paths{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .speaking-path{grid-column:1 / -1;max-width:none}
+}
+@media(max-width:800px){.start-main{width:min(100% - 24px,1160px)}.practice-paths{grid-template-columns:repeat(2,minmax(0,1fr))}.speaking-path{grid-column:1 / -1}}
+@media(max-width:560px){.start-main{width:min(100% - 20px,1160px)}.practice-paths{grid-template-columns:1fr}.speaking-path{grid-column:auto}}

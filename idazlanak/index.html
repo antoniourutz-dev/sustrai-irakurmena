@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#163e30">
   <meta name="description" content="SUSTRAI Idazlanak: C1 mailako IVAP eta HABE idazmen-atazak, idazteko gunea eta behar duzunean zabaltzeko laguntza.">
   <title>SUSTRAI · Idazlanak C1</title>
-  <link rel="stylesheet" href="/idazlanak/style.css?v=20261114-integrated">
+  <link rel="stylesheet" href="/idazlanak/style.css?v=20261114-outline-1">
 </head>
 <body>
 <a class="skip-link" href="#writingTitle">Joan idazteko gunera</a>
@@ -99,6 +99,106 @@
         </details>
       </article>
 
+      <section class="outline-workshop panel" id="outlineWorkshop" aria-labelledby="outlineHeading" data-mode="training">
+        <div class="outline-header">
+          <div class="outline-head-main">
+            <span class="overline">IDAZTEN HASI AURRETIK · IKASLEAREN TAILERRA</span>
+            <h3 id="outlineHeading">Zure eskema eraiki</h3>
+            <p>Ez dizugu idazlana edo eskema egina emango. Zuk hartuko dituzu erabakiak: zer esan, zergatik eta zer ordenatan.</p>
+          </div>
+          <div class="outline-status">
+            <span class="outline-mode" id="outlineHelpMode">Pistak zuk nahi duzunean</span>
+            <span class="outline-progress" id="outlineProgress">Aukeratu ataza bat</span>
+          </div>
+        </div>
+        <p class="outline-task" id="outlineTaskTitle"></p>
+        <div class="outline-tabs" role="tablist" aria-label="Eskema eraikitzeko lau urratsak">
+          <button type="button" class="outline-tab current" role="tab" aria-controls="outlineStage0" aria-selected="true" tabindex="0" id="outlineTab0"><span>01</span> Misioa</button>
+          <button type="button" class="outline-tab" role="tab" aria-controls="outlineStage1" aria-selected="false" tabindex="-1" id="outlineTab1"><span>02</span> Ideiak</button>
+          <button type="button" class="outline-tab" role="tab" aria-controls="outlineStage2" aria-selected="false" tabindex="-1" id="outlineTab2"><span>03</span> Ibilbidea</button>
+          <button type="button" class="outline-tab" role="tab" aria-controls="outlineStage3" aria-selected="false" tabindex="-1" id="outlineTab3"><span>04</span> Berrikusi</button>
+        </div>
+        <div class="outline-workarea">
+          <span class="outline-step-name" id="outlineStepName">1 / 4 · MISIOA</span>
+          <div class="outline-stage" id="outlineStage0" role="tabpanel" aria-labelledby="outlineTab0">
+            <h4>Ulertu eginkizuna, idatzi aurretik</h4>
+            <p class="outline-guide">Ez kopiatu enuntziatua: esan zeure hitzekin zer komunikazio-egoerari erantzun behar diozun.</p>
+            <div class="outline-context"><strong>Testu mota</strong><span id="outlineGenre"></span><strong>Enuntziatuko hartzailea</strong><span id="outlineOfficialReader"></span></div>
+            <div class="outline-field-row">
+              <label for="outlineMissionAudience">Nori zuzenduko diozu zure testua?</label>
+              <input id="outlineMissionAudience" maxlength="2000" type="text" placeholder="Hartzailea eta harreman mota, zure hitzekin…">
+            </div>
+            <div class="outline-field-row">
+              <label id="outlinePurposeLabel" for="outlineMissionGoal">Zertarako idatziko duzu?</label>
+              <textarea id="outlineMissionGoal" maxlength="2000" rows="2" placeholder="Azaldu komunikazio-helburua, ez testu osoa."></textarea>
+            </div>
+            <div class="outline-field-row">
+              <label id="outlineGoalLabel" for="outlineMissionThesis">Zer defendatu edo eskatu nahi duzu?</label>
+              <textarea id="outlineMissionThesis" maxlength="2000" rows="2" placeholder="Esaldi batean laburbildu zure mezu nagusia."></textarea>
+            </div>
+            <details class="outline-hint">
+              <summary>Laguntza 1 · Nola identifikatu misioa?</summary>
+              <p>Bilatu enuntziatuan hiru gako: <strong>nork</strong> idazten duen, <strong>norentzat</strong> eta <strong>zertarako</strong>. Ez nahastu gaia komunikazio-helburuarekin.</p>
+              <details class="outline-hint-deeper"><summary>Beste pista bat behar dut</summary><p>Azaldu zure buruari: «Testu hau irakurri ondoren, hartzaileak zer ulertu, pentsatu edo egin beharko luke?»</p></details>
+            </details>
+          </div>
+          <div class="outline-stage" id="outlineStage1" role="tabpanel" aria-labelledby="outlineTab1" hidden>
+            <h4>Ideiak sortu, aukeratu eta justifikatu</h4>
+            <p class="outline-guide" id="outlineIdeaInfo">Lehenik, sortu zenbait aukera. Gero, aukeratu garatuko dituzunak.</p>
+            <div id="outlineIdeaList" class="outline-idea-list"></div>
+            <button type="button" class="outline-add" id="outlineAddIdea">+ Beste ideia bat gehitu</button>
+            <details class="outline-hint">
+              <summary>Laguntza 2 · Nondik atera ideiak?</summary>
+              <p>Bereizi <strong>enuntziatuak ematen dituen datuak</strong> eta <strong>zuk proposatzen dituzun argudioak</strong>. Ez asmatu gertaera edo estatistikarik.</p>
+              <details class="outline-hint-deeper"><summary>Beste pista bat behar dut</summary><p>Galdetu: «Zergatik? Zer ondorio du? Nori eragiten dio? Zer adibide erabil dezaket?» Pentsatu zein ideiak laguntzen dioten zure xedeari.</p></details>
+            </details>
+          </div>
+          <div class="outline-stage" id="outlineStage2" role="tabpanel" aria-labelledby="outlineTab2" hidden>
+            <h4>Erabaki nola egingo duen aurrera testuak</h4>
+            <p class="outline-guide">Atal bakoitzari <strong>funtzio bat</strong> eman. Ez da paragrafo kopuru finkoa: ideiak batu edo bereiz ditzakezu.</p>
+            <div class="outline-chosen-summary" id="outlineChosenSummary"></div>
+            <div class="outline-route-grid" id="outlineRouteFields"></div>
+            <details class="outline-hint">
+              <summary>Laguntza 3 · Zer ordena aukeratu?</summary>
+              <p>Hasi hartzaileak behar duen testuingurutik. Ondoren, aurreratu zure arrazoibidean: zehaztu, argudiatu, kontrastatu edo proposatu. Itxi hasieran planteatutako helburuari erantzunez.</p>
+              <details class="outline-hint-deeper"><summary>Beste pista bat behar dut</summary><p>Irakurri atalen izenak segidan: bakoitzak informazio berria gehitzen al du, edo gauza bera errepikatzen duzu?</p></details>
+            </details>
+          </div>
+          <div class="outline-stage" id="outlineStage3" role="tabpanel" aria-labelledby="outlineTab3" hidden>
+            <h4>Begiratu zure eskema, idazten hasi aurretik</h4>
+            <p class="outline-guide">Hau <strong>autoegiaztapena</strong> da; ez du puntuaziorik edo azterketako notarik ematen. Markatu benetan landu dituzunak.</p>
+            <section id="outlineCoverageWrapper" class="outline-review-group">
+              <h5>Atazako galderak edo eskakizunak aintzat hartu ditut?</h5>
+              <div id="outlineCoverage"></div>
+            </section>
+            <section class="outline-review-group">
+              <h5>Eskema nire testurako erabilgarria da?</h5>
+              <div id="outlineReviewChecks"></div>
+            </section>
+            <div class="outline-feedback" id="outlineFeedback" aria-live="polite"></div>
+            <p class="outline-review-status" id="outlineReviewStatus"></p>
+            <details class="outline-preview-wrap">
+              <summary>Ikusi nire eskema osoa</summary>
+              <pre id="outlinePreview" class="outline-preview"></pre>
+            </details>
+          </div>
+        </div>
+        <div class="outline-footer">
+          <div class="outline-footer-state">
+            <span id="outlineSaved" aria-live="polite">Zure eskema nabigatzailean gordetzen da</span>
+            <span id="outlineHelpCount">Oraindik ez duzu pistarik ireki</span>
+          </div>
+          <div class="outline-footer-actions">
+            <button type="button" id="outlinePrev" class="soft" disabled>Aurrekoa</button>
+            <button type="button" id="outlineNext" class="outline-primary">Hurrengo urratsa</button>
+            <button type="button" id="outlineCopy" class="soft">Kopiatu eskema</button>
+            <button type="button" id="outlineGoWrite" class="outline-primary" disabled>Idazlanera joan</button>
+            <button type="button" id="outlineReset" class="outline-reset">Eskema ezabatu</button>
+          </div>
+        </div>
+        <p class="outline-disclaimer">Eskema eta idazlana bereizita gordetzen dira gailu honetan. Ez dira irakasleari bidaltzen, eta eskemaren ideiak ez dira automatikoki idazlanean txertatzen.</p>
+      </section>
+
       <section class="editor panel" aria-labelledby="editorHeading">
         <div class="editor-head">
           <div>
@@ -164,6 +264,7 @@
   <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
 </div>
 <noscript>Idazmen-tailerra erabiltzeko JavaScript beharrezkoa da.</noscript>
-<script src="/idazlanak/app.js?v=20261114-integrated" defer></script>
+<script src="/idazlanak/app.js?v=20261114-outline-1" defer></script>
+<script src="/idazlanak/eskema.js?v=20261114-outline-1" defer></script>
 </body>
 </html>

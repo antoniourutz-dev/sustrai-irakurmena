@@ -114,7 +114,11 @@ function tick(){
  renderTimers();
 }
 function releaseRecording(){
- if(recording&&recording.state!=='inactive'){try{recording.stop()}catch{}}
+ if(recording){
+  // A discarded recording must not finish later and appear under another task.
+  recording.onstop=null;recording.ondataavailable=null;recording.onerror=null;
+  if(recording.state!=='inactive'){try{recording.stop()}catch{}}
+ }
  if(mediaStream){for(const tr of mediaStream.getTracks())tr.stop();mediaStream=null}
  recording=null;
 }
@@ -165,7 +169,7 @@ function downloadRecording(){
 }
 function choose(slug,updateUrl){
  const item=tasks.find(x=>x.slug===slug);if(!item)return;
- if(clipDirty&&!confirm('Aldatu ataza? Uneko grabazioa galduko da. Deskargatu duzu?'))return;
+ if((clipDirty||recording?.state==='recording')&&!confirm('Aldatu ataza? Uneko grabazioa galduko da. Deskargatu duzu?'))return;
  clearRecording();stopAllTimers();for(const k of ['prep','speak'])timers[k].elapsed=0;
  selected=item;
  $('speakingTitle').textContent=item.title_eu;
@@ -188,7 +192,7 @@ function choose(slug,updateUrl){
 }
 function setMode(next){
  if(next===mode)return;
- if(clipDirty&&!confirm('Modua aldatuta audioa galduko da. Deskargatu duzu?'))return;
+ if((clipDirty||recording?.state==='recording')&&!confirm('Modua aldatuta audioa galduko da. Deskargatu duzu?'))return;
  if(selected)saveState();
  mode=next;clearRecording();stopAllTimers();for(const k of ['prep','speak'])timers[k].elapsed=0;
  $('trainMode').classList.toggle('active',next==='training');

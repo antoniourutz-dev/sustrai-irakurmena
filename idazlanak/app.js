@@ -51,9 +51,26 @@ function selectTaskBySlug(slug){
   const link=safeSource(item.source_url);
   $('sourceLink').hidden=!link;
   if(link)$('sourceLink').href=link;
+  const notes=Array.isArray(item.official_material)?item.official_material.filter(n=>n&&typeof n.text==='string'&&n.text.trim()):[];
+  $('officialMaterialSection').hidden=!notes.length;
+  const grid=$('officialMaterialGrid');grid.replaceChildren();
+  notes.forEach((note,index)=>{
+    const card=document.createElement('blockquote');
+    card.className='official-note';
+    const idx=document.createElement('span');
+    idx.className='official-note-index';
+    idx.textContent='JATORRIZKO DATUA '+(index+1);
+    const body=document.createElement('p');
+    body.textContent=note.text;
+    card.append(idx,body);
+    grid.append(card);
+  });
+  $('originalExcerpt').hidden=!item.source_excerpt_eu;
+  $('originalExcerpt').open=false;
+  $('originalExcerptText').textContent=item.source_excerpt_eu||'';
   const guidance=Array.isArray(item.exam_guidance)?item.exam_guidance:[];
   $('officialGuidance').hidden=guidance.length===0;
-  $('officialGuidance').open=false;
+  $('officialGuidance').open=guidance.length>0;
   $('officialGuidanceList').replaceChildren(...guidance.map(g=>{let li=document.createElement('li');li.textContent=g;return li}));
   $('draft').disabled=false;
   $('draft').value=loadDraft();
@@ -67,7 +84,12 @@ function selectTaskBySlug(slug){
   try{sessionStorage.setItem('sustrai-writer-last',slug)}catch{}
 }
 function renderList(){
-  const filtered=tasks.filter(t=>$('sourceFilter').value==='all'||t.org_code===$('sourceFilter').value);
+  const selectedOrg=$('sourceFilter').value,selectedGenre=$('genreFilter').value;
+  const search=$('taskSearch').value.toLocaleLowerCase('eu').trim();
+  const filtered=tasks.filter(t=>(selectedOrg==='all'||t.org_code===selectedOrg)
+    &&(selectedGenre==='all'||t.genre===selectedGenre)
+    &&(!search||[t.title_eu,t.exam_reference,t.context_eu].some(v=>String(v||'').toLocaleLowerCase('eu').includes(search))));
+  $('catalogCount').textContent=filtered.length+' / '+tasks.length+' ataza';
   const list=$('taskList');list.replaceChildren();
   if(!filtered.length){list.textContent='Ez dago atazarik iragazki honekin.';return}
   for(const task of filtered){
@@ -141,6 +163,8 @@ function clearDraft(){
 }
 async function start(){
   $('sourceFilter').onchange=renderList;
+  $('genreFilter').onchange=renderList;
+  $('taskSearch').oninput=renderList;
   $('trainingMode').onclick=()=>setMode('training');
   $('simulationMode').onclick=()=>setMode('simulation');
   $('draft').addEventListener('input',()=>{updateWordCount();saveDraft()});
@@ -152,7 +176,7 @@ async function start(){
   startClock();
   try{
     const [raw,supportData]=await Promise.all([
-      readTable('sr_writing_prompts','id,slug,organism_id,level,exam_reference,title_eu,genre,audience_eu,context_eu,instruction_eu,exam_guidance,min_words,recommended_minutes,source_url,source_section,source_status'),
+      readTable('sr_writing_prompts','id,slug,organism_id,level,exam_reference,title_eu,genre,audience_eu,context_eu,instruction_eu,exam_guidance,min_words,recommended_minutes,source_url,source_section,source_status,official_material,source_excerpt_eu,source_excerpt_kind'),
       readTable('sr_writing_supports','prompt_id,support_kind,version,items,is_official')
     ]);
     const mapping={'IVAP':'IVAP','HABE':'HABE'};

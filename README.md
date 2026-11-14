@@ -46,7 +46,7 @@ No se exportan los textos y respuestas desde Supabase al repositorio. Los cambio
 
 ## Despliegue
 
-Este repositorio contiene una copia del código de la versión de producción de Vercel recuperada el 14-11-2026 (`dpl_2snPti2ZstGn8dauwCwJ4xQ9Rdd1`). Vercel se ha utilizado hasta ahora con despliegues de archivos; **subir el código a GitHub no configura automáticamente el enlace Git-Vercel**. Para activar despliegues automáticos, habrá que conectar este repositorio al proyecto Vercel existente, sin crear otro proyecto ni cambiar el dominio.
+Este repositorio contiene una copia del código de la versión de producción de Vercel recuperada el 14-11-2026 (`dpl_2snPti2ZstGn8dauwCwJ4xQ9Rdd1`). El proyecto Vercel existente está conectado a este repositorio GitHub (`main`) para desplegar nuevos commits automáticamente. El dominio de producción `sustrai-irakurmena.vercel.app` permanece asociado al mismo proyecto. La integración se verificó el 14-11-2026.
 
 ## Módulos futuros
 

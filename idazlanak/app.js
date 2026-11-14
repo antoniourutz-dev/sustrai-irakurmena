@@ -83,6 +83,7 @@ function selectTaskBySlug(slug){
   $('timeGuidance').textContent=item.recommended_minutes?item.recommended_minutes+' min gomendatuak':'Denbora-muga: ez egiaztatua';
   updateWordCount();
   renderSupports(); renderList();
+  window.SustraiEskema?.setTask(item,mode);
   try{sessionStorage.setItem('sustrai-writer-last',slug)}catch{}
 }
 function renderList(){
@@ -136,6 +137,7 @@ function setMode(next){
   $('modeNote').textContent=next==='simulation'?'Simulazioa: idazki autonomoa, hizkuntza-laguntzarik gabe.':'Entrenamendua: ideiak, hiztegia eta egiturak nahi duzunean ireki.';
   $('draft').value=loadDraft();
   updateWordCount();renderSupports();
+  window.SustraiEskema?.setMode(next);
   if(next==='simulation')notify('Simulazioan laguntzak ezkutuan daude.');
 }
 function formatClock(seconds){const m=Math.floor(seconds/60),s=seconds%60;return String(m).padStart(2,'0')+':'+String(s).padStart(2,'0')}

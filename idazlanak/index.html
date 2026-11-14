@@ -36,6 +36,18 @@
           <option value="HABE">HABE</option>
         </select>
       </div>
+      <div class="filter-wrap extra-filters">
+        <label for="genreFilter">Testu mota</label>
+        <select id="genreFilter">
+          <option value="all">Mota guztiak</option>
+          <option value="iritzi_artikulua">Iritzi-artikuluak</option>
+          <option value="gutuna">Gutunak</option>
+          <option value="gutun_irekia">Gutun irekiak</option>
+        </select>
+        <label for="taskSearch">Gaiaren edo deialdiaren arabera bilatu</label>
+        <input type="search" id="taskSearch" placeholder="Adibidez: 2022, lana, kirola…" autocomplete="off">
+        <span class="catalog-count" id="catalogCount" aria-live="polite"></span>
+      </div>
       <div id="taskList" class="task-list" aria-label="Idazteko atazak">
         <p class="loading">Atazak kargatzen…</p>
       </div>
@@ -66,9 +78,23 @@
         <h3 id="promptHeading">Enuntziatua</h3>
         <div class="prompt-section"><strong>Egoera</strong><p id="contextText">Aukeratu ataza bat, enuntziatua ikusteko.</p></div>
         <div class="prompt-section instruction"><strong>Eginkizuna</strong><p id="instructionText"></p></div>
+        <section class="official-material" id="officialMaterialSection" aria-labelledby="officialMaterialHeading" hidden>
+          <div class="official-material-header">
+            <span class="overline">AZTERKETAREN PARTE · EZ SUSTRAIREN PISTAK</span>
+            <h4 id="officialMaterialHeading">Jatorrizko probako datuak eta ideiak</h4>
+            <p>Azterketako enuntziatuan azaltzen diren informazio-koadroen testuak dira. Irudiak ikusteko, ireki jatorrizko PDFa.</p>
+          </div>
+          <div class="official-material-grid" id="officialMaterialGrid"></div>
+          <p class="historical-note">Kontuan izan: datuak eta aipamenak jatorrizko deialdikoak dira; ez dira gaur egungo egoeraren egiaztapenak.</p>
+        </section>
         <details class="official-guidance" id="officialGuidance">
-          <summary>Proba ofizialeko ideia orientagarriak <span class="muted-note">(enuntziatuaren parte)</span></summary>
+          <summary>Azterketako galdera orientagarriak <span class="muted-note">(enuntziatuaren parte)</span></summary>
           <ul id="officialGuidanceList"></ul>
+        </details>
+        <details class="original-excerpt" id="originalExcerpt" hidden>
+          <summary>Ikusi PDFtik berreskuratutako ataza osoaren testua <span class="muted-note">(kontrolerako)</span></summary>
+          <p class="excerpt-warning">PDFaren testu-geruzatik jasoa da: lerro-jauziak edo irudien kokapenak desberdinak izan daitezke. Jatorrizko maketazioa PDFan ikus dezakezu.</p>
+          <pre id="originalExcerptText"></pre>
         </details>
       </article>
 

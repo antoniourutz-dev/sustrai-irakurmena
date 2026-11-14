@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="eu">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#163e30">
+  <meta name="description" content="SUSTRAI Idazlanak: C1 mailako IVAP eta HABE idazmen-atazak, idazteko gunea eta behar duzunean zabaltzeko laguntza.">
+  <title>SUSTRAI · Idazlanak C1</title>
+  <link rel="stylesheet" href="/idazlanak/style.css">
+</head>
+<body>
+<div class="app" id="app">
+  <header class="topbar">
+    <a class="brand" href="/" aria-label="SUSTRAI hasiera">
+      <span class="brand-icon" aria-hidden="true">S</span>
+      <span><strong>SUSTRAI</strong><small>IDAZMENA · C1</small></span>
+    </a>
+    <nav class="topnav" aria-label="Atalak">
+      <a href="/">Hasiera</a>
+      <a href="/" title="Irakurmena praktikatzeko aukerak">Irakurmena</a>
+      <span class="active" aria-current="page">Idazlanak</span>
+    </nav>
+  </header>
+  <main class="layout">
+    <aside class="catalog panel" aria-labelledby="catalogTitle">
+      <div class="catalog-heading">
+        <span class="overline">BENETAKO EREDUAK</span>
+        <h1 id="catalogTitle">Idazlanak</h1>
+        <p>Aukeratu IVAP edo HABEko C1 ataza bat.</p>
+      </div>
+      <div class="filter-wrap">
+        <label for="sourceFilter">Erakundea</label>
+        <select id="sourceFilter">
+          <option value="all">IVAP eta HABE</option>
+          <option value="IVAP">IVAP</option>
+          <option value="HABE">HABE</option>
+        </select>
+      </div>
+      <div id="taskList" class="task-list" aria-label="Idazteko atazak">
+        <p class="loading">Atazak kargatzen…</p>
+      </div>
+      <p class="catalog-footnote">Enuntziatuak eredu ofizialetan oinarrituta daude; laguntza pedagogikoa SUSTRAIk prestatu du.</p>
+    </aside>
+
+    <section class="maincol" aria-labelledby="writingTitle">
+      <div class="sessionbar panel">
+        <div class="session-top">
+          <div>
+            <span class="overline">IDAZMEN-TAILERRA</span>
+            <h2 id="writingTitle">Aukeratu idazlan bat</h2>
+            <div class="chips" id="taskMeta"></div>
+          </div>
+          <div class="modes" role="group" aria-label="Lanerako modua">
+            <button type="button" class="mode active" id="trainingMode" aria-pressed="true">Entrenatu</button>
+            <button type="button" class="mode" id="simulationMode" aria-pressed="false">Simulatu</button>
+          </div>
+        </div>
+        <div class="mode-note" id="modeNote">Laguntza aukerakoa da: lehenengo saiatu zeure kabuz.</div>
+      </div>
+
+      <article class="prompt panel" aria-labelledby="promptHeading">
+        <div class="section-topline">
+          <span class="overline">AZTERKETAKO ATAZA</span>
+          <a id="sourceLink" href="#" target="_blank" rel="noopener noreferrer" class="source" hidden>Jatorrizko PDFa ↗</a>
+        </div>
+        <h3 id="promptHeading">Enuntziatua</h3>
+        <div class="prompt-section"><strong>Egoera</strong><p id="contextText">Aukeratu ataza bat, enuntziatua ikusteko.</p></div>
+        <div class="prompt-section instruction"><strong>Eginkizuna</strong><p id="instructionText"></p></div>
+        <details class="official-guidance" id="officialGuidance">
+          <summary>Proba ofizialeko ideia orientagarriak <span class="muted-note">(enuntziatuaren parte)</span></summary>
+          <ul id="officialGuidanceList"></ul>
+        </details>
+      </article>
+
+      <section class="editor panel" aria-labelledby="editorHeading">
+        <div class="editor-head">
+          <div>
+            <span class="overline">ZURE LANA</span>
+            <h3 id="editorHeading">Idatzi zeure kabuz</h3>
+          </div>
+          <div class="editor-actions">
+            <button type="button" id="copyDraft" class="soft" disabled>Kopiatu</button>
+            <button type="button" id="downloadDraft" class="soft" disabled>Deskargatu .txt</button>
+          </div>
+        </div>
+        <label for="draft" class="sr-only">Zure idazlana</label>
+        <textarea id="draft" spellcheck="true" placeholder="Hemen idatzi zure testua… Lehenengo, zehaztu zer esan nahi duzun eta nori." disabled></textarea>
+        <div class="editor-status">
+          <span id="wordCounter" aria-live="polite">0 hitz</span>
+          <span id="wordTarget">Gutxieneko hitz-kopurua: —</span>
+          <span id="saveState" aria-live="polite">Zirriborroa zure nabigatzailean gordetzen da</span>
+        </div>
+        <div class="editor-bottom">
+          <div class="timer-group">
+            <span class="timer-label">Denbora</span>
+            <output id="timerDisplay">00:00</output>
+            <button id="timerToggle" type="button" class="soft" disabled>Hasi</button>
+            <span id="timeGuidance" class="muted-note"></span>
+          </div>
+          <button id="clearDraft" type="button" class="text-action" disabled>Testua ezabatu</button>
+        </div>
+        <p class="privacy-note">Zirriborroa gailu eta nabigatzaile honetan bakarrik gordetzen da; oraingoz ez da irakasleari bidaltzen.</p>
+      </section>
+    </section>
+
+    <aside class="support panel" id="supportPanel" aria-labelledby="supportHeading">
+      <div class="support-heading">
+        <span class="overline">ZUK ERABAKITZEN DUZU</span>
+        <h2 id="supportHeading">Laguntza behar?</h2>
+        <p>Hasi bakarrik idazten. Trabatu egiten bazara, ireki behar duzun atala.</p>
+      </div>
+      <div id="supportReady" class="support-ready">
+        <details id="planningDetails" class="support-section">
+          <summary><span class="support-number">01</span> Ideiak antolatu</summary>
+          <div class="support-content" id="planningSupport"></div>
+        </details>
+        <details id="lexiconDetails" class="support-section">
+          <summary><span class="support-number">02</span> Hiztegia</summary>
+          <div class="support-content" id="lexiconSupport"></div>
+        </details>
+        <details id="structuresDetails" class="support-section">
+          <summary><span class="support-number">03</span> Egiturak eta lokailuak</summary>
+          <div class="support-content" id="structuresSupport"></div>
+        </details>
+      </div>
+      <div id="simulationHelp" class="simulation-help" hidden>
+        <strong>Simulazio modua</strong>
+        <p>Laguntzak ezkutuan daude. Horrela, zure kabuz sortzen duzun testua landuko duzu.</p>
+      </div>
+      <div class="help-footer">
+        <span id="helpBadge">Laguntzarik erabili gabe</span>
+        <p>Adibideak ikasteko dira, ez testuan hitzez hitz txertatzeko.</p>
+      </div>
+    </aside>
+  </main>
+  <footer class="footer">SUSTRAI · Idazmena C1 · Hezkuntza-laguntza, ez kalifikazio ofiziala</footer>
+  <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+</div>
+<noscript>Idazmen-tailerra erabiltzeko JavaScript beharrezkoa da.</noscript>
+<script src="/idazlanak/app.js" defer></script>
+</body>
+</html>

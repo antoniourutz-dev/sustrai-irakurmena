@@ -6,3 +6,23 @@
 
 /* hidden always wins over layout declarations at tablet widths */
 [hidden]{display:none!important}
+
+/* Jatorrizko probako materiala: beti ikusgai, laguntza didaktikotik bereizita */
+.extra-filters{border-top:1px solid var(--border);padding-top:13px}
+.extra-filters label:not(:first-child){margin-top:12px}
+.extra-filters input{width:100%;border:1px solid #cad8cc;border-radius:8px;padding:10px 11px;background:#fafcf9;color:var(--ink);outline-offset:2px}
+.extra-filters input:focus-visible{outline:3px solid #82b893}
+.catalog-count{display:block;font-size:11px;color:#647c6a;margin:11px 0 0;font-weight:750}
+.official-material{margin-top:22px;border:1px solid #c8dccf;border-radius:11px;padding:19px;background:#f7fbf7}
+.official-material-header h4{font:700 20px/1.25 Georgia,serif;margin:5px 0 8px;color:#224b33}
+.official-material-header p{font-size:12px;line-height:1.58;color:#69806d;margin:0 0 15px}
+.official-material-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.official-note{border:1px solid #d4e6d7;border-left:3px solid #468767;border-radius:9px;margin:0;padding:14px 15px;background:#fff;min-width:0}
+.official-note-index{font-size:9px;letter-spacing:.085em;color:#4c805f;font-weight:850}
+.official-note p{font-size:13px;line-height:1.6;margin:7px 0 0;color:#263c2f;overflow-wrap:break-word}
+.historical-note{font-size:11px;color:#708475;line-height:1.5;margin:12px 0 0}
+.original-excerpt{margin-top:16px;padding-top:14px;border-top:1px solid var(--border)}
+.original-excerpt summary{cursor:pointer;color:#57715c;font-size:12px;font-weight:700}
+.original-excerpt .excerpt-warning{font-size:11px;color:#758879;line-height:1.5}
+.original-excerpt pre{white-space:pre-wrap;overflow-wrap:anywhere;font:12px/1.65 ui-monospace,SFMono-Regular,Consolas,monospace;background:#f5f7f5;padding:16px;border:1px solid #e0e8df;border-radius:8px;max-height:420px;overflow:auto}
+@media(max-width:720px){.official-material{padding:15px}.official-material-grid{grid-template-columns:1fr}.extra-filters{padding:12px 14px}.official-note{padding:12px}}

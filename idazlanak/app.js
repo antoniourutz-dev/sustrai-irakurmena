@@ -46,13 +46,15 @@ function selectTaskBySlug(slug){
   $('contextText').textContent=item.context_eu;
   $('instructionText').textContent=item.instruction_eu;
   $('taskMeta').replaceChildren();
-  const chips=[item.org_code,item.exam_reference,GENRES[item.genre]||item.genre,item.min_words?item.min_words+' hitz gutxienez':null,item.recommended_minutes?item.recommended_minutes+' min':null].filter(Boolean);
+  const noteTotal=Array.isArray(item.official_material)?item.official_material.length:0;
+  const chips=[item.org_code,item.exam_reference,GENRES[item.genre]||item.genre,noteTotal?noteTotal+' jatorrizko datu':null,item.min_words?item.min_words+' hitz gutxienez':null,item.recommended_minutes?item.recommended_minutes+' min':null].filter(Boolean);
   for(const x of chips){const el=document.createElement('span');el.textContent=x;$('taskMeta').append(el)}
   const link=safeSource(item.source_url);
   $('sourceLink').hidden=!link;
   if(link)$('sourceLink').href=link;
   const notes=Array.isArray(item.official_material)?item.official_material.filter(n=>n&&typeof n.text==='string'&&n.text.trim()):[];
   $('officialMaterialSection').hidden=!notes.length;
+  $('officialMaterialCount').textContent=notes.length?'('+notes.length+' testu)':'';
   const grid=$('officialMaterialGrid');grid.replaceChildren();
   notes.forEach((note,index)=>{
     const card=document.createElement('blockquote');
@@ -96,7 +98,7 @@ function renderList(){
     const btn=document.createElement('button');btn.type='button';btn.className='task-card'+(task.slug===selected?.slug?' selected':'');
     btn.setAttribute('aria-pressed',String(task.slug===selected?.slug));
     btn.innerHTML='<span class="small">'+escapeHtml(task.org_code)+' · '+escapeHtml(task.exam_reference)+'</span><strong>'+escapeHtml(task.title_eu)+'</strong><span class="task-genre">'+escapeHtml(GENRES[task.genre]||task.genre)+'</span>';
-    btn.onclick=()=>selectTaskBySlug(task.slug);
+    btn.onclick=()=>{selectTaskBySlug(task.slug);try{const url=new URL(window.location.href);url.searchParams.set('ataza',task.slug);window.history.replaceState(null,'',url.toString())}catch{}};
     list.append(btn);
   }
 }
@@ -187,7 +189,8 @@ async function start(){
     supports=supportData.filter(x=>!x.is_official);
     if(!tasks.length)throw Error('Oraindik ez dago idazlanik argitaratuta.');
     let previous;try{previous=sessionStorage.getItem('sustrai-writer-last')}catch{}
-    selectTaskBySlug(tasks.some(t=>t.slug===previous)?previous:tasks[0].slug);
+    let requested=null;try{requested=new URLSearchParams(window.location.search).get('ataza')}catch{}
+    selectTaskBySlug(tasks.some(t=>t.slug===requested)?requested:(tasks.some(t=>t.slug===previous)?previous:tasks[0].slug));
   }catch(error){
     $('taskList').textContent=error.message||'Ezin izan da kargatu.';
     notify('Arazoa atazak kargatzean. Freskatu orria.');

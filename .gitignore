@@ -1,0 +1,12 @@
+# Configuración y archivos locales
+.env
+.env.*
+!.env.example
+.vercel/
+node_modules/
+dist/
+build/
+.DS_Store
+Thumbs.db
+*.log
+*.local

@@ -3,19 +3,73 @@
 const SR_URL="https://awdajwrzxceqazmaorxc.supabase.co";
 const SR_ANON="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF3ZGFqd3J6eGNlcWF6bWFvcnhjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM2MDcyMjUsImV4cCI6MjA4OTE4MzIyNX0.OjjmvIiGf020pF2Frie2wCPiVCAPO-uWWdzoN4nkwCQ";
 const SR_HEADERS={'apikey':SR_ANON,'Authorization':'Bearer '+SR_ANON,'Content-Type':'application/json'};
+const SR_LETTER=/^[A-J]$/;
+const srObject=value=>value!==null&&typeof value==='object'&&!Array.isArray(value);
+function srRequiredText(value,field){
+ if(typeof value!=='string'||!value.trim())throw new Error('Azterketa-datu baliogabea: '+field);
+ return value.trim();
+}
+function srSafeUrl(value,field,required=false){
+ if(value===null||value===undefined||value===''){
+   if(required)throw new Error('Azterketa-datu baliogabea: '+field);
+   return null;
+ }
+ let url;
+ try{url=new URL(value)}catch{throw new Error('Azterketa-datu baliogabea: '+field)}
+ if(url.protocol!=='https:')throw new Error('Azterketa-datu baliogabea: '+field);
+ return url.href;
+}
+function srExamLabel(label,id,organism){
+ const clean=typeof label==='string'?label.trim():'';
+ if(clean)return clean;
+ const date=id.match(/^(\d{4})-(\d{2})-(\d{2})/);
+ if(date)return date[3]+'/'+date[2]+'/'+date[1];
+ return organism+' · '+id.replace(/[-_]+/g,' ');
+}
+function srChoiceArray(value,field){
+ if(!Array.isArray(value)||!value.length||value.length>10||value.some(choice=>typeof choice!=='string'))throw new Error('Azterketa-datu baliogabea: '+field);
+ return value;
+}
+function srOptions(value,field){
+ if(!srObject(value)||!Object.keys(value).length)throw new Error('Azterketa-datu baliogabea: '+field);
+ for(const [key,choice] of Object.entries(value)){
+   if(/^\d+$/.test(key))srChoiceArray(choice,field+'.'+key);
+   else if(!SR_LETTER.test(key)||typeof choice!=='string')throw new Error('Azterketa-datu baliogabea: '+field+'.'+key);
+ }
+ return value;
+}
+function srNormalizeExam(value,organism){
+ if(!srObject(value))throw new Error('Azterketa-datu baliogabea');
+ const id=srRequiredText(value.id,'id'),slug=srRequiredText(value.slug,'slug');
+ if(!Array.isArray(value.items)||!value.items.length)throw new Error('Azterketa-datu baliogabea: items');
+ const items=value.items.map((item,index)=>{
+   if(!srObject(item)||!Array.isArray(item.r)||item.r.length!==2)throw new Error('Azterketa-datu baliogabea: items.'+index);
+   const [first,last]=item.r,type=srRequiredText(item.type,'items.'+index+'.type');
+   if(!Number.isInteger(first)||!Number.isInteger(last)||first<1||last<first||last-first>100)throw new Error('Azterketa-datu baliogabea: items.'+index+'.r');
+   if(!['fill','mcq','fragments','synonyms'].includes(type))throw new Error('Azterketa-datu baliogabea: items.'+index+'.type');
+   const title=srRequiredText(item.title,'items.'+index+'.title'),passage=srRequiredText(item.p,'items.'+index+'.p');
+   if(type==='mcq'){
+     if(!Array.isArray(item.qs)||item.qs.length!==last-first+1)throw new Error('Azterketa-datu baliogabea: items.'+index+'.qs');
+     item.qs.forEach((question,questionIndex)=>{
+       if(!srObject(question))throw new Error('Azterketa-datu baliogabea: items.'+index+'.qs.'+questionIndex);
+       srRequiredText(question.q,'items.'+index+'.qs.'+questionIndex+'.q');
+       srChoiceArray(question.o,'items.'+index+'.qs.'+questionIndex+'.o');
+     });
+   }else srOptions(item.opts,'items.'+index+'.opts');
+   if(item.weight!==undefined&&(!Number.isFinite(item.weight)||item.weight<=0))throw new Error('Azterketa-datu baliogabea: items.'+index+'.weight');
+   return {...item,type,title,p:passage,key:'?'.repeat(last-first+1)};
+ });
+ return {...value,id,slug,label:srExamLabel(value.label,id,organism),source:srSafeUrl(value.source,'source',true),solution:srSafeUrl(value.solution,'solution'),items};
+}
 async function srRequest(path,body){
- const result=await fetch(SR_URL+path,{method:'POST',headers:SR_HEADERS,body:JSON.stringify(body)});
+ const result=await fetch(SR_URL+path,{method:'POST',headers:SR_HEADERS,body:JSON.stringify(body),cache:'no-store'});
  if(!result.ok)throw new Error('Ezin izan da Supabaserekin konektatu ('+result.status+')');
  return await result.json();
 }
 async function srReadExams(organism){
  const exams=await srRequest('/rest/v1/rpc/sr_public_exam_snapshot',{p_organism_code:organism});
  if(!Array.isArray(exams))throw new Error('Azterketa-datuak ez dira egokiak');
- for(const e of exams)for(const it of e.items){
-   const n=it.r[1]-it.r[0]+1;
-   it.key='?'.repeat(n);
- }
- return exams;
+ return exams.map(exam=>srNormalizeExam(exam,organism));
 }
 const srAwaiting=new Map();
 async function srGrade(activeExam,getAnswers) {
@@ -28,9 +82,11 @@ async function srGrade(activeExam,getAnswers) {
         throw new Error('Ezin izan dira erantzunak zuzendu');
       const correct=new Map();
       for(const row of result.items){
-        const pos=Number(row.position), n=Number(row.n);
+        const pos=Number(row?.position),n=Number(row?.n),accepted=row?.accepted;
+        const item=activeExam.items[pos-1];
+        if(!Number.isInteger(pos)||!item||!Number.isInteger(n)||n<item.r[0]||n>item.r[1]||!Array.isArray(accepted)||!accepted.length||accepted.some(letter=>typeof letter!=='string'||!SR_LETTER.test(letter)))throw new Error('Ezin izan dira erantzunak zuzendu');
         if(!correct.has(pos))correct.set(pos,new Map());
-        correct.get(pos).set(n,row.accepted);
+        correct.get(pos).set(n,accepted.slice());
       }
       activeExam.items.forEach((it,index)=>{
         const answers=correct.get(index+1),alternative={};
@@ -50,6 +106,8 @@ async function srGrade(activeExam,getAnswers) {
  return await srAwaiting.get(slug);
 }
 const $=s=>document.getElementById(s),L="ABCD",COLORS={yellow:"#ffe174",green:"#a9e8bd",pink:"#f7bed5",blue:"#b2dbff"};
+function setLoading(isLoading){document.body.classList.toggle('loading',isLoading);document.body.setAttribute('aria-busy',String(isLoading))}
+function externalLink(href,label){const link=document.createElement('a');link.href=href;link.target='_blank';link.rel='noopener';link.textContent=label;return link}
 const read=(k,f)=>{try{let x=JSON.parse(localStorage.getItem(k));return x===null?f:x}catch{return f}},save=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch{}};
 const escapeText=v=>String(v).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 let exams=[],examIndex=0,part=0,current=1,graded={},markVisible=true,lastSelection=[],toastCounter=0;
@@ -97,9 +155,9 @@ function paragraphs(txt){let items=txt.split(/(?<=[.!?])\s+(?=[A-ZÁÉÍÓÚÜÑ
 function renderPassage(reset){let sc=$('readingPanel').querySelector('.paperscroll'),y=reset?0:sc.scrollTop,it=task(),a=answers(),section=0,html='';for(let paragraph of paragraphs(it.p)){html+='<p>';for(let part of paragraph.split(/(\{\{\d+\}\})/g)){let match=part.match(/^\{\{(\d+)\}\}$/);if(match){let n=+match[1],v=a[n],label=v?(it.type==="fill"?it.opts[n][L.indexOf(v)]:v):'···';html+='<button class="hole '+(n===current?'active ':'')+(v?'answered':'')+'" data-gap="'+n+'">'+n+' · '+escapeText(label)+'</button>'}else if(part){let area='a'+section++;html+='<span class="selectable" data-area="'+area+'">'+highlighted(part,area)+'</span>'}}html+='</p>'}$('passage').innerHTML=html;document.querySelectorAll('[data-gap]').forEach(el=>el.onclick=()=>pickQuestion(+el.dataset.gap));sc.scrollTop=y}
 function targetWord(it,n){let p=it.p,i=p.indexOf('{{'+n+'}}');if(i<0)return'';let left=p.slice(Math.max(0,i-45),i).trim();let m=left.match(/([A-Za-zÀ-ÿ\-]+)$/);return m?m[1]:left.slice(-25)}
 function renderQuestion(){let it=task(),n=current,a=answers(),idx=n-it.r[0],q=it.type==="mcq"?it.qs[idx]:null,opts=it.type==="mcq"?q.o:it.opts[n],prompt=it.type==="mcq"?q.q:it.type==="fill"?"Hutsunerako hitz edo esaldi egokia aukeratu.":"Aukeratu testuko «"+targetWord(it,n)+"» hitzaren baliokidea.";$('qcounter').textContent='GALDERA '+n+' · '+(idx+1)+' / '+count(it);$('qtitle').textContent=it.title;$('questionText').innerHTML='<span class="selectable" data-area="q'+n+'">'+highlighted(prompt,'q'+n)+'</span>';$('options').innerHTML=opts.map((v,i)=>{let l=L[i],selected=a[n]===l,correct=graded[part]&&accepted(it,n).includes(l),wrong=graded[part]&&selected&&!correct;return '<div class="choice '+(selected?'chosen ':'')+(correct?'correct ':'')+(wrong?'wrong':'')+'" data-choice="'+l+'"><button class="choose" data-letter="'+l+'" aria-label="'+l+' aukera" aria-pressed="'+selected+'">'+l+'</button><span class="selectable" data-area="c'+n+l+'">'+highlighted(v,'c'+n+l)+'</span></div>'}).join('');document.querySelectorAll('.choose').forEach(b=>b.onclick=()=>choose(b.dataset.letter));document.querySelectorAll('.choice').forEach(b=>b.onclick=e=>{if(e.target.closest('button')||window.getSelection()?.toString())return;choose(b.dataset.choice)});$('prev').disabled=n===it.r[0];$('next').disabled=n===it.r[1];$('numbers').innerHTML=Array.from({length:count(it)},(_,i)=>{let z=i+it.r[0];return '<button class="'+(current===z?'current ':'')+(a[z]?'done':'')+'" data-number="'+z+'">'+z+'</button>'}).join('');document.querySelectorAll('[data-number]').forEach(b=>b.onclick=()=>pickQuestion(+b.dataset.number));$('gradeResult').innerHTML='';if(graded[part]){let num=0;for(let z=it.r[0];z<=it.r[1];z++)if(accepted(it,z).includes(a[z]))num++;$('gradeResult').innerHTML='<div class="result"><strong>'+num+' / '+count(it)+' zuzen</strong> · '+(num*it.weight).toFixed(1).replace('.',',')+' puntu<small>Galdera honetako erantzun zuzena: '+accepted(it,n).join(' edo ')+'</small></div>'}}
-function render(reset=true){if(!exams.length)return;$('exam').value=exam().id;$('readingTitle').textContent=task().title;$('sourceNote').innerHTML='<a href="'+escapeText(exam().source)+'" target="_blank" rel="noopener">HABEko jatorrizko PDFa ↗</a> · <a href="'+escapeText(exam().solution)+'" target="_blank" rel="noopener">Erantzun ofizialak ↗</a>';renderTabs();renderProgress();renderPassage(reset);renderQuestion();updateTimer()}
+function render(reset=true){if(!exams.length)return;$('exam').value=exam().id;$('readingTitle').textContent=task().title;const links=[externalLink(exam().source,'HABEko jatorrizko PDFa ↗')];if(exam().solution)links.push(' · ',externalLink(exam().solution,'Erantzun ofizialak ↗'));$('sourceNote').replaceChildren(...links);renderTabs();renderProgress();renderPassage(reset);renderQuestion();updateTimer()}
 function captureSelection(){let s=window.getSelection();if(!s||s.isCollapsed||!s.rangeCount)return;let range=s.getRangeAt(0),saved=[];document.querySelectorAll('.selectable[data-area]').forEach(el=>{if(!range.intersectsNode(el))return;let full=document.createRange();full.selectNodeContents(el);let part=range.cloneRange();try{if(range.compareBoundaryPoints(Range.START_TO_START,full)<0)part.setStart(full.startContainer,full.startOffset);if(range.compareBoundaryPoints(Range.END_TO_END,full)>0)part.setEnd(full.endContainer,full.endOffset);let before=full.cloneRange();before.setEnd(part.startContainer,part.startOffset);let len=part.toString().length;if(len)saved.push({area:el.dataset.area,start:before.toString().length,end:before.toString().length+len})}catch{}});if(saved.length){lastSelection=saved;$('markerHint').textContent='Hautatuta · aukeratu kolorea'}}
 function paint(color){captureSelection();if(!lastSelection.length){toast('Hautatu hitz edo esaldi bat');return}let a=marks();for(let s of lastSelection){a=a.filter(m=>m.area!==s.area||m.end<=s.start||m.start>=s.end);a.push({...s,color})}save(markKey(),a);lastSelection=[];window.getSelection()?.removeAllRanges();renderPassage(false);renderQuestion();toast('Marka gordeta')}
 function erase(){captureSelection();if(!lastSelection.length){toast('Hautatu ezabatu beharreko marka');return}save(markKey(),marks().filter(m=>!lastSelection.some(s=>s.area===m.area&&s.start<m.end&&s.end>m.start)));lastSelection=[];window.getSelection()?.removeAllRanges();renderPassage(false);renderQuestion();toast('Marka ezabatuta')}
-async function initialize(){exams=await srReadExams('HABE');if(!exams.length||exams.some(e=>!e.items.length||e.items.some(it=>it.key.length!==count(it))||Math.abs(e.items.reduce((n,it)=>n+count(it)*it.weight,0)-20)>0.001))throw Error('HABEko azterketak osatu gabe daude');$('exam').innerHTML=exams.map(e=>'<option value="'+e.id+'">'+e.label+'</option>').join('');let id=localStorage.getItem('sustrai-habe-active')||exams.at(-1).id;examIndex=Math.max(0,exams.findIndex(e=>e.id===id));current=task().r[0];$('exam').onchange=e=>pickExam(exams.findIndex(x=>x.id===e.target.value));$('start').onclick=toggleTimer;$('finish').onclick=finishExam;$('prev').onclick=()=>step(-1);$('next').onclick=()=>step(1);$('grade').onclick=async()=>{const e=exam(),p=part;try{await srGrade(e,answers);if(e!==exam())return;graded[p]=true;renderQuestion()}catch(error){console.error(error);toast('Ezin izan da zuzendu: saiatu berriro')}};$('resetEx').onclick=clearPart;$('erase').onclick=erase;$('markVisibility').onclick=()=>{markVisible=!markVisible;$('markVisibility').textContent=markVisible?'◎ Ezkutatu':'◎ Erakutsi';renderPassage(false);renderQuestion()};$('markerTool').onclick=function(){let v=$('markerbar').classList.toggle('visible');this.setAttribute('aria-expanded',String(v))};$('closeMarker').onclick=()=>{$('markerbar').classList.remove('visible');$('markerTool').setAttribute('aria-expanded','false')};document.querySelectorAll('.swatch').forEach(b=>{b.onpointerdown=e=>e.preventDefault();b.onclick=()=>paint(b.dataset.color)});$('closeModal').onclick=dismiss;$('dismissSummary').onclick=dismiss;$('repeatExam').onclick=restart;$('viewReading').onclick=()=>setView('reading');$('viewQuestions').onclick=()=>setView('questions');document.addEventListener('selectionchange',()=>{if(window.getSelection()&&!window.getSelection().isCollapsed)requestAnimationFrame(captureSelection)});document.addEventListener('pointerup',()=>setTimeout(captureSelection,0));document.addEventListener('keydown',e=>{if(e.key==='Escape')dismiss()});render(true);setInterval(updateTimer,500)}
-initialize().catch(e=>{console.error(e);$('readingTitle').textContent='Ezin izan da kargatu';$('passage').textContent=e.message});
+async function initialize(){exams=await srReadExams('HABE');if(!exams.length||exams.some(e=>!e.items.length||e.items.some(it=>it.key.length!==count(it))||Math.abs(e.items.reduce((n,it)=>n+count(it)*it.weight,0)-20)>0.001))throw Error('HABEko azterketak osatu gabe daude');$('exam').replaceChildren(...exams.map(e=>{const option=document.createElement('option');option.value=e.id;option.textContent=e.label;return option}));let id=localStorage.getItem('sustrai-habe-active')||exams.at(-1).id;examIndex=Math.max(0,exams.findIndex(e=>e.id===id));current=task().r[0];$('exam').onchange=e=>pickExam(exams.findIndex(x=>x.id===e.target.value));$('start').onclick=toggleTimer;$('finish').onclick=finishExam;$('prev').onclick=()=>step(-1);$('next').onclick=()=>step(1);$('grade').onclick=async()=>{const e=exam(),p=part;try{await srGrade(e,answers);if(e!==exam())return;graded[p]=true;renderQuestion()}catch(error){console.error(error);toast('Ezin izan da zuzendu: saiatu berriro')}};$('resetEx').onclick=clearPart;$('erase').onclick=erase;$('markVisibility').onclick=()=>{markVisible=!markVisible;$('markVisibility').textContent=markVisible?'◎ Ezkutatu':'◎ Erakutsi';renderPassage(false);renderQuestion()};$('markerTool').onclick=function(){let v=$('markerbar').classList.toggle('visible');this.setAttribute('aria-expanded',String(v))};$('closeMarker').onclick=()=>{$('markerbar').classList.remove('visible');$('markerTool').setAttribute('aria-expanded','false')};document.querySelectorAll('.swatch').forEach(b=>{b.onpointerdown=e=>e.preventDefault();b.onclick=()=>paint(b.dataset.color)});$('closeModal').onclick=dismiss;$('dismissSummary').onclick=dismiss;$('repeatExam').onclick=restart;$('viewReading').onclick=()=>setView('reading');$('viewQuestions').onclick=()=>setView('questions');document.addEventListener('selectionchange',()=>{if(window.getSelection()&&!window.getSelection().isCollapsed)requestAnimationFrame(captureSelection)});document.addEventListener('pointerup',()=>setTimeout(captureSelection,0));document.addEventListener('keydown',e=>{if(e.key==='Escape')dismiss()});render(true);setLoading(false);setInterval(updateTimer,500)}
+initialize().catch(e=>{console.error(e);setLoading(false);$('readingTitle').textContent='Ezin izan da kargatu';$('passage').textContent=e.message});

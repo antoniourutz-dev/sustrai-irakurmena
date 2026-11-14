@@ -62,3 +62,20 @@ writingForm.addEventListener('submit', (event) => {
 
 updateReadingEntry();
 updateWritingEntry();
+
+const speakingForm=document.getElementById('speakingForm');
+const startSpeakingButton=document.getElementById('startSpeaking');
+const speakingSummary=document.getElementById('speakingSummary');
+function updateSpeakingEntry(){
+ const selected=speakingForm.querySelector('input[name="speakingMode"]:checked')?.value||'';
+ startSpeakingButton.disabled=!selected;
+ speakingSummary.textContent=selected?(selected==='training'?'Entrenamendua':'Simulazioa')+' aukeratuta. Dena prest.':'Aukeratu entrenamendua edo simulazioa.';
+}
+speakingForm.addEventListener('change',updateSpeakingEntry);
+speakingForm.addEventListener('submit',event=>{
+ event.preventDefault();
+ const selected=speakingForm.querySelector('input[name="speakingMode"]:checked')?.value;
+ if(!selected)return;
+ window.location.assign('/ahozkoa/?mode='+encodeURIComponent(selected));
+});
+updateSpeakingEntry();

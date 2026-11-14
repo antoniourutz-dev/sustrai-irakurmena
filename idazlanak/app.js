@@ -190,8 +190,9 @@ async function start(){
     $('taskList').setAttribute('aria-busy','false');
     if(!tasks.length)throw Error('Oraindik ez dago idazlanik argitaratuta.');
     let previous;try{previous=sessionStorage.getItem('sustrai-writer-last')}catch{}
-    let requested=null;try{requested=new URLSearchParams(window.location.search).get('ataza')}catch{}
+    let requested=null,requestedMode=null;try{const params=new URLSearchParams(window.location.search);requested=params.get('ataza');requestedMode=params.get('mode')}catch{}
     selectTaskBySlug(tasks.some(t=>t.slug===requested)?requested:(tasks.some(t=>t.slug===previous)?previous:tasks[0].slug));
+    if(requestedMode==='simulation')setMode('simulation');
   }catch(error){
     $('taskList').setAttribute('aria-busy','false');
     $('taskList').textContent=error.message||'Ezin izan da kargatu.';

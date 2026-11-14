@@ -27,7 +27,12 @@ function updateEntry() {
   else summary.textContent = examNames[examType] + ' · ' + modeNames[practiceMode] + '. Dena prest dago.';
 }
 
-form.addEventListener('change', updateEntry);
+form.addEventListener('change', (event) => {
+  if (event.target.name === 'examType') {
+    form.querySelectorAll('[name="practiceMode"]').forEach((input) => { input.checked = false; });
+  }
+  updateEntry();
+});
 form.addEventListener('submit', (event) => {
   event.preventDefault();
   const examType = selectedValue('examType');

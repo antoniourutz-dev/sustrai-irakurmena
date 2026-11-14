@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#163e30">
   <meta name="description" content="SUSTRAI Idazlanak: C1 mailako IVAP eta HABE idazmen-atazak, idazteko gunea eta behar duzunean zabaltzeko laguntza.">
   <title>SUSTRAI · Idazlanak C1</title>
-  <link rel="stylesheet" href="/idazlanak/style.css">
+  <link rel="stylesheet" href="/idazlanak/style.css?v=20261114-display-fix-2">
 </head>
 <body>
 <div class="app" id="app">
@@ -77,16 +77,16 @@
         </div>
         <h3 id="promptHeading">Enuntziatua</h3>
         <div class="prompt-section"><strong>Egoera</strong><p id="contextText">Aukeratu ataza bat, enuntziatua ikusteko.</p></div>
-        <div class="prompt-section instruction"><strong>Eginkizuna</strong><p id="instructionText"></p></div>
         <section class="official-material" id="officialMaterialSection" aria-labelledby="officialMaterialHeading" hidden>
           <div class="official-material-header">
             <span class="overline">AZTERKETAREN PARTE · EZ SUSTRAIREN PISTAK</span>
-            <h4 id="officialMaterialHeading">Jatorrizko probako datuak eta ideiak</h4>
-            <p>Azterketako enuntziatuan azaltzen diren informazio-koadroen testuak dira. Irudiak ikusteko, ireki jatorrizko PDFa.</p>
+            <h4 id="officialMaterialHeading">Azterketak emandako informazioa <span class="official-note-count" id="officialMaterialCount"></span></h4>
+            <p>Hauek ez dira aukerako pistak: <strong>jatorrizko enuntziatuko informazio-koadroen testuak dira.</strong> Irudiak eta jatorrizko kokapena PDFan daude.</p>
           </div>
           <div class="official-material-grid" id="officialMaterialGrid"></div>
           <p class="historical-note">Kontuan izan: datuak eta aipamenak jatorrizko deialdikoak dira; ez dira gaur egungo egoeraren egiaztapenak.</p>
         </section>
+        <div class="prompt-section instruction"><strong>Eginkizuna</strong><p id="instructionText"></p></div>
         <details class="official-guidance" id="officialGuidance">
           <summary>Azterketako galdera orientagarriak <span class="muted-note">(enuntziatuaren parte)</span></summary>
           <ul id="officialGuidanceList"></ul>
@@ -163,6 +163,6 @@
   <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
 </div>
 <noscript>Idazmen-tailerra erabiltzeko JavaScript beharrezkoa da.</noscript>
-<script src="/idazlanak/app.js" defer></script>
+<script src="/idazlanak/app.js?v=20261114-display-fix-2" defer></script>
 </body>
 </html>

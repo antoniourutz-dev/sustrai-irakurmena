@@ -1,11 +1,103 @@
-<!doctype html><html lang="eu"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#163e30"><title>SUSTRAI · Irakurmena</title><link rel="stylesheet" href="./style.css"></head><body class="loading" aria-busy="true"><div id="app">
-<header class="topbar"><div class="brand"><span class="brand-icon">S</span><div><strong>SUSTRAI</strong><small>IRAKURMENA · C1</small></div></div><div class="topright"><span class="official">Azterketa ofizialak</span><a href="/" style="background:#d4efda;color:#173d2c;border-radius:7px;padding:5px 10px;font-weight:700;text-decoration:none;white-space:nowrap">IVAP</a><a href="/habe/" style="border:1px solid #699779;color:#e1f1e5;border-radius:7px;padding:5px 10px;font-weight:700;text-decoration:none;white-space:nowrap">HABE</a></div></header>
-<section class="session"><div class="pickexam"><label for="exam">Deialdia</label><select id="exam" aria-label="Deialdia aukeratu"><option>Kargatzen…</option></select><span id="modeBadge" class="mode-badge">Aukeratu modua</span></div><div class="timer"><span class="timer-label">Denbora</span><div class="time" id="clock" aria-live="off">00:00:00</div><span class="timer-hint" id="timehint">Azterketa osorako kronometroa</span></div><div class="time-actions" id="timeActions"><button id="start" class="primary">Hasi</button><button id="finish" class="outline">Amaitu</button><button id="markerTool" aria-expanded="false" aria-controls="markerbar" class="marker-open" type="button">Nabarmendu</button><button id="actionsToggle" class="actions-toggle" type="button" aria-expanded="false" aria-controls="timeActions">Gehiago</button></div></section>
-<div class="menu"><div class="tabs" id="tabs" aria-label="Ariketa atalak"></div><div class="progress" id="progress" role="progressbar" aria-valuemin="0" aria-valuemax="34" aria-valuenow="0"><span id="progressLabel">0/34 erantzunda</span><div class="track" aria-hidden="true"><div class="trackfill" id="trackfill"></div></div></div></div>
-<div class="markerbar" id="markerbar"><span class="highlabel">Rotulagailua</span><button class="swatch" style="--ink:#ffe174" data-color="yellow" aria-label="Horia" title="Horia"></button><button class="swatch" style="--ink:#a9e8bd" data-color="green" aria-label="Berdea" title="Berdea"></button><button class="swatch" style="--ink:#f7bed5" data-color="pink" aria-label="Arrosa" title="Arrosa"></button><button class="swatch" style="--ink:#b2dbff" data-color="blue" aria-label="Urdina" title="Urdina"></button><button id="erase" class="little">Ezabatu</button><button id="markVisibility" class="little">Ezkutatu</button><span id="markerHint">Hautatu hitz edo esaldi bat eta aukeratu kolorea</span><button id="closeMarker" class="closemarker" aria-label="Rotulagailua itxi">×</button></div>
-<div class="mobileswitch" aria-label="Eduki ikuspegia"><button id="viewReading" class="on" aria-pressed="true">Irakurgaia</button><button id="viewQuestions" aria-pressed="false">Galderak</button></div>
-<main class="workspace"><section class="paper" id="readingPanel"><div class="paperhead"><span class="eyebrow">IRAKURGAIA</span><h1 id="readingTitle">Irakurgaia prestatzen...</h1></div><div class="paperscroll"><div id="passage" class="passage"></div><p class="source-note">Iturria: IVAP · Hirugarren hizkuntza-eskakizuna · A eredua</p></div></section><aside class="answerpanel paper" id="questionsPanel"><div class="paperhead qhead"><span class="eyebrow" id="qcounter">GALDERA</span><h2 id="qtitle" tabindex="-1">Erantzun</h2></div><div class="questionscroll"><div id="questionText" class="questiontext"></div><div id="options"></div><div class="prevnext"><button id="prev">← Aurrekoa</button><button id="next">Hurrengoa →</button></div><div id="numbers" class="numbers"></div><div class="footeractions"><button id="grade" class="outline">Ariketa zuzendu</button><button id="resetEx" class="quiet">Erantzunak garbitu</button></div><div id="gradeResult" aria-live="polite"></div></div></aside></main>
-<div id="toast" class="toast" role="status" aria-live="polite"></div>
-<div id="intro" class="modal intro-modal" hidden role="dialog" aria-modal="true" aria-labelledby="introTitle" aria-describedby="introDescription"><div class="modal-card intro-card" tabindex="-1"><span class="eyebrow">SUSTRAI · C1 IRAKURMENA</span><h2 id="introTitle">Nola praktikatu nahi duzu?</h2><p id="introDescription">Aukeratu lan egiteko modua. Erantzunak eta aurrerapena nabigatzaile honetan gordeko dira.</p><div class="intro-facts"><div><strong id="introQuestions">—</strong><span>galdera</span></div><div><strong id="introDuration">—</strong><span>gomendatutako denbora</span></div><div><strong>20 puntu</strong><span>10 puntu gainditzeko</span></div></div><div class="mode-options"><button id="introSimulation" class="mode-option"><strong>Simulazioa</strong><span>Kronometroa berehala abiatzen da eta amaieran emaitza osoa ikusiko duzu.</span></button><button id="introPractice" class="mode-option"><strong>Praktika librea</strong><span>Zure erritmoan aritu eta atal bakoitza nahi duzunean zuzendu.</span></button></div><button id="introResume" class="resume-button" hidden>Aurreko saioa jarraitu</button></div></div>
-<div id="modal" class="modal" hidden role="dialog" aria-modal="true" aria-labelledby="summaryTitle"><div class="modal-card" tabindex="-1"><button id="closeModal" class="modalclose" aria-label="Emaitza itxi">×</button><span class="eyebrow">AZTERKETAREN EMAITZA</span><h2 id="summaryTitle">Azterketa amaituta</h2><div id="summary"></div><button id="reviewMistakes" class="outline" hidden>Akatsak berrikusi</button><button id="repeatExam" class="outline">Berriz egin</button><button id="dismissSummary" class="primary">Itxi</button></div></div></div>
-<script src="./app.js" defer></script></body></html>
+<!doctype html>
+<html lang="eu">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#163e30">
+  <meta name="description" content="Prestatu euskarako C1 irakurmen-probak IVAP eta HABEko deialdi ofizialekin, simulazioan edo praktika librean.">
+  <title>SUSTRAI · Aukeratu zure praktika</title>
+  <link rel="stylesheet" href="/start.css">
+</head>
+<body>
+  <header class="start-header">
+    <a class="start-brand" href="/" aria-label="SUSTRAI hasiera">
+      <span class="start-brand-icon" aria-hidden="true">S</span>
+      <span><strong>SUSTRAI</strong><small>IRAKURMENA · C1</small></span>
+    </a>
+    <span class="header-note">Azterketa ofizialekin prestatu</span>
+  </header>
+
+  <main class="start-main">
+    <section class="start-intro" aria-labelledby="pageTitle">
+      <span class="start-eyebrow">ZURE PRESTAKETA, ZURE ERRITMOAN</span>
+      <h1 id="pageTitle">Zer praktikatu nahi duzu gaur?</h1>
+      <p>Aukeratu prestatzen ari zaren proba eta lan egiteko modua. SUSTRAIk zuzenean eramango zaitu dagokion ariketara.</p>
+      <div class="start-benefits" aria-label="Plataformaren abantailak">
+        <span>Deialdi ofizialak</span>
+        <span>Zuzenketa gidatua</span>
+        <span>Aurrerapen gordea</span>
+      </div>
+    </section>
+
+    <section class="start-card" aria-labelledby="startTitle">
+      <div class="start-card-head">
+        <div>
+          <span class="start-eyebrow">HASI PRAKTIKATZEN</span>
+          <h2 id="startTitle">Prestatu zure saioa</h2>
+        </div>
+        <ol class="start-steps" aria-label="Hasteko urratsak">
+          <li class="active"><span>1</span>Proba</li>
+          <li><span>2</span>Modua</li>
+          <li><span>3</span>Hasi</li>
+        </ol>
+      </div>
+
+      <form id="practiceForm">
+        <fieldset>
+          <legend><span>1</span> Zein proba prestatzen ari zara?</legend>
+          <div class="choice-grid exam-grid">
+            <label class="start-choice">
+              <input type="radio" name="examType" value="ivap">
+              <span class="choice-mark" aria-hidden="true"></span>
+              <strong>IVAP</strong>
+              <small>Administrazio publikoetako hizkuntza-eskakizunak</small>
+              <span class="choice-meta">C1 · 3. HE</span>
+            </label>
+            <label class="start-choice">
+              <input type="radio" name="examType" value="habe">
+              <span class="choice-mark" aria-hidden="true"></span>
+              <strong>HABE</strong>
+              <small>Helduen euskalduntzeko C1 mailako probak</small>
+              <span class="choice-meta">C1 maila</span>
+            </label>
+          </div>
+        </fieldset>
+
+        <fieldset id="modeFieldset" disabled>
+          <legend><span>2</span> Nola praktikatu nahi duzu?</legend>
+          <div class="choice-grid mode-grid">
+            <label class="start-choice mode-choice">
+              <input type="radio" name="practiceMode" value="simulation">
+              <span class="choice-mark" aria-hidden="true"></span>
+              <strong>Simulazioa</strong>
+              <small>Azterketa osoa, kronometroarekin eta amaierako emaitzarekin.</small>
+            </label>
+            <label class="start-choice mode-choice">
+              <input type="radio" name="practiceMode" value="practice">
+              <span class="choice-mark" aria-hidden="true"></span>
+              <strong>Praktika librea</strong>
+              <small>Atalez atal, presiorik gabe eta nahi duzunean zuzenduta.</small>
+            </label>
+          </div>
+        </fieldset>
+
+        <div class="start-action">
+          <p id="selectionSummary" aria-live="polite">Lehenik, aukeratu IVAP edo HABE.</p>
+          <button id="startPractice" type="submit" disabled>Hasi praktika <span aria-hidden="true">→</span></button>
+        </div>
+      </form>
+    </section>
+
+    <aside class="start-help" aria-labelledby="helpTitle">
+      <div>
+        <span class="start-eyebrow">EZ DAKIZU ZEIN AUKERATU?</span>
+        <h2 id="helpTitle">Bi modu, helburu bera</h2>
+      </div>
+      <p><strong>Simulazioa</strong> aukeratu azterketaren erritmoa entrenatzeko. <strong>Praktika librea</strong> aukeratu estrategia lantzeko eta akatsetatik ikasteko.</p>
+    </aside>
+  </main>
+
+  <footer class="start-footer">SUSTRAI · Euskara C1 irakurmena prestatzeko tresna</footer>
+  <script src="/start.js" defer></script>
+</body>
+</html>

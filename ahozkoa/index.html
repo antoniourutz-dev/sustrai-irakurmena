@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="eu">
+<head>
+ <meta charset="utf-8">
+ <meta name="viewport" content="width=device-width,initial-scale=1">
+ <meta name="theme-color" content="#153e32">
+ <meta name="description" content="SUSTRAI Ahozkoa C1: IVAP eta HABEko ahozko atazak, eskema propioa, laguntza mailakatua eta tokiko grabazioa.">
+ <title>SUSTRAI · Ahozkoa C1</title>
+ <link rel="stylesheet" href="/ahozkoa/style.css?v=20261114-initial">
+</head>
+<body>
+<a class="skip" href="#speakingTitle">Joan ariketara</a>
+<div class="app">
+ <header class="topbar">
+  <a class="brand" href="/" aria-label="SUSTRAI hasiera"><span class="brand-icon">S</span><span><strong>SUSTRAI</strong><small>AHOZKOA · C1</small></span></a>
+  <nav aria-label="SUSTRAI atalak"><a href="/">Hasiera</a><a href="/#irakurmena">Irakurmena</a><a href="/idazlanak/">Idazmena</a><span aria-current="page">Ahozkoa</span></nav>
+ </header>
+ <main class="layout">
+  <aside class="catalog panel" aria-labelledby="catalogHeading">
+   <div class="catalog-intro"><span class="eyebrow">BENETAKO FITXAK · C1</span><h1 id="catalogHeading">Ahozkoa</h1><p>Gaiaren azalpena edo elkarrizketa. Aukeratu iturria eta ataza.</p></div>
+   <div class="catalog-filters">
+    <label for="orgFilter">Erakundea</label><select id="orgFilter"><option value="all">IVAP eta HABE</option><option value="IVAP">IVAP</option><option value="HABE">HABE</option></select>
+    <label for="kindFilter">Ataza mota</label><select id="kindFilter"><option value="all">Denak</option><option value="monologue">Bakarrizketa</option><option value="interaction">Elkarrizketa</option></select>
+    <label for="search">Bilatu gaia edo deialdia</label><input type="search" id="search" placeholder="Adibidez: 2022, kirola…" autocomplete="off">
+    <p id="catalogCount" class="count" aria-live="polite"></p>
+   </div>
+   <div id="taskList" class="task-list" aria-label="Ahozko atazen katalogoa" aria-busy="true"><p class="loading">Atazak kargatzen…</p></div>
+   <p class="catalog-note">Jatorrizko azterketen fitxak. Iturriko irudiak eta maketazioa PDFan ikus daitezke.</p>
+  </aside>
+  <div class="maincol">
+   <section class="hero panel">
+    <span class="eyebrow">MINTZAMEN-TAILERRA</span>
+    <div class="hero-row"><div><h2 id="speakingTitle">Aukeratu ataza bat</h2><div id="taskTags" class="tags"></div></div>
+    <div class="modes" role="group" aria-label="Praktikatzeko modua"><button id="trainMode" class="active" type="button" aria-pressed="true">Entrenatu</button><button id="simulateMode" type="button" aria-pressed="false">Simulatu</button></div></div>
+    <p id="modeInfo" class="mode-info">Laguntzak zuk nahi duzunean irekiko dituzu. Lehenik, saiatu zeure kabuz.</p>
+   </section>
+   <article class="official panel" aria-labelledby="officialHeading">
+    <div class="section-head"><span class="eyebrow">JATORRIZKO FITXA · AZTERKETAREN PARTE</span><a id="sourceLink" class="source-link" href="#" target="_blank" rel="noopener noreferrer" hidden>Ireki PDFa <span aria-hidden="true">↗</span></a></div>
+    <h3 id="officialHeading">Gaia eta eginkizuna</h3>
+    <p class="instruction" id="instruction">Ataza bat aukeratu.</p>
+    <section id="sourceTextBox" class="source-box" hidden><h4>Iturriko testua</h4><p class="source-notice">Azterketa-fitxako testua da, ez SUSTRAIren laguntza. Jatorrizko irudiak PDFan daude.</p><div id="sourceText" class="source-text"></div></section>
+    <section id="roleBox" class="role-box" hidden><div class="role-heading"><span class="eyebrow">ZURE FITXAKO ARRAZOIAK</span><strong id="roleName"></strong></div><ul id="rolePoints"></ul><p class="other-role" id="otherRole"></p><p class="source-notice">Fitxako ideiak abiapuntua dira: eztabaidan solaskideari erantzun behar zaio.</p></section>
+    <section id="questionsBox" class="questions" hidden><h4>Azterketako galderak</h4><ul id="guidingQuestions"></ul></section>
+    <p id="sourceNote" class="source-note"></p>
+   </article>
+   <section class="prep panel" aria-labelledby="prepHeading">
+    <div class="section-head"><span class="eyebrow">ZUK ERAIKITAKO ESKEMA</span><span class="local-badge">Gailu honetan</span></div>
+    <h3 id="prepHeading">Prestatu zure ahozko ibilbidea</h3>
+    <p>Ez idatzi buruz ikasteko testu osoa. Antolatu gako-hitzak eta azalduko dituzun ideiak.</p>
+    <div class="prep-grid">
+     <div class="field"><label for="opening">Hasiera: zer gai aurkeztuko duzu?</label><textarea id="opening" rows="2" maxlength="2000" placeholder="Zure hitzetan, gaia eta helburua…"></textarea></div>
+     <div class="field"><label for="idea1">Lehenengo ideia eta arrazoia</label><textarea id="idea1" rows="2" maxlength="2000" placeholder="Zure argudioa, adibide batekin…"></textarea></div>
+     <div class="field"><label for="idea2">Bigarren ideia edo kontrastea</label><textarea id="idea2" rows="2" maxlength="2000" placeholder="Beste ikuspegi bat, adibidea edo erantzuna…"></textarea></div>
+     <div class="field"><label for="closing">Amaiera / solaskideari galdera</label><textarea id="closing" rows="2" maxlength="2000" placeholder="Ondorioa, proposamena edo galdera…"></textarea></div>
+    </div>
+    <div class="prep-actions"><span id="notesStatus" aria-live="polite">Eskema automatikoki gordetzen da</span><button id="copyNotes" type="button" class="soft" disabled>Kopiatu eskema</button><button id="clearNotes" type="button" class="link-danger" disabled>Eskema ezabatu</button></div>
+   </section>
+   <section class="practice panel" aria-labelledby="practiceHeading">
+    <span class="eyebrow">PRAKTIKATU ZURE KABUZ</span><h3 id="practiceHeading">Denbora eta ahotsa</h3>
+    <div class="time-grid">
+     <div class="time-block"><div class="time-heading"><strong>Prestaketa</strong><span id="prepTarget">—</span></div><output id="prepTime">00:00</output><div class="time-controls"><button id="prepStart" type="button" class="primary" disabled>Hasi</button><button id="prepReset" type="button" class="soft" disabled>Berrezarri</button></div></div>
+     <div class="time-block"><div class="time-heading"><strong>Interbentzioa</strong><span id="speakTarget">—</span></div><output id="speakTime">00:00</output><div class="time-controls"><button id="speakStart" type="button" class="primary" disabled>Hasi</button><button id="speakReset" type="button" class="soft" disabled>Berrezarri</button></div></div>
+    </div>
+    <div class="recording">
+      <div><h4>Grabatu zure saioa</h4><p>Grabazioa zure gailuan bakarrik geratzen da. Mikrofonoaren baimena zuk erabakiko duzu; ez dugu audioa zerbitzarira bidaltzen.</p></div>
+      <div class="record-actions"><button id="recordToggle" type="button" class="record-button" disabled> <span aria-hidden="true">●</span> Grabatu</button><button id="recordDownload" type="button" class="soft" disabled>Deskargatu audioa</button></div>
+      <audio id="recordPlayback" controls hidden aria-label="Zure ahozko grabazioa"></audio>
+      <p id="recordStatus" class="record-status" role="status" aria-live="polite">Prest</p>
+    </div>
+    <div class="review">
+     <h4>Autoberrikuspena (ez da nota)</h4>
+     <div id="reviewChecks" class="checklist">
+      <label><input type="checkbox" value="mission"> Eginkizuna eta gaia bete ditut.</label>
+      <label><input type="checkbox" value="structure"> Hasiera, garapena eta amaiera ulergarriak izan dira.</label>
+      <label><input type="checkbox" value="support"> Ideiak arrazoi edo adibideekin justifikatu ditut.</label>
+      <label><input type="checkbox" value="fluency"> Mezuaren haria mantentzen saiatu naiz.</label>
+      <label><input type="checkbox" value="interaction"> Elkarrizketa bada, solaskideari erantzuteko tartea utzi dut.</label>
+     </div>
+    </div>
+   </section>
+  </div>
+  <aside class="help panel" id="helpPanel" aria-labelledby="helpHeading">
+   <div class="help-intro"><span class="eyebrow">AUKERAKO LAGUNTZA</span><h2 id="helpHeading">Laguntza behar?</h2><p>Lehenengo probatu zure kabuz. Gero, zabaldu behar duzuna.</p></div>
+   <div class="help-sections" id="helpSections">
+     <details id="planningDetails"><summary>01 · Prestatzeko ideiak</summary><div id="planningItems"></div></details>
+     <details id="lexiconDetails"><summary>02 · Hiztegi erabilgarria</summary><div id="lexiconItems"></div></details>
+     <details id="structuresDetails"><summary>03 · Egiturak eta lokailuak</summary><div id="structuresItems"></div></details>
+     <details id="interactionDetails"><summary>04 · Elkarrizketarako estrategiak</summary><div id="interactionItems"></div></details>
+   </div>
+   <div id="simulationNotice" class="sim-notice" hidden><strong>Simulazio modua</strong><p>Laguntza didaktikoa ezkutuan dago. Jatorrizko azterketako materiala eskuragarri dago beti.</p></div>
+   <div class="help-footer"><span id="helpCount">Laguntzarik zabaldu gabe</span><p>SUSTRAIren adibideak ikasteko dira; ez dira enuntziatuaren parte.</p></div>
+  </aside>
+ </main>
+ <footer>SUSTRAI · Ahozkoa C1 · Prestakuntza didaktikoa, ez egiaztapen ofiziala</footer>
+ <div id="toast" class="toast" hidden role="status" aria-live="polite"></div>
+</div>
+<script src="/ahozkoa/app.js?v=20261114-initial" defer></script>
+</body>
+</html>

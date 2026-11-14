@@ -193,7 +193,31 @@ function progressBar(){let p=progress(),total=totalOf(exam());$('progressLabel')
 function tabs(){let content='';exam().items.forEach((it,i)=>{let a=answersOf(i),done=Object.keys(a).filter(n=>+n>=it.r[0]&&+n<=it.r[1]&&a[n]).length;content+='<button class="tab '+(i===part?'active':'')+'" data-part="'+i+'" aria-pressed="'+(i===part)+'">'+(i+1)+'. '+(it.type==='fill'?'Hutsuneak':it.type==='mcq'?'Ulermena':'Testu zatiak')+' <small>'+done+'/'+numberOf(it)+'</small></button>'});$('tabs').innerHTML=content;document.querySelectorAll('[data-part]').forEach(b=>b.onclick=()=>selectPart(+b.dataset.part))}
 function marked(content,area){let ms=visible?highlights().filter(m=>m.area===area).sort((a,b)=>a.start-b.start):[];let index=0,out='';for(let m of ms){if(m.start<index||m.start<0||m.end>content.length||m.end<=m.start)continue;out+=htmlEscape(content.slice(index,m.start))+'<mark class="highlit" style="background:'+colors[m.color]+'">'+htmlEscape(content.slice(m.start,m.end))+'</mark>';index=m.end}return out+htmlEscape(content.slice(index))}
 function paragraphs(input){let parts=String(input).split(/(?<=[.!?])\s+(?=[A-ZÁÉÍÓÚÜÑ«])/u),out=[],p='';for(let s of parts){if(p.length>520){out.push(p.trim());p=''}p+=(p?' ':'')+s}if(p.trim())out.push(p.trim());return out}
-function renderPassage(reset=false){let scroll=$('readingPanel').querySelector('.paperscroll'),pos=reset?0:scroll.scrollTop,it=task(),a=answersOf(),segment=0,content='';for(let text of paragraphs(it.p)){content+='<p>';for(let token of text.split(/(\{\{\d+\}\})/g)){let m=token.match(/^\{\{(\d+)\}\}$/);if(m){let n=+m[1],letter=a[n]||'',choice=letter?(it.type==='fill'?it.opts[n][letters.indexOf(letter)]:letter):'···';content+='<button class="hole '+(n===current?'active ':'')+(letter?'answered':'')+'" data-gap="'+n+'">'+n+' · '+htmlEscape(choice)+'</button>'}else if(token){let area='a'+segment++;content+='<span class="selectable" data-area="'+area+'">'+marked(token,area)+'</span>'}}content+='</p>'}$('passage').innerHTML=content;document.querySelectorAll('[data-gap]').forEach(b=>b.onclick=()=>selectQuestion(+b.dataset.gap));scroll.scrollTop=pos}
+
+function readingLayout(it){
+ const title=String(it.title||'').replace(/\s*·\s*(?:lotu bi zutabeak|bi zutabeak lotu)\s*$/iu,'').trim();
+ const source=String(it.p||'').trim();
+ const words=title.match(/[\p{L}\p{N}]+/gu)||[];
+ if(!words.length)return {title,body:source};
+ const titlePattern=new RegExp(words.join('[\\s\\p{P}\\p{S}]+')+'(?=\\s|$|\\p{P})','iu');
+ let end=0;
+ const numberPrefix=source.match(/^\d{1,2}\.\s*testua\s*/iu);
+ if(numberPrefix){
+   const start=numberPrefix[0].length,remaining=source.slice(start),match=titlePattern.exec(remaining);
+   if(match&&(match.index===0||(/^Egitekoa\b/iu.test(remaining)&&match.index<650)))end=start+match.index+match[0].length;
+   if(!end&&title==='Eliten bestaldean, mundua'){
+     const variant=remaining.match(/^Eliteen bestaldean,\s*mundua\b/iu);
+     if(variant)end=start+variant[0].length;
+   }
+ }else{
+   const match=titlePattern.exec(source);
+   if(match&&match.index===0&&(words.length>1||match[0]===match[0].toLocaleUpperCase('eu')))end=match[0].length;
+   if(!end&&title.length>=5&&source.toLocaleLowerCase('eu').startsWith(title.slice(1).toLocaleLowerCase('eu')))end=title.length-1;
+ }
+ return {title,body:end?source.slice(end).replace(/^[\s.!?:;·—-]+/u,'').trimStart():source};
+}
+
+function renderPassage(reset=false){let scroll=$('readingPanel').querySelector('.paperscroll'),pos=reset?0:scroll.scrollTop,it=task(),a=answersOf(),segment=0,doc=readingLayout(it),content='<h2 class="document-title">'+htmlEscape(doc.title)+'</h2>';for(let text of paragraphs(doc.body)){content+='<p>';for(let token of text.split(/(\{\{\d+\}\})/g)){let m=token.match(/^\{\{(\d+)\}\}$/);if(m){let n=+m[1],letter=a[n]||'',choice=letter?(it.type==='fill'?it.opts[n][letters.indexOf(letter)]:letter):'···';content+='<button class="hole '+(n===current?'active ':'')+(letter?'answered':'')+'" data-gap="'+n+'">'+n+' · '+htmlEscape(choice)+'</button>'}else if(token){let area='a'+segment++;content+='<span class="selectable" data-area="'+area+'">'+marked(token,area)+'</span>'}}content+='</p>'}$('passage').innerHTML=content;document.querySelectorAll('[data-gap]').forEach(b=>b.onclick=()=>selectQuestion(+b.dataset.gap));scroll.scrollTop=pos}
 function renderQuestion(){let it=task(),a=answersOf(),n=current,index=n-it.r[0],q=it.type==='mcq'?it.qs[index]:null,choices=it.type==='mcq'?q.o:it.type==='fill'?it.opts[n]:it.opts,labels=Array.isArray(choices)?letters.slice(0,choices.length).split(''):Object.keys(choices).sort(),vals=Array.isArray(choices)?choices:labels.map(l=>choices[l]);$('qcounter').textContent='GALDERA '+n+' · '+(index+1)+' / '+numberOf(it);$('qtitle').textContent=it.title;
  let question=it.type==='mcq'?q.q:it.type==='fill'?'Hutsuneari dagokion hitza aukeratu.':it.title.toLowerCase().includes('bi zutabeak lotu')?'Lotu 1. zutabeko esaldia 2. zutabeko aukera egokiarekin. Aukera bat sobera dago.':'Testuko hutsuneari dagokion zatia aukeratu. Aukera bat sobera dago.';$('questionText').innerHTML='<span class="selectable" data-area="q'+n+'">'+marked(question,'q'+n)+'</span>';
  $('options').innerHTML=labels.map((l,j)=>{let chosen=a[n]===l,isCorrect=graded[part]&&it.key[index]===l,isWrong=graded[part]&&chosen&&!isCorrect,area='c'+n+l;return '<div class="choice '+(chosen?'chosen ':'')+(isCorrect?'correct ':'')+(isWrong?'wrong':'')+'" data-choice="'+l+'"><button class="choose" data-letter="'+l+'" aria-label="'+l+' aukera" aria-pressed="'+chosen+'">'+l+'</button><span class="selectable" data-area="'+area+'">'+marked(vals[j],area)+'</span></div>'}).join('');

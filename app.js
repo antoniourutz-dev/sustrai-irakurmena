@@ -236,7 +236,7 @@ function previewBrushSelection(start,end){
  return false;
 }
 function brushTargetFromEvent(event){
- if(event.target.closest('#markerbar,.marker-drag,button,a,select,label,.choice,.numbers,.tab,.modal,.hole,.time-actions'))return null;
+ if(event.target.closest('#markerbar,.marker-drag,button,a,select,label,.numbers,.tab,.modal,.hole,.time-actions,.choose'))return null;
  return event.target.closest('.selectable[data-area]');
 }
 function finishBrushStroke(){
@@ -377,7 +377,7 @@ function renderPassage(reset=false){let scroll=$('readingPanel').querySelector('
 function renderQuestion(){let it=task(),a=answersOf(),n=current,index=n-it.r[0],q=it.type==='mcq'?it.qs[index]:null,choices=it.type==='mcq'?q.o:it.type==='fill'?it.opts[n]:it.opts,labels=Array.isArray(choices)?letters.slice(0,choices.length).split(''):Object.keys(choices).sort(),vals=Array.isArray(choices)?choices:labels.map(l=>choices[l]);$('qcounter').textContent='GALDERA '+n+' · '+(index+1)+' / '+numberOf(it);$('qtitle').textContent=it.title;
  let question=it.type==='mcq'?q.q:it.type==='fill'?'Hutsuneari dagokion hitza aukeratu.':it.title.toLowerCase().includes('bi zutabeak lotu')?'Lotu 1. zutabeko esaldia 2. zutabeko aukera egokiarekin. Aukera bat sobera dago.':'Testuko hutsuneari dagokion zatia aukeratu. Aukera bat sobera dago.';$('questionText').innerHTML='<span class="selectable" data-area="q'+n+'">'+marked(question,'q'+n)+'</span>';
  $('options').innerHTML=labels.map((l,j)=>{let chosen=a[n]===l,isCorrect=graded[part]&&it.key[index]===l,isWrong=graded[part]&&chosen&&!isCorrect,area='c'+n+l;return '<div class="choice '+(chosen?'chosen ':'')+(isCorrect?'correct ':'')+(isWrong?'wrong':'')+'" data-choice="'+l+'"><button class="choose" data-letter="'+l+'" aria-label="'+l+' aukera" aria-pressed="'+chosen+'">'+l+'</button><span class="selectable" data-area="'+area+'">'+marked(vals[j],area)+'</span></div>'}).join('');
- document.querySelectorAll('.choose').forEach(b=>b.onclick=()=>choose(b.dataset.letter));document.querySelectorAll('.choice').forEach(b=>b.onclick=e=>{if(e.target.closest('button')||window.getSelection()?.toString())return;choose(b.dataset.choice)});
+ document.querySelectorAll('.choose').forEach(b=>b.onclick=()=>{if(activeMarker)return;choose(b.dataset.letter)});document.querySelectorAll('.choice').forEach(b=>b.onclick=e=>{if(activeMarker||e.target.closest('button')||window.getSelection()?.toString())return;choose(b.dataset.choice)});
  $('prev').disabled=n===it.r[0];$('next').disabled=n===it.r[1];
  $('numbers').innerHTML=Array.from({length:numberOf(it)},(_,i)=>{let k=i+it.r[0];return '<button data-q="'+k+'" class="'+(k===n?'current ':'')+(a[k]?'done':'')+'">'+k+'</button>'}).join('');
  document.querySelectorAll('[data-q]').forEach(b=>b.onclick=()=>selectQuestion(+b.dataset.q));

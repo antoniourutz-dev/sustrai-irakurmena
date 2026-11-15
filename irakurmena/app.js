@@ -18,7 +18,7 @@ function show(message) {
 async function readExams(organism) {
   const response = await fetch(API_URL + '/rest/v1/rpc/sr_public_exam_snapshot', {
     method: 'POST',
-    headers: { ...HEADERS, 'Content-Type': 'application/json' },
+    headers: await window.SustraiCloud.headers({ ...HEADERS, 'Content-Type': 'application/json' }),
     body: JSON.stringify({ p_organism_code: organism }),
     cache: 'no-store'
   });

@@ -24,7 +24,7 @@
 
     function readMarks() {
       try {
-        const raw = JSON.parse(localStorage.getItem(key()));
+        const raw = JSON.parse(window.SustraiCloud.storage.getItem(key()));
         return Array.isArray(raw) ? raw : [];
       } catch {
         return [];
@@ -32,7 +32,7 @@
     }
 
     function writeMarks(list) {
-      try { localStorage.setItem(key(), JSON.stringify(list)); } catch {}
+      try { window.SustraiCloud.storage.setItem(key(), JSON.stringify(list)); } catch {}
     }
 
     function markedHtml(content, area) {
@@ -201,7 +201,7 @@
       const bar = $('markerbar');
       if (!bar) return;
       try {
-        const raw = localStorage.getItem('sustrai-markerbar-pos');
+        const raw = window.SustraiCloud.storage.getItem('sustrai-markerbar-pos');
         if (!raw) return;
         const pos = JSON.parse(raw);
         if (Number.isFinite(pos.left) && Number.isFinite(pos.top)) {
@@ -215,7 +215,7 @@
       const bar = $('markerbar');
       if (!bar) return;
       const rect = bar.getBoundingClientRect();
-      try { localStorage.setItem('sustrai-markerbar-pos', JSON.stringify({ left: rect.left, top: rect.top })); } catch {}
+      try { window.SustraiCloud.storage.setItem('sustrai-markerbar-pos', JSON.stringify({ left: rect.left, top: rect.top })); } catch {}
     }
 
     function setupMarkerDrag() {

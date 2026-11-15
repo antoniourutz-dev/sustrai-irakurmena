@@ -44,7 +44,7 @@ async function readTable(table,fields){
 }
 const draftKey=()=>selected?'sustrai-writer-c1:'+selected.slug+':'+mode:'';
 function loadDraft(){try{return window.SustraiCloud.storage.getItem(draftKey())||''}catch{return ''}}
-function saveDraft(){if(!selected)return;try{window.SustraiCloud.storage.setItem(draftKey(),$('draft').value);$('saveState').textContent='Gordeta gailu honetan'}catch{$('saveState').textContent='Ezin izan da automatikoki gorde'}}
+function saveDraft(){if(!selected)return;try{window.SustraiCloud.storage.setItem(draftKey(),$('draft').value);$('saveState').textContent=window.SustraiCloud.user()?'Hodeira bidaltzen…':'Gordeta gailu honetan'}catch{$('saveState').textContent='Ezin izan da automatikoki gorde'}}
 function countWords(text){return (text.trim().match(/[\p{L}\p{N}]+(?:['’·-][\p{L}\p{N}]+)*/gu)||[]).length}
 function updateWordCount(){
   const words=countWords($('draft').value),min=selected?.min_words??null;

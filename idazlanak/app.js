@@ -141,11 +141,22 @@ function setMode(next){
   if(next==='simulation')notify('Simulazioan laguntzak ezkutuan daude.');
 }
 function formatClock(seconds){const m=Math.floor(seconds/60),s=seconds%60;return String(m).padStart(2,'0')+':'+String(s).padStart(2,'0')}
+function setFocusMode(on){
+  document.body.classList.toggle('focus-mode',!!on);
+  const exit=$('exitFocus');
+  if(exit)exit.hidden=!on;
+}
 function updateClock(){
   $('timerDisplay').textContent=formatClock(elapsed);
   $('timerToggle').textContent=running?'Gelditu':'Hasi';
+  setFocusMode(running);
 }
-function toggleTimer(){if(!selected)return;running=!running;updateClock()}
+function toggleTimer(){
+  if(!selected)return;
+  running=!running;
+  updateClock();
+  notify(running?'Kontzentrazio-modua: kronometroa martxan':'Kronometroa geldituta');
+}
 function startClock(){clockId=setInterval(()=>{if(!running)return;elapsed++;updateClock();if(selected?.recommended_minutes&&elapsed===selected.recommended_minutes*60)notify('Gomendatutako denbora amaitu da.')},1000)}
 async function copyDraft(){
   if(!selected||!$('draft').value.trim())return;
@@ -174,6 +185,7 @@ async function start(){
   $('draft').addEventListener('input',()=>{updateWordCount();saveDraft()});
   $('copyDraft').onclick=copyDraft;$('downloadDraft').onclick=downloadDraft;
   $('timerToggle').onclick=toggleTimer;$('clearDraft').onclick=clearDraft;
+  if($('exitFocus'))$('exitFocus').onclick=()=>{running=false;updateClock();notify('Kontzentrazio-modua itxita')};
   for(const id of ['planningDetails','lexiconDetails','structuresDetails']){
     $(id).addEventListener('toggle',()=>{if(!$(id).open||!selected||mode==='simulation')return;assistOpened.add(id);$('helpBadge').textContent=assistOpened.size+' laguntza-atal irekita';});
   }

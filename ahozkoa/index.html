@@ -6,7 +6,7 @@
  <meta name="theme-color" content="#153e32">
  <meta name="description" content="SUSTRAI Ahozkoa C1: IVAP eta HABEko ahozko atazak, eskema propioa, laguntza mailakatua eta tokiko grabazioa.">
  <title>SUSTRAI · Ahozkoa C1</title>
- <link rel="stylesheet" href="/ahozkoa/style.css?v=20261115-two-col">
+ <link rel="stylesheet" href="/ahozkoa/style.css?v=20261115-focus">
 </head>
 <body>
 <a class="skip" href="#speakingTitle">Joan ariketara</a>
@@ -50,8 +50,23 @@
    <section class="hero panel">
     <span class="eyebrow">MINTZAMEN-TAILERRA</span>
     <div class="hero-row"><div><h2 id="speakingTitle">Aukeratu ataza bat</h2><div id="taskTags" class="tags"></div></div>
-    <div class="modes" role="group" aria-label="Praktikatzeko modua"><button id="trainMode" class="active" type="button" aria-pressed="true">Entrenatu</button><button id="simulateMode" type="button" aria-pressed="false">Simulatu</button></div></div>
-    <p id="modeInfo" class="mode-info">Laguntzak zuk nahi duzunean irekiko dituzu. Lehenik, saiatu zeure kabuz.</p>
+    <div class="hero-controls">
+     <div class="session-timer" aria-label="Kronometroak">
+      <div class="mini-timer">
+       <span class="timer-label">Prestaketa</span>
+       <output id="prepTimeTop">00:00</output>
+       <button id="prepStart" type="button" class="primary" disabled>Hasi</button>
+      </div>
+      <div class="mini-timer">
+       <span class="timer-label">Interbentzioa</span>
+       <output id="speakTimeTop">00:00</output>
+       <button id="speakStart" type="button" class="primary" disabled>Hasi</button>
+      </div>
+      <button id="exitFocus" type="button" class="soft focus-exit" hidden>Kontzentrazioa itxi</button>
+     </div>
+     <div class="modes" role="group" aria-label="Praktikatzeko modua"><button id="trainMode" class="active" type="button" aria-pressed="true">Entrenatu</button><button id="simulateMode" type="button" aria-pressed="false">Simulatu</button></div>
+    </div></div>
+    <p id="modeInfo" class="mode-info">Laguntzak zuk nahi duzunean irekiko dituzu. Kronometroa hasiz gero, kontzentrazio-modua irekiko da.</p>
    </section>
    <article class="official panel" aria-labelledby="officialHeading">
     <div class="section-head"><span class="eyebrow">JATORRIZKO FITXA · AZTERKETAREN PARTE</span><a id="sourceLink" class="source-link" href="#" target="_blank" rel="noopener noreferrer" hidden>Ireki PDFa <span aria-hidden="true">↗</span></a></div>
@@ -93,10 +108,10 @@
     <p class="help-footnote">SUSTRAIren adibideak ikasteko dira; ez dira enuntziatuaren parte.</p>
    </aside>
    <section class="practice panel" aria-labelledby="practiceHeading">
-    <span class="eyebrow">PRAKTIKATU ZURE KABUZ</span><h3 id="practiceHeading">Denbora eta ahotsa</h3>
-    <div class="time-grid">
-     <div class="time-block"><div class="time-heading"><strong>Prestaketa</strong><span id="prepTarget">—</span></div><output id="prepTime">00:00</output><div class="time-controls"><button id="prepStart" type="button" class="primary" disabled>Hasi</button><button id="prepReset" type="button" class="soft" disabled>Berrezarri</button></div></div>
-     <div class="time-block"><div class="time-heading"><strong>Interbentzioa</strong><span id="speakTarget">—</span></div><output id="speakTime">00:00</output><div class="time-controls"><button id="speakStart" type="button" class="primary" disabled>Hasi</button><button id="speakReset" type="button" class="soft" disabled>Berrezarri</button></div></div>
+    <span class="eyebrow">PRAKTIKATU ZURE KABUZ</span><h3 id="practiceHeading">Ahotsa eta berrikuspena</h3>
+    <div class="time-grid time-grid-secondary" aria-label="Kronometroen xehetasunak">
+     <div class="time-block"><div class="time-heading"><strong>Prestaketa</strong><span id="prepTarget">—</span></div><output id="prepTime">00:00</output><div class="time-controls"><button id="prepReset" type="button" class="soft" disabled>Berrezarri</button></div></div>
+     <div class="time-block"><div class="time-heading"><strong>Interbentzioa</strong><span id="speakTarget">—</span></div><output id="speakTime">00:00</output><div class="time-controls"><button id="speakReset" type="button" class="soft" disabled>Berrezarri</button></div></div>
     </div>
     <div class="recording">
       <div><h4>Grabatu zure saioa</h4><p>Grabazioa zure gailuan bakarrik geratzen da. Mikrofonoaren baimena zuk erabakiko duzu; ez dugu audioa zerbitzarira bidaltzen.</p></div>
@@ -120,6 +135,6 @@
  <footer>SUSTRAI · Ahozkoa C1 · Prestakuntza didaktikoa, ez egiaztapen ofiziala</footer>
  <div id="toast" class="toast" hidden role="status" aria-live="polite"></div>
 </div>
-<script src="/ahozkoa/app.js?v=20261114-initial" defer></script>
+<script src="/ahozkoa/app.js?v=20261115-focus" defer></script>
 </body>
 </html>

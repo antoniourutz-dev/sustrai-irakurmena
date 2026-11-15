@@ -40,7 +40,7 @@ function getState(){
 function saveState(){
  if(!selected)return;
  const state={notes:Object.fromEntries(KEYS.map(k=>[k,$(k).value])),checks:[...$('reviewChecks').querySelectorAll('input:checked')].map(x=>x.value)};
- try{window.SustraiCloud.storage.setItem(storageKey(),JSON.stringify(state));$('notesStatus').textContent='Zure gailuan gordeta'}catch{$('notesStatus').textContent='Ezin izan da gorde: kopiatu eskema.'}
+ try{window.SustraiCloud.storage.setItem(storageKey(),JSON.stringify(state));$('notesStatus').textContent=window.SustraiCloud.user()?'Hodeira bidaltzen…':'Zure gailuan gordeta'}catch{$('notesStatus').textContent='Ezin izan da gorde: kopiatu eskema.'}
  $('copyNotes').disabled=!KEYS.some(k=>$(k).value.trim());
  $('clearNotes').disabled=!KEYS.some(k=>$(k).value.trim());
 }
@@ -50,7 +50,7 @@ function loadState(){
  for(const c of $('reviewChecks').querySelectorAll('input'))c.checked=state.checks.includes(c.value);
  $('copyNotes').disabled=!KEYS.some(k=>$(k).value.trim());
  $('clearNotes').disabled=!KEYS.some(k=>$(k).value.trim());
- $('notesStatus').textContent='Eskema gailu honetan gordetzen da';
+ $('notesStatus').textContent=window.SustraiCloud.user()?'Eskema zure kontuan gordetzen da':'Eskema gailu honetan gordetzen da';
 }
 function filtered(){
  const org=$('orgFilter').value,kind=$('kindFilter').value,term=$('search').value.toLocaleLowerCase('eu').trim();

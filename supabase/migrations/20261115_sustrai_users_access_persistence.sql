@@ -233,7 +233,7 @@ SET search_path=pg_catalog, public AS $$
      'averageReadingScore',(SELECT round(avg(r.score),2) FROM public.sr_app_reading_results r WHERE r.user_id=p.user_id)
    ) ORDER BY p.last_seen_at DESC)
   FROM public.sr_app_profiles p JOIN auth.users u ON u.id=p.user_id
-  WHERE p.user_id NOT IN (SELECT a.user_id FROM sustrai_private.sr_app_admins)), '[]'::jsonb) END
+  WHERE NOT EXISTS (SELECT 1 FROM sustrai_private.sr_app_admins a WHERE a.user_id=p.user_id)), '[]'::jsonb) END
 $$;
 REVOKE ALL ON FUNCTION public.sr_admin_students() FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.sr_admin_students() TO authenticated;

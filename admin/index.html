@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="eu">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#163e30">
+<title>SUSTRAI · Administrazioa</title>
+<link rel="stylesheet" href="/auth.css">
+<link rel="stylesheet" href="/admin/admin.css">
+</head>
+<body>
+<header class="topbar">
+ <a class="brand" href="/"><span class="logo">S</span><span><strong>SUSTRAI</strong><small>ADMINISTRAZIOA</small></span></a>
+ <nav><a href="/">Hasiera</a><a href="/irakurmena/">Irakurmena</a><a href="/idazlanak/">Idazmena</a><a href="/ahozkoa/">Ahozkoa</a></nav>
+</header>
+<main id="adminApp" class="admin-layout" aria-busy="true">
+ <section class="intro">
+   <div><p class="eyebrow">SUSTRAI · IKASLEEN KUDEAKETA</p><h1>Administrazio panela</h1>
+   <p>Ikasleen lanak, irakurmeneko emaitzak eta edukien sarbide-baimenak kudeatzeko gunea.</p></div>
+   <p class="status" id="status" role="status" aria-live="polite">Saioa egiaztatzen…</p>
+ </section>
+ <div id="restricted" class="card" hidden>
+  <h2>Sarbide mugatua</h2><p>Atal hau administratzaileari bakarrik dagokio. Hasi saioa baimendutako kontuarekin.</p>
+  <button id="loginAdmin" type="button">Saioa hasi</button>
+ </div>
+ <div id="adminPanels" hidden>
+  <section class="stats" id="stats"></section>
+  <div class="grid">
+   <section class="card">
+     <div class="section-head"><div><p class="eyebrow">IKASLEAK</p><h2>Erabiltzaile erregistratuak</h2></div>
+     <button id="refresh" type="button" class="soft">Eguneratu</button></div>
+     <label for="studentSearch">Bilatu ikaslea</label>
+     <input id="studentSearch" type="search" placeholder="Izena edo helbide elektronikoa">
+     <div id="students" class="student-list" aria-live="polite"></div>
+   </section>
+   <section class="card">
+     <div class="section-head"><div><p class="eyebrow">JARRAIPENA</p><h2 id="studentTitle">Aukeratu ikaslea</h2></div><button id="userActive" class="soft" type="button" hidden></button></div>
+     <div id="studentSummary" class="subtle">Ikasle bat hautatuta, bere jarduerak eta gordetako lanak ikusiko dituzu.</div>
+     <h3>Irakurmenaren emaitzak</h3><div id="results" class="results"></div>
+     <h3>Gordetako lanak eta oharrak</h3><div id="works" class="works"></div>
+   </section>
+  </div>
+  <section class="card permissions">
+   <div class="section-head">
+    <div><p class="eyebrow">BAIMENAK</p><h2>Edukien sarbidea</h2>
+     <p>Gonbidatuak, kontuarekin sartzen direnak eta hautatutako ikaslea bereizita kudeatzen dira. Baimen zehatzak baimen orokorraren gainetik daude.</p></div>
+   </div>
+   <div class="filters">
+    <label for="contentType">Arloa<select id="contentType"><option value="reading">Irakurmena</option><option value="writing">Idazmena</option><option value="speaking">Ahozkoa</option></select></label>
+    <label for="contentSearch">Bilatu edukia<input id="contentSearch" type="search" placeholder="Azterketa, gaia edo urtea"></label>
+   </div>
+   <div id="content" class="content-list"></div>
+  </section>
+  <p class="footer-note">Sarbide-murrizketek SUSTRAI aplikazioaren edukia babesten dute. Kanpoko jatorrizko PDF publikoek beren sarbide-araubidea mantentzen dute.</p>
+ </div>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.0/dist/umd/supabase.min.js" defer></script>
+<script src="/auth.js" defer></script>
+<script src="/admin/admin.js" defer></script>
+</body></html>

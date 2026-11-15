@@ -118,6 +118,7 @@ function selectExam(exam) {
 }
 
 async function start() {
+  await window.SustraiCloud.ready;
   $('orgFilter').onchange = renderList;
   $('sizeFilter').onchange = renderList;
   $('search').oninput = renderList;

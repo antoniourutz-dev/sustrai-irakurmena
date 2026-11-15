@@ -1,5 +1,5 @@
 /* Shared highlighter toolbar */
-.marker-open{border-color:#b4d3be;color:#255f43;background:#f2faf3}
+.marker-open{border-color:#cbd5e1;color:#2a45c9;background:#e8ecfb}
 .markerbar{
   position:fixed;
   top:110px;
@@ -13,18 +13,18 @@
   max-width:min(420px,calc(100vw - 24px));
   padding:10px 28px 10px 8px;
   background:#fff;
-  border:1px solid #c9decf;
+  border:1px solid #cbd5e1;
   border-radius:11px;
-  box-shadow:0 14px 36px #123e2e2e,0 1px 0 #fff inset;
+  box-shadow:0 14px 36px #0f172a2e,0 1px 0 #fff inset;
   touch-action:none;
   user-select:none;
 }
 .markerbar.visible{display:flex}
-.highlabel{font-size:11px;font-weight:750;color:#355f47;margin-right:4px}
+.highlabel{font-size:11px;font-weight:700;color:#2a45c9;margin-right:4px}
 .swatch{
   background:var(--ink);
   border:2px solid #fff;
-  box-shadow:0 0 0 1px #c7d6c9;
+  box-shadow:0 0 0 1px #cbd5e1;
   color:transparent;
   min-width:30px;
   width:30px;
@@ -34,17 +34,17 @@
   cursor:pointer;
 }
 .swatch.active,.marker-erase.active{
-  outline:2px solid #1f7352;
+  outline:2px solid #2a45c9;
   outline-offset:2px;
   transform:translateY(-1px);
 }
-.markerbar .little{font-size:11px;padding:5px 8px;border:1px solid #c9decf;border-radius:8px;background:#fff;cursor:pointer}
-.closemarker{position:absolute;right:8px;top:6px;border:0;background:none;font-size:21px;padding:0 5px;color:#6a8374;cursor:pointer}
+.markerbar .little{font-size:11px;padding:5px 8px;border:1px solid #cbd5e1;border-radius:8px;background:#fff;cursor:pointer}
+.closemarker{position:absolute;right:8px;top:6px;border:0;background:none;font-size:21px;padding:0 5px;color:#64748b;cursor:pointer}
 .marker-drag{
   cursor:grab;
   border:0!important;
   background:transparent!important;
-  color:#6d8575!important;
+  color:#64748b!important;
   font-size:16px;
   line-height:1;
   padding:4px 2px!important;
@@ -62,3 +62,4 @@ body.marker-armed .selectable{touch-action:none;caret-color:transparent}
 body.marker-armed[data-marker-tool="erase"],
 body.marker-armed[data-marker-tool="erase"] .selectable{cursor:cell}
 body.marker-armed mark.highlit{cursor:pointer}
+.swatch[data-color="yellow"]{--ink:#ffe174}.swatch[data-color="green"]{--ink:#a9e8bd}.swatch[data-color="pink"]{--ink:#f7bed5}.swatch[data-color="blue"]{--ink:#b2dbff}

@@ -16,19 +16,29 @@ Plataforma de práctica de comprensión lectora de euskera C1 con modelos IVAP y
 ## Archivos
 
 ```text
-index.html          # Entrada guiada para elegir IVAP/HABE y modo
-start.css           # Estilos de la entrada
-start.js            # Lógica del selector inicial
-ivap/
-  index.html        # Pantalla IVAP
-style.css           # Estilos comunes de los exámenes
-app.js              # Lógica IVAP
-habe/
-  index.html        # Pantalla HABE
-  app.js            # Lógica HABE
-.gitignore
-README.md
+index.html          # Inicio: las tres destrezas, cuenta y modos de trabajo
+theme.css           # Sistema de diseño «Fokua»: tokens (--s-*), fuentes, cabecera y barra inferior
+start.css / home.js # Estilos y lógica del inicio
+auth.js / auth.css  # Cuenta, sesión y sincronización con Supabase
+fonts/              # Fuentes autoalojadas (Inter, Inter Display, Sustrai Serif) · ver fonts/README.md
+irakurmena/         # Catálogo de exámenes de lectura
+ivap/ · habe/       # Taller de lectura (HTML); comparten style.css
+style.css           # Estilos del taller de lectura
+app.js · habe/app.js# Lógica del taller IVAP / HABE
+idazlanak/          # Idazmena (expresión escrita)
+ahozkoa/            # Ahozkoa (expresión oral)
+mi-espacio/         # Nire espazioa (progreso del alumno)
+admin/              # Panel de administración
+sw.js · pwa.js      # Service worker (caché offline)
+supabase/           # Migraciones SQL y función sr-grade-exam
 ```
+
+## Diseño
+
+Todas las páginas cargan `theme.css` antes de su hoja propia y usan los tokens `--s-*`
+(color, tipografía, radios). La cabecera (`.site-header`) y la barra inferior móvil (`.tabbar`)
+son idénticas en todas las páginas. Al cambiar un CSS o JS hay que subir el `?v=` de los HTML
+y `CACHE_VERSION` en `sw.js`.
 
 ## Desarrollo local
 

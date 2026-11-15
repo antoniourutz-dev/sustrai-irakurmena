@@ -191,25 +191,40 @@
    if(msg.includes('network')||msg.includes('fetch'))return 'Konexio-arazoa. Egiaztatu sarea.';
    return err?.message||'Ezin izan da eskaera osatu.';
  }
+ function closeAccountMenu(){
+   const menu=document.getElementById('sustrai-account-menu'),trigger=document.getElementById('sustrai-account-trigger');
+   if(menu)menu.hidden=true;
+   if(trigger)trigger.setAttribute('aria-expanded','false');
+ }
+ function menuItem(tag,label,setup){
+   const item=document.createElement(tag);item.className='sustrai-account-item';item.textContent=label;
+   if(tag==='button')item.type='button';
+   setup(item);return item;
+ }
  function renderAccount(){
-   const header=document.querySelector('.start-header, .topbar');
+   const header=document.querySelector('.site-header');
    if(!header)return;
    let el=document.getElementById('sustrai-account');
    if(!el){el=document.createElement('div');el.id='sustrai-account';el.className='sustrai-account';header.append(el)}
    el.replaceChildren();
-   if(state.user && state.profile?.active){
-     const title=document.createElement('span');title.className='sustrai-account-user';title.textContent=state.profile.name||state.profile.email||'Nire kontua';el.append(title);
-     if(state.profile.admin){
-       const admin=document.createElement('a');admin.href='/admin/';admin.textContent='Kudeaketa';admin.className='sustrai-account-button';el.append(admin);
-     }
-     const mySpace=document.createElement('a');mySpace.href='/mi-espacio/';mySpace.textContent='Nire espazioa';mySpace.className='sustrai-account-button';el.append(mySpace);
-     const importBtn=document.createElement('button');importBtn.type='button';importBtn.className='sustrai-account-button';importBtn.textContent='Inportatu';importBtn.title='Gonbidatu gisa egindako lanak inportatu';importBtn.onclick=importGuestData;el.append(importBtn);
-     const signOut=document.createElement('button');signOut.type='button';signOut.className='sustrai-account-button';signOut.textContent='Irten';signOut.onclick=async()=>{await flush();await state.client.auth.signOut();location.assign('/')};el.append(signOut);
-   } else {
-     const guest=document.createElement('span');guest.className='sustrai-guest-tag';guest.textContent='Gonbidatua';el.append(guest);
-     const login=document.createElement('button');login.type='button';login.className='sustrai-account-button';login.textContent='Sartu / erregistratu';login.onclick=()=>openDialog();el.append(login);
-   }
    const status=document.createElement('span');status.id='sustrai-account-status';status.className='sustrai-account-status';status.textContent=state.notice;status.setAttribute('role','status');el.append(status);
+   if(state.user && state.profile?.active){
+     const label=state.profile.name||state.profile.email||'Nire kontua';
+     const trigger=document.createElement('button');trigger.type='button';trigger.id='sustrai-account-trigger';trigger.className='sustrai-account-trigger';
+     trigger.setAttribute('aria-haspopup','true');trigger.setAttribute('aria-expanded','false');trigger.setAttribute('aria-controls','sustrai-account-menu');trigger.setAttribute('aria-label','Nire kontua: '+label);
+     const avatar=document.createElement('span');avatar.className='sustrai-account-avatar';avatar.setAttribute('aria-hidden','true');avatar.textContent=(label.trim()[0]||'S').toLocaleUpperCase('eu');
+     const name=document.createElement('span');name.className='sustrai-account-user';name.textContent=label;
+     trigger.append(avatar,name);
+     const menu=document.createElement('div');menu.id='sustrai-account-menu';menu.className='sustrai-account-menu';menu.hidden=true;
+     menu.append(menuItem('a','Nire espazioa',a=>{a.href='/mi-espacio/'}));
+     if(state.profile.admin)menu.append(menuItem('a','Kudeaketa',a=>{a.href='/admin/'}));
+     menu.append(menuItem('button','Inportatu gonbidatu-lanak',b=>{b.onclick=()=>{closeAccountMenu();importGuestData()}}));
+     menu.append(menuItem('button','Irten',b=>{b.onclick=async()=>{closeAccountMenu();await flush();await state.client.auth.signOut();location.assign('/')}}));
+     trigger.onclick=()=>{const open=menu.hidden;menu.hidden=!open;trigger.setAttribute('aria-expanded',String(open));if(open)menu.querySelector('.sustrai-account-item')?.focus()};
+     el.append(trigger,menu);
+   } else {
+     const login=document.createElement('button');login.type='button';login.className='sustrai-account-button';login.textContent='Sartu';login.setAttribute('aria-label','Sartu edo erregistratu');login.onclick=()=>openDialog();el.append(login);
+   }
  }
  window.SustraiCloud={
    storage,headers,client:()=>state.client,profile:()=>state.profile,user:()=>state.user,
@@ -219,7 +234,8 @@
    ready:null
  };
  window.SustraiCloud.ready=init();
- document.addEventListener('keydown',event=>{if(event.key==='Escape'&&!document.getElementById('sustrai-auth-modal')?.hidden)closeDialog()});
+ document.addEventListener('keydown',event=>{if(event.key!=='Escape')return;if(!document.getElementById('sustrai-auth-modal')?.hidden&&document.getElementById('sustrai-auth-modal'))closeDialog();if(document.getElementById('sustrai-account-menu')?.hidden===false){closeAccountMenu();document.getElementById('sustrai-account-trigger')?.focus()}});
+ document.addEventListener('click',event=>{if(!event.target.closest?.('#sustrai-account'))closeAccountMenu()});
  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')flush()});
  window.addEventListener('pagehide',()=>flush());
 })();

@@ -353,8 +353,24 @@ function showDialog(id){dialogReturnFocus=document.activeElement;activeDialog=$(
 function hideDialog(id){const dialog=$(id);dialog.hidden=true;if(activeDialog===dialog)activeDialog=null;if(dialogReturnFocus instanceof HTMLElement&&!dialogReturnFocus.closest('[hidden]'))dialogReturnFocus.focus();dialogReturnFocus=null}
 function trapDialog(event){if(!activeDialog||event.key!=='Tab')return;const focusable=[...activeDialog.querySelectorAll('button:not([disabled]):not([hidden]),a[href],select,[tabindex]:not([tabindex="-1"])')].filter(element=>!element.closest('[hidden]'));if(!focusable.length)return;const first=focusable[0],last=focusable.at(-1);if(event.shiftKey&&(document.activeElement===first||!focusable.includes(document.activeElement))){event.preventDefault();last.focus()}else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first.focus()}}
 function closeActions(){$('timeActions').classList.remove('expanded');$('actionsToggle').setAttribute('aria-expanded','false')}
-function chooseMode(mode){$('modeBadge').textContent=mode==='simulation'?'Simulazioa':'Praktika librea';if(mode==='simulation'){const t=timer();if(!t.done&&!t.start){t.start=Date.now();write(timerKey(),t);tick();syncFocusFromTimer();toast('Simulazioa · kontzentrazio-modua')}}else syncFocusFromTimer()}
-function requestedMode(){const mode=new URLSearchParams(location.search).get('mode');return mode==='simulation'||mode==='practice'?mode:null}
+function syncModeButtons(mode){
+ const practice=$('modePractice'),simulation=$('modeSimulation');
+ if(!practice||!simulation)return;
+ const sim=mode==='simulation';
+ practice.classList.toggle('active',!sim);simulation.classList.toggle('active',sim);
+ practice.setAttribute('aria-pressed',String(!sim));simulation.setAttribute('aria-pressed',String(sim));
+}
+function setWorkshopMode(mode){
+ const next=mode==='simulation'?'simulation':'practice';
+ try{
+  const url=new URL(location.href);
+  url.searchParams.set('mode',next);
+  history.replaceState(null,'',url.toString());
+ }catch{}
+ chooseMode(next);
+}
+function chooseMode(mode){syncModeButtons(mode);$('modeBadge').textContent=mode==='simulation'?'Simulazioa':'Praktika librea';if(mode==='simulation'){const t=timer();if(!t.done&&!t.start){t.start=Date.now();write(timerKey(),t);tick();syncFocusFromTimer();toast('Simulazioa · kontzentrazio-modua')}}else syncFocusFromTimer()}
+function requestedMode(){const mode=new URLSearchParams(location.search).get('mode');return mode==='simulation'?'simulation':'practice'}
 function mistakeList(gradedOnly=false){const list=[];exam().items.forEach((it,index)=>{if(gradedOnly&&!graded[index])return;const selected=answersOf(index);for(let n=it.r[0];n<=it.r[1];n++)if(selected[n]!==it.key[n-it.r[0]])list.push({part:index,n})});return list}
 function learningTip(it){if(it.type==='fill')return'Berrirakurri esaldi osoa eta egiaztatu gramatika-loturak.';if(it.type==='mcq')return'Bilatu testuan aukera zuzena frogatzen duen esaldia.';return'Egiaztatu lokailuak eta aurreko zein ondorengo esaldien lotura.'}
 function reviewMistakes(){const errors=mistakeList();if(!errors.length){toast('Ez dago berrikusteko akatsik');return}graded=Object.fromEntries(exam().items.map((_,index)=>[index,true]));part=errors[0].part;current=errors[0].n;closeSummary();render(true);view('questions');$('qtitle').focus()}
@@ -439,7 +455,6 @@ function paint(color){capture();if(!pendingSelection.length){if(!activeMarker)to
 function erase(){capture();if(!pendingSelection.length){if(!activeMarker)toast('Hautatu ezabatu nahi duzun zatia');return}let list=highlights().filter(m=>!pendingSelection.some(s=>s.area===m.area&&s.start<m.end&&s.end>m.start));write(highlightsKey(),list);pendingSelection=[];window.getSelection()?.removeAllRanges();renderPassage(false);renderQuestion();if(!activeMarker)toast('Marka ezabatuta')}
 async function start(){
  const mode=requestedMode();
- if(!mode){location.replace('/');return}
  exams=(await srReadExams('IVAP')).sort((a,b)=>a.id.localeCompare(b.id));
  if(!exams.length)throw Error('Ez dago argitaratutako IVAP azterketarik');
  let ids=new Set;
@@ -450,7 +465,7 @@ async function start(){
    for(let it of e.items)if(it.key.length!==numberOf(it))throw Error('Ariketa osatu gabea: '+e.id);
  }
  $('exam').replaceChildren(...exams.map(e=>{const option=document.createElement('option');option.value=e.id;option.textContent=e.label+' · '+totalOf(e)+' galdera';return option}));
- let chosen=localStorage.getItem('sustrai-current-exam')||'2019-05-04',found=exams.findIndex(e=>e.id===chosen);ex=found>=0?found:0;current=task().r[0];
- $('exam').onchange=e=>selectExam(exams.findIndex(x=>x.id===e.target.value));$('start').onclick=pauseToggle;$('finish').onclick=()=>{closeActions();finish()};$('prev').onclick=()=>step(-1);$('next').onclick=()=>step(1);$('grade').onclick=correct;$('resetEx').onclick=resetPart;$('markerTool').onclick=function(){closeActions();const open=$('markerbar').classList.toggle('visible');this.setAttribute('aria-expanded',String(open))};$('closeMarker').onclick=()=>{$('markerbar').classList.remove('visible');$('markerTool').setAttribute('aria-expanded','false');if(activeMarker)setActiveMarker(activeMarker)};$('actionsToggle').onclick=()=>{const open=$('timeActions').classList.toggle('expanded');$('actionsToggle').setAttribute('aria-expanded',String(open))};
+ let requestedExam=null;try{requestedExam=new URLSearchParams(location.search).get('exam')}catch{}let chosen=requestedExam||localStorage.getItem('sustrai-current-exam')||'2019-05-04',found=exams.findIndex(e=>e.id===chosen);ex=found>=0?found:0;current=task().r[0];
+ $('exam').onchange=e=>selectExam(exams.findIndex(x=>x.id===e.target.value));if($('modePractice'))$('modePractice').onclick=()=>setWorkshopMode('practice');if($('modeSimulation'))$('modeSimulation').onclick=()=>setWorkshopMode('simulation');$('start').onclick=pauseToggle;$('finish').onclick=()=>{closeActions();finish()};$('prev').onclick=()=>step(-1);$('next').onclick=()=>step(1);$('grade').onclick=correct;$('resetEx').onclick=resetPart;$('markerTool').onclick=function(){closeActions();const open=$('markerbar').classList.toggle('visible');this.setAttribute('aria-expanded',String(open))};$('closeMarker').onclick=()=>{$('markerbar').classList.remove('visible');$('markerTool').setAttribute('aria-expanded','false');if(activeMarker)setActiveMarker(activeMarker)};$('actionsToggle').onclick=()=>{const open=$('timeActions').classList.toggle('expanded');$('actionsToggle').setAttribute('aria-expanded',String(open))};
  document.querySelectorAll('.swatch').forEach(b=>{b.addEventListener('pointerdown',e=>e.preventDefault());b.onclick=()=>setActiveMarker(b.dataset.color)});$('erase').onclick=()=>setActiveMarker('erase');const _markVis=$('markVisibility');_markVis.onclick=()=>{visible=!visible;_markVis.textContent=visible?'Ezkutatu':'Erakutsi';renderPassage(false);renderQuestion()};setupMarkerDrag();if($('exitFocus'))$('exitFocus').onclick=()=>{const t=timer();if(t.start){t.elapsed=elapsed(t);t.start=null;write(timerKey(),t);tick()}setFocusMode(false);toast('Kontzentrazio-modua itxita')};$('closeModal').onclick=closeSummary;$('dismissSummary').onclick=closeSummary;$('reviewMistakes').onclick=reviewMistakes;$('repeatExam').onclick=restart;$('viewReading').onclick=()=>view('reading');$('viewQuestions').onclick=()=>view('questions');document.addEventListener('selectionchange',()=>{if(activeMarker||brushStroke)return;if(window.getSelection()&&!window.getSelection().isCollapsed)requestAnimationFrame(capture)});setupBrushPaint();document.addEventListener('keydown',event=>{trapDialog(event);if(event.key==='Escape'&&!$('modal').hidden)closeSummary()});render(true);setLoading(false);chooseMode(mode);syncFocusFromTimer();setInterval(tick,500)}
 start().catch(error=>{console.error(error);setLoading(false);$('readingTitle').textContent='Ezin izan da aplikazioa kargatu';$('passage').innerHTML='<div class="load-error"><strong>Ezin izan dira azterketak kargatu.</strong><p>'+htmlEscape(error.message)+'</p><button id="retryLoad" type="button">Saiatu berriro</button></div>';$('retryLoad').onclick=()=>location.reload()});

@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="eu">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#163e30">
+  <meta name="description" content="SUSTRAI Irakurmena C1: IVAP eta HABEko irakurmen-probak aukeratu eta landu.">
+  <title>SUSTRAI · Irakurmena C1</title>
+  <link rel="stylesheet" href="/irakurmena/style.css?v=20261115-catalog">
+</head>
+<body>
+<a class="skip" href="#examTitle">Joan azterketara</a>
+<div class="app">
+  <header class="topbar">
+    <a class="brand" href="/" aria-label="SUSTRAI hasiera">
+      <span class="brand-icon" aria-hidden="true">S</span>
+      <span><strong>SUSTRAI</strong><small>IRAKURMENA · C1</small></span>
+    </a>
+    <nav aria-label="Atalak">
+      <a href="/">Hasiera</a>
+      <span aria-current="page">Irakurmena</span>
+      <a href="/idazlanak/">Idazmena</a>
+      <a href="/ahozkoa/">Ahozkoa</a>
+    </nav>
+  </header>
+
+  <main class="layout">
+    <aside class="catalog panel" aria-labelledby="catalogTitle">
+      <div class="catalog-intro">
+        <div class="catalog-heading-row">
+          <div>
+            <span class="eyebrow">BENETAKO PROBAK · C1</span>
+            <h1 id="catalogTitle">Irakurmena</h1>
+          </div>
+          <p id="catalogCount" class="count" aria-live="polite"></p>
+        </div>
+        <p class="catalog-lead">Aukeratu IVAP edo HABEko irakurmen-proba bat.</p>
+      </div>
+      <div class="catalog-toolbar" role="search" aria-label="Probak iragazi">
+        <div class="filter-grid">
+          <div class="filter-field">
+            <label for="orgFilter">Erakundea</label>
+            <select id="orgFilter">
+              <option value="all">IVAP eta HABE</option>
+              <option value="IVAP">IVAP</option>
+              <option value="HABE">HABE</option>
+            </select>
+          </div>
+          <div class="filter-field">
+            <label for="sizeFilter">Galdera kopurua</label>
+            <select id="sizeFilter">
+              <option value="all">Denak</option>
+              <option value="25">25 galdera</option>
+              <option value="30">30 galdera</option>
+              <option value="34">34 galdera</option>
+            </select>
+          </div>
+        </div>
+        <div class="filter-field filter-search">
+          <label for="search">Bilatu</label>
+          <input id="search" type="search" placeholder="2019, maiatza…" autocomplete="off">
+        </div>
+      </div>
+      <div id="examList" class="task-list" aria-label="Irakurmen-proben katalogoa" aria-busy="true">
+        <p class="loading">Probak kargatzen…</p>
+      </div>
+      <p class="catalog-note">Jatorrizko azterketak. Lan-modua (praktika edo simulazioa) probaren barruan aukeratuko duzu.</p>
+    </aside>
+
+    <section class="maincol" aria-labelledby="examTitle">
+      <article class="hero panel">
+        <span class="eyebrow">IRAKURMEN-TAILERRA</span>
+        <div class="hero-row">
+          <div>
+            <h2 id="examTitle">Aukeratu proba bat</h2>
+            <div id="examTags" class="tags"></div>
+          </div>
+        </div>
+        <p id="examLead" class="lead">Ezkerreko zerrendan aukeratu IVAP edo HABEko deialdi bat. Ondoren, proba irekiko da eta bertan erabakiko duzu praktika edo simulazioa.</p>
+      </article>
+
+      <article class="detail panel" id="examDetail" hidden>
+        <div class="detail-grid">
+          <div>
+            <span class="eyebrow">DEIALDIA</span>
+            <h3 id="detailLabel"></h3>
+            <p id="detailMeta" class="meta"></p>
+          </div>
+          <div class="detail-actions">
+            <a id="openExam" class="primary" href="#">Ireki proba <span aria-hidden="true">→</span></a>
+            <a id="sourcePdf" class="soft" href="#" target="_blank" rel="noopener noreferrer" hidden>Jatorrizko PDFa ↗</a>
+          </div>
+        </div>
+        <ul id="detailParts" class="parts" aria-label="Ariketak"></ul>
+      </article>
+    </section>
+  </main>
+  <footer>SUSTRAI · Irakurmena C1 · Prestakuntza didaktikoa, ez egiaztapen ofiziala</footer>
+  <div id="toast" class="toast" hidden role="status" aria-live="polite"></div>
+</div>
+<script src="/irakurmena/app.js?v=20261115-catalog" defer></script>
+</body>
+</html>

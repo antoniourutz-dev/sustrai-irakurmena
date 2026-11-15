@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#123e2e">
   <meta name="description" content="Prestatu euskarako C1 irakurmen-, idazmen- eta mintzamen-probak, IVAP eta HABEko benetako deialdiekin.">
   <title>SUSTRAI · Irakurmena, idazmena eta ahozkoa C1</title>
-  <link rel="stylesheet" href="/start.css?v=20261115-no-path-desc">
+  <link rel="stylesheet" href="/start.css?v=20261115-direct-entry">
 </head>
 <body>
   <header class="start-header">
@@ -16,9 +16,9 @@
     </a>
     <nav class="start-nav" aria-label="Atalak">
       <span class="active" aria-current="page">Hasiera</span>
-      <a href="#irakurmena">Irakurmena</a>
-      <a href="#idazmena">Idazmena</a>
-      <a href="#ahozkoa">Ahozkoa</a>
+      <a href="/irakurmena/">Irakurmena</a>
+      <a href="/idazlanak/">Idazmena</a>
+      <a href="/ahozkoa/">Ahozkoa</a>
     </nav>
   </header>
 
@@ -27,7 +27,7 @@
       <div class="intro-copy">
         <span class="start-eyebrow">C1 PRESTAKETA OSOA</span>
         <h1 id="pageTitle">Hiru trebetasun.<br>Prestaketa bakarra.</h1>
-        <p>Irakurmena, idazmena eta ahozkoa C1 mailan landu, IVAP eta HABEko ereduekin. Aukeratu gaurko helburua eta ikasi modu autonomoan.</p>
+        <p>Irakurmena, idazmena eta ahozkoa C1 mailan landu, IVAP eta HABEko ereduekin. Sartu zuzenean atalean eta aukeratu bertan nola lan egin.</p>
       </div>
       <div class="intro-proof" aria-label="Plataformaren ezaugarriak">
         <div><strong>IVAP + HABE</strong><span>Benetako deialdiak</span></div>
@@ -48,43 +48,17 @@
         <ul class="path-stats" aria-label="Irakurmenaren edukia">
           <li><strong>23</strong><span>IVAP proba</span></li>
           <li><strong>9</strong><span>HABE proba</span></li>
-          <li><strong>2</strong><span>lan-modu</span></li>
+          <li><strong>Katalogoa</strong><span>testuak aukeratu</span></li>
         </ul>
-
-        <form class="path-form" id="practiceForm">
-          <fieldset>
-            <legend><span>1</span> Erakundea</legend>
-            <div class="option-grid">
-              <label class="path-choice">
-                <input type="radio" name="examType" value="ivap">
-                <span class="choice-body"><span class="choice-mark" aria-hidden="true"></span><strong>IVAP</strong><small>C1 · 3. HE</small></span>
-              </label>
-              <label class="path-choice">
-                <input type="radio" name="examType" value="habe">
-                <span class="choice-body"><span class="choice-mark" aria-hidden="true"></span><strong>HABE</strong><small>C1 maila</small></span>
-              </label>
-            </div>
-          </fieldset>
-
-          <fieldset id="modeFieldset" disabled>
-            <legend><span>2</span> Lan-modua</legend>
-            <div class="option-grid">
-              <label class="path-choice">
-                <input type="radio" name="practiceMode" value="practice">
-                <span class="choice-body"><span class="choice-mark" aria-hidden="true"></span><strong>Praktika</strong><small>Atalez atal</small></span>
-              </label>
-              <label class="path-choice">
-                <input type="radio" name="practiceMode" value="simulation">
-                <span class="choice-body"><span class="choice-mark" aria-hidden="true"></span><strong>Simulazioa</strong><small>Proba osoa</small></span>
-              </label>
-            </div>
-          </fieldset>
-
-          <div class="path-action">
-            <p id="selectionSummary" aria-live="polite">Aukeratu erakundea eta lan-modua.</p>
-            <button id="startPractice" type="submit" disabled>Hasi irakurmena <span aria-hidden="true">→</span></button>
-          </div>
-        </form>
+        <div class="writing-includes" aria-label="Irakurmen-tailerrak barne hartzen du">
+          <span>IVAP eta HABEko benetako deialdiak</span>
+          <span>Praktika edo simulazioa, barruan</span>
+          <span>Rotulagailua eta kontzentrazio-modua</span>
+        </div>
+        <div class="path-action">
+          <p>Sartu eta aukeratu irakurri nahi duzun proba.</p>
+          <a class="path-cta" href="/irakurmena/">Hasi irakurmena <span aria-hidden="true">→</span></a>
+        </div>
       </article>
 
       <article class="practice-path writing-path" id="idazmena" aria-labelledby="writingPathTitle">
@@ -100,34 +74,17 @@
           <li><strong>IVAP</strong><span>eta HABE</span></li>
           <li><strong>3</strong><span>laguntza-atal</span></li>
         </ul>
-
-        <form class="path-form" id="writingForm">
-          <fieldset>
-            <legend><span>1</span> Lan-modua</legend>
-            <div class="option-grid">
-              <label class="path-choice">
-                <input type="radio" name="writingMode" value="training">
-                <span class="choice-body"><span class="choice-mark" aria-hidden="true"></span><strong>Entrenatu</strong><small>Laguntza aukeran</small></span>
-              </label>
-              <label class="path-choice">
-                <input type="radio" name="writingMode" value="simulation">
-                <span class="choice-body"><span class="choice-mark" aria-hidden="true"></span><strong>Simulatu</strong><small>Zure kabuz</small></span>
-              </label>
-            </div>
-          </fieldset>
-
-          <div class="writing-includes" aria-label="Idazmen-tailerrak barne hartzen du">
-            <span>Enuntziatu eta material ofiziala</span>
-            <span>Hitz-kontagailua eta kronometroa</span>
-            <span>Ideiak, hiztegia eta egiturak</span>
-          </div>
-
-          <div class="path-action">
-            <p id="writingSummary" aria-live="polite">Aukeratu entrenamendua edo simulazioa.</p>
-            <button id="startWriting" type="submit" disabled>Hasi idazmena <span aria-hidden="true">→</span></button>
-          </div>
-        </form>
+        <div class="writing-includes" aria-label="Idazmen-tailerrak barne hartzen du">
+          <span>Enuntziatu eta material ofiziala</span>
+          <span>Hitz-kontagailua eta kronometroa</span>
+          <span>Entrenatu edo simulatu, barruan</span>
+        </div>
+        <div class="path-action">
+          <p>Sartu eta aukeratu idatzi nahi duzun ataza.</p>
+          <a class="path-cta" href="/idazlanak/">Hasi idazmena <span aria-hidden="true">→</span></a>
+        </div>
       </article>
+
       <article class="practice-path speaking-path" id="ahozkoa" aria-labelledby="speakingPathTitle">
         <header class="path-header">
           <span class="path-number" aria-hidden="true">03</span>
@@ -138,21 +95,15 @@
           <li><strong>HABE</strong><span>gaia garatu eta elkarrizketa</span></li>
           <li><strong>C1</strong><span>laguntza mailakatua</span></li>
         </ul>
-        <form class="path-form" id="speakingForm">
-          <fieldset>
-            <legend><span>1</span> Lan-modua</legend>
-            <div class="option-grid">
-              <label class="path-choice"><input type="radio" name="speakingMode" value="training"><span class="choice-body"><span class="choice-mark" aria-hidden="true"></span><strong>Entrenatu</strong><small>Pistak zuk aukeran</small></span></label>
-              <label class="path-choice"><input type="radio" name="speakingMode" value="simulation"><span class="choice-body"><span class="choice-mark" aria-hidden="true"></span><strong>Simulatu</strong><small>Zure kabuz</small></span></label>
-            </div>
-          </fieldset>
-          <div class="writing-includes" aria-label="Ahozko tailerrak barne hartzen du">
-            <span>Testu eta fitxa ofizialak</span>
-            <span>Eskema eta denbora-kontrola</span>
-            <span>Tokiko grabazioa, zure esku</span>
-          </div>
-          <div class="path-action"><p id="speakingSummary" aria-live="polite">Aukeratu entrenamendua edo simulazioa.</p><button id="startSpeaking" type="submit" disabled>Hasi ahozkoa <span aria-hidden="true">→</span></button></div>
-        </form>
+        <div class="writing-includes" aria-label="Ahozko tailerrak barne hartzen du">
+          <span>Testu eta fitxa ofizialak</span>
+          <span>Eskema eta denbora-kontrola</span>
+          <span>Entrenatu edo simulatu, barruan</span>
+        </div>
+        <div class="path-action">
+          <p>Sartu eta aukeratu landu nahi duzun fitxa.</p>
+          <a class="path-cta" href="/ahozkoa/">Hasi ahozkoa <span aria-hidden="true">→</span></a>
+        </div>
       </article>
     </section>
 
@@ -161,11 +112,10 @@
         <span class="start-eyebrow">ZURE PLANA</span>
         <h2 id="helpTitle">Txandakatu hiru trebetasunak</h2>
       </div>
-      <p>Erabili <strong>praktika edo entrenamendua</strong> estrategia berriak barneratzeko, eta <strong>simulazioa</strong> azterketaren erritmoa neurtzeko. Irakurmenak ulermena zorrozten du, idazmenak zure euskara antolatzen du eta ahozkoak benetako jarduna aktibatzen du.</p>
+      <p>Atal bakoitzean aukeratuko duzu <strong>entrenamendua edo simulazioa</strong>. Irakurmenak ulermena zorrozten du, idazmenak zure euskara antolatzen du eta ahozkoak benetako jarduna aktibatzen du.</p>
     </aside>
   </main>
 
   <footer class="start-footer">SUSTRAI · Irakurmena + Idazmena + Ahozkoa · C1</footer>
-  <script src="/start.js?v=20261114-equal-paths" defer></script>
 </body>
 </html>

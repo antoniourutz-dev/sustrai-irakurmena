@@ -88,3 +88,7 @@ a:focus-visible,button:focus-visible,input:focus-visible+.choice-body{outline:3p
     grid-column: auto !important;
   }
 }
+
+/* Path descriptions removed from home cards */
+.path-header{margin-bottom:14px}
+.path-stats{margin-top:0}

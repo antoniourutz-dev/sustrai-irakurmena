@@ -3,3 +3,40 @@
 @media(max-width:1310px){.layout{grid-template-columns:250px minmax(450px,1fr)}.help{position:static;max-height:none;grid-column:2}.help-sections{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;padding-bottom:15px}.help-sections details{align-self:start;margin:0}}
 @media(max-width:900px){.layout{max-width:790px;grid-template-columns:1fr;padding:11px;gap:11px}.catalog,.help{max-height:none;position:static}.catalog-intro{padding:17px}.catalog-intro h1{font-size:25px}.catalog-filters{display:grid;grid-template-columns:1fr 1fr;gap:0 12px}.catalog-filters label{margin:8px 0 4px}.catalog-filters .count{grid-column:1/-1}.task-list{display:flex;gap:8px;overflow-x:auto;padding:0 13px 12px}.task-card{min-width:185px;max-width:200px;flex-shrink:0}.catalog-note{display:none}.help{grid-column:auto}}
 @media(max-width:580px){.topbar{padding:9px 12px;flex-wrap:wrap;gap:8px}.topbar nav a,.topbar nav span{padding:6px 7px;font-size:11px}.brand strong{font-size:13px}.layout{padding:8px;gap:9px}.official,.prep,.practice{padding:16px}.hero{padding:16px}.hero-row{display:block}.hero h2{font-size:25px}.modes{display:inline-flex;margin-top:13px}.prep-grid,.time-grid,.help-sections{grid-template-columns:1fr}.source-text{font-size:15px;max-height:none}.time-block output{font-size:30px}.catalog-filters{grid-template-columns:1fr 1fr}.catalog-filters label{font-size:10px}}
+
+/* Compact catalog: more room for filtered exam models */
+.catalog-intro{padding:14px 14px 8px;flex-shrink:0}
+.catalog-heading-row{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.catalog h1{font-size:24px;margin:4px 0 0;line-height:1.15}
+.catalog-lead{margin:6px 0 0;font-size:11px;line-height:1.4;color:var(--muted)}
+.catalog .count{margin:2px 0 0;flex-shrink:0;align-self:center;display:inline-flex;padding:5px 9px;border-radius:999px;background:#e7f1e9;color:#2c6547}
+.catalog-toolbar{padding:0 12px 10px;flex-shrink:0;display:grid;gap:8px}
+.catalog-toolbar .filter-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.catalog-toolbar .filter-field{min-width:0}
+.catalog-toolbar label{display:block;font-size:10px;font-weight:800;margin:0 0 4px;color:#496b54;letter-spacing:.02em}
+.catalog-toolbar select,
+.catalog-toolbar input{display:block;width:100%;border:1px solid #ccdbcd;border-radius:8px;padding:7px 9px;background:#fff;color:var(--ink);font-size:12px}
+.catalog .task-list{padding:0 8px 10px;min-height:0}
+.catalog .task-card{padding:10px;margin:3px 0}
+.catalog .task-card strong{font-size:12.5px}
+.catalog-note{padding:8px 14px}
+@media(max-width:900px){
+  .catalog-intro{padding:12px 14px 6px}
+  .catalog h1{font-size:22px}
+  .catalog-toolbar{padding:0 12px 8px;gap:7px}
+  .catalog .task-list{padding:4px 12px 10px}
+  .catalog .task-card{min-width:200px;max-width:220px}
+}
+@media(max-width:580px){
+  .catalog-lead{display:none}
+}
+@media(min-width:901px){
+  .layout{grid-template-columns:minmax(250px,310px) minmax(500px,1fr) minmax(250px,295px)}
+  .catalog{max-height:calc(100vh - 80px)}
+}
+@media(max-width:900px){
+  .catalog{overflow-x:clip}
+  .catalog .task-list{overscroll-behavior-x:contain}
+}
+.catalog .task-card strong{font-size:13px;line-height:1.35}
+.catalog .task-card .meta,.catalog .task-card .kind{font-size:11px}

@@ -6,7 +6,7 @@
  <meta name="theme-color" content="#153e32">
  <meta name="description" content="SUSTRAI Ahozkoa C1: IVAP eta HABEko ahozko atazak, eskema propioa, laguntza mailakatua eta tokiko grabazioa.">
  <title>SUSTRAI · Ahozkoa C1</title>
- <link rel="stylesheet" href="/ahozkoa/style.css?v=20261114-initial">
+ <link rel="stylesheet" href="/ahozkoa/style.css?v=20261115-catalog-compact">
 </head>
 <body>
 <a class="skip" href="#speakingTitle">Joan ariketara</a>
@@ -17,12 +17,31 @@
  </header>
  <main class="layout">
   <aside class="catalog panel" aria-labelledby="catalogHeading">
-   <div class="catalog-intro"><span class="eyebrow">BENETAKO FITXAK · C1</span><h1 id="catalogHeading">Ahozkoa</h1><p>Gaiaren azalpena edo elkarrizketa. Aukeratu iturria eta ataza.</p></div>
-   <div class="catalog-filters">
-    <label for="orgFilter">Erakundea</label><select id="orgFilter"><option value="all">IVAP eta HABE</option><option value="IVAP">IVAP</option><option value="HABE">HABE</option></select>
-    <label for="kindFilter">Ataza mota</label><select id="kindFilter"><option value="all">Denak</option><option value="monologue">Bakarrizketa</option><option value="interaction">Elkarrizketa</option></select>
-    <label for="search">Bilatu gaia edo deialdia</label><input type="search" id="search" placeholder="Adibidez: 2022, kirola…" autocomplete="off">
-    <p id="catalogCount" class="count" aria-live="polite"></p>
+   <div class="catalog-intro">
+    <div class="catalog-heading-row">
+     <div>
+      <span class="eyebrow">BENETAKO FITXAK · C1</span>
+      <h1 id="catalogHeading">Ahozkoa</h1>
+     </div>
+     <p id="catalogCount" class="count" aria-live="polite"></p>
+    </div>
+    <p class="catalog-lead">Gaiaren azalpena edo elkarrizketa.</p>
+   </div>
+   <div class="catalog-toolbar" role="search" aria-label="Atazak iragazi">
+    <div class="filter-grid">
+     <div class="filter-field">
+      <label for="orgFilter">Erakundea</label>
+      <select id="orgFilter"><option value="all">IVAP eta HABE</option><option value="IVAP">IVAP</option><option value="HABE">HABE</option></select>
+     </div>
+     <div class="filter-field">
+      <label for="kindFilter">Ataza mota</label>
+      <select id="kindFilter"><option value="all">Denak</option><option value="monologue">Bakarrizketa</option><option value="interaction">Elkarrizketa</option></select>
+     </div>
+    </div>
+    <div class="filter-field filter-search">
+     <label for="search">Bilatu</label>
+     <input type="search" id="search" placeholder="2022, kirola…" autocomplete="off">
+    </div>
    </div>
    <div id="taskList" class="task-list" aria-label="Ahozko atazen katalogoa" aria-busy="true"><p class="loading">Atazak kargatzen…</p></div>
    <p class="catalog-note">Jatorrizko azterketen fitxak. Iturriko irudiak eta maketazioa PDFan ikus daitezke.</p>

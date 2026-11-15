@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#163e30">
   <meta name="description" content="SUSTRAI Idazlanak: C1 mailako IVAP eta HABE idazmen-atazak, idazteko gunea eta behar duzunean zabaltzeko laguntza.">
   <title>SUSTRAI · Idazlanak C1</title>
-  <link rel="stylesheet" href="/idazlanak/style.css?v=20261114-visual-depth-outline-1">
+  <link rel="stylesheet" href="/idazlanak/style.css?v=20261115-catalog-compact">
 </head>
 <body>
 <a class="skip-link" href="#writingTitle">Joan idazteko gunera</a>
@@ -26,29 +26,39 @@
   <main class="layout">
     <aside class="catalog panel" aria-labelledby="catalogTitle">
       <div class="catalog-heading">
-        <span class="overline">BENETAKO EREDUAK</span>
-        <h1 id="catalogTitle">Idazlanak</h1>
-        <p>Aukeratu IVAP edo HABEko C1 ataza bat.</p>
+        <div class="catalog-heading-row">
+          <div>
+            <span class="overline">BENETAKO EREDUAK</span>
+            <h1 id="catalogTitle">Idazlanak</h1>
+          </div>
+          <span class="catalog-count" id="catalogCount" aria-live="polite"></span>
+        </div>
+        <p class="catalog-lead">Aukeratu IVAP edo HABEko C1 ataza bat.</p>
       </div>
-      <div class="filter-wrap">
-        <label for="sourceFilter">Erakundea</label>
-        <select id="sourceFilter">
-          <option value="all">IVAP eta HABE</option>
-          <option value="IVAP">IVAP</option>
-          <option value="HABE">HABE</option>
-        </select>
-      </div>
-      <div class="filter-wrap extra-filters">
-        <label for="genreFilter">Testu mota</label>
-        <select id="genreFilter">
-          <option value="all">Mota guztiak</option>
-          <option value="iritzi_artikulua">Iritzi-artikuluak</option>
-          <option value="gutuna">Gutunak</option>
-          <option value="gutun_irekia">Gutun irekiak</option>
-        </select>
-        <label for="taskSearch">Gaiaren edo deialdiaren arabera bilatu</label>
-        <input type="search" id="taskSearch" placeholder="Adibidez: 2022, lana, kirola…" autocomplete="off">
-        <span class="catalog-count" id="catalogCount" aria-live="polite"></span>
+      <div class="catalog-toolbar" role="search" aria-label="Atazak iragazi">
+        <div class="filter-grid">
+          <div class="filter-field">
+            <label for="sourceFilter">Erakundea</label>
+            <select id="sourceFilter">
+              <option value="all">IVAP eta HABE</option>
+              <option value="IVAP">IVAP</option>
+              <option value="HABE">HABE</option>
+            </select>
+          </div>
+          <div class="filter-field">
+            <label for="genreFilter">Testu mota</label>
+            <select id="genreFilter">
+              <option value="all">Mota guztiak</option>
+              <option value="iritzi_artikulua">Iritzi-artikuluak</option>
+              <option value="gutuna">Gutunak</option>
+              <option value="gutun_irekia">Gutun irekiak</option>
+            </select>
+          </div>
+        </div>
+        <div class="filter-field filter-search">
+          <label for="taskSearch">Bilatu</label>
+          <input type="search" id="taskSearch" placeholder="2022, lana, kirola…" autocomplete="off">
+        </div>
       </div>
       <div id="taskList" class="task-list" aria-label="Idazteko atazak" aria-busy="true">
         <p class="loading">Atazak kargatzen…</p>

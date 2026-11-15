@@ -1,0 +1,111 @@
+/* SUSTRAI PWA service worker */
+const CACHE_VERSION = 'sustrai-pwa-v1';
+const SHELL = [
+  '/',
+  '/index.html',
+  '/manifest.webmanifest',
+  '/start.css',
+  '/style.css',
+  '/marker.css',
+  '/marker-kit.js',
+  '/app.js',
+  '/icons/icon-192.png',
+  '/icons/icon-512.png',
+  '/icons/apple-touch-icon.png',
+  '/icons/favicon-32.png',
+  '/irakurmena/',
+  '/irakurmena/index.html',
+  '/irakurmena/style.css',
+  '/irakurmena/app.js',
+  '/idazlanak/',
+  '/idazlanak/index.html',
+  '/idazlanak/style.css',
+  '/idazlanak/app.js',
+  '/idazlanak/eskema.js',
+  '/ahozkoa/',
+  '/ahozkoa/index.html',
+  '/ahozkoa/style.css',
+  '/ahozkoa/app.js',
+  '/ivap/',
+  '/ivap/index.html',
+  '/habe/',
+  '/habe/index.html',
+  '/habe/app.js'
+];
+
+self.addEventListener('install', (event) => {
+  event.waitUntil(
+    caches.open(CACHE_VERSION)
+      .then((cache) => cache.addAll(SHELL))
+      .then(() => self.skipWaiting())
+      .catch(() => self.skipWaiting())
+  );
+});
+
+self.addEventListener('activate', (event) => {
+  event.waitUntil(
+    caches.keys().then((keys) =>
+      Promise.all(keys.filter((key) => key !== CACHE_VERSION).map((key) => caches.delete(key)))
+    ).then(() => self.clients.claim())
+  );
+});
+
+function isApiRequest(url) {
+  return url.hostname.includes('supabase.co');
+}
+
+function isNavigation(request) {
+  return request.mode === 'navigate' || (request.headers.get('accept') || '').includes('text/html');
+}
+
+self.addEventListener('fetch', (event) => {
+  const request = event.request;
+  if (request.method !== 'GET') return;
+
+  const url = new URL(request.url);
+
+  // Never cache API/auth calls: always network.
+  if (isApiRequest(url)) return;
+
+  // Cross-origin: leave to browser.
+  if (url.origin !== self.location.origin) return;
+
+  // Navigations: network first, fallback to cache/home.
+  if (isNavigation(request)) {
+    event.respondWith(
+      fetch(request)
+        .then((response) => {
+          const copy = response.clone();
+          caches.open(CACHE_VERSION).then((cache) => cache.put(request, copy));
+          return response;
+        })
+        .catch(async () => {
+          const cached = await caches.match(request);
+          if (cached) return cached;
+          if (url.pathname.startsWith('/ivap/')) return caches.match('/ivap/index.html');
+          if (url.pathname.startsWith('/habe/')) return caches.match('/habe/index.html');
+          if (url.pathname.startsWith('/irakurmena/')) return caches.match('/irakurmena/index.html');
+          if (url.pathname.startsWith('/idazlanak/')) return caches.match('/idazlanak/index.html');
+          if (url.pathname.startsWith('/ahozkoa/')) return caches.match('/ahozkoa/index.html');
+          return caches.match('/index.html');
+        })
+    );
+    return;
+  }
+
+  // Static assets: stale-while-revalidate.
+  event.respondWith(
+    caches.match(request).then((cached) => {
+      const network = fetch(request)
+        .then((response) => {
+          if (response && response.ok) {
+            const copy = response.clone();
+            caches.open(CACHE_VERSION).then((cache) => cache.put(request, copy));
+          }
+          return response;
+        })
+        .catch(() => cached);
+      return cached || network;
+    })
+  );
+});

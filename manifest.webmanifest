@@ -1,0 +1,60 @@
+{
+  "name": "SUSTRAI · Euskara C1",
+  "short_name": "SUSTRAI",
+  "description": "Prestatu euskarako C1 irakurmen-, idazmen- eta mintzamen-probak, IVAP eta HABEko benetako deialdiekin.",
+  "lang": "eu",
+  "dir": "ltr",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#123e2e",
+  "theme_color": "#123e2e",
+  "categories": ["education", "productivity"],
+  "icons": [
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-maskable-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icons/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Irakurmena",
+      "short_name": "Irakurmena",
+      "url": "/irakurmena/",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Idazmena",
+      "short_name": "Idazmena",
+      "url": "/idazlanak/",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Ahozkoa",
+      "short_name": "Ahozkoa",
+      "url": "/ahozkoa/",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
+    }
+  ]
+}

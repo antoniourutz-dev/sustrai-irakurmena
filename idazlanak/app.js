@@ -36,15 +36,15 @@ async function readTable(table,fields){
   const u=new URL(API_URL+'/rest/v1/'+table);
   u.searchParams.set('select',fields);
   u.searchParams.set('publication_status','eq.published');
-  const response=await fetch(u,{headers,cache:'no-store'});
+  const response=await fetch(u,{headers:await window.SustraiCloud.headers(headers),cache:'no-store'});
   if(!response.ok)throw Error('Ezin izan dira atazak kargatu ('+response.status+').');
   const values=await response.json();
   if(!Array.isArray(values))throw Error('Zerbitzariaren erantzuna ez da egokia.');
   return values;
 }
 const draftKey=()=>selected?'sustrai-writer-c1:'+selected.slug+':'+mode:'';
-function loadDraft(){try{return localStorage.getItem(draftKey())||''}catch{return ''}}
-function saveDraft(){if(!selected)return;try{localStorage.setItem(draftKey(),$('draft').value);$('saveState').textContent='Gordeta gailu honetan'}catch{$('saveState').textContent='Ezin izan da automatikoki gorde'}}
+function loadDraft(){try{return window.SustraiCloud.storage.getItem(draftKey())||''}catch{return ''}}
+function saveDraft(){if(!selected)return;try{window.SustraiCloud.storage.setItem(draftKey(),$('draft').value);$('saveState').textContent='Gordeta gailu honetan'}catch{$('saveState').textContent='Ezin izan da automatikoki gorde'}}
 function countWords(text){return (text.trim().match(/[\p{L}\p{N}]+(?:['’·-][\p{L}\p{N}]+)*/gu)||[]).length}
 function updateWordCount(){
   const words=countWords($('draft').value),min=selected?.min_words??null;
@@ -191,7 +191,7 @@ function clearDraft(){
   if(!confirm('Ziur zaude idazlan hau ezabatu nahi duzula? Ezin da desegin.'))return;
   $('draft').value='';saveDraft();updateWordCount();notify('Zirriborroa ezabatu da.');
 }
-async function start(){
+async function start(){await window.SustraiCloud.ready;
   markerKit=window.SustraiMarker?.createMarkerKit({
     storageKey:'sustrai-writer-marks',
     getScope:()=>selected?selected.slug:'none',

@@ -14,8 +14,8 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="SUSTRAI">
-  <link rel="stylesheet" href="/start.css?v=20261115-direct-entry">
-  <link rel="stylesheet" href="/auth.css?v=20261115">
+  <link rel="stylesheet" href="/start.css?v=20261115-product">
+  <link rel="stylesheet" href="/auth.css?v=20261115-product">
 </head>
 <body>
   <header class="start-header">
@@ -123,11 +123,32 @@
       </div>
       <p>Atal bakoitzean aukeratuko duzu <strong>entrenamendua edo simulazioa</strong>. Irakurmenak ulermena zorrozten du, idazmenak zure euskara antolatzen du eta ahozkoak benetako jarduna aktibatzen du.</p>
     </aside>
+
+    <aside class="start-account" aria-labelledby="accountTitle">
+      <div>
+        <span class="start-eyebrow">NIRE ESPAZIOA</span>
+        <h2 id="accountTitle">Gorde aurrerapena kontuarekin</h2>
+        <p>Erregistratu eta zure zirriborroak, eskemak, azpimarrak eta irakurmen-emaitzak hodeian gorde. Gailuz aldatuta ere jarrai dezakezu.</p>
+      </div>
+      <div class="start-account-actions">
+        <button type="button" class="start-account-cta" id="homeRegister">Kontua sortu</button>
+        <a class="start-account-link" href="/mi-espacio/">Nire espaziora joan</a>
+      </div>
+    </aside>
   </main>
 
   <footer class="start-footer">SUSTRAI · Irakurmena + Idazmena + Ahozkoa · C1</footer>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.0" defer></script>
-<script src="/auth.js?v=20261115" defer></script>
+<script src="/auth.js?v=20261115-product" defer></script>
+<script>
+  window.addEventListener('DOMContentLoaded', () => {
+    const btn = document.getElementById('homeRegister');
+    if (!btn) return;
+    btn.addEventListener('click', () => {
+      if (window.SustraiCloud?.openLogin) window.SustraiCloud.openLogin('signup');
+    });
+  });
+</script>
 <script src="/pwa.js" defer></script>
 </body>
 </html>

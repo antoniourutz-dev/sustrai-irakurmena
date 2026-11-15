@@ -1,22 +1,118 @@
-<!doctype html><html lang="eu"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>SUSTRAI · Nire espazioa</title><meta name="theme-color" content="#163e30">
-<link rel="stylesheet" href="/auth.css"><link rel="stylesheet" href="/admin/admin.css">
-<style>.my-work{max-width:1060px}.my-work .grid{grid-template-columns:1fr 1fr}.my-work .works,.my-work .results{max-height:none}.my-work .actions{display:flex;gap:8px;flex-wrap:wrap}.my-work .empty{padding:12px;color:#63766c}@media(max-width:750px){.my-work .grid{grid-template-columns:1fr}}</style>
-</head><body>
-<header class="topbar"><a class="brand" href="/"><span class="logo">S</span><span><strong>SUSTRAI</strong><small>NIRE ESPAZIOA</small></span></a><nav><a href="/">Hasiera</a><a href="/irakurmena/">Irakurmena</a><a href="/idazlanak/">Idazmena</a><a href="/ahozkoa/">Ahozkoa</a></nav></header>
-<main class="admin-layout my-work">
- <section class="intro"><div><p class="eyebrow">NIRE IKASKUNTZA</p><h1>Nire espazioa</h1>
-  <p>Zure saioak, idazlanak, eskemak, markak eta emaitzak kontsultatu edo esportatu ahal dituzu.</p></div>
-  <p id="myStatus" class="status" role="status">Saioa egiaztatzen…</p></section>
- <section id="guest" class="card" hidden><h2>Saioa hasi behar duzu</h2><p>Gonbidatu gisa egindako lanak zure nabigatzailean gordetzen dira. Kontuarekin sartuz gero, aukeran inportatu ahal dituzu.</p><button id="login" type="button">Saioa hasi / erregistratu</button></section>
- <div id="signedIn" hidden>
-  <div class="card"><h2>Kontuaren informazioa</h2><p id="identity"></p>
-   <div class="actions"><button id="refresh" type="button">Eguneratu</button><button id="import" type="button" class="soft">Gonbidatu-lanak inportatu</button><button id="export" type="button" class="soft">Nire datuen kopia deskargatu</button><button id="eraseAll" type="button" class="soft">Hodeiko lan guztiak ezabatu</button></div>
-   <p class="subtle">Zure lanak SUSTRAIren administratzaileak ikusi ahal izango ditu ikaskuntzaren jarraipena egiteko. Grabazioak ez dira hodeira igotzen: zuk deskargatu behar dituzu.</p>
+<!doctype html>
+<html lang="eu">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#163e30">
+  <meta name="description" content="SUSTRAI Nire espazioa: zure C1 aurrerapena, emaitzak eta gordetako lanak.">
+  <title>SUSTRAI · Nire espazioa</title>
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png">
+  <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="SUSTRAI">
+  <link rel="stylesheet" href="/auth.css?v=20261115-product">
+  <link rel="stylesheet" href="/admin/admin.css?v=20261115-product">
+  <link rel="stylesheet" href="/mi-espacio/space.css?v=20261115-product">
+</head>
+<body>
+<header class="topbar">
+  <a class="brand" href="/" aria-label="SUSTRAI hasiera"><span class="logo">S</span><span><strong>SUSTRAI</strong><small>NIRE ESPAZIOA</small></span></a>
+  <nav aria-label="Atalak"><a href="/">Hasiera</a><a href="/irakurmena/">Irakurmena</a><a href="/idazlanak/">Idazmena</a><a href="/ahozkoa/">Ahozkoa</a></nav>
+</header>
+
+<main class="admin-layout my-space">
+  <section class="intro">
+    <div>
+      <p class="eyebrow">NIRE IKASKUNTZA</p>
+      <h1>Nire espazioa</h1>
+      <p>Jarraitu utzitako tokian, ikusi hiru trebetasunen aurrerapena eta kudeatu zure hodeiko lanak.</p>
+    </div>
+    <p id="myStatus" class="status" role="status">Saioa egiaztatzen…</p>
+  </section>
+
+  <section id="guest" class="card guest-card" hidden>
+    <p class="eyebrow">KONTUA BEHARREZKOA</p>
+    <h2>Hasi saioa zure espazioa irekitzeko</h2>
+    <p>Gonbidatu gisa lan egin dezakezu gailuan. Kontuarekin, lanak hodeian gordetzen dira eta hemendik berreskura ditzakezu.</p>
+    <div class="actions">
+      <button id="login" type="button">Saioa hasi / erregistratu</button>
+      <a class="soft-link" href="/irakurmena/">Jarraitu gonbidatu gisa</a>
+    </div>
+  </section>
+
+  <div id="signedIn" hidden>
+    <section class="stats" id="overview" aria-label="Aurrerapenaren laburpena"></section>
+
+    <section class="card continue-card" id="continueCard">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">JARRAITU</p>
+          <h2>Non utzi zenuen</h2>
+        </div>
+      </div>
+      <div id="continueList" class="continue-list"></div>
+    </section>
+
+    <div class="grid space-grid">
+      <section class="card">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">IRAKURMENA</p>
+            <h2>Emaitzak</h2>
+          </div>
+          <a class="soft-link" href="/irakurmena/">Proba berria</a>
+        </div>
+        <div id="myResults" class="results"></div>
+      </section>
+
+      <section class="card">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">LANAK</p>
+            <h2>Zirriborroak eta oharrak</h2>
+          </div>
+        </div>
+        <div class="work-filters" role="group" aria-label="Lan mota">
+          <button type="button" class="chip active" data-filter="all">Denak</button>
+          <button type="button" class="chip" data-filter="writing">Idazmena</button>
+          <button type="button" class="chip" data-filter="speaking">Ahozkoa</button>
+          <button type="button" class="chip" data-filter="reading">Irakurmena</button>
+        </div>
+        <div id="myWorks" class="works"></div>
+      </section>
+    </div>
+
+    <section class="card profile-card">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">KONTUA</p>
+          <h2>Profila eta datuak</h2>
+        </div>
+      </div>
+      <form id="profileForm" class="profile-form">
+        <label for="displayName">Izena</label>
+        <input id="displayName" name="displayName" type="text" maxlength="120" required minlength="2" autocomplete="nickname">
+        <p id="identity" class="subtle"></p>
+        <div class="actions">
+          <button type="submit">Izena gorde</button>
+          <button id="import" type="button" class="soft">Gonbidatu-lanak inportatu</button>
+          <button id="export" type="button" class="soft">Datuen kopia deskargatu</button>
+          <button id="eraseAll" type="button" class="soft danger">Hodeiko lanak ezabatu</button>
+          <button id="refresh" type="button" class="soft">Eguneratu</button>
+        </div>
+        <p class="subtle">Administratzaileak zure lanak ikus ditzake jarraipena egiteko. Ahozko grabazioak ez dira hodeira igotzen.</p>
+      </form>
+    </section>
   </div>
-  <div class="grid"><section class="card"><h2>Irakurmeneko emaitzak</h2><div id="myResults" class="results"></div></section>
-   <section class="card"><h2>Gordetako lanak</h2><p class="subtle">Elementu bakoitza kontsultatu edo ezabatu dezakezu.</p><div id="myWorks" class="works"></div></section></div>
- </div>
 </main>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.0" defer></script>
-<script src="/auth.js" defer></script><script src="/mi-espacio/app.js" defer></script></body></html>
+<script src="/auth.js?v=20261115-product" defer></script>
+<script src="/account-kit.js?v=20261115-product" defer></script>
+<script src="/mi-espacio/app.js?v=20261115-product" defer></script>
+<script src="/pwa.js" defer></script>
+</body>
+</html>

@@ -108,7 +108,7 @@
       <button type="button" id="sustrai-auth-close" class="sustrai-auth-close" aria-label="Itxi">×</button>
       <p class="sustrai-auth-eyebrow">SUSTRAI · IKASLEAREN KONTUA</p>
       <h2 id="sustrai-auth-title">Saioa hasi</h2>
-      <p id="sustrai-auth-help">Gonbidatu gisa ere jarrai dezakezu. Kontuarekin zure lanak hodeian gordeko dira, eta irakasle/administratzaileak ikusi ahal izango ditu.</p>
+      <p id="sustrai-auth-help">Gonbidatu gisa ere jarrai dezakezu. Kontuarekin zure lanak hodeian gordetzen dira, Nire espazioan ikusgai, eta administratzaileak jarraipena egin dezake.</p>
       <form id="sustrai-auth-form">
         <label for="sustrai-auth-email">Helbide elektronikoa</label>
         <input id="sustrai-auth-email" name="email" type="email" autocomplete="email" required maxlength="254">
@@ -171,15 +171,25 @@
      else if(dialogMode==='signup')result=await state.client.auth.signUp({email,password,options:{emailRedirectTo:location.origin+'/'}});
      else if(dialogMode==='reset')result=await state.client.auth.resetPasswordForEmail(email,{redirectTo:location.origin+'/'});
      else result=await state.client.auth.updateUser({password});
-     if(result.error)throw result.error;
-     if(dialogMode==='login'){location.reload();return}
-     if(dialogMode==='recover'){out.textContent='Pasahitza aldatuta.';setTimeout(()=>location.assign('/'),500);return}
-     out.textContent=dialogMode==='signup'
+    if(result.error)throw result.error;
+    if(dialogMode==='login'){location.reload();return}
+    if(dialogMode==='recover'){out.textContent='Pasahitza aldatuta.';setTimeout(()=>location.assign('/'),500);return}
+    out.textContent=dialogMode==='signup'
        ? 'Kontsultatu posta elektronikoa eta baieztatu kontua; ondoren, hasi saioa.'
        : 'Kontua badago, berreskurapen-esteka bidaliko da posta elektronikora.';
-     form.elements.password.value='';
-   }catch(err){out.textContent=err?.message||'Ezin izan da eskaera osatu.'}
+    form.elements.password.value='';
+   }catch(err){out.textContent=friendlyAuthError(err)}
    finally{submit.disabled=false}
+ }
+ function friendlyAuthError(err){
+   const msg=String(err?.message||err||'').toLowerCase();
+   if(msg.includes('invalid login')||msg.includes('invalid credentials'))return 'Helbidea edo pasahitza ez da zuzena.';
+   if(msg.includes('email not confirmed')||msg.includes('email_confirmation'))return 'Baieztatu lehenik posta elektronikoa.';
+   if(msg.includes('user already registered'))return 'Helbide honekin kontua badago. Hasi saioa edo berreskuratu pasahitza.';
+   if(msg.includes('password')&&msg.includes('least'))return 'Pasahitzak gutxienez 8 karaktere izan behar ditu.';
+   if(msg.includes('rate limit')||msg.includes('too many'))return 'Saiakera gehiegi. Itxaron une bat eta saiatu berriro.';
+   if(msg.includes('network')||msg.includes('fetch'))return 'Konexio-arazoa. Egiaztatu sarea.';
+   return err?.message||'Ezin izan da eskaera osatu.';
  }
  function renderAccount(){
    const header=document.querySelector('.start-header, .topbar');
@@ -204,6 +214,8 @@
  window.SustraiCloud={
    storage,headers,client:()=>state.client,profile:()=>state.profile,user:()=>state.user,
    isAdmin:()=>!!state.profile?.admin,flush,importGuestData,openLogin:openDialog,
+   setProfile:(next)=>{if(next)state.profile=next},
+   refreshAccount:renderAccount,
    ready:null
  };
  window.SustraiCloud.ready=init();

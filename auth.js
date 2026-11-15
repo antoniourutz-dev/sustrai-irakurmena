@@ -22,7 +22,7 @@
     const v=String(value);
     if(!isWorkKey(key) || !state.user){try{raw.setItem(key,v)}catch{};return}
     if(v.length>250000){notify('Edukia handiegia da sinkronizatzeko.');return}
-    state.cloud.set(key,v);state.deleted.delete(key);state.dirty.add(key);schedule();
+    state.cloud.set(key,v);state.deleted.delete(key);state.dirty.add(key);notify('Gordetzen…');schedule();
   },
   removeItem(key) {
     if(!isWorkKey(key) || !state.user){try{raw.removeItem(key)}catch{};return}
@@ -30,7 +30,7 @@
   }
  };
  let flushTimer=null;
- function schedule(){clearTimeout(flushTimer);flushTimer=setTimeout(flush,450)}
+ function schedule(){if(flushTimer!==null)return;flushTimer=setTimeout(()=>{flushTimer=null;flush()},700)}
  async function flush(){
    if(!state.client || !state.user || state.busy || (!state.dirty.size&&!state.deleted.size)) return;
    state.busy=true;

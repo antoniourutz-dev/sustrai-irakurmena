@@ -126,7 +126,8 @@ function syncFocusFromTimer(){
  setFocusMode(!!t.start && !t.done);
 }
 function setActiveMarker(tool){
- activeMarker=activeMarker===tool?null:tool;
+ const next=activeMarker===tool?null:tool;
+ activeMarker=next;
  document.body.classList.toggle('marker-armed',!!activeMarker);
  if(activeMarker)document.body.dataset.markerTool=activeMarker;else delete document.body.dataset.markerTool;
  document.querySelectorAll('.swatch').forEach(el=>{
@@ -141,8 +142,11 @@ function setActiveMarker(tool){
   eraseBtn.setAttribute('aria-pressed',String(on));
  }
  const hint=$('markerHint');
- if(hint)hint.textContent=activeMarker==='erase'?'Ezabatzeko: hautatu markatutako testua':activeMarker?'Arrastatu edo hautatu testua markatzeko':'Aukeratu kolorea eta markatu zuzenean';
- if(activeMarker)$('markerbar').classList.add('visible');
+ if(hint)hint.textContent=activeMarker==='erase'?'Ezabatzeko: arrastatu markaren gainean':activeMarker?'Arrastatu testuan rotulagailuarekin':'Aukeratu kolorea: kurtsorea rotulagailu bihurtuko da';
+ if(activeMarker){
+  $('markerbar').classList.add('visible');
+  toast(activeMarker==='erase'?'Ezabatzailea prest':'Rotulagailua prest: arrastatu testuan');
+ }
 }
 function restoreMarkerPosition(){
  const bar=$('markerbar');if(!bar)return;
@@ -187,6 +191,84 @@ function setupMarkerDrag(){
  handle.addEventListener('pointerup',end);
  handle.addEventListener('pointercancel',end);
 }
+
+
+let brushStroke=null;
+function caretFromPoint(x,y){
+ let node=null,offset=0;
+ if(document.caretRangeFromPoint){
+  const range=document.caretRangeFromPoint(x,y);
+  if(range){node=range.startContainer;offset=range.startOffset}
+ }else if(document.caretPositionFromPoint){
+  const pos=document.caretPositionFromPoint(x,y);
+  if(pos){node=pos.offsetNode;offset=pos.offset}
+ }
+ if(!node)return null;
+ if(node.nodeType===Node.TEXT_NODE)return {node,offset};
+ if(node.nodeType===Node.ELEMENT_NODE){
+  const walker=document.createTreeWalker(node,NodeFilter.SHOW_TEXT);
+  const first=walker.nextNode();
+  if(first)return {node:first,offset:Math.min(offset,first.textContent.length)};
+ }
+ return null;
+}
+function previewBrushSelection(start,end){
+ try{
+  const range=document.createRange();
+  range.setStart(start.node,start.offset);
+  range.setEnd(end.node,end.offset);
+  const sel=window.getSelection();
+  sel.removeAllRanges();
+  sel.addRange(range);
+  return true;
+ }catch{}
+ try{
+  const range=document.createRange();
+  range.setStart(end.node,end.offset);
+  range.setEnd(start.node,start.offset);
+  const sel=window.getSelection();
+  sel.removeAllRanges();
+  sel.addRange(range);
+  return true;
+ }catch{}
+ return false;
+}
+function brushTargetFromEvent(event){
+ if(event.target.closest('#markerbar,.marker-drag,button,a,select,label,.choice,.numbers,.tab,.modal,.hole,.time-actions'))return null;
+ return event.target.closest('.selectable[data-area]');
+}
+function finishBrushStroke(){
+ if(!brushStroke||!activeMarker){brushStroke=null;return}
+ brushStroke=null;
+ captureSelection();
+ if(!lastSelection.length)return;
+ if(activeMarker==='erase')erase();else paint(activeMarker);
+}
+function setupBrushPaint(){
+ document.addEventListener('pointerdown',event=>{
+  if(!activeMarker||event.button!==0||brushStroke)return;
+  if(!brushTargetFromEvent(event))return;
+  const caret=caretFromPoint(event.clientX,event.clientY);
+  if(!caret||caret.node.nodeType!==Node.TEXT_NODE)return;
+  event.preventDefault();
+  brushStroke={pid:event.pointerId,start:caret,end:caret};
+  previewBrushSelection(caret,caret);
+ },true);
+ document.addEventListener('pointermove',event=>{
+  if(!brushStroke||event.pointerId!==brushStroke.pid)return;
+  const caret=caretFromPoint(event.clientX,event.clientY);
+  if(!caret||caret.node.nodeType!==Node.TEXT_NODE)return;
+  brushStroke.end=caret;
+  previewBrushSelection(brushStroke.start,caret);
+ },true);
+ const end=event=>{
+  if(!brushStroke||event.pointerId!==brushStroke.pid)return;
+  finishBrushStroke();
+ };
+ document.addEventListener('pointerup',end,true);
+ document.addEventListener('pointercancel',end,true);
+}
+
 
 function setLoading(isLoading){document.body.classList.toggle('loading',isLoading);document.body.setAttribute('aria-busy',String(isLoading))}
 function externalLink(href,label){const link=document.createElement('a');link.href=href;link.target='_blank';link.rel='noopener';link.textContent=label;return link}
@@ -272,8 +354,8 @@ function renderPassage(reset){let sc=$('readingPanel').querySelector('.paperscro
 function targetWord(it,n){let p=it.p,i=p.indexOf('{{'+n+'}}');if(i<0)return'';let left=p.slice(Math.max(0,i-45),i).trim();let m=left.match(/([A-Za-zÀ-ÿ\-]+)$/);return m?m[1]:left.slice(-25)}
 function renderQuestion(){let it=task(),n=current,a=answers(),idx=n-it.r[0],q=it.type==="mcq"?it.qs[idx]:null,opts=it.type==="mcq"?q.o:it.opts[n],prompt=it.type==="mcq"?q.q:it.type==="fill"?"Hutsunerako hitz edo esaldi egokia aukeratu.":"Aukeratu testuko «"+targetWord(it,n)+"» hitzaren baliokidea.";$('qcounter').textContent='GALDERA '+n+' · '+(idx+1)+' / '+count(it);$('qtitle').textContent=it.title;$('questionText').innerHTML='<span class="selectable" data-area="q'+n+'">'+highlighted(prompt,'q'+n)+'</span>';$('options').innerHTML=opts.map((v,i)=>{let l=L[i],selected=a[n]===l,correct=graded[part]&&accepted(it,n).includes(l),wrong=graded[part]&&selected&&!correct;return '<div class="choice '+(selected?'chosen ':'')+(correct?'correct ':'')+(wrong?'wrong':'')+'" data-choice="'+l+'"><button class="choose" data-letter="'+l+'" aria-label="'+l+' aukera" aria-pressed="'+selected+'">'+l+'</button><span class="selectable" data-area="c'+n+l+'">'+highlighted(v,'c'+n+l)+'</span></div>'}).join('');document.querySelectorAll('.choose').forEach(b=>b.onclick=()=>choose(b.dataset.letter));document.querySelectorAll('.choice').forEach(b=>b.onclick=e=>{if(e.target.closest('button')||window.getSelection()?.toString())return;choose(b.dataset.choice)});$('prev').disabled=n===it.r[0];$('next').disabled=n===it.r[1];$('numbers').innerHTML=Array.from({length:count(it)},(_,i)=>{let z=i+it.r[0];return '<button class="'+(current===z?'current ':'')+(a[z]?'done':'')+'" data-number="'+z+'">'+z+'</button>'}).join('');document.querySelectorAll('[data-number]').forEach(b=>b.onclick=()=>pickQuestion(+b.dataset.number));$('gradeResult').innerHTML='';if(graded[part]){let num=0;for(let z=it.r[0];z<=it.r[1];z++)if(accepted(it,z).includes(a[z]))num++;let correctAnswers=accepted(it,n),selectedAnswer=a[n]||'Erantzun gabe',isCorrect=correctAnswers.includes(selectedAnswer),errors=mistakeList(true);$('gradeResult').innerHTML='<div class="result"><strong>'+num+' / '+count(it)+' zuzen</strong> · '+(num*it.weight).toFixed(1).replace('.',',')+' puntu<small>'+(isCorrect?'Galdera hau zuzen dago.':'Zure erantzuna: '+selectedAnswer+' · Erantzun zuzena: '+correctAnswers.join(' edo '))+'</small><span class="learning-tip">'+learningTip(it)+'</span>'+(errors.length?'<button type="button" id="nextMistake" class="outline mistake-action">Hurrengo akatsa</button>':'')+'</div>';if($('nextMistake'))$('nextMistake').onclick=nextMistake}}
 function render(reset=true){if(!exams.length)return;$('exam').value=exam().id;$('readingTitle').textContent=task().title;const links=[externalLink(exam().source,'HABEko jatorrizko PDFa ↗')];if(exam().solution)links.push(' · ',externalLink(exam().solution,'Erantzun ofizialak ↗'));$('sourceNote').replaceChildren(...links);renderTabs();renderProgress();renderPassage(reset);renderQuestion();updateTimer()}
-function captureSelection(){let s=window.getSelection();if(!s||s.isCollapsed||!s.rangeCount)return;let range=s.getRangeAt(0),saved=[];document.querySelectorAll('.selectable[data-area]').forEach(el=>{if(!range.intersectsNode(el))return;let full=document.createRange();full.selectNodeContents(el);let part=range.cloneRange();try{if(range.compareBoundaryPoints(Range.START_TO_START,full)<0)part.setStart(full.startContainer,full.startOffset);if(range.compareBoundaryPoints(Range.END_TO_END,full)>0)part.setEnd(full.endContainer,full.endOffset);let before=full.cloneRange();before.setEnd(part.startContainer,part.startOffset);let len=part.toString().length;if(len)saved.push({area:el.dataset.area,start:before.toString().length,end:before.toString().length+len})}catch{}});if(saved.length){lastSelection=saved;if(!activeMarker)$('markerHint').textContent='Hautatuta · aukeratu kolorea'}}
-function paint(color){captureSelection();if(!lastSelection.length){toast('Hautatu hitz edo esaldi bat');return}let a=marks();for(let s of lastSelection){a=a.filter(m=>m.area!==s.area||m.end<=s.start||m.start>=s.end);a.push({...s,color})}save(markKey(),a);lastSelection=[];window.getSelection()?.removeAllRanges();renderPassage(false);renderQuestion();if(!activeMarker)toast('Marka gordeta')}
-function erase(){captureSelection();if(!lastSelection.length){toast('Hautatu ezabatu beharreko marka');return}save(markKey(),marks().filter(m=>!lastSelection.some(s=>s.area===m.area&&s.start<m.end&&s.end>m.start)));lastSelection=[];window.getSelection()?.removeAllRanges();renderPassage(false);renderQuestion();if(!activeMarker)toast('Marka ezabatuta')}
-async function initialize(){const mode=requestedMode();if(!mode){location.replace('/');return}exams=await srReadExams('HABE');if(!exams.length||exams.some(e=>!e.items.length||e.items.some(it=>it.key.length!==count(it))||Math.abs(e.items.reduce((n,it)=>n+count(it)*it.weight,0)-20)>0.001))throw Error('HABEko azterketak osatu gabe daude');$('exam').replaceChildren(...exams.map(e=>{const option=document.createElement('option');option.value=e.id;option.textContent=e.label;return option}));let id=localStorage.getItem('sustrai-habe-active')||exams.at(-1).id;examIndex=Math.max(0,exams.findIndex(e=>e.id===id));current=task().r[0];$('exam').onchange=e=>pickExam(exams.findIndex(x=>x.id===e.target.value));$('start').onclick=toggleTimer;$('finish').onclick=()=>{closeActions();finishExam()};$('prev').onclick=()=>step(-1);$('next').onclick=()=>step(1);$('grade').onclick=async()=>{const e=exam(),p=part;try{await srGrade(e,answers);if(e!==exam())return;graded[p]=true;renderQuestion()}catch(error){console.error(error);toast('Ezin izan da zuzendu: saiatu berriro')}};$('resetEx').onclick=clearPart;$('markerTool').onclick=function(){closeActions();let v=$('markerbar').classList.toggle('visible');this.setAttribute('aria-expanded',String(v))};$('closeMarker').onclick=()=>{$('markerbar').classList.remove('visible');$('markerTool').setAttribute('aria-expanded','false');if(activeMarker)setActiveMarker(activeMarker)};$('actionsToggle').onclick=()=>{const open=$('timeActions').classList.toggle('expanded');$('actionsToggle').setAttribute('aria-expanded',String(open))};document.querySelectorAll('.swatch').forEach(b=>{b.onpointerdown=e=>e.preventDefault();b.onclick=()=>setActiveMarker(b.dataset.color)});$('erase').onclick=()=>setActiveMarker('erase');const _mv=$('markVisibility');_mv.onclick=()=>{markVisible=!markVisible;_mv.textContent=markVisible?'Ezkutatu':'Erakutsi';renderPassage(false);renderQuestion()};setupMarkerDrag();if($('exitFocus'))$('exitFocus').onclick=()=>{const t=timer();if(t.start){t.elapsed=elapsed(t);t.start=null;save(timerKey(),t);updateTimer()}setFocusMode(false);toast('Kontzentrazio-modua itxita')};$('closeModal').onclick=dismiss;$('dismissSummary').onclick=dismiss;$('reviewMistakes').onclick=reviewMistakes;$('repeatExam').onclick=restart;$('viewReading').onclick=()=>setView('reading');$('viewQuestions').onclick=()=>setView('questions');document.addEventListener('selectionchange',()=>{if(window.getSelection()&&!window.getSelection().isCollapsed)requestAnimationFrame(captureSelection)});document.addEventListener('pointerup',()=>setTimeout(()=>{captureSelection();if(!activeMarker||!lastSelection.length)return;if(activeMarker==='erase')erase();else paint(activeMarker)},0));document.addEventListener('keydown',event=>{trapDialog(event);if(event.key==='Escape'&&!$('modal').hidden)dismiss()});render(true);setLoading(false);chooseMode(mode);syncFocusFromTimer();setInterval(updateTimer,500)}
+function captureSelection(){let s=window.getSelection();if(!s||s.isCollapsed||!s.rangeCount)return;let range=s.getRangeAt(0),saved=[];document.querySelectorAll('.selectable[data-area]').forEach(el=>{if(!range.intersectsNode(el))return;let full=document.createRange();full.selectNodeContents(el);let part=range.cloneRange();try{if(range.compareBoundaryPoints(Range.START_TO_START,full)<0)part.setStart(full.startContainer,full.startOffset);if(range.compareBoundaryPoints(Range.END_TO_END,full)>0)part.setEnd(full.endContainer,full.endOffset);let before=full.cloneRange();before.setEnd(part.startContainer,part.startOffset);let len=part.toString().length;if(len)saved.push({area:el.dataset.area,start:before.toString().length,end:before.toString().length+len})}catch{}});if(saved.length){lastSelection=saved;}}
+function paint(color){captureSelection();if(!lastSelection.length){if(!activeMarker)toast('Hautatu hitz edo esaldi bat');return}let a=marks();for(let s of lastSelection){a=a.filter(m=>m.area!==s.area||m.end<=s.start||m.start>=s.end);a.push({...s,color})}save(markKey(),a);lastSelection=[];window.getSelection()?.removeAllRanges();renderPassage(false);renderQuestion();if(!activeMarker)toast('Marka gordeta')}
+function erase(){captureSelection();if(!lastSelection.length){if(!activeMarker)toast('Hautatu ezabatu beharreko marka');return}save(markKey(),marks().filter(m=>!lastSelection.some(s=>s.area===m.area&&s.start<m.end&&s.end>m.start)));lastSelection=[];window.getSelection()?.removeAllRanges();renderPassage(false);renderQuestion();if(!activeMarker)toast('Marka ezabatuta')}
+async function initialize(){const mode=requestedMode();if(!mode){location.replace('/');return}exams=await srReadExams('HABE');if(!exams.length||exams.some(e=>!e.items.length||e.items.some(it=>it.key.length!==count(it))||Math.abs(e.items.reduce((n,it)=>n+count(it)*it.weight,0)-20)>0.001))throw Error('HABEko azterketak osatu gabe daude');$('exam').replaceChildren(...exams.map(e=>{const option=document.createElement('option');option.value=e.id;option.textContent=e.label;return option}));let id=localStorage.getItem('sustrai-habe-active')||exams.at(-1).id;examIndex=Math.max(0,exams.findIndex(e=>e.id===id));current=task().r[0];$('exam').onchange=e=>pickExam(exams.findIndex(x=>x.id===e.target.value));$('start').onclick=toggleTimer;$('finish').onclick=()=>{closeActions();finishExam()};$('prev').onclick=()=>step(-1);$('next').onclick=()=>step(1);$('grade').onclick=async()=>{const e=exam(),p=part;try{await srGrade(e,answers);if(e!==exam())return;graded[p]=true;renderQuestion()}catch(error){console.error(error);toast('Ezin izan da zuzendu: saiatu berriro')}};$('resetEx').onclick=clearPart;$('markerTool').onclick=function(){closeActions();let v=$('markerbar').classList.toggle('visible');this.setAttribute('aria-expanded',String(v))};$('closeMarker').onclick=()=>{$('markerbar').classList.remove('visible');$('markerTool').setAttribute('aria-expanded','false');if(activeMarker)setActiveMarker(activeMarker)};$('actionsToggle').onclick=()=>{const open=$('timeActions').classList.toggle('expanded');$('actionsToggle').setAttribute('aria-expanded',String(open))};document.querySelectorAll('.swatch').forEach(b=>{b.onpointerdown=e=>e.preventDefault();b.onclick=()=>setActiveMarker(b.dataset.color)});$('erase').onclick=()=>setActiveMarker('erase');const _mv=$('markVisibility');_mv.onclick=()=>{markVisible=!markVisible;_mv.textContent=markVisible?'Ezkutatu':'Erakutsi';renderPassage(false);renderQuestion()};setupMarkerDrag();if($('exitFocus'))$('exitFocus').onclick=()=>{const t=timer();if(t.start){t.elapsed=elapsed(t);t.start=null;save(timerKey(),t);updateTimer()}setFocusMode(false);toast('Kontzentrazio-modua itxita')};$('closeModal').onclick=dismiss;$('dismissSummary').onclick=dismiss;$('reviewMistakes').onclick=reviewMistakes;$('repeatExam').onclick=restart;$('viewReading').onclick=()=>setView('reading');$('viewQuestions').onclick=()=>setView('questions');document.addEventListener('selectionchange',()=>{if(activeMarker||brushStroke)return;if(window.getSelection()&&!window.getSelection().isCollapsed)requestAnimationFrame(captureSelection)});setupBrushPaint();document.addEventListener('keydown',event=>{trapDialog(event);if(event.key==='Escape'&&!$('modal').hidden)dismiss()});render(true);setLoading(false);chooseMode(mode);syncFocusFromTimer();setInterval(updateTimer,500)}
 initialize().catch(e=>{console.error(e);setLoading(false);$('readingTitle').textContent='Ezin izan da kargatu';$('passage').innerHTML='<div class="load-error"><strong>Ezin izan dira azterketak kargatu.</strong><p>'+escapeText(e.message)+'</p><button id="retryLoad" type="button">Saiatu berriro</button></div>';$('retryLoad').onclick=()=>location.reload()});

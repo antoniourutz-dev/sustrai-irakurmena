@@ -29,7 +29,7 @@ function empty(){return {version:1,audience:'',goal:'',thesis:'',ideas:[EMPTY_ID
 function key(){return 'sustrai-outline-v1:'+task.slug+':'+mode}
 function restore(){
  try {
-  const raw=localStorage.getItem(key());if(!raw)return empty();
+  const raw=window.SustraiCloud.storage.getItem(key());if(!raw)return empty();
   const p=JSON.parse(raw);
   if(!p||p.version!==1||!Array.isArray(p.ideas))return empty();
   const valid=empty();
@@ -45,7 +45,7 @@ function restore(){
 }
 function save(){
  if(!task||!data)return;
- try{data.updatedAt=Date.now();localStorage.setItem(key(),JSON.stringify(data));$('outlineSaved').textContent='Zure gailuan gordeta';}
+ try{data.updatedAt=Date.now();window.SustraiCloud.storage.setItem(key(),JSON.stringify(data));$('outlineSaved').textContent='Zure gailuan gordeta';}
  catch{$('outlineSaved').textContent='Ezin izan da gorde; kopiatu eskema.'}
 }
 function measure(){

@@ -3,19 +3,28 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#163e30">
+<meta name="description" content="SUSTRAI administrazioa: ikasleak, emaitzak eta edukien sarbidea.">
 <title>SUSTRAI · Administrazioa</title>
-<link rel="stylesheet" href="/auth.css">
-<link rel="stylesheet" href="/admin/admin.css">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="SUSTRAI">
+<link rel="stylesheet" href="/auth.css?v=20261115-product">
+<link rel="stylesheet" href="/admin/admin.css?v=20261115-product">
+<link rel="stylesheet" href="/mi-espacio/space.css?v=20261115-product">
 </head>
 <body>
 <header class="topbar">
- <a class="brand" href="/"><span class="logo">S</span><span><strong>SUSTRAI</strong><small>ADMINISTRAZIOA</small></span></a>
- <nav><a href="/">Hasiera</a><a href="/irakurmena/">Irakurmena</a><a href="/idazlanak/">Idazmena</a><a href="/ahozkoa/">Ahozkoa</a></nav>
+ <a class="brand" href="/" aria-label="SUSTRAI hasiera"><span class="logo">S</span><span><strong>SUSTRAI</strong><small>ADMINISTRAZIOA</small></span></a>
+ <nav aria-label="Atalak"><a href="/">Hasiera</a><a href="/irakurmena/">Irakurmena</a><a href="/idazlanak/">Idazmena</a><a href="/ahozkoa/">Ahozkoa</a><a href="/mi-espacio/">Nire espazioa</a></nav>
 </header>
 <main id="adminApp" class="admin-layout" aria-busy="true">
  <section class="intro">
    <div><p class="eyebrow">SUSTRAI · IKASLEEN KUDEAKETA</p><h1>Administrazio panela</h1>
-   <p>Ikasleen lanak, irakurmeneko emaitzak eta edukien sarbide-baimenak kudeatzeko gunea.</p></div>
+   <p>Ikasleen aurrerapena irakurri, lanak berrikusi eta edukien sarbidea doitu.</p></div>
    <p class="status" id="status" role="status" aria-live="polite">Saioa egiaztatzen…</p>
  </section>
  <div id="restricted" class="card" hidden>
@@ -35,8 +44,16 @@
    <section class="card">
      <div class="section-head"><div><p class="eyebrow">JARRAIPENA</p><h2 id="studentTitle">Aukeratu ikaslea</h2></div><button id="userActive" class="soft" type="button" hidden></button></div>
      <div id="studentSummary" class="subtle">Ikasle bat hautatuta, bere jarduerak eta gordetako lanak ikusiko dituzu.</div>
+     <div id="studentPulse" class="continue-list" hidden></div>
      <h3>Irakurmenaren emaitzak</h3><div id="results" class="results"></div>
-     <h3>Gordetako lanak eta oharrak</h3><div id="works" class="works"></div>
+     <h3>Gordetako lanak eta oharrak</h3>
+     <div class="work-filters" role="group" aria-label="Lan mota">
+       <button type="button" class="chip active" data-filter="all">Denak</button>
+       <button type="button" class="chip" data-filter="writing">Idazmena</button>
+       <button type="button" class="chip" data-filter="speaking">Ahozkoa</button>
+       <button type="button" class="chip" data-filter="reading">Irakurmena</button>
+     </div>
+     <div id="works" class="works"></div>
    </section>
   </div>
   <section class="card permissions">
@@ -54,6 +71,9 @@
  </div>
 </main>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.0" defer></script>
-<script src="/auth.js" defer></script>
-<script src="/admin/admin.js" defer></script>
-</body></html>
+<script src="/auth.js?v=20261115-product" defer></script>
+<script src="/account-kit.js?v=20261115-product" defer></script>
+<script src="/admin/admin.js?v=20261115-product" defer></script>
+<script src="/pwa.js" defer></script>
+</body>
+</html>

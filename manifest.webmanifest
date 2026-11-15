@@ -55,6 +55,12 @@
       "short_name": "Ahozkoa",
       "url": "/ahozkoa/",
       "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Nire espazioa",
+      "short_name": "Espazioa",
+      "url": "/mi-espacio/",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
     }
   ]
 }

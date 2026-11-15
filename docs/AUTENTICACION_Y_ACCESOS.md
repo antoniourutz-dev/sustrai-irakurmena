@@ -5,8 +5,9 @@ Fecha: 2026-11-15.
 ## Experiencia
 
 - Invitados: la aplicación mantiene el acceso anónimo y el guardado en este navegador, como hasta ahora.
-- Alumnos: pueden registrarse/iniciar sesión por correo y contraseña (Supabase Auth), acceder a **Nire espazioa**, recuperar sus trabajos desde varios dispositivos y exportar o eliminar elementos de trabajo.
-- Administración: `lumi@sustrai.app`, ya confirmada en Auth, queda asociada por UUID a `sustrai_private.sr_app_admins`. Ninguna dirección de correo ni parámetro suministrado por el navegador concede permisos administrativos.
+- Alumnos: pueden registrarse/iniciar sesión por correo y contraseña (Supabase Auth), acceder a **Nire espazioa** (panel de progreso, continuar donde lo dejaron, resultados legibles, filtros de trabajos, nombre editable, exportar/borrar), recuperar trabajos en varios dispositivos e importar datos de invitado de forma explícita.
+- Home: bloque de cuenta debajo de los tres módulos, con CTA a registro y enlace a Nire espazioa.
+- Administración: `lumi@sustrai.app`, ya confirmada en Auth, queda asociada por UUID a `sustrai_private.sr_app_admins`. Ninguna dirección de correo ni parámetro suministrado por el navegador concede permisos administrativos. El panel muestra medias de lectura, vista legible de borradores/notas y filtros por habilidad.
 - El administrador ve solo perfiles creados en SUSTRAI, no todas las cuentas existentes en el proyecto compartido de Supabase.
 
 ## Modelo y privacidad

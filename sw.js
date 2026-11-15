@@ -1,5 +1,5 @@
 /* SUSTRAI PWA service worker */
-const CACHE_VERSION = 'sustrai-pwa-v2-accounts';
+const CACHE_VERSION = 'sustrai-pwa-v3-product';
 const SHELL = [
   '/',
   '/index.html',
@@ -7,6 +7,8 @@ const SHELL = [
   '/start.css',
   '/auth.js',
   '/auth.css',
+  '/account-kit.js',
+  '/pwa.js',
   '/admin/',
   '/admin/index.html',
   '/admin/admin.js',
@@ -14,6 +16,7 @@ const SHELL = [
   '/mi-espacio/',
   '/mi-espacio/index.html',
   '/mi-espacio/app.js',
+  '/mi-espacio/space.css',
   '/style.css',
   '/marker.css',
   '/marker-kit.js',

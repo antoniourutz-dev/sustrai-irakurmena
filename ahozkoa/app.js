@@ -26,7 +26,7 @@ function textNode(tag,value,className){
 async function readPublic(table,fields){
  const u=new URL(API_URL+'/rest/v1/'+table);u.searchParams.set('select',fields);
  if(table!=='sr_organisms')u.searchParams.set('publication_status','eq.published');
- const res=await fetch(u,{headers:HEADERS,cache:'no-store'});
+ const res=await fetch(u,{headers:await window.SustraiCloud.headers(HEADERS),cache:'no-store'});
  if(!res.ok)throw new Error('Datuak ezin izan dira kargatu ('+res.status+').');
  const rows=await res.json();if(!Array.isArray(rows))throw new Error('Datuen formatua ez da egokia.');return rows;
 }
@@ -35,12 +35,12 @@ function safePDF(link){
 }
 function storageKey(){return selected?'sustrai-oral-c1:'+selected.slug+':'+mode:''}
 function getState(){
- try{const raw=localStorage.getItem(storageKey());if(!raw)return {notes:{},checks:[]};const data=JSON.parse(raw);return {notes:data.notes||{},checks:Array.isArray(data.checks)?data.checks:[]}}catch{return {notes:{},checks:[]}}
+ try{const raw=window.SustraiCloud.storage.getItem(storageKey());if(!raw)return {notes:{},checks:[]};const data=JSON.parse(raw);return {notes:data.notes||{},checks:Array.isArray(data.checks)?data.checks:[]}}catch{return {notes:{},checks:[]}}
 }
 function saveState(){
  if(!selected)return;
  const state={notes:Object.fromEntries(KEYS.map(k=>[k,$(k).value])),checks:[...$('reviewChecks').querySelectorAll('input:checked')].map(x=>x.value)};
- try{localStorage.setItem(storageKey(),JSON.stringify(state));$('notesStatus').textContent='Zure gailuan gordeta'}catch{$('notesStatus').textContent='Ezin izan da gorde: kopiatu eskema.'}
+ try{window.SustraiCloud.storage.setItem(storageKey(),JSON.stringify(state));$('notesStatus').textContent=window.SustraiCloud.user()?'Hodeira bidaltzen…':'Zure gailuan gordeta'}catch{$('notesStatus').textContent='Ezin izan da gorde: kopiatu eskema.'}
  $('copyNotes').disabled=!KEYS.some(k=>$(k).value.trim());
  $('clearNotes').disabled=!KEYS.some(k=>$(k).value.trim());
 }
@@ -50,7 +50,7 @@ function loadState(){
  for(const c of $('reviewChecks').querySelectorAll('input'))c.checked=state.checks.includes(c.value);
  $('copyNotes').disabled=!KEYS.some(k=>$(k).value.trim());
  $('clearNotes').disabled=!KEYS.some(k=>$(k).value.trim());
- $('notesStatus').textContent='Eskema gailu honetan gordetzen da';
+ $('notesStatus').textContent=window.SustraiCloud.user()?'Eskema zure kontuan gordetzen da':'Eskema gailu honetan gordetzen da';
 }
 function filtered(){
  const org=$('orgFilter').value,kind=$('kindFilter').value,term=$('search').value.toLocaleLowerCase('eu').trim();
@@ -232,7 +232,7 @@ function clearNotes(){
  if(!selected||!confirm('Ziur zaude eskema hau ezabatu nahi duzula?'))return;
  for(const k of KEYS)$(k).value='';saveState();show('Eskema ezabatu da.');
 }
-async function init(){
+async function init(){await window.SustraiCloud.ready;
  markerKit=window.SustraiMarker?.createMarkerKit({
   storageKey:'sustrai-oral-marks',
   getScope:()=>selected?selected.slug:'none',

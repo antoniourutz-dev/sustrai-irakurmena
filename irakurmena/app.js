@@ -18,7 +18,7 @@ function show(message) {
 async function readExams(organism) {
   const response = await fetch(API_URL + '/rest/v1/rpc/sr_public_exam_snapshot', {
     method: 'POST',
-    headers: { ...HEADERS, 'Content-Type': 'application/json' },
+    headers: await window.SustraiCloud.headers({ ...HEADERS, 'Content-Type': 'application/json' }),
     body: JSON.stringify({ p_organism_code: organism }),
     cache: 'no-store'
   });
@@ -74,10 +74,10 @@ function renderList() {
     const btn = document.createElement('button');
     btn.type = 'button';
     btn.className = 'task-card' + (selected?.id === exam.id && selected?.organism === exam.organism ? ' active' : '');
-    btn.innerHTML =
-      '<span class="meta">' + exam.organism + ' · ' + exam.id + '</span>' +
-      '<strong>' + exam.label.replace(/</g, '&lt;') + '</strong>' +
-      '<span class="kind">' + exam.questions + ' galdera · ' + exam.parts.length + ' ariketa</span>';
+    const meta=document.createElement('span');meta.className='meta';meta.textContent=exam.organism+' · '+exam.id;
+    const label=document.createElement('strong');label.textContent=exam.label;
+    const kind=document.createElement('span');kind.className='kind';kind.textContent=exam.questions+' galdera · '+exam.parts.length+' ariketa';
+    btn.append(meta,label,kind);
     btn.onclick = () => selectExam(exam);
     list.append(btn);
   }
@@ -111,13 +111,16 @@ function selectExam(exam) {
   const parts = $('detailParts');
   parts.replaceChildren(...exam.parts.map((part, index) => {
     const li = document.createElement('li');
-    li.innerHTML = '<strong>' + (index + 1) + '. ' + part.title.replace(/</g, '&lt;') + '</strong><span>' + part.count + ' galdera</span>';
+    const name=document.createElement('strong');name.textContent=(index+1)+'. '+part.title;
+    const count=document.createElement('span');count.textContent=part.count+' galdera';
+    li.append(name,count);
     return li;
   }));
   try { sessionStorage.setItem('sustrai-reading-last', JSON.stringify({ organism: exam.organism, id: exam.id })); } catch {}
 }
 
 async function start() {
+  await window.SustraiCloud.ready;
   $('orgFilter').onchange = renderList;
   $('sizeFilter').onchange = renderList;
   $('search').oninput = renderList;

@@ -45,7 +45,7 @@ function restore(){
 }
 function save(){
  if(!task||!data)return;
- try{data.updatedAt=Date.now();window.SustraiCloud.storage.setItem(key(),JSON.stringify(data));$('outlineSaved').textContent='Zure gailuan gordeta';}
+ try{data.updatedAt=Date.now();window.SustraiCloud.storage.setItem(key(),JSON.stringify(data));$('outlineSaved').textContent=window.SustraiCloud.user()?'Hodeira bidaltzen…':'Zure gailuan gordeta';}
  catch{$('outlineSaved').textContent='Ezin izan da gorde; kopiatu eskema.'}
 }
 function measure(){

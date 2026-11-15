@@ -6,7 +6,17 @@ const GENRE={monologue:'Bakarrizketa',interaction:'Elkarrizketa',mediation:'Bita
 const KEYS=['opening','idea1','idea2','closing'];
 let tasks=[],supports=[],selected=null,mode='training',recording=null,mediaStream=null,mediaChunks=[],recordBlob=null,recordUrl=null,recorderMime='',clipDirty=false;
 const timers={prep:{elapsed:0,running:false},speak:{elapsed:0,running:false}};
-let toastTimer=null;
+let toastTimer=null,markerKit=null;
+function refreshMarkedOfficial(){
+ if(!selected||!markerKit)return;
+ markerKit.fillSelectable($('instruction'),selected.instruction_eu,'instruction');
+ if(selected.source_text_eu?.trim())markerKit.fillSelectable($('sourceText'),selected.source_text_eu,'source');
+ const points=Array.isArray(selected.role_points)?selected.role_points:[];
+ $('rolePoints').querySelectorAll('li').forEach((li,index)=>{if(typeof points[index]==='string')markerKit.fillSelectable(li,points[index],'role'+index)});
+ if(selected.other_position_eu)$('otherRole')&&markerKit.fillSelectable($('otherRole'),('Beste fitxako jarrera: '+selected.other_position_eu),'other');
+ const qs=Array.isArray(selected.guiding_questions)?selected.guiding_questions:[];
+ $('guidingQuestions').querySelectorAll('li').forEach((li,index)=>{if(typeof qs[index]==='string')markerKit.fillSelectable(li,qs[index],'q'+index)});
+}
 function show(message){
  const el=$('toast');el.textContent=message;el.hidden=false;clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.hidden=true,4000);
 }
@@ -61,7 +71,7 @@ function renderCatalog(){
 }
 function appendList(containerId,items){
  const box=$(containerId);box.replaceChildren();
- for(const x of items||[]){if(typeof x!=='string'||!x.trim())continue;box.append(textNode('li',x))}
+ for(const x of items||[]){if(typeof x!=='string'||!x.trim())continue;box.append(document.createElement('li'))}
 }
 function renderSupports(){
  for(const t of ['planning','lexicon','structures','interaction']){
@@ -184,16 +194,17 @@ function choose(slug,updateUrl){
  $('speakingTitle').textContent=item.title_eu;
  const tags=[item.org_code,item.exam_reference,GENRE[item.exercise_type]||item.exercise_type,item.variant&&item.variant!=='single'?item.variant+' fitxa':null].filter(Boolean);
  $('taskTags').replaceChildren(...tags.map(t=>textNode('span',t)));
- $('instruction').textContent=item.instruction_eu;
  const source=safePDF(item.source_url);$('sourceLink').hidden=!source;if(source)$('sourceLink').href=source;
- $('sourceTextBox').hidden=!item.source_text_eu?.trim();$('sourceText').textContent=item.source_text_eu||'';
+ $('sourceTextBox').hidden=!item.source_text_eu?.trim();
  const debate=item.exercise_type==='interaction';$('roleBox').hidden=!debate;
  $('roleName').textContent=item.title_eu;
  appendList('rolePoints',Array.isArray(item.role_points)?item.role_points:[]);
- $('otherRole').textContent=debate?'Beste fitxako jarrera: '+(item.other_position_eu||'jatorrizko PDFan'):'';
+ $('otherRole').textContent='';
  const qs=Array.isArray(item.guiding_questions)?item.guiding_questions:[];
  $('questionsBox').hidden=!qs.length;appendList('guidingQuestions',qs);
  $('sourceNote').textContent=item.reference_note||'Jatorrizko materiala: testu-geruzatik berreskuratua; irudiak PDFan.';
+ refreshMarkedOfficial();
+ if(debate&&!item.other_position_eu)$('otherRole').textContent='Beste fitxako jarrera: jatorrizko PDFan';
  $('recordToggle').disabled=false;
  loadState();renderTimers();renderSupports();renderCatalog();
  try{sessionStorage.setItem('sustrai-oral-last',slug)}catch{}
@@ -222,6 +233,12 @@ function clearNotes(){
  for(const k of KEYS)$(k).value='';saveState();show('Eskema ezabatu da.');
 }
 async function init(){
+ markerKit=window.SustraiMarker?.createMarkerKit({
+  storageKey:'sustrai-oral-marks',
+  getScope:()=>selected?selected.slug:'none',
+  onChange:refreshMarkedOfficial
+ });
+ markerKit?.setup();
  $('orgFilter').onchange=renderCatalog;$('kindFilter').onchange=renderCatalog;$('search').oninput=renderCatalog;
  $('trainMode').onclick=()=>setMode('training');$('simulateMode').onclick=()=>setMode('simulation');
  for(const k of KEYS)$(k).addEventListener('input',saveState);

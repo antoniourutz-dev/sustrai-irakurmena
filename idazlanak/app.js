@@ -7,6 +7,23 @@ const escapeHtml = value => String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;
 const GENRES = {iritzi_artikulua:'Iritzi-artikulua',gutuna:'Gutuna',gutun_irekia:'Gutun irekia',eskaera:'Eskaera',kexa:'Kexa',txostena:'Txostena',bestea:'Beste testu bat'};
 let tasks=[], supports=[], selected=null, mode='training', started=false, elapsed=0, running=false, clockId=null, lastNotice=null;
 let assistOpened = new Set();
+let markerKit=null;
+function refreshMarkedPrompt(){
+  if(!selected||!markerKit)return;
+  markerKit.fillSelectable($('contextText'), selected.context_eu, 'context');
+  markerKit.fillSelectable($('instructionText'), selected.instruction_eu, 'instruction');
+  const notes=Array.isArray(selected.official_material)?selected.official_material.filter(n=>n&&typeof n.text==='string'&&n.text.trim()):[];
+  const grid=$('officialMaterialGrid');
+  grid.querySelectorAll('.official-note-body').forEach((el,index)=>{
+    const note=notes[index];
+    if(note)markerKit.fillSelectable(el, note.text, 'official'+index);
+  });
+  const guidance=Array.isArray(selected.exam_guidance)?selected.exam_guidance:[];
+  $('officialGuidanceList').querySelectorAll('li').forEach((li,index)=>{
+    if(guidance[index])markerKit.fillSelectable(li, guidance[index], 'guidance'+index);
+  });
+  if(selected.source_excerpt_eu)markerKit.fillSelectable($('originalExcerptText'), selected.source_excerpt_eu, 'excerpt');
+}
 function notify(message){
   const el=$('toast'); el.textContent=message; el.hidden=false;
   if(lastNotice)clearTimeout(lastNotice);
@@ -43,8 +60,6 @@ function selectTaskBySlug(slug){
   selected=item;
   $('writingTitle').textContent=item.title_eu;
   $('promptHeading').textContent=item.title_eu;
-  $('contextText').textContent=item.context_eu;
-  $('instructionText').textContent=item.instruction_eu;
   $('taskMeta').replaceChildren();
   const noteTotal=Array.isArray(item.official_material)?item.official_material.length:0;
   const chips=[item.org_code,item.exam_reference,GENRES[item.genre]||item.genre,noteTotal?noteTotal+' jatorrizko datu':null,item.min_words?item.min_words+' hitz gutxienez':null,item.recommended_minutes?item.recommended_minutes+' min':null].filter(Boolean);
@@ -62,18 +77,18 @@ function selectTaskBySlug(slug){
     const idx=document.createElement('span');
     idx.className='official-note-index';
     idx.textContent='JATORRIZKO DATUA '+(index+1);
-    const body=document.createElement('p');
-    body.textContent=note.text;
+    const body=document.createElement('div');
+    body.className='official-note-body';
     card.append(idx,body);
     grid.append(card);
   });
   $('originalExcerpt').hidden=!item.source_excerpt_eu;
   $('originalExcerpt').open=false;
-  $('originalExcerptText').textContent=item.source_excerpt_eu||'';
   const guidance=Array.isArray(item.exam_guidance)?item.exam_guidance:[];
   $('officialGuidance').hidden=guidance.length===0;
   $('officialGuidance').open=guidance.length>0;
-  $('officialGuidanceList').replaceChildren(...guidance.map(g=>{let li=document.createElement('li');li.textContent=g;return li}));
+  $('officialGuidanceList').replaceChildren(...guidance.map(()=>{let li=document.createElement('li');return li}));
+  refreshMarkedPrompt();
   $('draft').disabled=false;
   $('draft').value=loadDraft();
   $('timerToggle').disabled=false;
@@ -177,6 +192,12 @@ function clearDraft(){
   $('draft').value='';saveDraft();updateWordCount();notify('Zirriborroa ezabatu da.');
 }
 async function start(){
+  markerKit=window.SustraiMarker?.createMarkerKit({
+    storageKey:'sustrai-writer-marks',
+    getScope:()=>selected?selected.slug:'none',
+    onChange:refreshMarkedPrompt
+  });
+  markerKit?.setup();
   $('sourceFilter').onchange=renderList;
   $('genreFilter').onchange=renderList;
   $('taskSearch').oninput=renderList;

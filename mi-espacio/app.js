@@ -50,6 +50,12 @@
   $('refresh').onclick=()=>fetchData().catch(e=>status(e.message));
   $('import').onclick=async()=>{await window.SustraiCloud.importGuestData();await fetchData()};
   $('export').onclick=exportData;
+  $('eraseAll').onclick=async()=>{
+   if(!confirm('Zure hodeiko lan eta irakurmen-emaitza GUZTIAK ezabatuko dira. Ez du nabigatzaileko gonbidatu-datuak ezabatzen. Jarraitu?'))return;
+   if(!confirm('Ezin da ekintza desegin. Benetan ezabatu nahi dituzu zure SUSTRAIko hodei-datuak?'))return;
+   status('Datuak ezabatzen…');const {error}=await client.rpc('sr_delete_my_work');
+   if(error){status('Ezin izan dira datuak ezabatu: '+error.message);return}location.reload();
+  };
   await fetchData();
  }
  start().catch(err=>status(err?.message||'Datuak ezin izan dira kargatu.'));

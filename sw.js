@@ -1,10 +1,19 @@
 /* SUSTRAI PWA service worker */
-const CACHE_VERSION = 'sustrai-pwa-v3-product';
+const CACHE_VERSION = 'sustrai-pwa-v4-fokua';
 const SHELL = [
   '/',
   '/index.html',
   '/manifest.webmanifest',
+  '/theme.css',
   '/start.css',
+  '/home.js',
+  '/fonts/inter-400.woff2',
+  '/fonts/inter-500.woff2',
+  '/fonts/inter-600.woff2',
+  '/fonts/inter-700.woff2',
+  '/fonts/inter-display-600.woff2',
+  '/fonts/inter-display-700.woff2',
+  '/fonts/sustrai-serif-var.woff2',
   '/auth.js',
   '/auth.css',
   '/account-kit.js',
@@ -48,7 +57,13 @@ const SHELL = [
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_VERSION)
-      .then((cache) => cache.addAll(SHELL))
+      // One file failing must not discard the whole offline shell.
+      .then((cache) => Promise.allSettled(SHELL.map((path) =>
+        fetch(path, { cache: 'reload' }).then((response) => {
+          if (!response.ok) throw new Error(path + ' ' + response.status);
+          return cache.put(path, response);
+        })
+      )))
       .then(() => self.skipWaiting())
       .catch(() => self.skipWaiting())
   );
@@ -92,7 +107,7 @@ self.addEventListener('fetch', (event) => {
           return response;
         })
         .catch(async () => {
-          const cached = await caches.match(request);
+          const cached = await caches.match(request, { ignoreSearch: true });
           if (cached) return cached;
           if (url.pathname.startsWith('/ivap/')) return caches.match('/ivap/index.html');
           if (url.pathname.startsWith('/habe/')) return caches.match('/habe/index.html');
@@ -107,12 +122,13 @@ self.addEventListener('fetch', (event) => {
 
   // Static assets: stale-while-revalidate.
   event.respondWith(
-    caches.match(request).then((cached) => {
+    caches.match(request).then((exact) => exact || caches.match(request, { ignoreSearch: true })).then((cached) => {
       const network = fetch(request)
         .then((response) => {
           if (response && response.ok) {
             const copy = response.clone();
-            caches.open(CACHE_VERSION).then((cache) => cache.put(request, copy));
+            // Store under the bare path so each asset keeps a single, current copy.
+            caches.open(CACHE_VERSION).then((cache) => cache.put(url.pathname, copy));
           }
           return response;
         })

@@ -260,20 +260,22 @@
       const { error } = await s.client.from('sr_app_content_rules').delete().eq('kind', item.kind).eq('resource_id', item.id);
       if (error) throw error;
     } else {
-      const { error } = await s.client.from('sr_app_content_rules').upsert({
+      const { data, error } = await s.client.from('sr_app_content_rules').upsert({
         kind: item.kind, resource_id: item.id, guest_visible: visibleGuest, member_visible: visibleMember, updated_at: new Date().toISOString()
-      }, { onConflict: 'kind,resource_id' });
+      }, { onConflict: 'kind,resource_id' }).select('resource_id');
       if (error) throw error;
+      if (!data || !data.length) throw new Error('Baimena ez da gorde.');
     }
     if (s.selected) {
       if (special === 'default') {
         const { error } = await s.client.from('sr_app_grants').delete().eq('user_id', s.selected).eq('kind', item.kind).eq('resource_id', item.id);
         if (error) throw error;
       } else {
-        const { error } = await s.client.from('sr_app_grants').upsert({
+        const { data, error } = await s.client.from('sr_app_grants').upsert({
           user_id: s.selected, kind: item.kind, resource_id: item.id, allowed: special === 'allow', updated_at: new Date().toISOString()
-        }, { onConflict: 'user_id,kind,resource_id' });
+        }, { onConflict: 'user_id,kind,resource_id' }).select('resource_id');
         if (error) throw error;
+        if (!data || !data.length) throw new Error('Baimen berezia ez da gorde.');
       }
     }
     const [r, g] = await Promise.all([
@@ -289,8 +291,9 @@
     if (!u) return;
     const target = !u.active;
     if (!confirm((target ? 'Aktibatu' : 'Desaktibatu') + ' kontua: ' + u.email + '?')) return;
-    const { error } = await s.client.from('sr_app_profiles').update({ active: target }).eq('user_id', u.id);
+    const { data, error } = await s.client.from('sr_app_profiles').update({ active: target }).eq('user_id', u.id).select('user_id');
     if (error) { status(error.message); return; }
+    if (!data || !data.length) { status('Ezin izan da kontua eguneratu: ez da aldaketarik gorde.'); return; }
     u.active = target;
     renderStudents();
     renderStats();

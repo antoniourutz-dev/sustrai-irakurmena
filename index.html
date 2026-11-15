@@ -2,153 +2,106 @@
 <html lang="eu">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="theme-color" content="#123e2e">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#ffffff">
   <meta name="description" content="Prestatu euskarako C1 irakurmen-, idazmen- eta mintzamen-probak, IVAP eta HABEko benetako deialdiekin.">
   <title>SUSTRAI · Irakurmena, idazmena eta ahozkoa C1</title>
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="SUSTRAI">
+  <meta property="og:locale" content="eu_ES">
+  <meta property="og:title" content="SUSTRAI · Euskarako C1 prestaketa">
+  <meta property="og:description" content="Irakurmena, idazmena eta ahozkoa landu IVAP eta HABEko benetako deialdiekin.">
+  <meta property="og:image" content="https://sustrai-irakurmena.vercel.app/icons/icon-512.png">
+  <meta name="twitter:card" content="summary">
   <link rel="manifest" href="/manifest.webmanifest">
   <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32.png">
   <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png">
   <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="SUSTRAI">
-  <link rel="stylesheet" href="/start.css?v=20261115-product">
-  <link rel="stylesheet" href="/auth.css?v=20261115-product">
+  <link rel="preload" href="/fonts/inter-400.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/fonts/inter-display-700.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="/theme.css?v=20261116-fokua">
+  <link rel="stylesheet" href="/start.css?v=20261116-fokua">
+  <link rel="stylesheet" href="/auth.css?v=20261116-fokua">
 </head>
-<body>
-  <header class="start-header">
-    <a class="start-brand" href="/" aria-label="SUSTRAI hasiera">
-      <span class="start-brand-icon" aria-hidden="true">S</span>
-      <span><strong>SUSTRAI</strong><small>EUSKARA · C1</small></span>
-    </a>
-    <nav class="start-nav" aria-label="Atalak">
-      <span class="active" aria-current="page">Hasiera</span>
-      <a href="/irakurmena/">Irakurmena</a>
-      <a href="/idazlanak/">Idazmena</a>
-      <a href="/ahozkoa/">Ahozkoa</a>
+<body class="has-tabbar">
+  <a class="skip" href="#pageTitle">Joan edukira</a>
+  <header class="site-header">
+  <a class="site-brand" href="/" aria-label="SUSTRAI hasiera"><span class="site-brand-mark" aria-hidden="true">S</span><span class="site-brand-name">SUSTRAI</span><span class="site-brand-level">C1</span></a>
+  <nav class="site-nav" aria-label="Atalak"><a href="/" aria-current="page">Hasiera</a><a href="/irakurmena/">Irakurmena</a><a href="/idazlanak/">Idazmena</a><a href="/ahozkoa/">Ahozkoa</a></nav>
+</header>
+
+  <main class="home">
+    <section class="home-hero" aria-labelledby="pageTitle">
+      <h1 id="pageTitle">Hiru trebetasun. Prestaketa bakarra.</h1>
+      <p>Irakurmena, idazmena eta ahozkoa C1 mailan landu, IVAP eta HABEko benetako deialdiekin.</p>
+    </section>
+
+    <nav class="skill-list" aria-label="Trebetasunak">
+      <a class="skill-card" href="/irakurmena/">
+        <span class="skill-icon"><svg aria-hidden="true" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6c-2-1.5-5-2-8-2v14c3 0 6 .5 8 2 2-1.5 5-2 8-2V4c-3 0-6 .5-8 2zM12 6v14"/></svg></span>
+        <span class="skill-body">
+          <h2 class="skill-title">Irakurmena</h2>
+          <span class="skill-tagline">Ulertu, aztertu, erantzun.</span>
+          <span class="skill-meta">23 IVAP proba · 9 HABE proba</span>
+        </span>
+        <ul class="skill-points"><li>IVAP eta HABEko benetako deialdiak</li><li>Praktika edo simulazioa, proba barruan</li><li>Rotulagailua eta kontzentrazio-modua</li></ul>
+        <span class="skill-cta"><span class="skill-cta-label">Hasi irakurmena</span><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span>
+      </a>
+      <a class="skill-card" href="/idazlanak/">
+        <span class="skill-icon"><svg aria-hidden="true" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20l4-1L19 8l-3-3L5 16l-1 4zM14 7l3 3"/></svg></span>
+        <span class="skill-body">
+          <h2 class="skill-title">Idazmena</h2>
+          <span class="skill-tagline">Pentsatu, idatzi, hobetu.</span>
+          <span class="skill-meta">45 benetako ataza · IVAP eta HABE</span>
+        </span>
+        <ul class="skill-points"><li>Enuntziatu eta material ofiziala</li><li>Hitz-kontagailua eta kronometroa</li><li>Eskema eraikitzeko tailerra</li></ul>
+        <span class="skill-cta"><span class="skill-cta-label">Hasi idazmena</span><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span>
+      </a>
+      <a class="skill-card" href="/ahozkoa/">
+        <span class="skill-icon"><svg aria-hidden="true" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a3 3 0 0 0-3 3v5a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3zM5 11a7 7 0 0 0 14 0M12 18v3"/></svg></span>
+        <span class="skill-body">
+          <h2 class="skill-title">Ahozkoa</h2>
+          <span class="skill-tagline">Prestatu, azaldu, eztabaidatu.</span>
+          <span class="skill-meta">Bakarrizketa eta elkarrizketa</span>
+        </span>
+        <ul class="skill-points"><li>Testu eta fitxa ofizialak</li><li>Prestaketa- eta interbentzio-kronometroak</li><li>Grabazioa zure gailuan bakarrik</li></ul>
+        <span class="skill-cta"><span class="skill-cta-label">Hasi ahozkoa</span><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span>
+      </a>
     </nav>
-  </header>
 
-  <main class="start-main">
-    <section class="start-intro" aria-labelledby="pageTitle">
-      <div class="intro-copy">
-        <span class="start-eyebrow">C1 PRESTAKETA OSOA</span>
-        <h1 id="pageTitle">Hiru trebetasun.<br>Prestaketa bakarra.</h1>
-        <p>Irakurmena, idazmena eta ahozkoa C1 mailan landu, IVAP eta HABEko ereduekin. Sartu zuzenean atalean eta aukeratu bertan nola lan egin.</p>
-      </div>
-      <div class="intro-proof" aria-label="Plataformaren ezaugarriak">
-        <div><strong>IVAP + HABE</strong><span>Benetako deialdiak</span></div>
-        <div><strong>C1</strong><span>Azterketa-mailako lana</span></div>
-        <div><strong>3 arlo</strong><span>Irakurmena, Idazmena, Ahozkoa</span></div>
-      </div>
-    </section>
+    <div class="home-extras">
+      <section class="home-account" aria-labelledby="accountTitle">
+        <div class="home-account-copy">
+          <span class="home-eyebrow">NIRE ESPAZIOA</span>
+          <h2 id="accountTitle">Gorde aurrerapena kontuarekin</h2>
+          <p id="accountLead">Zirriborroak, eskemak, azpimarrak eta irakurmen-emaitzak hodeian gordetzen dira. Gailuz aldatuta ere jarrai dezakezu.</p>
+        </div>
+        <div class="home-account-actions">
+          <button type="button" class="home-account-cta" id="homeRegister">Kontua sortu</button>
+          <a class="home-account-link" id="homeSpaceLink" href="/mi-espacio/">Nire espaziora joan</a>
+        </div>
+      </section>
 
-    <section class="practice-paths" aria-label="Aukeratu prestaketa-ibilbidea">
-      <article class="practice-path reading-path" id="irakurmena" aria-labelledby="readingPathTitle">
-        <header class="path-header">
-          <span class="path-number" aria-hidden="true">01</span>
-          <div>
-            <span class="path-kicker">IRAKURMENA · C1</span>
-            <h2 id="readingPathTitle">Ulertu, aztertu, erantzun.</h2>
-          </div>
-        </header>
-        <ul class="path-stats" aria-label="Irakurmenaren edukia">
-          <li><strong>23</strong><span>IVAP proba</span></li>
-          <li><strong>9</strong><span>HABE proba</span></li>
-          <li><strong>Katalogoa</strong><span>testuak aukeratu</span></li>
-        </ul>
-        <div class="writing-includes" aria-label="Irakurmen-tailerrak barne hartzen du">
-          <span>IVAP eta HABEko benetako deialdiak</span>
-          <span>Praktika edo simulazioa, barruan</span>
-          <span>Rotulagailua eta kontzentrazio-modua</span>
-        </div>
-        <div class="path-action">
-          <p>Sartu eta aukeratu irakurri nahi duzun proba.</p>
-          <a class="path-cta" href="/irakurmena/">Hasi irakurmena <span aria-hidden="true">→</span></a>
-        </div>
-      </article>
-
-      <article class="practice-path writing-path" id="idazmena" aria-labelledby="writingPathTitle">
-        <header class="path-header">
-          <span class="path-number" aria-hidden="true">02</span>
-          <div>
-            <span class="path-kicker">IDAZMENA · C1</span>
-            <h2 id="writingPathTitle">Pentsatu, idatzi, hobetu.</h2>
-          </div>
-        </header>
-        <ul class="path-stats" aria-label="Idazmenaren edukia">
-          <li><strong>45</strong><span>benetako ataza</span></li>
-          <li><strong>IVAP</strong><span>eta HABE</span></li>
-          <li><strong>3</strong><span>laguntza-atal</span></li>
-        </ul>
-        <div class="writing-includes" aria-label="Idazmen-tailerrak barne hartzen du">
-          <span>Enuntziatu eta material ofiziala</span>
-          <span>Hitz-kontagailua eta kronometroa</span>
-          <span>Entrenatu edo simulatu, barruan</span>
-        </div>
-        <div class="path-action">
-          <p>Sartu eta aukeratu idatzi nahi duzun ataza.</p>
-          <a class="path-cta" href="/idazlanak/">Hasi idazmena <span aria-hidden="true">→</span></a>
-        </div>
-      </article>
-
-      <article class="practice-path speaking-path" id="ahozkoa" aria-labelledby="speakingPathTitle">
-        <header class="path-header">
-          <span class="path-number" aria-hidden="true">03</span>
-          <div><span class="path-kicker">AHOZKOA · C1</span><h2 id="speakingPathTitle">Prestatu, azaldu, eztabaidatu.</h2></div>
-        </header>
-        <ul class="path-stats" aria-label="Mintzameneko edukia">
-          <li><strong>IVAP</strong><span>bakarrizketa eta eztabaida</span></li>
-          <li><strong>HABE</strong><span>gaia garatu eta elkarrizketa</span></li>
-          <li><strong>C1</strong><span>laguntza mailakatua</span></li>
-        </ul>
-        <div class="writing-includes" aria-label="Ahozko tailerrak barne hartzen du">
-          <span>Testu eta fitxa ofizialak</span>
-          <span>Eskema eta denbora-kontrola</span>
-          <span>Entrenatu edo simulatu, barruan</span>
-        </div>
-        <div class="path-action">
-          <p>Sartu eta aukeratu landu nahi duzun fitxa.</p>
-          <a class="path-cta" href="/ahozkoa/">Hasi ahozkoa <span aria-hidden="true">→</span></a>
-        </div>
-      </article>
-    </section>
-
-    <aside class="start-help" aria-labelledby="helpTitle">
-      <div>
-        <span class="start-eyebrow">ZURE PLANA</span>
-        <h2 id="helpTitle">Txandakatu hiru trebetasunak</h2>
-      </div>
-      <p>Atal bakoitzean aukeratuko duzu <strong>entrenamendua edo simulazioa</strong>. Irakurmenak ulermena zorrozten du, idazmenak zure euskara antolatzen du eta ahozkoak benetako jarduna aktibatzen du.</p>
-    </aside>
-
-    <aside class="start-account" aria-labelledby="accountTitle">
-      <div>
-        <span class="start-eyebrow">NIRE ESPAZIOA</span>
-        <h2 id="accountTitle">Gorde aurrerapena kontuarekin</h2>
-        <p>Erregistratu eta zure zirriborroak, eskemak, azpimarrak eta irakurmen-emaitzak hodeian gorde. Gailuz aldatuta ere jarrai dezakezu.</p>
-      </div>
-      <div class="start-account-actions">
-        <button type="button" class="start-account-cta" id="homeRegister">Kontua sortu</button>
-        <a class="start-account-link" href="/mi-espacio/">Nire espaziora joan</a>
-      </div>
-    </aside>
+      <section class="home-modes" aria-labelledby="modesTitle">
+        <span class="home-eyebrow">BI LAN-MODU</span>
+        <h2 id="modesTitle">Entrenatu lasai, edo simulatu azterketa</h2>
+        <dl class="mode-list">
+          <div><dt>Entrenamendua</dt><dd>Laguntzak eskura, zuzenketa ariketaz ariketa eta denbora-presiorik gabe.</dd></div>
+          <div><dt>Simulazioa</dt><dd>Kronometroa martxan eta laguntzarik gabe, benetako azterketan bezala.</dd></div>
+        </dl>
+      </section>
+    </div>
   </main>
 
-  <footer class="start-footer">SUSTRAI · Irakurmena + Idazmena + Ahozkoa · C1</footer>
+  <footer class="home-footer">SUSTRAI · Euskarako C1 prestaketa · Prestakuntza didaktikoa, ez egiaztapen ofiziala</footer>
+  <nav class="tabbar" aria-label="Atal nagusiak"><a href="/" aria-current="page"><span class="tabbar-icon"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg></span><span>Hasiera</span></a><a href="/irakurmena/"><span class="tabbar-icon"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6c-2-1.5-5-2-8-2v14c3 0 6 .5 8 2 2-1.5 5-2 8-2V4c-3 0-6 .5-8 2zM12 6v14"/></svg></span><span>Irakurmena</span></a><a href="/idazlanak/"><span class="tabbar-icon"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20l4-1L19 8l-3-3L5 16l-1 4zM14 7l3 3"/></svg></span><span>Idazmena</span></a><a href="/ahozkoa/"><span class="tabbar-icon"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a3 3 0 0 0-3 3v5a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3zM5 11a7 7 0 0 0 14 0M12 18v3"/></svg></span><span>Ahozkoa</span></a></nav>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.0" defer></script>
-<script src="/auth.js?v=20261115-product" defer></script>
-<script>
-  window.addEventListener('DOMContentLoaded', () => {
-    const btn = document.getElementById('homeRegister');
-    if (!btn) return;
-    btn.addEventListener('click', () => {
-      if (window.SustraiCloud?.openLogin) window.SustraiCloud.openLogin('signup');
-    });
-  });
-</script>
-<script src="/pwa.js" defer></script>
+  <script src="/auth.js?v=20261116-fokua" defer></script>
+  <script src="/home.js?v=20261116-fokua" defer></script>
+  <script src="/pwa.js?v=20261116-fokua" defer></script>
 </body>
 </html>

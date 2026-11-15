@@ -1,8 +1,8 @@
 <!doctype html>
 <html lang="eu">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#163e30">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#ffffff">
 <meta name="description" content="SUSTRAI administrazioa: ikasleak, emaitzak eta edukien sarbidea.">
 <title>SUSTRAI · Administrazioa</title>
 <link rel="manifest" href="/manifest.webmanifest">
@@ -12,14 +12,17 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="SUSTRAI">
-<link rel="stylesheet" href="/auth.css?v=20261115-product">
-<link rel="stylesheet" href="/admin/admin.css?v=20261115-product">
-<link rel="stylesheet" href="/mi-espacio/space.css?v=20261115-product">
+<link rel="preload" href="/fonts/inter-400.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/fonts/inter-display-700.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="/theme.css?v=20261116-fokua">
+  <link rel="stylesheet" href="/auth.css?v=20261116-fokua">
+<link rel="stylesheet" href="/admin/admin.css?v=20261116-fokua">
+<link rel="stylesheet" href="/mi-espacio/space.css?v=20261116-fokua">
 </head>
-<body>
-<header class="topbar">
- <a class="brand" href="/" aria-label="SUSTRAI hasiera"><span class="logo">S</span><span><strong>SUSTRAI</strong><small>ADMINISTRAZIOA</small></span></a>
- <nav aria-label="Atalak"><a href="/">Hasiera</a><a href="/irakurmena/">Irakurmena</a><a href="/idazlanak/">Idazmena</a><a href="/ahozkoa/">Ahozkoa</a><a href="/mi-espacio/">Nire espazioa</a></nav>
+<body class="has-tabbar">
+<header class="site-header">
+  <a class="site-brand" href="/" aria-label="SUSTRAI hasiera"><span class="site-brand-mark" aria-hidden="true">S</span><span class="site-brand-name">SUSTRAI</span><span class="site-brand-level">C1</span></a>
+  <nav class="site-nav" aria-label="Atalak"><a href="/">Hasiera</a><a href="/irakurmena/">Irakurmena</a><a href="/idazlanak/">Idazmena</a><a href="/ahozkoa/">Ahozkoa</a></nav>
 </header>
 <main id="adminApp" class="admin-layout" aria-busy="true">
  <section class="intro">
@@ -70,10 +73,11 @@
   <p class="footer-note">Sarbide-murrizketek SUSTRAI aplikazioaren edukia babesten dute. Kanpoko jatorrizko PDF publikoek beren sarbide-araubidea mantentzen dute.</p>
  </div>
 </main>
+<nav class="tabbar" aria-label="Atal nagusiak"><a href="/"><span class="tabbar-icon"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg></span><span>Hasiera</span></a><a href="/irakurmena/"><span class="tabbar-icon"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6c-2-1.5-5-2-8-2v14c3 0 6 .5 8 2 2-1.5 5-2 8-2V4c-3 0-6 .5-8 2zM12 6v14"/></svg></span><span>Irakurmena</span></a><a href="/idazlanak/"><span class="tabbar-icon"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20l4-1L19 8l-3-3L5 16l-1 4zM14 7l3 3"/></svg></span><span>Idazmena</span></a><a href="/ahozkoa/"><span class="tabbar-icon"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a3 3 0 0 0-3 3v5a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3zM5 11a7 7 0 0 0 14 0M12 18v3"/></svg></span><span>Ahozkoa</span></a></nav>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.0" defer></script>
-<script src="/auth.js?v=20261115-product" defer></script>
-<script src="/account-kit.js?v=20261115-product" defer></script>
-<script src="/admin/admin.js?v=20261115-product" defer></script>
-<script src="/pwa.js" defer></script>
+<script src="/auth.js?v=20261116-fokua" defer></script>
+<script src="/account-kit.js?v=20261116-fokua" defer></script>
+<script src="/admin/admin.js?v=20261116-fokua" defer></script>
+<script src="/pwa.js?v=20261116-fokua" defer></script>
 </body>
 </html>

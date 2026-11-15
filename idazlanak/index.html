@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#163e30">
   <meta name="description" content="SUSTRAI Idazlanak: C1 mailako IVAP eta HABE idazmen-atazak, idazteko gunea eta behar duzunean zabaltzeko laguntza.">
   <title>SUSTRAI · Idazlanak C1</title>
-  <link rel="stylesheet" href="/idazlanak/style.css?v=20261115-catalog-compact">
+  <link rel="stylesheet" href="/idazlanak/style.css?v=20261115-two-col">
 </head>
 <body>
 <a class="skip-link" href="#writingTitle">Joan idazteko gunera</a>
@@ -210,6 +210,36 @@
         <p class="outline-disclaimer">Eskema eta idazlana bereizita gordetzen dira gailu honetan. Ez dira irakasleari bidaltzen, eta eskemaren ideiak ez dira automatikoki idazlanean txertatzen.</p>
       </section>
 
+      <aside class="support panel" id="supportPanel" aria-labelledby="supportHeading">
+        <div class="support-heading">
+          <div>
+            <span class="overline">ZUK ERABAKITZEN DUZU</span>
+            <h2 id="supportHeading">Laguntza behar?</h2>
+            <p>Hasi bakarrik idazten. Trabatu egiten bazara, ireki behar duzun atala.</p>
+          </div>
+          <span id="helpBadge" class="help-badge">Laguntzarik erabili gabe</span>
+        </div>
+        <div id="supportReady" class="support-ready">
+          <details id="planningDetails" class="support-section">
+            <summary><span class="support-number">01</span> Ideiak antolatu</summary>
+            <div class="support-content" id="planningSupport"></div>
+          </details>
+          <details id="lexiconDetails" class="support-section">
+            <summary><span class="support-number">02</span> Hiztegia</summary>
+            <div class="support-content" id="lexiconSupport"></div>
+          </details>
+          <details id="structuresDetails" class="support-section">
+            <summary><span class="support-number">03</span> Egiturak eta lokailuak</summary>
+            <div class="support-content" id="structuresSupport"></div>
+          </details>
+        </div>
+        <div id="simulationHelp" class="simulation-help" hidden>
+          <strong>Simulazio modua</strong>
+          <p>Laguntzak ezkutuan daude. Horrela, zure kabuz sortzen duzun testua landuko duzu.</p>
+        </div>
+        <p class="help-footnote">Adibideak ikasteko dira, ez testuan hitzez hitz txertatzeko.</p>
+      </aside>
+
       <section class="editor panel" aria-labelledby="editorHeading">
         <div class="editor-head">
           <div>
@@ -240,36 +270,6 @@
         <p class="privacy-note">Zirriborroa gailu eta nabigatzaile honetan bakarrik gordetzen da; oraingoz ez da irakasleari bidaltzen.</p>
       </section>
     </section>
-
-    <aside class="support panel" id="supportPanel" aria-labelledby="supportHeading">
-      <div class="support-heading">
-        <span class="overline">ZUK ERABAKITZEN DUZU</span>
-        <h2 id="supportHeading">Laguntza behar?</h2>
-        <p>Hasi bakarrik idazten. Trabatu egiten bazara, ireki behar duzun atala.</p>
-      </div>
-      <div id="supportReady" class="support-ready">
-        <details id="planningDetails" class="support-section">
-          <summary><span class="support-number">01</span> Ideiak antolatu</summary>
-          <div class="support-content" id="planningSupport"></div>
-        </details>
-        <details id="lexiconDetails" class="support-section">
-          <summary><span class="support-number">02</span> Hiztegia</summary>
-          <div class="support-content" id="lexiconSupport"></div>
-        </details>
-        <details id="structuresDetails" class="support-section">
-          <summary><span class="support-number">03</span> Egiturak eta lokailuak</summary>
-          <div class="support-content" id="structuresSupport"></div>
-        </details>
-      </div>
-      <div id="simulationHelp" class="simulation-help" hidden>
-        <strong>Simulazio modua</strong>
-        <p>Laguntzak ezkutuan daude. Horrela, zure kabuz sortzen duzun testua landuko duzu.</p>
-      </div>
-      <div class="help-footer">
-        <span id="helpBadge">Laguntzarik erabili gabe</span>
-        <p>Adibideak ikasteko dira, ez testuan hitzez hitz txertatzeko.</p>
-      </div>
-    </aside>
   </main>
   <footer class="footer">SUSTRAI · Idazmena C1 · Hezkuntza-laguntza, ez kalifikazio ofiziala</footer>
   <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>

@@ -92,3 +92,10 @@ a:focus-visible,button:focus-visible,input:focus-visible+.choice-body{outline:3p
 /* Path descriptions removed from home cards */
 .path-header{margin-bottom:14px}
 .path-stats{margin-top:0}
+
+
+/* Direct entry CTAs (no mode form on home) */
+.path-cta{display:inline-flex;align-items:center;justify-content:center;gap:13px;min-height:45px;padding:0 16px;border:0;border-radius:10px;background:var(--path);color:#fff!important;font-size:12px;font-weight:850;text-decoration:none;box-shadow:0 8px 20px color-mix(in srgb,var(--path) 20%,transparent)}
+.path-cta:hover{filter:brightness(.9);transform:translateY(-1px)}
+.path-action{grid-template-columns:minmax(0,1fr) auto}
+@media(max-width:800px){.path-action .path-cta{width:100%}}

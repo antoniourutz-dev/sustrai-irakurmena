@@ -83,3 +83,7 @@ body.marker-armed .passage{touch-action:none;caret-color:transparent}
 body.marker-armed[data-marker-tool="erase"],
 body.marker-armed[data-marker-tool="erase"] .selectable,
 body.marker-armed[data-marker-tool="erase"] .passage{cursor:cell}
+
+body.marker-armed .choice{cursor:inherit}
+body.marker-armed .choice .selectable{cursor:inherit}
+body.marker-armed .choice:hover{transform:none}

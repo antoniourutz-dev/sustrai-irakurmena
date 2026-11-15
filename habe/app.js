@@ -141,12 +141,7 @@ function setActiveMarker(tool){
   eraseBtn.classList.toggle('active',on);
   eraseBtn.setAttribute('aria-pressed',String(on));
  }
- const hint=$('markerHint');
- if(hint)hint.textContent=activeMarker==='erase'?'Ezabatzeko: arrastatu markaren gainean':activeMarker?'Arrastatu testuan rotulagailuarekin':'Aukeratu kolorea: kurtsorea rotulagailu bihurtuko da';
- if(activeMarker){
-  $('markerbar').classList.add('visible');
-  toast(activeMarker==='erase'?'Ezabatzailea prest':'Rotulagailua prest: arrastatu testuan');
- }
+ if(activeMarker)$('markerbar').classList.add('visible');
 }
 function restoreMarkerPosition(){
  const bar=$('markerbar');if(!bar)return;
@@ -237,9 +232,31 @@ function brushTargetFromEvent(event){
  if(event.target.closest('#markerbar,.marker-drag,button,a,select,label,.numbers,.tab,.modal,.hole,.time-actions,.choose'))return null;
  return event.target.closest('.selectable[data-area]');
 }
+function markRangeFromElement(mark){
+ const areaEl=mark.closest('.selectable[data-area]');
+ if(!areaEl)return null;
+ try{
+  const before=document.createRange();
+  before.selectNodeContents(areaEl);
+  before.setEnd(mark,0);
+  const start=before.toString().length,end=start+mark.textContent.length;
+  if(end<=start)return null;
+  return {area:areaEl.dataset.area,start,end};
+ }catch{return null}
+}
+function eraseMarkElement(mark){
+ const span=markRangeFromElement(mark);
+ if(!span)return;
+ const list=marks().filter(m=>!(m.area===span.area&&m.start<span.end&&m.end>span.start));
+ save(markKey(),list);
+ window.getSelection()?.removeAllRanges();
+ renderPassage(false);renderQuestion();
+}
 function finishBrushStroke(){
  if(!brushStroke||!activeMarker){brushStroke=null;return}
+ const moved=brushStroke.moved;
  brushStroke=null;
+ if(!moved)return;
  captureSelection();
  if(!lastSelection.length)return;
  if(activeMarker==='erase')erase();else paint(activeMarker);
@@ -247,15 +264,15 @@ function finishBrushStroke(){
 function setupBrushPaint(){
  document.addEventListener('pointerdown',event=>{
   if(!activeMarker||event.button!==0||brushStroke)return;
+  if(event.target.closest('mark.highlit'))return;
   if(!brushTargetFromEvent(event))return;
   const caret=caretFromPoint(event.clientX,event.clientY);
   if(!caret||caret.node.nodeType!==Node.TEXT_NODE)return;
-  event.preventDefault();
-  brushStroke={pid:event.pointerId,start:caret,end:caret};
-  previewBrushSelection(caret,caret);
+  brushStroke={pid:event.pointerId,start:caret,end:caret,moved:false,x:event.clientX,y:event.clientY};
  },true);
  document.addEventListener('pointermove',event=>{
   if(!brushStroke||event.pointerId!==brushStroke.pid)return;
+  if(Math.abs(event.clientX-brushStroke.x)>3||Math.abs(event.clientY-brushStroke.y)>3)brushStroke.moved=true;
   const caret=caretFromPoint(event.clientX,event.clientY);
   if(!caret||caret.node.nodeType!==Node.TEXT_NODE)return;
   brushStroke.end=caret;
@@ -267,6 +284,40 @@ function setupBrushPaint(){
  };
  document.addEventListener('pointerup',end,true);
  document.addEventListener('pointercancel',end,true);
+ document.addEventListener('click',event=>{
+  if(!activeMarker)return;
+  const mark=event.target.closest('mark.highlit');
+  if(!mark||!mark.closest('.selectable[data-area]'))return;
+  if(event.target.closest('#markerbar,button,a,select,.choose'))return;
+  event.preventDefault();
+  event.stopPropagation();
+  eraseMarkElement(mark);
+ },true);
+ document.addEventListener('dblclick',event=>{
+  if(!activeMarker||activeMarker==='erase')return;
+  if(event.target.closest('mark.highlit,button,a,select,.choose,#markerbar,.hole'))return;
+  if(!event.target.closest('.selectable[data-area]'))return;
+  event.preventDefault();
+  const caret=caretFromPoint(event.clientX,event.clientY);
+  if(!caret||caret.node.nodeType!==Node.TEXT_NODE)return;
+  const text=caret.node.textContent;
+  let start=caret.offset,end=caret.offset;
+  const word=c=>/[\p{L}\p{N}'’\-]/u.test(c);
+  while(start>0&&word(text[start-1]))start--;
+  while(end<text.length&&word(text[end]))end++;
+  if(end<=start)return;
+  try{
+   const range=document.createRange();
+   range.setStart(caret.node,start);
+   range.setEnd(caret.node,end);
+   const sel=window.getSelection();
+   sel.removeAllRanges();
+   sel.addRange(range);
+  }catch{return}
+  captureSelection();
+  if(!lastSelection.length)return;
+  paint(activeMarker);
+ },true);
 }
 
 

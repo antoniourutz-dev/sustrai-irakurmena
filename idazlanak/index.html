@@ -6,7 +6,8 @@
   <meta name="theme-color" content="#163e30">
   <meta name="description" content="SUSTRAI Idazlanak: C1 mailako IVAP eta HABE idazmen-atazak, idazteko gunea eta behar duzunean zabaltzeko laguntza.">
   <title>SUSTRAI · Idazlanak C1</title>
-  <link rel="stylesheet" href="/idazlanak/style.css?v=20261115-focus">
+  <link rel="stylesheet" href="/idazlanak/style.css?v=20261115-marker">
+  <link rel="stylesheet" href="/marker.css?v=20261115-marker">
 </head>
 <body>
 <a class="skip-link" href="#writingTitle">Joan idazteko gunera</a>
@@ -80,6 +81,7 @@
               <output id="timerDisplay">00:00</output>
               <button id="timerToggle" type="button" class="soft" disabled>Hasi</button>
               <button id="exitFocus" type="button" class="soft focus-exit" hidden>Kontzentrazioa itxi</button>
+              <button id="markerTool" type="button" class="soft marker-open" aria-expanded="false" aria-controls="markerbar">Nabarmendu</button>
               <span id="timeGuidance" class="muted-note"></span>
             </div>
             <div class="modes" role="group" aria-label="Lanerako modua">
@@ -275,10 +277,12 @@
     </section>
   </main>
   <footer class="footer">SUSTRAI · Idazmena C1 · Hezkuntza-laguntza, ez kalifikazio ofiziala</footer>
+  <div class="markerbar" id="markerbar" role="toolbar" aria-label="Rotulagailua"><button type="button" class="marker-drag" id="markerDrag" aria-label="Mugitu rotulagailua" title="Mugitu">⠿</button><span class="highlabel">Rotulagailua</span><button class="swatch" style="--ink:#ffe174" data-color="yellow" aria-label="Horia" title="Horia"></button><button class="swatch" style="--ink:#a9e8bd" data-color="green" aria-label="Berdea" title="Berdea"></button><button class="swatch" style="--ink:#f7bed5" data-color="pink" aria-label="Arrosa" title="Arrosa"></button><button class="swatch" style="--ink:#b2dbff" data-color="blue" aria-label="Urdina" title="Urdina"></button><button id="erase" class="little marker-erase" data-tool="erase" type="button">Ezabatu</button><button id="markVisibility" class="little" type="button">Ezkutatu</button><button id="closeMarker" class="closemarker" aria-label="Rotulagailua itxi" type="button">×</button></div>
   <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
 </div>
 <noscript>Idazmen-tailerra erabiltzeko JavaScript beharrezkoa da.</noscript>
-<script src="/idazlanak/app.js?v=20261115-focus" defer></script>
+<script src="/marker-kit.js?v=20261115-marker" defer></script>
+<script src="/idazlanak/app.js?v=20261115-marker" defer></script>
 <script src="/idazlanak/eskema.js?v=20261114-outline-1" defer></script>
 </body>
 </html>

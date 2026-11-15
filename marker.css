@@ -1,0 +1,64 @@
+/* Shared highlighter toolbar */
+.marker-open{border-color:#b4d3be;color:#255f43;background:#f2faf3}
+.markerbar{
+  position:fixed;
+  top:110px;
+  left:24px;
+  z-index:40;
+  display:none;
+  align-items:center;
+  gap:6px;
+  flex-wrap:nowrap;
+  width:auto;
+  max-width:min(420px,calc(100vw - 24px));
+  padding:10px 28px 10px 8px;
+  background:#fff;
+  border:1px solid #c9decf;
+  border-radius:11px;
+  box-shadow:0 14px 36px #123e2e2e,0 1px 0 #fff inset;
+  touch-action:none;
+  user-select:none;
+}
+.markerbar.visible{display:flex}
+.highlabel{font-size:11px;font-weight:750;color:#355f47;margin-right:4px}
+.swatch{
+  background:var(--ink);
+  border:2px solid #fff;
+  box-shadow:0 0 0 1px #c7d6c9;
+  color:transparent;
+  min-width:30px;
+  width:30px;
+  height:27px;
+  padding:0;
+  border-radius:5px;
+  cursor:pointer;
+}
+.swatch.active,.marker-erase.active{
+  outline:2px solid #1f7352;
+  outline-offset:2px;
+  transform:translateY(-1px);
+}
+.markerbar .little{font-size:11px;padding:5px 8px;border:1px solid #c9decf;border-radius:8px;background:#fff;cursor:pointer}
+.closemarker{position:absolute;right:8px;top:6px;border:0;background:none;font-size:21px;padding:0 5px;color:#6a8374;cursor:pointer}
+.marker-drag{
+  cursor:grab;
+  border:0!important;
+  background:transparent!important;
+  color:#6d8575!important;
+  font-size:16px;
+  line-height:1;
+  padding:4px 2px!important;
+  min-width:22px;
+  letter-spacing:-2px;
+}
+.marker-drag:active{cursor:grabbing}
+.selectable{user-select:text;-webkit-user-select:text}
+mark.highlit{color:inherit;border-radius:3px;padding:0;box-decoration-break:clone;-webkit-box-decoration-break:clone}
+body.marker-armed,
+body.marker-armed .selectable{
+  cursor:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 28 28'%3E%3Cpath fill='%23f0c94d' stroke='%231f7352' stroke-width='1.2' d='M4 19.5V25h5.5L22 12.5 16.5 7 4 19.5z'/%3E%3Cpath fill='%231f7352' d='M17.2 6.3l4.5 4.5 1.7-1.7a1.5 1.5 0 0 0 0-2.1l-2.4-2.4a1.5 1.5 0 0 0-2.1 0l-1.7 1.7z'/%3E%3C/svg%3E") 3 25, crosshair;
+}
+body.marker-armed .selectable{touch-action:none;caret-color:transparent}
+body.marker-armed[data-marker-tool="erase"],
+body.marker-armed[data-marker-tool="erase"] .selectable{cursor:cell}
+body.marker-armed mark.highlit{cursor:pointer}

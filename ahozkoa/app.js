@@ -81,16 +81,24 @@ function renderSupports(){
  $('simulationNotice').hidden=mode!=='simulation';
  $('helpCount').textContent='Laguntzarik zabaldu gabe';
 }
+function setFocusMode(on){
+ document.body.classList.toggle('focus-mode',!!on);
+ const exit=$('exitFocus');
+ if(exit)exit.hidden=!on;
+}
+function anyTimerRunning(){return timers.prep.running||timers.speak.running}
 function renderTimers(){
  for(const k of ['prep','speak']){
   const t=timers[k],target=k==='prep'?selected?.preparation_minutes:selected?.speaking_minutes;
-  const minutes=Math.floor(t.elapsed/60),seconds=t.elapsed%60;
-  $(k+'Time').textContent=String(minutes).padStart(2,'0')+':'+String(seconds).padStart(2,'0');
+  const stamp=String(Math.floor(t.elapsed/60)).padStart(2,'0')+':'+String(t.elapsed%60).padStart(2,'0');
+  $(k+'Time').textContent=stamp;
+  const top=$(k+'TimeTop');if(top)top.textContent=stamp;
   $(k+'Target').textContent=target===null||target===undefined?'Denbora ez egiaztatua':target+' min (fitxa)';
   $(k+'Start').disabled=!selected||target===null||target===undefined;
   $(k+'Start').textContent=t.running?'Gelditu':'Hasi';
   $(k+'Reset').disabled=!selected;
  }
+ setFocusMode(anyTimerRunning());
 }
 function stopAllTimers(){for(const k of ['prep','speak'])timers[k].running=false;renderTimers()}
 function startTimer(k){
@@ -100,6 +108,7 @@ function startTimer(k){
  const was=timers[k].running;for(const x of ['prep','speak'])timers[x].running=false;
  timers[k].running=!was;
  renderTimers();
+ if(timers[k].running)show('Kontzentrazio-modua: kronometroa martxan');
 }
 function resetTimer(k){timers[k].elapsed=0;timers[k].running=false;renderTimers()}
 function tick(){
@@ -219,6 +228,7 @@ async function init(){
  $('reviewChecks').addEventListener('change',saveState);
  $('copyNotes').onclick=copyNotes;$('clearNotes').onclick=clearNotes;
  for(const k of ['prep','speak']){$(k+'Start').onclick=()=>startTimer(k);$(k+'Reset').onclick=()=>resetTimer(k)}
+ if($('exitFocus'))$('exitFocus').onclick=()=>{stopAllTimers();show('Kontzentrazio-modua itxita')};
  $('recordToggle').onclick=toggleRecording;$('recordDownload').onclick=downloadRecording;
  for(const panel of document.querySelectorAll('.help-sections details')){
   panel.addEventListener('toggle',()=>{

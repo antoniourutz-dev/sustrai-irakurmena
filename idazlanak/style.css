@@ -232,3 +232,36 @@ body{background:radial-gradient(circle at 12% 8%,#dfece2 0,transparent 34rem),ra
 @media(min-width:851px) and (max-width:1100px){
   .support-ready{grid-template-columns:1fr!important}
 }
+
+/* Session timer at top + concentration mode */
+.session-controls{display:flex;flex-direction:column;align-items:flex-end;gap:10px}
+.session-timer{display:flex;align-items:center;gap:8px;padding:8px 10px;border:1px solid #c5d9cb;border-radius:10px;background:#fff;box-shadow:0 2px 8px #173b280c}
+.session-timer #timerDisplay{font-size:22px;font-weight:850;font-variant-numeric:tabular-nums;color:#166647;min-width:4.2em}
+.session-timer .timer-label{font-size:11px;font-weight:750;color:#5d7564}
+.session-timer .focus-exit[hidden]{display:none!important}
+body.focus-mode .catalog,
+body.focus-mode .modes,
+body.focus-mode .mode-note,
+body.focus-mode .support,
+body.focus-mode .outline-workshop,
+body.focus-mode .official-guidance,
+body.focus-mode .original-excerpt,
+body.focus-mode .footer,
+body.focus-mode .topnav{display:none!important}
+body.focus-mode .topbar{min-height:44px;padding-block:6px}
+body.focus-mode .brand small{display:none}
+body.focus-mode .layout{display:block;padding:10px;max-width:1100px;margin:0 auto}
+body.focus-mode .maincol{width:100%}
+body.focus-mode .sessionbar{position:sticky;top:0;z-index:12;padding:12px 16px}
+body.focus-mode .session-top{align-items:center}
+body.focus-mode .prompt{padding:12px 16px}
+body.focus-mode .prompt h3{font-size:18px;margin:4px 0 8px}
+body.focus-mode .prompt-section p{font-size:14px;line-height:1.45}
+body.focus-mode .official-material{max-height:160px;overflow:auto}
+body.focus-mode .editor{padding:14px 16px;display:flex;flex-direction:column;min-height:min(70vh,720px)}
+body.focus-mode .editor textarea{flex:1;min-height:min(58vh,620px);font-size:18px;line-height:1.65}
+body.focus-mode .focus-exit{display:inline-flex!important}
+@media(max-width:850px){
+  .session-controls{align-items:stretch;width:100%}
+  .session-timer{justify-content:flex-start;flex-wrap:wrap}
+}

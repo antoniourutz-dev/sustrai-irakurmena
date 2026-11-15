@@ -6,7 +6,8 @@
  const KEY_PREFIX = 'sustrai-';
  const state = {user:null,profile:null,client:null,cloud:new Map(),dirty:new Set(),deleted:new Set(),busy:false,notice:'',ready:false};
  const isWorkKey = key => typeof key==='string' && key.startsWith(KEY_PREFIX) && key.length<=180;
- const raw = window.localStorage;
+ let raw;
+ try{raw=window.localStorage}catch{const m=new Map();raw={getItem:k=>m.get(k)||null,setItem:(k,v)=>m.set(k,String(v)),removeItem:k=>m.delete(k),key:i=>[...m.keys()][i]||null,get length(){return m.size}}}
  const notify = (msg) => {
    state.notice=msg;
    const target=document.getElementById('sustrai-account-status');
@@ -36,6 +37,7 @@
    const uid=state.user.id;
    const keys=[...state.dirty];state.dirty.clear();
    const removed=[...state.deleted];state.deleted.clear();
+   let failed=false;
    try{
      if(keys.length){
        const rows=keys.filter(k=>state.cloud.has(k)).map(k=>({user_id:uid,storage_key:k,value_text:state.cloud.get(k),updated_at:new Date().toISOString()}));
@@ -50,11 +52,12 @@
      }
      notify('Gordeta hodeian');
    }catch(err){
+     failed=true;
      keys.forEach(k=>{if(state.cloud.has(k))state.dirty.add(k)});
      removed.forEach(k=>{if(!state.cloud.has(k))state.deleted.add(k)});
      notify('Ezin da gorde hodeian. Egiaztatu konexioa.');
      console.warn('SUSTRAI cloud sync error',err?.code||'connection');
-   }finally{state.busy=false;if(state.dirty.size||state.deleted.size){}}
+   }finally{state.busy=false;if(!failed&&(state.dirty.size||state.deleted.size))schedule()}
  }
  async function reloadCloud(){
    const {data,error}=await state.client.from('sr_app_state').select('storage_key,value_text').eq('user_id',state.user.id).limit(2000);
@@ -81,7 +84,7 @@
        if(!state.profile?.active){notify('Kontua desaktibatuta dago.');return}
        await reloadCloud();
      }
-     state.client.auth.onAuthStateChange((event) => {if(event==='PASSWORD_RECOVERY')openDialog('recover')});
+     state.client.auth.onAuthStateChange((event) => {if(event==='PASSWORD_RECOVERY')openDialog('recover');if(event==='SIGNED_OUT'&&state.user)setTimeout(()=>location.reload(),0)});
    } catch(err){
      if(state.user)notify('Ezin izan dira zure datuak kargatu. Ez da ezer lokalean ordezkatu.');
      else notify('Gonbidatu modua martxan.');
@@ -187,6 +190,7 @@
      if(state.profile.admin){
        const admin=document.createElement('a');admin.href='/admin/';admin.textContent='Kudeaketa';admin.className='sustrai-account-button';el.append(admin);
      }
+     const mySpace=document.createElement('a');mySpace.href='/mi-espacio/';mySpace.textContent='Nire espazioa';mySpace.className='sustrai-account-button';el.append(mySpace);
      const importBtn=document.createElement('button');importBtn.type='button';importBtn.className='sustrai-account-button';importBtn.textContent='Inportatu';importBtn.title='Gonbidatu gisa egindako lanak inportatu';importBtn.onclick=importGuestData;el.append(importBtn);
      const signOut=document.createElement('button');signOut.type='button';signOut.className='sustrai-account-button';signOut.textContent='Irten';signOut.onclick=async()=>{await flush();await state.client.auth.signOut();location.assign('/')};el.append(signOut);
    } else {

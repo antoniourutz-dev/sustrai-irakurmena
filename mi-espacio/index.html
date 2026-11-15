@@ -1,0 +1,22 @@
+<!doctype html><html lang="eu"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SUSTRAI · Nire espazioa</title><meta name="theme-color" content="#163e30">
+<link rel="stylesheet" href="/auth.css"><link rel="stylesheet" href="/admin/admin.css">
+<style>.my-work{max-width:1060px}.my-work .grid{grid-template-columns:1fr 1fr}.my-work .works,.my-work .results{max-height:none}.my-work .actions{display:flex;gap:8px;flex-wrap:wrap}.my-work .empty{padding:12px;color:#63766c}@media(max-width:750px){.my-work .grid{grid-template-columns:1fr}}</style>
+</head><body>
+<header class="topbar"><a class="brand" href="/"><span class="logo">S</span><span><strong>SUSTRAI</strong><small>NIRE ESPAZIOA</small></span></a><nav><a href="/">Hasiera</a><a href="/irakurmena/">Irakurmena</a><a href="/idazlanak/">Idazmena</a><a href="/ahozkoa/">Ahozkoa</a></nav></header>
+<main class="admin-layout my-work">
+ <section class="intro"><div><p class="eyebrow">NIRE IKASKUNTZA</p><h1>Nire espazioa</h1>
+  <p>Zure saioak, idazlanak, eskemak, markak eta emaitzak kontsultatu edo esportatu ahal dituzu.</p></div>
+  <p id="myStatus" class="status" role="status">Saioa egiaztatzen…</p></section>
+ <section id="guest" class="card" hidden><h2>Saioa hasi behar duzu</h2><p>Gonbidatu gisa egindako lanak zure nabigatzailean gordetzen dira. Kontuarekin sartuz gero, aukeran inportatu ahal dituzu.</p><button id="login" type="button">Saioa hasi / erregistratu</button></section>
+ <div id="signedIn" hidden>
+  <div class="card"><h2>Kontuaren informazioa</h2><p id="identity"></p>
+   <div class="actions"><button id="refresh" type="button">Eguneratu</button><button id="import" type="button" class="soft">Gonbidatu-lanak inportatu</button><button id="export" type="button" class="soft">Nire datuen kopia deskargatu</button></div>
+   <p class="subtle">Zure lanak SUSTRAIren administratzaileak ikusi ahal izango ditu ikaskuntzaren jarraipena egiteko. Grabazioak ez dira hodeira igotzen: zuk deskargatu behar dituzu.</p>
+  </div>
+  <div class="grid"><section class="card"><h2>Irakurmeneko emaitzak</h2><div id="myResults" class="results"></div></section>
+   <section class="card"><h2>Gordetako lanak</h2><p class="subtle">Elementu bakoitza kontsultatu edo ezabatu dezakezu.</p><div id="myWorks" class="works"></div></section></div>
+ </div>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.0/dist/umd/supabase.min.js" defer></script>
+<script src="/auth.js" defer></script><script src="/mi-espacio/app.js" defer></script></body></html>

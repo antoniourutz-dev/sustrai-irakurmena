@@ -6,7 +6,7 @@
  <meta name="theme-color" content="#153e32">
  <meta name="description" content="SUSTRAI Ahozkoa C1: IVAP eta HABEko ahozko atazak, eskema propioa, laguntza mailakatua eta tokiko grabazioa.">
  <title>SUSTRAI · Ahozkoa C1</title>
- <link rel="stylesheet" href="/ahozkoa/style.css?v=20261115-catalog-compact">
+ <link rel="stylesheet" href="/ahozkoa/style.css?v=20261115-two-col">
 </head>
 <body>
 <a class="skip" href="#speakingTitle">Joan ariketara</a>
@@ -74,6 +74,24 @@
     </div>
     <div class="prep-actions"><span id="notesStatus" aria-live="polite">Eskema automatikoki gordetzen da</span><button id="copyNotes" type="button" class="soft" disabled>Kopiatu eskema</button><button id="clearNotes" type="button" class="link-danger" disabled>Eskema ezabatu</button></div>
    </section>
+   <aside class="help panel" id="helpPanel" aria-labelledby="helpHeading">
+    <div class="help-intro">
+     <div>
+      <span class="eyebrow">AUKERAKO LAGUNTZA</span>
+      <h2 id="helpHeading">Laguntza behar?</h2>
+      <p>Lehenengo probatu zure kabuz. Gero, zabaldu behar duzuna.</p>
+     </div>
+     <span id="helpCount" class="help-badge">Laguntzarik zabaldu gabe</span>
+    </div>
+    <div class="help-sections" id="helpSections">
+      <details id="planningDetails"><summary>01 · Prestatzeko ideiak</summary><div id="planningItems"></div></details>
+      <details id="lexiconDetails"><summary>02 · Hiztegi erabilgarria</summary><div id="lexiconItems"></div></details>
+      <details id="structuresDetails"><summary>03 · Egiturak eta lokailuak</summary><div id="structuresItems"></div></details>
+      <details id="interactionDetails"><summary>04 · Elkarrizketarako estrategiak</summary><div id="interactionItems"></div></details>
+    </div>
+    <div id="simulationNotice" class="sim-notice" hidden><strong>Simulazio modua</strong><p>Laguntza didaktikoa ezkutuan dago. Jatorrizko azterketako materiala eskuragarri dago beti.</p></div>
+    <p class="help-footnote">SUSTRAIren adibideak ikasteko dira; ez dira enuntziatuaren parte.</p>
+   </aside>
    <section class="practice panel" aria-labelledby="practiceHeading">
     <span class="eyebrow">PRAKTIKATU ZURE KABUZ</span><h3 id="practiceHeading">Denbora eta ahotsa</h3>
     <div class="time-grid">
@@ -98,17 +116,6 @@
     </div>
    </section>
   </div>
-  <aside class="help panel" id="helpPanel" aria-labelledby="helpHeading">
-   <div class="help-intro"><span class="eyebrow">AUKERAKO LAGUNTZA</span><h2 id="helpHeading">Laguntza behar?</h2><p>Lehenengo probatu zure kabuz. Gero, zabaldu behar duzuna.</p></div>
-   <div class="help-sections" id="helpSections">
-     <details id="planningDetails"><summary>01 · Prestatzeko ideiak</summary><div id="planningItems"></div></details>
-     <details id="lexiconDetails"><summary>02 · Hiztegi erabilgarria</summary><div id="lexiconItems"></div></details>
-     <details id="structuresDetails"><summary>03 · Egiturak eta lokailuak</summary><div id="structuresItems"></div></details>
-     <details id="interactionDetails"><summary>04 · Elkarrizketarako estrategiak</summary><div id="interactionItems"></div></details>
-   </div>
-   <div id="simulationNotice" class="sim-notice" hidden><strong>Simulazio modua</strong><p>Laguntza didaktikoa ezkutuan dago. Jatorrizko azterketako materiala eskuragarri dago beti.</p></div>
-   <div class="help-footer"><span id="helpCount">Laguntzarik zabaldu gabe</span><p>SUSTRAIren adibideak ikasteko dira; ez dira enuntziatuaren parte.</p></div>
-  </aside>
  </main>
  <footer>SUSTRAI · Ahozkoa C1 · Prestakuntza didaktikoa, ez egiaztapen ofiziala</footer>
  <div id="toast" class="toast" hidden role="status" aria-live="polite"></div>

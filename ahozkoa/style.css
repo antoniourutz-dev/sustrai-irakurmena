@@ -40,3 +40,73 @@
 }
 .catalog .task-card strong{font-size:13px;line-height:1.35}
 .catalog .task-card .meta,.catalog .task-card .kind{font-size:11px}
+
+/* Two-column workshop: catalog + main (help lives inside main) */
+.layout{
+  grid-template-columns:minmax(250px,310px) minmax(0,1fr)!important;
+}
+.maincol{
+  min-width:0;
+  display:flex;
+  flex-direction:column;
+  gap:15px;
+}
+.help{
+  position:static!important;
+  max-height:none!important;
+  width:100%;
+  overflow:visible;
+}
+.help-intro{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:14px;
+  padding:16px 18px 12px;
+}
+.help-intro h2{margin:6px 0 6px;font:700 22px/1.15 var(--font-text)}
+.help-intro p{max-width:48rem;margin:0}
+.help-badge{
+  display:inline-flex;
+  flex-shrink:0;
+  align-self:center;
+  padding:6px 10px;
+  border-radius:999px;
+  background:#e7f1e9;
+  color:#2c6547;
+  font-size:11px;
+  font-weight:800;
+}
+.help-sections{
+  display:grid!important;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:10px;
+  padding:0 16px 14px;
+}
+.help-sections details{
+  margin:0;
+  border:1px solid #d7e4da;
+  border-radius:10px;
+  background:#fff;
+  overflow:hidden;
+}
+.help-sections summary{
+  cursor:pointer;
+  list-style:none;
+  padding:12px;
+  font-weight:750;
+}
+.help-sections summary::-webkit-details-marker{display:none}
+.help-sections details > div{padding:0 12px 12px}
+.help-footnote{
+  margin:0;
+  padding:0 18px 14px;
+  font-size:11px;
+  color:#6a7f6f;
+}
+.sim-notice{margin:0 16px 14px}
+@media(max-width:900px){
+  .layout{grid-template-columns:1fr!important}
+  .help-sections{grid-template-columns:1fr!important}
+  .help-intro{flex-direction:column;gap:8px}
+}

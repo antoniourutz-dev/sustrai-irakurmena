@@ -113,7 +113,7 @@
         <label for="sustrai-auth-email">Helbide elektronikoa</label>
         <input id="sustrai-auth-email" name="email" type="email" autocomplete="email" required maxlength="254">
         <label for="sustrai-auth-pass">Pasahitza</label>
-        <input id="sustrai-auth-pass" name="password" type="password" autocomplete="current-password" minlength="8" required>
+        <input id="sustrai-auth-pass" name="password" type="password" autocomplete="current-password" required>
         <button type="submit" id="sustrai-auth-submit">Sartu</button>
       </form>
       <p id="sustrai-auth-message" role="status" aria-live="polite"></p>
@@ -138,6 +138,8 @@
    $('sustrai-auth-submit').textContent=({login:'Sartu',signup:'Erregistratu',reset:'Bidali berreskurapen-esteka',recover:'Gorde pasahitz berria'})[mode];
    const pass=$('sustrai-auth-pass');
    pass.required=mode!=='reset';pass.hidden=mode==='reset';
+   // Existing accounts may have shorter passwords. Validate length only when setting a new password.
+   if(mode==='signup'||mode==='recover')pass.minLength=8;else pass.removeAttribute('minlength');
    const label=pass.previousElementSibling;if(label)label.hidden=mode==='reset';
    const email=$('sustrai-auth-email');email.required=mode!=='recover';
    email.parentElement.querySelector('label[for="sustrai-auth-email"]').hidden=mode==='recover';

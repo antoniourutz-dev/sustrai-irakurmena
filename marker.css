@@ -28,9 +28,9 @@ body.marker-armed[data-marker-tool="erase"] mark.highlit{cursor:pointer}
 }
 /* Phones: docked, centred and always the same size. */
 @media(max-width:760px){
-  .markerbar{left:50%;right:auto;top:auto;bottom:84px;transform:translateX(-50%);gap:5px;padding:5px 6px;border-radius:14px}
+  .markerbar{left:50%;right:auto;top:auto;bottom:84px;transform:translateX(-50%);gap:5px;margin-bottom:var(--s-safe-bottom);padding:5px 6px;border-radius:14px}
   body.has-tabbar .markerbar{bottom:calc(var(--s-tabbar-h) + env(safe-area-inset-bottom,0px) + 10px)}
-  body.view-questions .markerbar{bottom:calc(50dvh + 10px)}
+  body.view-questions .markerbar{bottom:calc(50vh + 10px);bottom:calc(50dvh + 10px)}
   .marker-drag,.highlabel{display:none}
   .swatch{width:34px;min-width:34px;height:34px;min-height:34px}
   .markerbar .little{padding:0 8px}

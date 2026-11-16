@@ -42,6 +42,10 @@
   --s-shadow-sheet:0 -10px 30px rgb(15 23 42 / .10);
   --s-header-h:64px;
   --s-tabbar-h:64px;
+  --s-safe-top:env(safe-area-inset-top,0px);
+  --s-safe-bottom:env(safe-area-inset-bottom,0px);
+  --s-safe-left:env(safe-area-inset-left,0px);
+  --s-safe-right:env(safe-area-inset-right,0px);
   color-scheme:light;
 }
 
@@ -50,7 +54,7 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 .sr-only{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
 
 /* ---------- Site header ---------- */
-.site-header{position:relative;z-index:30;display:flex;align-items:center;gap:8px 20px;min-height:var(--s-header-h);padding:8px clamp(16px,3vw,40px);background:var(--s-surface);border-bottom:1px solid var(--s-line);color:var(--s-ink);font-family:var(--s-font-ui)}
+.site-header{position:relative;z-index:30;display:flex;align-items:center;gap:8px 20px;min-height:calc(var(--s-header-h) + var(--s-safe-top));padding:calc(8px + var(--s-safe-top)) max(clamp(16px,3vw,40px),var(--s-safe-right)) 8px max(clamp(16px,3vw,40px),var(--s-safe-left));background:var(--s-surface);border-bottom:1px solid var(--s-line);color:var(--s-ink);font-family:var(--s-font-ui)}
 .site-brand{display:inline-flex;align-items:center;gap:10px;min-height:44px;color:var(--s-ink);text-decoration:none;flex:none}
 .site-brand-mark{display:grid;place-items:center;width:36px;height:36px;border-radius:10px;background:var(--s-primary);color:#fff;font:700 21px/1 var(--s-font-display)}
 .site-brand-name{font:700 18px/1 var(--s-font-display);letter-spacing:.04em}
@@ -66,7 +70,7 @@ body.focus-mode .site-nav{display:none}
 /* ---------- Mobile tab bar ---------- */
 .tabbar{display:none}
 @media(max-width:760px){
-  .site-header{min-height:56px;padding:6px 14px;gap:8px}
+  .site-header{min-height:calc(56px + var(--s-safe-top));padding:calc(6px + var(--s-safe-top)) max(14px,var(--s-safe-right)) 6px max(14px,var(--s-safe-left));gap:8px}
   .site-brand-mark{width:34px;height:34px;font-size:20px}
   .site-brand-name{font-size:17px}
   .site-nav{display:none}

@@ -85,3 +85,5 @@ button{cursor:pointer}
   .maincol{bottom:calc(var(--s-tabbar-h) + env(safe-area-inset-bottom,0px) + 10px)}
   .app>footer{display:none}
 }
+/* Room for the sticky action bar, so the last exams of the list stay reachable. */
+@media(max-width:900px){.app>main{padding-bottom:150px}}

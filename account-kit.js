@@ -56,6 +56,18 @@
         href: '/ahozkoa/?ataza=' + encodeURIComponent(m[1]) + '&mode=' + m[2]
       };
     }
+    if ((m = raw.match(/^sustrai-writer-saved:([^:]+)$/))) {
+      return { ...base, skill: 'writing', kind: 'saved', slug: m[1], label: 'Gordetako idazlanak', href: '/idazlanak/?ataza=' + encodeURIComponent(m[1]) };
+    }
+    if ((m = raw.match(/^sustrai-oral-saved:([^:]+)$/))) {
+      return { ...base, skill: 'speaking', kind: 'saved', slug: m[1], label: 'Gordetako eskemak', href: '/ahozkoa/?ataza=' + encodeURIComponent(m[1]) };
+    }
+    if ((m = raw.match(/^sustrai-glossary:(writing|speaking):([^:]+)$/))) {
+      return {
+        ...base, skill: m[1], kind: 'glossary', slug: m[2], label: 'Hiztegia eta kontzeptuak',
+        href: (m[1] === 'writing' ? '/idazlanak/' : '/ahozkoa/') + '?ataza=' + encodeURIComponent(m[2])
+      };
+    }
     if (/highlight|marks/i.test(raw)) {
       return { ...base, skill: 'reading', kind: 'marks', label: 'Azpimarrak', href: '/irakurmena/' };
     }
@@ -86,6 +98,14 @@
         const text = String(valueText).replace(/\s+/g, ' ').trim();
         return text.slice(0, 180) + (text.length > 180 ? '…' : '');
       }
+      if (meta.kind === 'saved') {
+        const list = JSON.parse(valueText);
+        return list.length + ' gordeta · ' + list.map((x) => x.name).filter(Boolean).join(', ').slice(0, 150);
+      }
+      if (meta.kind === 'glossary') {
+        const list = JSON.parse(valueText);
+        return list.length + ' sarrera · ' + list.map((x) => x.term).filter(Boolean).join(', ').slice(0, 150);
+      }
       if (meta.kind === 'outline') {
         const data = JSON.parse(valueText);
         const bits = [];
@@ -107,6 +127,9 @@
   function isMeaningful(meta, valueText) {
     if (meta.hidden) return false;
     if (meta.kind === 'draft' || meta.kind === 'notes') return String(valueText || '').trim().length > 0;
+    if (meta.kind === 'saved' || meta.kind === 'glossary') {
+      try { const list = JSON.parse(valueText || '[]'); return Array.isArray(list) && list.length > 0; } catch { return false; }
+    }
     if (meta.kind === 'outline') {
       try {
         const data = JSON.parse(valueText || '{}');

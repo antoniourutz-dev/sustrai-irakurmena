@@ -232,19 +232,46 @@ body{background:radial-gradient(circle at 12% 8%,#e2e8f0 0,transparent 34rem),ra
 .session-timer #timerDisplay{font-size:22px;font-weight:700;font-variant-numeric:tabular-nums;color:#2a45c9;min-width:4.2em}
 .session-timer .timer-label{font-size:11px;font-weight:700;color:#475569}
 .session-timer .focus-exit[hidden]{display:none!important}
-body.focus-mode .catalog,body.focus-mode .modes,body.focus-mode .mode-note,body.focus-mode .support,body.focus-mode .outline-workshop,body.focus-mode .official-guidance,body.focus-mode .original-excerpt,body.focus-mode .footer{display:none!important}
-body.focus-mode .layout{display:block;padding:10px;max-width:1100px;margin:0 auto}
-body.focus-mode .maincol{width:100%}
-body.focus-mode .sessionbar{position:sticky;top:0;z-index:12;padding:12px 16px}
-body.focus-mode .session-top{align-items:center}
-body.focus-mode .prompt{padding:12px 16px}
-body.focus-mode .prompt h3{font-size:18px;margin:4px 0 8px}
-body.focus-mode .prompt-section p{font-size:14px;line-height:1.45}
-body.focus-mode .official-material{max-height:160px;overflow:auto}
-body.focus-mode .editor{padding:14px 16px;display:flex;flex-direction:column;min-height:min(70vh,720px)}
-body.focus-mode .editor textarea{flex:1;min-height:min(58vh,620px);font-size:18px;line-height:1.65}
-body.focus-mode .focus-exit{display:inline-flex!important}
+
 @media(max-width:850px){
   .session-controls{align-items:stretch;width:100%}
   .session-timer{justify-content:flex-start;flex-wrap:wrap}
+}
+
+/* ---------- Focus mode (timer running): one slim bar, the task and the student's work ---------- */
+body.focus-mode .site-header,body.focus-mode .catalog,body.focus-mode .modes,body.focus-mode footer,body.focus-mode .focus-exit,
+body.focus-mode #glossaryPanel,body.focus-mode .timer-label{display:none!important}
+body.focus-mode .layout{display:block;max-width:none;margin:0;padding:0}
+body.focus-mode .maincol{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.2fr);gap:14px;align-items:start;width:100%;max-width:1500px;margin:0 auto;padding:0 clamp(12px,2vw,24px) 16px}
+body.focus-mode .maincol>*{grid-column:1/-1;margin:0;min-width:0}
+body.focus-mode .focusbar{position:sticky;top:0;z-index:20;margin:0 calc(-1 * clamp(12px,2vw,24px));padding:6px clamp(12px,2vw,24px);min-height:52px;display:flex;align-items:center;border:0;border-bottom:1px solid var(--s-line);border-radius:0;background:var(--s-surface);box-shadow:none}
+body.focus-mode .focusbar h2{margin:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font:600 15px/1.3 var(--s-font-ui);letter-spacing:0}
+body.focus-mode .focusbar output{color:var(--s-accent);font:700 18px/1 var(--s-font-display);font-variant-numeric:tabular-nums}
+body.focus-mode .focusbar button{min-height:36px}
+@media(max-width:850px){
+  body.focus-mode .maincol{display:flex;flex-direction:column;gap:10px;padding:0 10px 12px}
+  body.focus-mode .focusbar{margin:0 -10px;padding:6px 10px}
+  body.focus-mode .focusbar h2{display:none}
+}
+body.focus-mode .mode-note,body.focus-mode .support,body.focus-mode .outline-workshop,body.focus-mode .official-guidance,body.focus-mode .original-excerpt,
+body.focus-mode #savedDrafts,body.focus-mode .sessionbar .overline,body.focus-mode .sessionbar .chips,body.focus-mode #timeGuidance,body.focus-mode .privacy-note{display:none!important}
+body.focus-mode .session-top{flex:1;min-width:0;display:flex;flex-wrap:nowrap;align-items:center;justify-content:space-between;gap:16px}
+body.focus-mode .session-top>div:first-child{min-width:0;order:2;flex:1}
+body.focus-mode .session-controls{display:contents}
+body.focus-mode .session-timer{order:1;display:flex;align-items:center;gap:10px;padding:0;border:0;background:transparent;box-shadow:none}
+body.focus-mode .session-timer output{padding:9px 12px;border-radius:var(--s-r-md);background:var(--s-accent-soft)}
+body.focus-mode .prompt{grid-column:1;padding:18px 20px}
+body.focus-mode .editor{grid-column:2;position:sticky;top:66px;display:flex;flex-direction:column;height:calc(100dvh - 82px);padding:16px 18px}
+body.focus-mode .editor textarea{flex:1;min-height:0;font-size:18px;line-height:1.65}
+@media(max-width:850px){
+  body.focus-mode .editor{position:static;height:auto}
+  body.focus-mode .editor textarea{min-height:62dvh}
+  body.focus-mode .session-timer #markerTool{margin-left:auto}
+  body.focus-mode .session-timer{flex:1}
+}
+@media(max-width:850px){
+  body.focus-mode .maincol{align-items:stretch}
+  body.focus-mode .session-top{flex-direction:row!important}
+  body.focus-mode .session-timer{flex-direction:row!important;flex-wrap:nowrap!important;width:auto!important;justify-content:flex-start}
+  body.focus-mode .session-timer button{width:auto!important;flex:none}
 }

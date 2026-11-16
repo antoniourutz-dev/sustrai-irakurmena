@@ -6,7 +6,8 @@ const GENRE={monologue:'Bakarrizketa',interaction:'Elkarrizketa',mediation:'Bita
 const KEYS=['opening','idea1','idea2','closing'];
 let tasks=[],supports=[],selected=null,mode='training',recording=null,mediaStream=null,mediaChunks=[],recordBlob=null,recordUrl=null,recorderMime='',clipDirty=false;
 const timers={prep:{elapsed:0,running:false},speak:{elapsed:0,running:false}};
-let toastTimer=null,markerKit=null;
+let toastTimer=null,markerKit=null,savedKit=null,glossaryKit=null;
+const FIELD_LABELS=['Hasiera','1. ideia','2. ideia','Amaiera'];
 function refreshMarkedOfficial(){
  if(!selected||!markerKit)return;
  markerKit.fillSelectable($('instruction'),selected.instruction_eu,'instruction');
@@ -207,6 +208,7 @@ function choose(slug,updateUrl){
  if(debate&&!item.other_position_eu)$('otherRole').textContent='Beste fitxako jarrera: jatorrizko PDFan';
  $('recordToggle').disabled=false;
  loadState();renderTimers();renderSupports();renderCatalog();
+ savedKit?.refresh();glossaryKit?.refresh();
  try{sessionStorage.setItem('sustrai-oral-last',slug)}catch{}
  if(updateUrl)try{const u=new URL(location.href);u.searchParams.set('ataza',slug);history.replaceState(null,'',u.toString())}catch{}
 }
@@ -221,6 +223,7 @@ function setMode(next){
  $('simulateMode').setAttribute('aria-pressed',String(next==='simulation'));
  $('modeInfo').textContent=next==='simulation'?'Simulazioa: laguntza pedagogikorik gabe. Iturri ofiziala beti ikusgai.':'Entrenamendua: probatu bakarrik eta zabaldu laguntza behar duzunean.';
  loadState();renderTimers();renderSupports();
+ glossaryKit?.refresh();
 }
 function copyNotes(){
  if(!selected)return;
@@ -239,6 +242,21 @@ async function init(){await window.SustraiCloud.ready;
   onChange:refreshMarkedOfficial
  });
  markerKit?.setup();
+ savedKit=window.SustraiStudy?.saved({
+  root:$('savedOutlines'),eyebrow:'ZURE ESKEMAK',title:'Gordetako eskemak',noun:'eskema',
+  saveLabel:'Gorde eskema hau',loadLabel:'Eskeman ireki',
+  note:'Gorde ataza honetarako prestatzen duzun eskema bakoitza: ikuspegi desberdinak probatu eta alderatu ditzakezu.',
+  emptyList:'Oraindik ez duzu eskemarik gorde ataza honetan.',emptyMessage:'Bete eskemaren atalen bat gorde aurretik.',
+  key:()=>selected?'sustrai-oral-saved:'+selected.slug:null,
+  capture:()=>{const notes=Object.fromEntries(KEYS.map(k=>[k,$(k).value.trim().slice(0,2000)]));return KEYS.some(k=>notes[k])?{notes,mode}:null},
+  meta:item=>[KEYS.filter(k=>item.notes?.[k]).length+' / '+KEYS.length+' atal',item.mode==='simulation'?'Simulazioa':'Entrenamendua'],
+  view:item=>{const dl=document.createElement('dl');dl.className='study-fields';KEYS.forEach((k,i)=>{if(!item.notes?.[k])return;const box=document.createElement('div');box.append(textNode('dt',FIELD_LABELS[i]),textNode('dd',item.notes[k]));dl.append(box)});return dl},
+  isDirty:item=>KEYS.some(k=>$(k).value.trim()&&$(k).value.trim()!==(item.notes?.[k]||'')),
+  load:item=>{for(const k of KEYS)$(k).value=typeof item.notes?.[k]==='string'?item.notes[k]:'';saveState();$(KEYS[0]).focus()},
+  notify:show
+ });
+ // Personal notes are a help, so they stay out of a simulation.
+ glossaryKit=window.SustraiStudy?.glossary({root:$('glossaryPanel'),key:()=>selected&&mode!=='simulation'?'sustrai-glossary:speaking:'+selected.slug:null,notify:show});
  $('orgFilter').onchange=renderCatalog;$('kindFilter').onchange=renderCatalog;$('search').oninput=renderCatalog;
  $('trainMode').onclick=()=>setMode('training');$('simulateMode').onclick=()=>setMode('simulation');
  for(const k of KEYS)$(k).addEventListener('input',saveState);

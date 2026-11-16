@@ -1,5 +1,5 @@
 /* SUSTRAI PWA service worker */
-const CACHE_VERSION = 'sustrai-pwa-v5-foco';
+const CACHE_VERSION = 'sustrai-pwa-v6-lanak';
 const SHELL = [
   '/',
   '/index.html',
@@ -30,6 +30,9 @@ const SHELL = [
   '/marker.css',
   '/marker-kit.js',
   '/marker-bar.js',
+  '/study-kit.js',
+  '/attempts-kit.js',
+  '/study-kit.css',
   '/app.js',
   '/icons/icon-192.png',
   '/icons/icon-512.png',

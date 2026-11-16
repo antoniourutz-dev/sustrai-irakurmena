@@ -79,6 +79,10 @@ async function srReadExams(organism){
  if(!Array.isArray(exams))throw new Error('Azterketa-datuak ez dira egokiak');
  return exams.map(exam=>srNormalizeExam(exam,organism));
 }
+// Grading comes from the server. A solution is only known for questions the server chose to reveal.
+function srAccepted(it,n){const k=it.key[n-it.r[0]];if(!k||k==='?')return[];return it.alternatives?.[n]?.split('/')||[k]}
+function srIsCorrect(it,n,answer){if(!answer)return false;const known=srAccepted(it,n);if(known.length)return known.includes(answer);const seen=it.checked?.[n];return !!(seen&&seen.answer===answer&&seen.correct)}
+function srSolutionHint(it,n,answer,mode){const known=srAccepted(it,n);if(known.length)return' · Erantzun zuzena: '+known.join(' edo ');if(mode==='simulation')return' · Simulazioan ez da soluziorik erakusten; Praktika moduan ikus ditzakezu.';return answer?'':' · Erantzun galdera, soluzioa ikusteko.'}
 const srAwaiting=new Map();
 async function srGrade(activeExam,getAnswers,options={}) {
  const slug=activeExam.slug,requestKey=slug+(options.finalize?':finish':':check');
@@ -90,22 +94,28 @@ async function srGrade(activeExam,getAnswers,options={}) {
         throw new Error('Ezin izan dira erantzunak zuzendu');
       const correct=new Map();
       for(const row of result.items){
-        const pos=Number(row?.position),n=Number(row?.n),accepted=row?.accepted;
+        const pos=Number(row?.position),n=Number(row?.n),accepted=row?.accepted??null;
         const item=activeExam.items[pos-1];
-        if(!Number.isInteger(pos)||!item||!Number.isInteger(n)||n<item.r[0]||n>item.r[1]||!Array.isArray(accepted)||!accepted.length||accepted.some(letter=>typeof letter!=='string'||!SR_LETTER.test(letter)))throw new Error('Ezin izan dira erantzunak zuzendu');
+        if(!Number.isInteger(pos)||!item||!Number.isInteger(n)||n<item.r[0]||n>item.r[1])throw new Error('Ezin izan dira erantzunak zuzendu');
+        if(accepted!==null&&(!Array.isArray(accepted)||!accepted.length||accepted.some(letter=>typeof letter!=='string'||!SR_LETTER.test(letter))))throw new Error('Ezin izan dira erantzunak zuzendu');
+        if(accepted===null&&typeof row?.correct!=='boolean')throw new Error('Ezin izan dira erantzunak zuzendu');
+        const given=byPart[String(pos)]?.[n]||'';
         if(!correct.has(pos))correct.set(pos,new Map());
-        correct.get(pos).set(n,accepted.slice());
+        correct.get(pos).set(n,{accepted:accepted?accepted.slice():null,answer:given,correct:typeof row?.correct==='boolean'?row.correct:accepted.includes(given)});
       }
       activeExam.items.forEach((it,index)=>{
-        const answers=correct.get(index+1),alternative={};
+        const answers=correct.get(index+1),alternative={},checked={};
         if(!answers)throw new Error('Falta diren soluzioak: '+(index+1));
         it.key=Array.from({length:it.r[1]-it.r[0]+1},(_,j)=>{
-          const nn=it.r[0]+j,list=answers.get(nn);
-          if(!list?.length)throw new Error('Soluzioa falta da: '+nn);
-          if(list.length>1)alternative[nn]=list.join('/');
-          return list[0];
+          const nn=it.r[0]+j,row=answers.get(nn);
+          if(!row)throw new Error('Zuzenketa falta da: '+nn);
+          checked[nn]={answer:row.answer,correct:row.correct};
+          // Keep a solution revealed earlier in this session when a later check hides it.
+          if(!row.accepted){const before=it.key?.[j];if(before&&before!=='?'){if(it.alternatives?.[nn])alternative[nn]=it.alternatives[nn];return before}return '?'}
+          if(row.accepted.length>1)alternative[nn]=row.accepted.join('/');
+          return row.accepted[0];
         }).join('');
-        it.alternatives=alternative;
+        it.alternatives=alternative;it.checked=checked;
       });
       return result;
     }).finally(()=>srAwaiting.delete(requestKey));
@@ -145,49 +155,9 @@ function setActiveMarker(tool){
  }
  if(activeMarker)$('markerbar').classList.add('visible');
 }
-function restoreMarkerPosition(){
- const bar=$('markerbar');if(!bar)return;
- try{
-  const raw=window.SustraiCloud.storage.getItem('sustrai-markerbar-pos');
-  if(!raw)return;
-  const pos=JSON.parse(raw);
-  if(Number.isFinite(pos.left)&&Number.isFinite(pos.top)){
-   bar.style.left=Math.max(8,pos.left)+'px';
-   bar.style.top=Math.max(8,pos.top)+'px';
-  }
- }catch{}
-}
-function saveMarkerPosition(){
- const bar=$('markerbar');if(!bar)return;
- const r=bar.getBoundingClientRect();
- try{window.SustraiCloud.storage.setItem('sustrai-markerbar-pos',JSON.stringify({left:r.left,top:r.top}))}catch{}
-}
-function setupMarkerDrag(){
- const handle=$('markerDrag'),bar=$('markerbar');
- if(!handle||!bar)return;
- restoreMarkerPosition();
- handle.addEventListener('pointerdown',event=>{
-  if(event.button!==0)return;
-  event.preventDefault();
-  const r=bar.getBoundingClientRect();
-  markerDragState={dx:event.clientX-r.left,dy:event.clientY-r.top,pid:event.pointerId};
-  handle.setPointerCapture(event.pointerId);
- });
- handle.addEventListener('pointermove',event=>{
-  if(!markerDragState||event.pointerId!==markerDragState.pid)return;
-  const left=Math.min(window.innerWidth-80,Math.max(8,event.clientX-markerDragState.dx));
-  const top=Math.min(window.innerHeight-48,Math.max(8,event.clientY-markerDragState.dy));
-  bar.style.left=left+'px';
-  bar.style.top=top+'px';
- });
- const end=event=>{
-  if(!markerDragState||event.pointerId!==markerDragState.pid)return;
-  markerDragState=null;
-  saveMarkerPosition();
- };
- handle.addEventListener('pointerup',end);
- handle.addEventListener('pointercancel',end);
-}
+function setupMarkerDrag(){window.SustraiMarkerBar.init($('markerbar'),$('markerDrag'))}
+// A colour (or the eraser) acts on the current selection if there is one; otherwise it toggles the tool.
+function pickMarker(tool){if(window.SustraiMarkerBar.hasSelection()){if(activeMarker!==tool)setActiveMarker(tool);if(tool==='erase')erase();else paint(tool);return}setActiveMarker(tool)}
 
 
 let brushStroke=null;
@@ -265,8 +235,8 @@ function finishBrushStroke(){
 }
 function setupBrushPaint(){
  document.addEventListener('pointerdown',event=>{
-  if(!activeMarker||event.button!==0||brushStroke)return;
-  if(event.target.closest('mark.highlit'))return;
+  if(!activeMarker||event.button!==0||brushStroke||event.pointerType==='touch')return;
+  if(activeMarker==='erase'&&event.target.closest('mark.highlit'))return;
   if(!brushTargetFromEvent(event))return;
   const caret=caretFromPoint(event.clientX,event.clientY);
   if(!caret||caret.node.nodeType!==Node.TEXT_NODE)return;
@@ -287,7 +257,7 @@ function setupBrushPaint(){
  document.addEventListener('pointerup',end,true);
  document.addEventListener('pointercancel',end,true);
  document.addEventListener('click',event=>{
-  if(!activeMarker)return;
+  if(activeMarker!=='erase')return;
   const mark=event.target.closest('mark.highlit');
   if(!mark||!mark.closest('.selectable[data-area]'))return;
   if(event.target.closest('#markerbar,button,a,select,.choose'))return;
@@ -373,14 +343,14 @@ function setWorkshopMode(mode){
 }
 function chooseMode(mode){$('grade').hidden=mode==='simulation'&&!timer().done;syncModeButtons(mode);$('modeBadge').textContent=mode==='simulation'?'Simulazioa':'Praktika librea';if(mode==='simulation'){const t=timer();if(!t.done&&!t.start){t.start=Date.now();write(timerKey(),t);tick();syncFocusFromTimer();toast('Simulazioa · kontzentrazio-modua')}}else syncFocusFromTimer()}
 function requestedMode(){const mode=new URLSearchParams(location.search).get('mode');return mode==='simulation'?'simulation':'practice'}
-function mistakeList(gradedOnly=false){const list=[];exam().items.forEach((it,index)=>{if(gradedOnly&&!graded[index])return;const selected=answersOf(index);for(let n=it.r[0];n<=it.r[1];n++)if(selected[n]!==it.key[n-it.r[0]])list.push({part:index,n})});return list}
+function mistakeList(gradedOnly=false){const list=[];exam().items.forEach((it,index)=>{if(gradedOnly&&!graded[index])return;const selected=answersOf(index);for(let n=it.r[0];n<=it.r[1];n++)if(!srIsCorrect(it,n,selected[n]))list.push({part:index,n})});return list}
 function learningTip(it){if(it.type==='fill')return'Berrirakurri esaldi osoa eta egiaztatu gramatika-loturak.';if(it.type==='mcq')return'Bilatu testuan aukera zuzena frogatzen duen esaldia.';return'Egiaztatu lokailuak eta aurreko zein ondorengo esaldien lotura.'}
 function reviewMistakes(){const errors=mistakeList();if(!errors.length){toast('Ez dago berrikusteko akatsik');return}graded=Object.fromEntries(exam().items.map((_,index)=>[index,true]));part=errors[0].part;current=errors[0].n;closeSummary();render(true);view('questions');$('qtitle').focus()}
 function nextMistake(){const errors=mistakeList(true),index=errors.findIndex(error=>error.part===part&&error.n===current),target=errors[(index+1+errors.length)%errors.length];if(!target)return;part=target.part;current=target.n;render(true);view('questions')}
 function toast(msg){$('toast').textContent=msg;$('toast').classList.add('show');const serial=++toastId;setTimeout(()=>{if(serial===toastId)$('toast').classList.remove('show')},2500)}
 function tick(){if(!exams.length)return;const t=timer();$('clock').textContent=timeString(elapsed(t));$('clock').title='Azterketaren iraupena · gomendioa: '+(totalOf(exam())===25?'35 minutu':'50–60 minutu');$('start').textContent=t.done?'Amaituta':t.start?'Pausatu':t.elapsed?'Jarraitu':'Hasi';$('start').disabled=!!t.done;$('finish').disabled=!!t.done;$('timehint').textContent=t.done?'Denbora gordeta':t.start?'Kronometroa martxan':totalOf(exam())===25?'Gomendioa: 35 min':'Gomendioa: 50–60 min'}
 function pauseToggle(){let t=timer();if(t.done)return;if(t.start){t.elapsed=elapsed(t);t.start=null;toast('Kronometroa geldituta')}else{t.start=Date.now();toast('Kontzentrazio-modua: kronometroa martxan')}write(timerKey(),t);tick();syncFocusFromTimer()}
-function points(){let score=0,correct=0;exam().items.forEach((it,i)=>{let ans=answersOf(i);for(let n=it.r[0];n<=it.r[1];n++)if(ans[n]===it.key[n-it.r[0]]){correct++;score+=weight(it)}});return{score:Math.round(score*10)/10,correct}}
+function points(){let score=0,correct=0;exam().items.forEach((it,i)=>{let ans=answersOf(i);for(let n=it.r[0];n<=it.r[1];n++)if(srIsCorrect(it,n,ans[n])){correct++;score+=weight(it)}});return{score:Math.round(score*10)/10,correct}}
 function clientAttemptKey(){const key='sustrai-client-attempt-v1-'+exam().id+'-'+requestedMode();let value=window.SustraiCloud.storage.getItem(key);if(!value){value='sustrai-'+crypto.randomUUID();window.SustraiCloud.storage.setItem(key,value)}return value}
 async function finish(){
  const e=exam(), blank=totalOf(e)-progress();
@@ -400,7 +370,7 @@ async function finish(){
 }
 function summary(){let p=points(),t=timer(),history=read('sustrai-attempts-v3-'+exam().id,[]),previous=history.length>1?history.at(-2):null,errors=mistakeList();
  const reviewRows=exam().items.map((it,index)=>{const wrong=errors.filter(error=>error.part===index).length;return '<div class="review-row"><span>'+(index+1)+'. ariketa</span><strong>'+wrong+' akats</strong></div>'}).join('');
- $('summary').innerHTML='<div class="scorebig">'+p.score.toFixed(1).replace('.',',')+' <span style="font-size:17px;color:#819284">/ 20 puntu</span></div><div class="summaryrow"><span>Erantzun zuzenak</span><strong>'+p.correct+' / '+totalOf(exam())+'</strong></div><div class="summaryrow"><span>Denbora guztira</span><strong>'+timeString(elapsed(t))+'</strong></div><div class="summaryrow"><span>Gainditzeko gutxienekoa</span><strong>10 puntu</strong></div>'+(previous?'<div class="summaryrow"><span>Aurreko saiakera</span><strong>'+previous.score.toFixed(1).replace('.',',')+' puntu · '+timeString(previous.elapsed)+'</strong></div>':'')+'<div class="review-list" aria-label="Akatsak ariketaka">'+reviewRows+'</div><p class="'+(p.score<10?'warn':'')+'">'+(p.score>=10?'Gaindituta. Orain, berrikusi akatsak ikasitakoa finkatzeko.':'Berrikusi akatsak eta saiatu berriro atal zailetan.')+'</p>';$('reviewMistakes').hidden=!errors.length;showDialog('modal')}
+ $('summary').innerHTML='<div class="scorebig">'+p.score.toFixed(1).replace('.',',')+' <span>/ 20 puntu</span></div><div class="summaryrow"><span>Erantzun zuzenak</span><strong>'+p.correct+' / '+totalOf(exam())+'</strong></div><div class="summaryrow"><span>Denbora guztira</span><strong>'+timeString(elapsed(t))+'</strong></div><div class="summaryrow"><span>Gainditzeko gutxienekoa</span><strong>10 puntu</strong></div>'+(previous?'<div class="summaryrow"><span>Aurreko saiakera</span><strong>'+previous.score.toFixed(1).replace('.',',')+' puntu · '+timeString(previous.elapsed)+'</strong></div>':'')+'<div class="review-list" aria-label="Akatsak ariketaka">'+reviewRows+'</div><p class="'+(p.score<10?'warn':'')+'">'+(p.score>=10?'Gaindituta. Orain, berrikusi akatsak ikasitakoa finkatzeko.':'Berrikusi akatsak eta saiatu berriro atal zailetan.')+'</p>';$('reviewMistakes').hidden=!errors.length;showDialog('modal')}
 function closeSummary(){hideDialog('modal')}
 function restart(){if(!confirm('Azterketaren erantzunak eta kronometroa berrabiarazi? Markak mantenduko dira.'))return;window.SustraiCloud.storage.removeItem('sustrai-client-attempt-v1-'+exam().id+'-'+requestedMode());exam().items.forEach((it,i)=>window.SustraiCloud.storage.removeItem(storageKey(exam().id,i)));window.SustraiCloud.storage.removeItem(timerKey());graded={};current=task().r[0];closeSummary();render();toast('Azterketa berrabiarazita')}
 function selectExam(i){ex=i;part=0;current=task().r[0];graded={};pendingSelection=[];try{window.SustraiCloud.storage.setItem('sustrai-current-exam',exam().id)}catch{};render(true);view('reading')}
@@ -413,7 +383,7 @@ function resetPart(){if(!confirm('Ariketa honetako erantzunak ezabatu?'))return;
 async function correct(){
  if(requestedMode()==='simulation'&&!timer().done){toast('Simulazioan ezin da ariketa zuzendu amaitu aurretik.');return}
  const e=exam(),n=part;
- try{await srGrade(e,answersOf);if(e!==exam())return;graded[n]=true;renderQuestion()}
+ try{await srGrade(e,answersOf,{mode:requestedMode()});if(e!==exam())return;graded[n]=true;renderQuestion()}
  catch(error){console.error(error);toast('Ezin izan da zuzendu: saiatu berriro')}
 }
 function progressBar(){let p=progress(),total=totalOf(exam());$('progressLabel').textContent=p+'/'+total+' erantzunda';$('trackfill').style.width=(100*p/total)+'%';$('progress').setAttribute('aria-valuemax',String(total));$('progress').setAttribute('aria-valuenow',String(p));$('progress').setAttribute('aria-valuetext',p+' galdera erantzunda, '+total+'etik')}
@@ -447,12 +417,12 @@ function readingLayout(it){
 function renderPassage(reset=false){let scroll=$('readingPanel').querySelector('.paperscroll'),pos=reset?0:scroll.scrollTop,it=task(),a=answersOf(),segment=0,doc=readingLayout(it),content='<h2 class="document-title">'+htmlEscape(doc.title)+'</h2>';for(let text of paragraphs(doc.body)){content+='<p>';for(let token of text.split(/(\{\{\d+\}\})/g)){let m=token.match(/^\{\{(\d+)\}\}$/);if(m){let n=+m[1],letter=a[n]||'',choice=letter?(it.type==='fill'?it.opts[n][letters.indexOf(letter)]:letter):'···';content+='<button class="hole '+(n===current?'active ':'')+(letter?'answered':'')+'" data-gap="'+n+'">'+n+' · '+htmlEscape(choice)+'</button>'}else if(token){let area='a'+segment++;content+='<span class="selectable" data-area="'+area+'">'+marked(token,area)+'</span>'}}content+='</p>'}$('passage').innerHTML=content;document.querySelectorAll('[data-gap]').forEach(b=>b.onclick=()=>selectQuestion(+b.dataset.gap));scroll.scrollTop=pos}
 function renderQuestion(){let it=task(),a=answersOf(),n=current,index=n-it.r[0],q=it.type==='mcq'?it.qs[index]:null,choices=it.type==='mcq'?q.o:it.type==='fill'?it.opts[n]:it.opts,labels=Array.isArray(choices)?letters.slice(0,choices.length).split(''):Object.keys(choices).sort(),vals=Array.isArray(choices)?choices:labels.map(l=>choices[l]);$('qcounter').textContent='GALDERA '+n+' · '+(index+1)+' / '+numberOf(it);$('qtitle').textContent=it.title;
  let question=it.type==='mcq'?q.q:it.type==='fill'?'Hutsuneari dagokion hitza aukeratu.':it.title.toLowerCase().includes('bi zutabeak lotu')?'Lotu 1. zutabeko esaldia 2. zutabeko aukera egokiarekin. Aukera bat sobera dago.':'Testuko hutsuneari dagokion zatia aukeratu. Aukera bat sobera dago.';$('questionText').innerHTML='<span class="selectable" data-area="q'+n+'">'+marked(question,'q'+n)+'</span>';
- $('options').innerHTML=labels.map((l,j)=>{let chosen=a[n]===l,isCorrect=graded[part]&&it.key[index]===l,isWrong=graded[part]&&chosen&&!isCorrect,area='c'+n+l;return '<div class="choice '+(chosen?'chosen ':'')+(isCorrect?'correct ':'')+(isWrong?'wrong':'')+'" data-choice="'+l+'"><button class="choose" data-letter="'+l+'" aria-label="'+l+' aukera" aria-pressed="'+chosen+'">'+l+'</button><span class="selectable" data-area="'+area+'">'+marked(vals[j],area)+'</span></div>'}).join('');
+ $('options').innerHTML=labels.map((l,j)=>{let chosen=a[n]===l,isCorrect=graded[part]&&(srAccepted(it,n).includes(l)||(chosen&&srIsCorrect(it,n,l))),isWrong=graded[part]&&chosen&&!isCorrect,area='c'+n+l;return '<div class="choice '+(chosen?'chosen ':'')+(isCorrect?'correct ':'')+(isWrong?'wrong':'')+'" data-choice="'+l+'"><button class="choose" data-letter="'+l+'" aria-label="'+l+' aukera" aria-pressed="'+chosen+'">'+l+'</button><span class="selectable" data-area="'+area+'">'+marked(vals[j],area)+'</span></div>'}).join('');
  document.querySelectorAll('.choose').forEach(b=>b.onclick=()=>{if(activeMarker)return;choose(b.dataset.letter)});document.querySelectorAll('.choice').forEach(b=>b.onclick=e=>{if(activeMarker||e.target.closest('button')||window.getSelection()?.toString())return;choose(b.dataset.choice)});
  $('prev').disabled=n===it.r[0];$('next').disabled=n===it.r[1];
  $('numbers').innerHTML=Array.from({length:numberOf(it)},(_,i)=>{let k=i+it.r[0];return '<button data-q="'+k+'" class="'+(k===n?'current ':'')+(a[k]?'done':'')+'">'+k+'</button>'}).join('');
  document.querySelectorAll('[data-q]').forEach(b=>b.onclick=()=>selectQuestion(+b.dataset.q));
- $('gradeResult').innerHTML='';if(graded[part]){let good=0;for(let k=it.r[0];k<=it.r[1];k++)if(a[k]===it.key[k-it.r[0]])good++;let note=exam().id==='2019-10-26'&&part===0&&current===2?'<small>Oharra: 2. galderako soluzioa ez dator bat argitaratutako bi iturri ofizialetan (C/D).</small>':'',correctAnswer=it.key[index],selectedAnswer=a[n]||'Erantzun gabe',isCorrect=selectedAnswer===correctAnswer,errors=mistakeList(true);$('gradeResult').innerHTML='<div class="result"><strong>'+good+' / '+numberOf(it)+' zuzen</strong> · '+(good*weight(it)).toFixed(1).replace('.',',')+' puntu <small>'+(isCorrect?'Galdera hau zuzen dago.':'Zure erantzuna: '+selectedAnswer+' · Erantzun zuzena: '+correctAnswer)+'</small>'+note+'<span class="learning-tip">'+learningTip(it)+'</span>'+(errors.length?'<button type="button" id="nextMistake" class="outline mistake-action">Hurrengo akatsa</button>':'')+'</div>';if($('nextMistake'))$('nextMistake').onclick=nextMistake}}
+ $('gradeResult').innerHTML='';if(graded[part]){let good=0;for(let k=it.r[0];k<=it.r[1];k++)if(srIsCorrect(it,k,a[k]))good++;let note=exam().id==='2019-10-26'&&part===0&&current===2?'<small>Oharra: 2. galderako soluzioa ez dator bat argitaratutako bi iturri ofizialetan (C/D).</small>':'',selectedAnswer=a[n]||'Erantzun gabe',isCorrect=srIsCorrect(it,n,a[n]),errors=mistakeList(true);$('gradeResult').innerHTML='<div class="result"><strong>'+good+' / '+numberOf(it)+' zuzen</strong> · '+(good*weight(it)).toFixed(1).replace('.',',')+' puntu <small>'+(isCorrect?'Galdera hau zuzen dago.':'Zure erantzuna: '+selectedAnswer+srSolutionHint(it,n,a[n],requestedMode()))+'</small>'+note+'<span class="learning-tip">'+learningTip(it)+'</span>'+(errors.length?'<button type="button" id="nextMistake" class="outline mistake-action">Hurrengo akatsa</button>':'')+'</div>';if($('nextMistake'))$('nextMistake').onclick=nextMistake}}
 function render(reset=false){if(!exams.length)return;$('exam').value=exam().id;$('readingTitle').textContent=task().title;document.querySelector('.source-note').replaceChildren('Iturria: ',externalLink(exam().source,'IVAP · Azterketa ofiziala (A eredua) ↗'));tabs();progressBar();renderPassage(reset);renderQuestion();tick()}
 function capture(){let selection=window.getSelection();if(!selection||selection.isCollapsed||!selection.rangeCount)return;let range=selection.getRangeAt(0),res=[];document.querySelectorAll('.selectable[data-area]').forEach(el=>{if(!range.intersectsNode(el))return;let whole=document.createRange();whole.selectNodeContents(el);let clipped=range.cloneRange();try{if(range.compareBoundaryPoints(Range.START_TO_START,whole)<0)clipped.setStart(whole.startContainer,whole.startOffset);if(range.compareBoundaryPoints(Range.END_TO_END,whole)>0)clipped.setEnd(whole.endContainer,whole.endOffset);let prefix=whole.cloneRange();prefix.setEnd(clipped.startContainer,clipped.startOffset);let start=prefix.toString().length,len=clipped.toString().length;if(len)res.push({area:el.dataset.area,start,end:start+len})}catch{}});if(res.length){pendingSelection=res;}}
 function paint(color){capture();if(!pendingSelection.length){if(!activeMarker)toast('Hautatu hitz edo esaldi bat lehenik');return}let list=highlights();for(let s of pendingSelection){list=list.filter(m=>m.area!==s.area||m.end<=s.start||m.start>=s.end);list.push({...s,color})}write(highlightsKey(),list);pendingSelection=[];window.getSelection()?.removeAllRanges();renderPassage(false);renderQuestion();if(!activeMarker)toast('Marka gordeta')}
@@ -471,5 +441,5 @@ async function start(){await window.SustraiCloud.ready;
  $('exam').replaceChildren(...exams.map(e=>{const option=document.createElement('option');option.value=e.id;option.textContent=e.label+' · '+totalOf(e)+' galdera';return option}));
  let requestedExam=null;try{requestedExam=new URLSearchParams(location.search).get('exam')}catch{}let chosen=requestedExam||window.SustraiCloud.storage.getItem('sustrai-current-exam')||'2019-05-04',found=exams.findIndex(e=>e.id===chosen);ex=found>=0?found:0;current=task().r[0];
  $('exam').onchange=e=>selectExam(exams.findIndex(x=>x.id===e.target.value));if($('modePractice'))$('modePractice').onclick=()=>setWorkshopMode('practice');if($('modeSimulation'))$('modeSimulation').onclick=()=>setWorkshopMode('simulation');$('start').onclick=pauseToggle;$('finish').onclick=()=>{closeActions();finish()};$('prev').onclick=()=>step(-1);$('next').onclick=()=>step(1);$('grade').onclick=correct;$('resetEx').onclick=resetPart;$('markerTool').onclick=function(){closeActions();const open=$('markerbar').classList.toggle('visible');this.setAttribute('aria-expanded',String(open))};$('closeMarker').onclick=()=>{$('markerbar').classList.remove('visible');$('markerTool').setAttribute('aria-expanded','false');if(activeMarker)setActiveMarker(activeMarker)};$('actionsToggle').onclick=()=>{const open=$('timeActions').classList.toggle('expanded');$('actionsToggle').setAttribute('aria-expanded',String(open))};
- document.querySelectorAll('.swatch').forEach(b=>{b.addEventListener('pointerdown',e=>e.preventDefault());b.onclick=()=>setActiveMarker(b.dataset.color)});$('erase').onclick=()=>setActiveMarker('erase');const _markVis=$('markVisibility');_markVis.onclick=()=>{visible=!visible;_markVis.textContent=visible?'Ezkutatu':'Erakutsi';renderPassage(false);renderQuestion()};setupMarkerDrag();if($('exitFocus'))$('exitFocus').onclick=()=>{const t=timer();if(t.start){t.elapsed=elapsed(t);t.start=null;write(timerKey(),t);tick()}setFocusMode(false);toast('Kontzentrazio-modua itxita')};$('closeModal').onclick=closeSummary;$('dismissSummary').onclick=closeSummary;$('reviewMistakes').onclick=reviewMistakes;$('repeatExam').onclick=restart;$('viewReading').onclick=()=>view('reading');$('viewQuestions').onclick=()=>view('questions');if($('sheetToggle'))$('sheetToggle').onclick=()=>view(document.body.classList.contains('view-questions')?'reading':'questions');document.addEventListener('selectionchange',()=>{if(activeMarker||brushStroke)return;if(window.getSelection()&&!window.getSelection().isCollapsed)requestAnimationFrame(capture)});setupBrushPaint();document.addEventListener('keydown',event=>{trapDialog(event);if(event.key==='Escape'&&!$('modal').hidden)closeSummary()});render(true);setLoading(false);chooseMode(mode);syncFocusFromTimer();setInterval(tick,500)}
+ document.querySelectorAll('.swatch').forEach(b=>{b.addEventListener('pointerdown',e=>e.preventDefault());b.onclick=()=>pickMarker(b.dataset.color)});$('erase').addEventListener('pointerdown',e=>e.preventDefault());$('erase').onclick=()=>pickMarker('erase');const _markVis=$('markVisibility');_markVis.onclick=()=>{visible=!visible;_markVis.textContent=visible?'Ezkutatu':'Erakutsi';renderPassage(false);renderQuestion()};setupMarkerDrag();if($('exitFocus'))$('exitFocus').onclick=()=>{const t=timer();if(t.start){t.elapsed=elapsed(t);t.start=null;write(timerKey(),t);tick()}setFocusMode(false);toast('Kontzentrazio-modua itxita')};$('closeModal').onclick=closeSummary;$('dismissSummary').onclick=closeSummary;$('reviewMistakes').onclick=reviewMistakes;$('repeatExam').onclick=restart;$('viewReading').onclick=()=>view('reading');$('viewQuestions').onclick=()=>view('questions');if($('sheetToggle'))$('sheetToggle').onclick=()=>view(document.body.classList.contains('view-questions')?'reading':'questions');document.addEventListener('selectionchange',()=>{if(activeMarker||brushStroke)return;if(window.getSelection()&&!window.getSelection().isCollapsed)requestAnimationFrame(capture)});setupBrushPaint();window.SustraiMarkerBar.touchAutoApply(()=>activeMarker,tool=>{if(tool==='erase')erase();else paint(tool)});document.addEventListener('keydown',event=>{trapDialog(event);if(event.key==='Escape'&&!$('modal').hidden)closeSummary()});render(true);setLoading(false);chooseMode(mode);syncFocusFromTimer();setInterval(tick,500)}
 start().catch(error=>{console.error(error);setLoading(false);$('readingTitle').textContent='Ezin izan da aplikazioa kargatu';$('passage').innerHTML='<div class="load-error"><strong>Ezin izan dira azterketak kargatu.</strong><p>'+htmlEscape(error.message)+'</p><button id="retryLoad" type="button">Saiatu berriro</button></div>';$('retryLoad').onclick=()=>location.reload()});

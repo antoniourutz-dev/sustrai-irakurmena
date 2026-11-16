@@ -111,34 +111,15 @@ mark.highlit{padding:1px 0;border-radius:3px;color:inherit;box-decoration-break:
 .mistake-action{margin-top:10px}
 .mobileswitch{display:none}
 
-/* ---------- Highlighter toolbar ---------- */
-.markerbar{position:fixed;bottom:28px;left:36px;z-index:40;display:none;align-items:center;gap:6px;width:auto;max-width:min(440px,calc(100vw - 24px));padding:8px 40px 8px 6px;border:1px solid var(--s-line-strong);border-radius:var(--s-r-lg);background:var(--s-surface);box-shadow:var(--s-shadow-pop);touch-action:none;user-select:none}
-.markerbar.visible{display:flex}
-.highlabel{margin-right:4px;color:var(--s-ink-3);font-size:12px;font-weight:600}
-.swatch[data-color="yellow"]{--ink:#ffe174}.swatch[data-color="green"]{--ink:#a9e8bd}.swatch[data-color="pink"]{--ink:#f7bed5}.swatch[data-color="blue"]{--ink:#b2dbff}
-.swatch{width:32px;min-width:32px;height:32px;min-height:32px;padding:0;border:2px solid var(--s-surface);border-radius:50%;background:var(--ink);box-shadow:0 0 0 1px var(--s-line-strong);color:transparent}
-.swatch:hover{background:var(--ink)}
-.swatch.active,.marker-erase.active{outline:2px solid var(--s-primary);outline-offset:2px}
-.markerbar .little{min-height:32px;padding:0 10px;border-radius:var(--s-r-sm);font-size:12px}
-.closemarker{position:absolute;top:50%;right:4px;width:32px;min-height:32px;padding:0;border:0;border-radius:var(--s-r-sm);background:transparent;color:var(--s-muted);font-size:20px;line-height:1;transform:translateY(-50%)}
-.marker-drag{min-width:22px;min-height:32px;padding:0 2px;border:0;background:transparent;color:var(--s-muted);font-size:16px;line-height:1;letter-spacing:-2px;cursor:grab}
-.marker-drag:hover{background:transparent}
-.marker-drag:active{cursor:grabbing}
-body.marker-armed,body.marker-armed .selectable,body.marker-armed .passage{cursor:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 28 28'%3E%3Cpath fill='%23ffe27a' stroke='%232a45c9' stroke-width='1.2' d='M4 19.5V25h5.5L22 12.5 16.5 7 4 19.5z'/%3E%3Cpath fill='%232a45c9' d='M17.2 6.3l4.5 4.5 1.7-1.7a1.5 1.5 0 0 0 0-2.1l-2.4-2.4a1.5 1.5 0 0 0-2.1 0l-1.7 1.7z'/%3E%3C/svg%3E") 3 25,crosshair}
-body.marker-armed .selectable,body.marker-armed .passage{touch-action:none;caret-color:transparent}
-body.marker-armed[data-marker-tool="erase"],body.marker-armed[data-marker-tool="erase"] .selectable,body.marker-armed[data-marker-tool="erase"] .passage{cursor:cell}
-body.marker-armed .choice,body.marker-armed .choice .selectable{cursor:inherit}
-body.marker-armed mark.highlit{cursor:pointer}
-
 /* ---------- Toast + result dialog ---------- */
-.toast{position:fixed;left:50%;bottom:24px;z-index:45;max-width:calc(100vw - 24px);padding:12px 18px;border-radius:var(--s-r-md);background:var(--s-ink);color:#fff;box-shadow:var(--s-shadow-pop);font-size:14px;opacity:0;pointer-events:none;transform:translate(-50%,16px);transition:opacity .15s,transform .15s}
+.toast{position:fixed;left:50%;top:72px;z-index:45;max-width:calc(100vw - 24px);padding:12px 18px;border-radius:var(--s-r-md);background:var(--s-ink);color:#fff;box-shadow:var(--s-shadow-pop);font-size:14px;opacity:0;pointer-events:none;transform:translate(-50%,-12px);transition:opacity .15s,transform .15s}
 .toast.show{opacity:1;transform:translate(-50%,0)}
 .modal{position:fixed;inset:0;z-index:50;display:grid;place-items:center;padding:16px;overflow-y:auto;background:rgb(15 23 42 / .62)}
 .modal-card{position:relative;width:min(520px,100%);padding:28px;border-radius:var(--s-r-xl);background:var(--s-surface);box-shadow:var(--s-shadow-pop)}
 .modal-card h2{margin:6px 0 16px;font:700 26px/1.15 var(--s-font-display);letter-spacing:-.015em}
 .modalclose{position:absolute;top:12px;right:12px;width:44px;min-height:44px;padding:0;border:0;font-size:24px;line-height:1}
 .scorebig{color:var(--s-primary);font:700 48px/1.1 var(--s-font-display);letter-spacing:-.02em;font-variant-numeric:tabular-nums}
-.scorebig span{color:var(--s-muted)!important;font-family:var(--s-font-ui);font-weight:500;letter-spacing:0}
+.scorebig span{color:var(--s-muted);font-size:17px;font-family:var(--s-font-ui);font-weight:500;letter-spacing:0}
 .summaryrow{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid var(--s-line);font-size:14px}
 .summaryrow strong{font-variant-numeric:tabular-nums}
 .review-list{display:grid;gap:6px;margin:14px 0}
@@ -148,12 +129,25 @@ body.marker-armed mark.highlit{cursor:pointer}
 .modal-card>button{min-height:44px;margin:16px 8px 0 0}
 .modal-card>.modalclose{margin:0}
 
-/* ---------- Focus mode (timer running) ---------- */
-body.focus-mode .pickexam,body.focus-mode .mode-badge,body.focus-mode .source-note,body.focus-mode .learning-tip{display:none!important}
-body.focus-mode .session{justify-content:space-between}
-body.focus-mode .time{font-size:22px}
-.focus-exit[hidden]{display:none!important}
-
+/* ---------- Focus mode (timer running): one slim bar, everything else is the text ---------- */
+.focus-exit{display:none!important}
+body.focus-mode #app>.site-header,
+body.focus-mode .pickexam,body.focus-mode .mode-badge,body.focus-mode .timer-label,
+body.focus-mode .source-note,body.focus-mode .learning-tip,
+body.focus-mode #readingPanel .paperhead{display:none!important}
+body.focus-mode #app{display:grid;grid-template-columns:auto minmax(0,1fr) auto auto;grid-template-rows:52px minmax(0,1fr);align-items:center;column-gap:16px}
+body.focus-mode #app::before{content:"";grid-area:1/1/2/-1;align-self:stretch;background:var(--s-surface);border-bottom:1px solid var(--s-line)}
+body.focus-mode .session,body.focus-mode .menu{display:contents}
+body.focus-mode .timer{grid-area:1/1;min-height:36px;margin-left:clamp(12px,2vw,24px)}
+body.focus-mode .time{font-size:18px}
+body.focus-mode .tabs{grid-area:1/2}
+body.focus-mode .tab{min-height:36px}
+body.focus-mode .progress{grid-area:1/3;min-width:110px}
+body.focus-mode .time-actions{grid-area:1/4;margin-right:clamp(12px,2vw,24px)}
+body.focus-mode .time-actions button{min-height:36px}
+body.focus-mode .workspace{grid-area:2/1/3/-1;align-self:stretch;grid-template-columns:minmax(0,1.9fr) minmax(340px,.9fr);padding-top:14px;padding-bottom:14px}
+body.focus-mode .paperscroll{padding-top:36px}
+body.focus-mode .passage,body.focus-mode .source-note{max-width:720px}
 @media(min-width:1400px){
   .workspace{grid-template-columns:minmax(0,1.64fr) minmax(420px,1fr)}
 }
@@ -161,7 +155,6 @@ body.focus-mode .time{font-size:22px}
 /* ---------- Phones: passage + question sheet ---------- */
 @media(max-width:760px){
   #app>.site-header{min-height:52px}
-  body.focus-mode #app>.site-header{display:none}
   .session{flex-wrap:wrap;min-height:0;padding:8px 12px;gap:8px}
   .pickexam{flex:1 1 100%;gap:8px}
   .pickexam label,.mode-badge{display:none}
@@ -177,7 +170,17 @@ body.focus-mode .time{font-size:22px}
   .time-actions.expanded{flex:1 1 100%;flex-wrap:nowrap;gap:6px}
   .time-actions.expanded button{flex:1 1 auto;padding:0 8px}
   .time-actions.expanded #finish,.time-actions.expanded #markerTool{display:inline-block}
-  body.focus-mode .time-actions #finish{display:inline-block}
+  body.focus-mode #app{grid-template-columns:auto minmax(0,1fr) auto;grid-template-rows:48px auto minmax(0,1fr);column-gap:8px}
+  body.focus-mode .timer{margin-left:10px;padding:0 10px}
+  body.focus-mode .time{font-size:16px}
+  body.focus-mode .tab{min-height:34px;padding:0 11px}
+  body.focus-mode .progress{display:none}
+  body.focus-mode .time-actions{grid-area:1/3;margin-right:10px;flex-wrap:nowrap}
+  body.focus-mode .time-actions #start{display:none}
+  body.focus-mode .time-actions.expanded{grid-area:2/1/3/-1;margin:0;padding:8px 10px;background:var(--s-surface);border-bottom:1px solid var(--s-line)}
+  body.focus-mode .time-actions.expanded #start{display:inline-block}
+  body.focus-mode .workspace{grid-area:3/1/4/-1;display:flex;padding:0}
+  body.focus-mode .paperscroll{padding-top:20px}
   .menu{min-height:48px;padding:4px 12px;gap:10px}
   .tab{min-height:38px;padding:0 13px}
   .progress{min-width:74px;font-size:12px}
@@ -203,7 +206,7 @@ body.focus-mode .time{font-size:22px}
   .questiontext{font-size:18px}
   .choice{min-height:58px}
   .numbers button{min-height:44px}
-  .toast{bottom:96px}
+  .toast{top:60px}
   .markerbar{bottom:96px;left:8px;max-width:calc(100vw - 16px)}
   .modal{padding:10px;align-items:start}
   .modal-card{margin:auto;padding:22px}

@@ -1,4 +1,4 @@
-// SUSTRAI Irakurmena: grade published exams without exposing official answer keys.
+// SUSTRAI Irakurmena: grade published exams without exposing the official answer key in bulk.
 // Authorization is verified by the Supabase gateway (verify_jwt=true).
 const OK_ORIGIN = /^https:\/\/sustrai-irakurmena(?:-[a-z0-9-]+)?\.vercel\.app$/i;
 const headers = (origin: string) => ({
@@ -52,11 +52,27 @@ Deno.serve(async (request: Request) => {
     if (!backend.ok) return json({ error: "grading_failed" }, 502, origin);
     const result = await backend.json();
     if (!result || !Array.isArray(result.items)) return json({ error: "exam_unavailable" }, 404, origin);
+    // Minimal disclosure: every item says whether the given answer is right, but the accepted
+    // options are only returned in practice mode and only for questions the student answered.
+    // A simulation never receives solutions, and an empty submission can no longer read the key.
+    const mode = body?.mode === "simulation" ? "simulation" : "practice";
+    const items = result.items.map((row: { position: number; n: number; accepted?: unknown }) => {
+      const given = answers[String(row.position)]?.[String(row.n)] ?? "";
+      const accepted = Array.isArray(row.accepted) ? row.accepted : [];
+      const item: Record<string, unknown> = {
+        position: row.position, n: row.n, correct: given !== "" && accepted.includes(given),
+      };
+      if (mode === "practice" && given !== "") item.accepted = accepted;
+      return item;
+    });
+    const graded = {
+      slug: result.slug, score: result.score, max_score: result.max_score,
+      correct: result.correct, answered: result.answered, total: result.total, items,
+    };
     let saved = false;
     if (body?.finalize === true) {
       const key = body?.clientAttemptKey;
       const elapsed = body?.elapsedSeconds;
-      const mode = body?.mode === "simulation" ? "simulation" : "practice";
       if (typeof key!=="string" || !/^sustrai-[a-f0-9-]{36}$/.test(key) ||
           !Number.isInteger(elapsed) || elapsed<0 || elapsed>86400)
         return json({error:"invalid_attempt"},400,origin);
@@ -92,7 +108,7 @@ Deno.serve(async (request: Request) => {
         saved=true;
       }
     }
-    return json({...result,saved}, 200, origin);
+    return json({...graded,saved}, 200, origin);
   } catch {
     return json({ error: "invalid_request" }, 400, origin);
   }

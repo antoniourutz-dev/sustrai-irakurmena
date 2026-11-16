@@ -15,7 +15,6 @@
     const getScope = options.getScope || (() => 'default');
     let activeMarker = null;
     let brushStroke = null;
-    let markerDragState = null;
     let visible = true;
 
     function key() {
@@ -197,53 +196,24 @@
       else applyPaint(activeMarker, spans);
     }
 
-    function restoreMarkerPosition() {
-      const bar = $('markerbar');
-      if (!bar) return;
-      try {
-        const raw = window.SustraiCloud.storage.getItem('sustrai-markerbar-pos');
-        if (!raw) return;
-        const pos = JSON.parse(raw);
-        if (Number.isFinite(pos.left) && Number.isFinite(pos.top)) {
-          bar.style.left = Math.max(8, pos.left) + 'px';
-          bar.style.top = Math.max(8, pos.top) + 'px';
-        }
-      } catch {}
-    }
-
-    function saveMarkerPosition() {
-      const bar = $('markerbar');
-      if (!bar) return;
-      const rect = bar.getBoundingClientRect();
-      try { window.SustraiCloud.storage.setItem('sustrai-markerbar-pos', JSON.stringify({ left: rect.left, top: rect.top })); } catch {}
-    }
-
     function setupMarkerDrag() {
-      const handle = $('markerDrag');
-      const bar = $('markerbar');
-      if (!handle || !bar) return;
-      restoreMarkerPosition();
-      handle.addEventListener('pointerdown', (event) => {
-        if (event.button !== 0) return;
-        event.preventDefault();
-        const rect = bar.getBoundingClientRect();
-        markerDragState = { dx: event.clientX - rect.left, dy: event.clientY - rect.top, pid: event.pointerId };
-        handle.setPointerCapture(event.pointerId);
-      });
-      handle.addEventListener('pointermove', (event) => {
-        if (!markerDragState || event.pointerId !== markerDragState.pid) return;
-        const left = Math.min(window.innerWidth - 80, Math.max(8, event.clientX - markerDragState.dx));
-        const top = Math.min(window.innerHeight - 48, Math.max(8, event.clientY - markerDragState.dy));
-        bar.style.left = left + 'px';
-        bar.style.top = top + 'px';
-      });
-      const end = (event) => {
-        if (!markerDragState || event.pointerId !== markerDragState.pid) return;
-        markerDragState = null;
-        saveMarkerPosition();
-      };
-      handle.addEventListener('pointerup', end);
-      handle.addEventListener('pointercancel', end);
+      window.SustraiMarkerBar.init($('markerbar'), $('markerDrag'));
+    }
+
+    // A colour (or the eraser) acts on the current selection if there is one; otherwise it toggles the tool.
+    function pickMarker(tool) {
+      if (window.SustraiMarkerBar.hasSelection()) {
+        if (activeMarker !== tool) setActiveMarker(tool);
+        applyTool(tool);
+        return;
+      }
+      setActiveMarker(tool);
+    }
+
+    function applyTool(tool) {
+      const spans = captureSelection();
+      if (tool === 'erase') applyErase(spans);
+      else applyPaint(tool, spans);
     }
 
     function setup() {
@@ -261,9 +231,10 @@
       });
       document.querySelectorAll('#markerbar .swatch').forEach((btn) => {
         btn.addEventListener('pointerdown', (e) => e.preventDefault());
-        btn.onclick = () => setActiveMarker(btn.dataset.color);
+        btn.onclick = () => pickMarker(btn.dataset.color);
       });
-      $('erase')?.addEventListener('click', () => setActiveMarker('erase'));
+      $('erase')?.addEventListener('pointerdown', (e) => e.preventDefault());
+      $('erase')?.addEventListener('click', () => pickMarker('erase'));
       const visibility = $('markVisibility');
       if (visibility) {
         visibility.onclick = () => {
@@ -273,10 +244,11 @@
         };
       }
       setupMarkerDrag();
+      window.SustraiMarkerBar.touchAutoApply(() => activeMarker, applyTool);
 
       document.addEventListener('pointerdown', (event) => {
-        if (!activeMarker || event.button !== 0 || brushStroke) return;
-        if (event.target.closest('mark.highlit')) return;
+        if (!activeMarker || event.button !== 0 || brushStroke || event.pointerType === 'touch') return;
+        if (activeMarker === 'erase' && event.target.closest('mark.highlit')) return;
         if (!brushTargetFromEvent(event)) return;
         const caret = caretFromPoint(event.clientX, event.clientY);
         if (!caret || caret.node.nodeType !== Node.TEXT_NODE) return;
@@ -300,7 +272,7 @@
       document.addEventListener('pointercancel', endStroke, true);
 
       document.addEventListener('click', (event) => {
-        if (!activeMarker) return;
+        if (activeMarker !== 'erase') return;
         const mark = event.target.closest('mark.highlit');
         if (!mark || !mark.closest('.selectable[data-area]')) return;
         if (event.target.closest('#markerbar,button,a,select')) return;

@@ -1,5 +1,5 @@
 /* SUSTRAI PWA service worker */
-const CACHE_VERSION = 'sustrai-pwa-v4-fokua';
+const CACHE_VERSION = 'sustrai-pwa-v5-foco';
 const SHELL = [
   '/',
   '/index.html',
@@ -29,6 +29,7 @@ const SHELL = [
   '/style.css',
   '/marker.css',
   '/marker-kit.js',
+  '/marker-bar.js',
   '/app.js',
   '/icons/icon-192.png',
   '/icons/icon-512.png',
@@ -116,6 +117,23 @@ self.addEventListener('fetch', (event) => {
           if (url.pathname.startsWith('/ahozkoa/')) return caches.match('/ahozkoa/index.html');
           return caches.match('/index.html');
         })
+    );
+    return;
+  }
+
+  // Versioned assets (?v=…): the page asked for a specific release, so the network wins and the
+  // cache is only the offline fallback. Otherwise a new release would run one visit with old code.
+  if (url.searchParams.has('v')) {
+    event.respondWith(
+      fetch(request)
+        .then((response) => {
+          if (response && response.ok) {
+            const copy = response.clone();
+            caches.open(CACHE_VERSION).then((cache) => cache.put(url.pathname, copy));
+          }
+          return response;
+        })
+        .catch(() => caches.match(request, { ignoreSearch: true }))
     );
     return;
   }

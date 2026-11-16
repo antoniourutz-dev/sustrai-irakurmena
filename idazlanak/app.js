@@ -7,7 +7,7 @@ const escapeHtml = value => String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;
 const GENRES = {iritzi_artikulua:'Iritzi-artikulua',gutuna:'Gutuna',gutun_irekia:'Gutun irekia',eskaera:'Eskaera',kexa:'Kexa',txostena:'Txostena',bestea:'Beste testu bat'};
 let tasks=[], supports=[], selected=null, mode='training', started=false, elapsed=0, running=false, clockId=null, lastNotice=null;
 let assistOpened = new Set();
-let markerKit=null;
+let markerKit=null, savedKit=null, glossaryKit=null;
 function refreshMarkedPrompt(){
   if(!selected||!markerKit)return;
   markerKit.fillSelectable($('contextText'), selected.context_eu, 'context');
@@ -99,6 +99,7 @@ function selectTaskBySlug(slug){
   updateWordCount();
   renderSupports(); renderList();
   window.SustraiEskema?.setTask(item,mode);
+  savedKit?.refresh();glossaryKit?.refresh();
   try{sessionStorage.setItem('sustrai-writer-last',slug)}catch{}
 }
 function renderList(){
@@ -153,6 +154,7 @@ function setMode(next){
   $('draft').value=loadDraft();
   updateWordCount();renderSupports();
   window.SustraiEskema?.setMode(next);
+  glossaryKit?.refresh();
   if(next==='simulation')notify('Simulazioan laguntzak ezkutuan daude.');
 }
 function formatClock(seconds){const m=Math.floor(seconds/60),s=seconds%60;return String(m).padStart(2,'0')+':'+String(s).padStart(2,'0')}
@@ -198,6 +200,21 @@ async function start(){await window.SustraiCloud.ready;
     onChange:refreshMarkedPrompt
   });
   markerKit?.setup();
+  savedKit=window.SustraiStudy?.saved({
+    root:$('savedDrafts'),eyebrow:'ZURE IDAZLANAK',title:'Gordetako idazlanak',noun:'idazlana',
+    saveLabel:'Gorde idazlan hau',loadLabel:'Editorean ireki',
+    note:'Gorde ataza honetarako idazten duzun bertsio bakoitza, geroago ikusi eta zure aurrerapena alderatzeko.',
+    emptyList:'Oraindik ez duzu idazlanik gorde ataza honetan.',emptyMessage:'Idatzi zerbait gorde aurretik.',
+    key:()=>selected?'sustrai-writer-saved:'+selected.slug:null,
+    capture:()=>{const text=$('draft').value.trim();return text?{text:text.slice(0,20000),words:countWords(text),mode}:null},
+    meta:item=>[(item.words||0)+' hitz',item.mode==='simulation'?'Simulazioa':'Entrenamendua'],
+    view:item=>{const p=document.createElement('p');p.className='study-text';p.textContent=item.text||'';return p},
+    isDirty:item=>{const now=$('draft').value.trim();return !!now&&now!==item.text},
+    load:item=>{$('draft').value=item.text||'';saveDraft();updateWordCount();$('draft').focus()},
+    notify
+  });
+  // Personal notes are a help, so they stay out of a simulation.
+  glossaryKit=window.SustraiStudy?.glossary({root:$('glossaryPanel'),key:()=>selected&&mode!=='simulation'?'sustrai-glossary:writing:'+selected.slug:null,notify});
   $('sourceFilter').onchange=renderList;
   $('genreFilter').onchange=renderList;
   $('taskSearch').oninput=renderList;

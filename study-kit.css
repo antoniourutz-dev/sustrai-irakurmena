@@ -1,0 +1,50 @@
+/* SUSTRAI study kit: saved versions and personal glossary (see /study-kit.js). */
+.study-panel{padding:20px;border:1px solid var(--s-line);border-radius:var(--s-r-lg);background:var(--s-surface);color:var(--s-ink);font:14px/1.5 var(--s-font-ui)}
+.study-panel[hidden]{display:none}
+.study-head{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:10px 16px}
+.study-eyebrow{display:block;color:var(--s-primary);font-size:11px;font-weight:700;letter-spacing:.1em}
+.study-title{margin:2px 0 0;font:600 19px/1.25 var(--s-font-display);letter-spacing:-.01em}
+.study-note{margin:8px 0 14px;color:var(--s-muted);font-size:13px}
+.study-empty{margin:0;padding:14px;border-radius:var(--s-r-md);background:var(--s-bg);color:var(--s-muted);font-size:13px}
+.study-panel button{font-family:inherit;cursor:pointer}
+.study-primary{min-height:42px;padding:0 16px;border:1px solid var(--s-primary);border-radius:var(--s-r-md);background:var(--s-primary);color:#fff;font-size:14px;font-weight:700}
+.study-primary:hover{border-color:var(--s-primary-hover);background:var(--s-primary-hover)}
+.study-action{min-height:36px;padding:0 12px;border:1px solid var(--s-line-strong);border-radius:var(--s-r-sm);background:var(--s-surface);color:var(--s-ink);font-size:13px;font-weight:600}
+.study-action:hover{border-color:var(--s-primary);color:var(--s-primary)}
+.study-danger:hover{border-color:var(--s-bad);color:var(--s-bad)}
+.study-list{display:grid;gap:10px}
+.study-item{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px 12px;align-items:center;padding:12px 14px;border:1px solid var(--s-line);border-radius:var(--s-r-md)}
+.study-item-top{min-width:0;display:grid;gap:2px}
+.study-name{width:100%;min-height:32px;padding:2px 6px;margin-left:-6px;border:1px solid transparent;border-radius:6px;background:transparent;color:var(--s-ink);font:600 15px var(--s-font-ui)}
+.study-name:hover{border-color:var(--s-line-strong)}
+.study-name:focus{border-color:var(--s-primary);background:var(--s-surface)}
+.study-meta{color:var(--s-muted);font-size:12px}
+.study-actions{display:flex;flex-wrap:wrap;gap:6px;justify-content:flex-end}
+.study-body{grid-column:1/-1;padding:14px 16px;border-radius:var(--s-r-sm);background:var(--s-bg)}
+.study-body[hidden]{display:none}
+.study-text{margin:0;white-space:pre-wrap;overflow-wrap:anywhere;color:var(--s-ink-2);font:16px/1.65 var(--s-font-reading)}
+.study-fields{display:grid;gap:10px;margin:0}
+.study-fields dt{color:var(--s-muted);font-size:12px;font-weight:700}
+.study-fields dd{margin:2px 0 0;white-space:pre-wrap;overflow-wrap:anywhere}
+.study-form{display:grid;grid-template-columns:auto minmax(0,1fr) minmax(0,1.4fr) auto auto;gap:8px;align-items:center;margin-bottom:14px}
+.study-form input{min-width:0;min-height:42px;padding:0 12px;border:1px solid var(--s-line-strong);border-radius:var(--s-r-md);background:var(--s-surface);color:var(--s-ink);font:15px var(--s-font-ui)}
+.study-kinds{display:inline-flex;gap:3px;padding:3px;border-radius:var(--s-r-md);background:var(--s-line)}
+.study-kinds button{min-height:36px;padding:0 12px;border:0;border-radius:9px;background:transparent;color:var(--s-ink-3);font-size:13px;font-weight:600}
+.study-kinds button.active{background:var(--s-ink);color:#fff}
+.study-group{margin:14px 0 6px;color:var(--s-ink-3);font:700 12px var(--s-font-ui);letter-spacing:.06em;text-transform:uppercase}
+.study-terms{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:8px;margin:0;padding:0;list-style:none}
+.study-term{display:flex;align-items:flex-start;gap:6px;padding:10px 8px 10px 12px;border:1px solid var(--s-line);border-radius:var(--s-r-md);background:var(--s-surface)}
+.study-term>div{flex:1;min-width:0;display:grid;gap:2px}
+.study-term strong{overflow-wrap:anywhere;font-size:14px}
+.study-term span{color:var(--s-muted);font-size:13px;overflow-wrap:anywhere}
+.study-term .study-action{min-height:32px;padding:0 8px;border-color:transparent;color:var(--s-muted);font-size:12px}
+.study-remove{width:32px;height:32px;flex:none;border:0;border-radius:var(--s-r-sm);background:transparent;color:var(--s-muted);font-size:20px;line-height:1}
+.study-remove:hover{background:var(--s-bad-soft);color:var(--s-bad)}
+@media(max-width:760px){
+  .study-panel{padding:16px}
+  .study-item{grid-template-columns:1fr}
+  .study-actions{justify-content:flex-start}
+  .study-form{grid-template-columns:1fr 1fr}
+  .study-form .study-kinds,.study-form input{grid-column:1/-1}
+  .study-kinds button{flex:1}
+}

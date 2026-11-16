@@ -33,9 +33,9 @@
     if (!Array.isArray(students.data)) throw new Error('Administratzaile-baimenik ez.');
     s.users = students.data;
     s.contents = [
-      ...exams.filter((e) => e.publication_status === 'published').map((e) => ({ kind: 'reading', id: e.id, label: e.title || e.slug, info: e.slug })),
-      ...writings.filter((e) => e.publication_status === 'published').map((e) => ({ kind: 'writing', id: e.id, label: e.title_eu || e.slug, info: e.exam_reference || e.slug })),
-      ...orals.filter((e) => e.publication_status === 'published').map((e) => ({ kind: 'speaking', id: e.id, label: e.title_eu || e.slug, info: e.exam_reference || e.slug }))
+      ...exams.filter((e) => e.publication_status === 'published').map((e) => ({ kind: 'reading', id: e.id, label: e.title || e.slug, info: e.slug, slug: e.slug })),
+      ...writings.filter((e) => e.publication_status === 'published').map((e) => ({ kind: 'writing', id: e.id, label: e.title_eu || e.slug, info: e.exam_reference || e.slug, slug: e.slug })),
+      ...orals.filter((e) => e.publication_status === 'published').map((e) => ({ kind: 'speaking', id: e.id, label: e.title_eu || e.slug, info: e.exam_reference || e.slug, slug: e.slug }))
     ];
     s.rules = rules;
     s.grants = grants;
@@ -200,90 +200,160 @@
     }
   }
 
-  function selection(label, values, chosen) {
-    const select = document.createElement('select');
-    select.setAttribute('aria-label', label);
-    for (const [value, title] of values) {
-      const o = el('option', title);
-      o.value = value;
-      select.append(o);
+  /* ---------- Material manager ----------
+     A content item has one state for everybody: public (guests and accounts), members (accounts
+     only) or hidden. "No rule" means public, so publishing removes the rule. */
+  const STATES = [['public', 'Publikoa'], ['members', 'Kontuak soilik'], ['hidden', 'Ezkutuan']];
+  const picked = new Set();
+
+  function stateOf(item) {
+    const rule = s.rules.find((x) => x.kind === item.kind && x.resource_id === item.id);
+    if (!rule || (rule.guest_visible !== false && rule.member_visible !== false)) return 'public';
+    if (rule.member_visible === false) return rule.guest_visible === false ? 'hidden' : 'guests';
+    return 'members';
+  }
+  const organismOf = (item) => (/^(ivap|habe)-/i.exec(item.slug || '') || [])[1]?.toUpperCase() || 'SUSTRAI';
+  const KIND_LABEL = { reading: 'Irakurmena', writing: 'Idazmena', speaking: 'Ahozkoa' };
+
+  function visibleContent() {
+    const search = $('contentSearch').value.toLocaleLowerCase('eu').trim();
+    const state = $('contentState').value;
+    const organism = $('contentOrganism').value;
+    return s.contents.filter((x) => x.kind === s.kind &&
+      (state === 'all' || stateOf(x) === state) &&
+      (organism === 'all' || organismOf(x) === organism) &&
+      (!search || (x.label + ' ' + x.info).toLocaleLowerCase('eu').includes(search)));
+  }
+
+  async function setState(items, state) {
+    if (!items.length) return;
+    const kind = items[0].kind;
+    const ids = items.map((x) => x.id);
+    if (state === 'public') {
+      const { error } = await s.client.from('sr_app_content_rules').delete().eq('kind', kind).in('resource_id', ids);
+      if (error) throw error;
+    } else {
+      const now = new Date().toISOString();
+      const rows = ids.map((id) => ({ kind, resource_id: id, guest_visible: false, member_visible: state === 'members', updated_at: now }));
+      const { data, error } = await s.client.from('sr_app_content_rules').upsert(rows, { onConflict: 'kind,resource_id' }).select('resource_id');
+      if (error) throw error;
+      if (!data || data.length !== rows.length) throw new Error('Aldaketa batzuk ez dira gorde.');
     }
-    select.value = chosen;
-    return select;
+    // Always re-read: the table is the source of truth for what students can open.
+    s.rules = await fetchList('sr_app_content_rules', 'kind,resource_id,guest_visible,member_visible');
+  }
+
+  async function setGrant(item, value) {
+    if (!s.selected) return;
+    if (value === 'default') {
+      const { error } = await s.client.from('sr_app_grants').delete().eq('user_id', s.selected).eq('kind', item.kind).eq('resource_id', item.id);
+      if (error) throw error;
+    } else {
+      const { data, error } = await s.client.from('sr_app_grants').upsert({
+        user_id: s.selected, kind: item.kind, resource_id: item.id, allowed: value === 'allow', updated_at: new Date().toISOString()
+      }, { onConflict: 'user_id,kind,resource_id' }).select('resource_id');
+      if (error) throw error;
+      if (!data || !data.length) throw new Error('Salbuespena ez da gorde.');
+    }
+    s.grants = await fetchList('sr_app_grants', 'user_id,kind,resource_id,allowed');
+  }
+
+  async function applyState(items, state, question) {
+    if (!items.length) return;
+    if (question && !confirm(question)) return;
+    const root = $('contentManager');
+    root.setAttribute('aria-busy', 'true');
+    try {
+      await setState(items, state);
+      status(items.length === 1 ? 'Egoera gordeta.' : items.length + ' eduki eguneratu dira.');
+    } catch (err) {
+      status('Ezin izan da gorde: ' + (err.message || 'errorea'));
+    } finally {
+      root.setAttribute('aria-busy', 'false');
+      renderContent();
+    }
+  }
+
+  function bulk(state) {
+    const rows = visibleContent();
+    const chosen = rows.filter((x) => picked.has(x.id));
+    const target = chosen.length ? chosen : rows;
+    const verb = state === 'public' ? 'argitaratu' : state === 'members' ? 'kontuentzat soilik utzi' : 'ezkutatu';
+    const scope = chosen.length ? 'Hautatutako ' + target.length + ' eduki' : KIND_LABEL[s.kind] + ': zerrendako ' + target.length + ' eduki';
+    applyState(target, state, scope + ' ' + verb + ' nahi dituzu?');
   }
 
   function renderContent() {
     const root = $('content');
     root.replaceChildren();
-    const search = $('contentSearch').value.toLocaleLowerCase('eu').trim();
-    const kind = $('contentType').value;
-    const rows = s.contents.filter((x) => x.kind === kind && (!search || (x.label + ' ' + x.info).toLocaleLowerCase('eu').includes(search)));
-    if (!rows.length) return empty(root, 'Ez dago edukirik iragazki honekin.');
+    document.querySelectorAll('#contentKinds button').forEach((btn) => {
+      const on = btn.dataset.kind === s.kind;
+      btn.classList.toggle('active', on);
+      btn.setAttribute('aria-pressed', String(on));
+      const all = s.contents.filter((x) => x.kind === btn.dataset.kind);
+      btn.querySelector('small').textContent = all.length;
+    });
+    const all = s.contents.filter((x) => x.kind === s.kind);
+    const count = (state) => all.filter((x) => stateOf(x) === state).length;
+    $('contentSummary').textContent = all.length + ' eduki · ' + count('public') + ' publiko · ' + count('members') + ' kontuentzat · ' + count('hidden') + ' ezkutuan';
+    const rows = visibleContent();
+    for (const id of [...picked]) if (!rows.some((x) => x.id === id)) picked.delete(id);
+    const selectedUser = s.selected ? s.users.find((u) => u.id === s.selected) : null;
+    $('contentGrantHead').textContent = selectedUser ? 'Salbuespena: ' + (selectedUser.name || selectedUser.email) : 'Salbuespena (hautatu ikaslea)';
+    const updateBulk = () => {
+      const n = rows.filter((x) => picked.has(x.id)).length;
+      $('contentPickAll').checked = !!rows.length && n === rows.length;
+      $('contentPickAll').indeterminate = n > 0 && n < rows.length;
+      $('contentBulkLabel').textContent = n ? n + ' hautatuta' : 'Zerrenda osoa (' + rows.length + ')';
+      document.querySelectorAll('#contentBulk button').forEach((b) => { b.disabled = !rows.length; });
+    };
+    $('contentPickAll').onchange = (event) => {
+      for (const x of rows) if (event.target.checked) picked.add(x.id); else picked.delete(x.id);
+      renderContent();
+    };
+    if (!rows.length) { empty(root, 'Ez dago edukirik iragazki honekin.'); updateBulk(); return; }
     for (const item of rows) {
-      const rule = s.rules.find((x) => x.kind === item.kind && x.resource_id === item.id);
-      const grant = s.selected ? s.grants.find((x) => x.user_id === s.selected && x.kind === item.kind && x.resource_id === item.id) : null;
-      const div = el('div', undefined, 'content-row');
-      const name = el('div');
-      name.append(el('strong', item.label), el('small', item.info));
-      div.append(name);
-      const guest = selection('Gonbidatuen baimena', [['yes', 'Ikusgai'], ['no', 'Ezkutuan']], rule?.guest_visible === false ? 'no' : 'yes');
-      const member = selection('Kontu guztien baimena', [['yes', 'Ikusgai'], ['no', 'Ezkutuan']], rule?.member_visible === false ? 'no' : 'yes');
-      const special = selection('Hautatutako ikaslearen salbuespena', [['default', 'Orokorra'], ['allow', 'Baimendu'], ['deny', 'Ukatu']], grant ? (grant.allowed ? 'allow' : 'deny') : 'default');
-      if (!s.selected) special.disabled = true;
-      const wrap = (label, select) => { const x = el('label', label); x.append(select); return x; };
-      div.append(wrap('Gonbidatuak', guest), wrap('Ikasle guztiak', member), wrap(s.selected ? 'Ikasle hautatua' : 'Hautatu ikaslea', special));
-      const save = el('button', 'Gorde');
-      save.type = 'button';
-      save.onclick = async () => {
-        save.disabled = true;
-        save.textContent = 'Gordetzen…';
-        try {
-          await savePermission(item, guest.value, member.value, special.value);
-          save.textContent = 'Gordeta';
-          status('Baimenak eguneratu dira.');
-        } catch (err) {
-          save.textContent = 'Errorea';
-          status('Ezin izan da gorde: ' + (err.message || 'errorea'));
-        } finally {
-          save.disabled = false;
-        }
-      };
-      div.append(save);
-      root.append(div);
-    }
-  }
-
-  async function savePermission(item, guest, member, special) {
-    const visibleGuest = guest === 'yes';
-    const visibleMember = member === 'yes';
-    if (visibleGuest && visibleMember) {
-      const { error } = await s.client.from('sr_app_content_rules').delete().eq('kind', item.kind).eq('resource_id', item.id);
-      if (error) throw error;
-    } else {
-      const { data, error } = await s.client.from('sr_app_content_rules').upsert({
-        kind: item.kind, resource_id: item.id, guest_visible: visibleGuest, member_visible: visibleMember, updated_at: new Date().toISOString()
-      }, { onConflict: 'kind,resource_id' }).select('resource_id');
-      if (error) throw error;
-      if (!data || !data.length) throw new Error('Baimena ez da gorde.');
-    }
-    if (s.selected) {
-      if (special === 'default') {
-        const { error } = await s.client.from('sr_app_grants').delete().eq('user_id', s.selected).eq('kind', item.kind).eq('resource_id', item.id);
-        if (error) throw error;
-      } else {
-        const { data, error } = await s.client.from('sr_app_grants').upsert({
-          user_id: s.selected, kind: item.kind, resource_id: item.id, allowed: special === 'allow', updated_at: new Date().toISOString()
-        }, { onConflict: 'user_id,kind,resource_id' }).select('resource_id');
-        if (error) throw error;
-        if (!data || !data.length) throw new Error('Baimen berezia ez da gorde.');
+      const state = stateOf(item);
+      const row = el('div', undefined, 'material-row' + (state === 'hidden' ? ' is-hidden' : ''));
+      row.setAttribute('role', 'row');
+      const check = document.createElement('input');
+      check.type = 'checkbox';
+      check.checked = picked.has(item.id);
+      check.setAttribute('aria-label', 'Hautatu: ' + item.label);
+      check.onchange = () => { if (check.checked) picked.add(item.id); else picked.delete(item.id); updateBulk(); };
+      const pick = el('label', undefined, 'material-pick');
+      pick.append(check);
+      const name = el('div', undefined, 'material-name');
+      name.append(el('strong', item.label), el('small', organismOf(item) + ' · ' + item.info));
+      const seg = el('div', undefined, 'material-state');
+      seg.setAttribute('role', 'group');
+      seg.setAttribute('aria-label', 'Egoera: ' + item.label);
+      for (const [value, title] of STATES) {
+        const b = el('button', title, 'state-' + value + (state === value ? ' active' : ''));
+        b.type = 'button';
+        b.setAttribute('aria-pressed', String(state === value));
+        b.onclick = () => { if (stateOf(item) !== value) applyState([item], value); };
+        seg.append(b);
       }
+      if (state === 'guests') seg.append(el('small', 'Gonbidatuak soilik (arau zaharra)'));
+      const grant = s.selected ? s.grants.find((x) => x.user_id === s.selected && x.kind === item.kind && x.resource_id === item.id) : null;
+      const special = document.createElement('select');
+      special.setAttribute('aria-label', 'Hautatutako ikaslearen salbuespena: ' + item.label);
+      for (const [value, title] of [['default', 'Orokorra'], ['allow', 'Baimendu'], ['deny', 'Ukatu']]) {
+        const o = el('option', title); o.value = value; special.append(o);
+      }
+      special.value = grant ? (grant.allowed ? 'allow' : 'deny') : 'default';
+      special.disabled = !s.selected;
+      special.onchange = async () => {
+        special.disabled = true;
+        try { await setGrant(item, special.value); status('Salbuespena gordeta.'); }
+        catch (err) { status('Ezin izan da gorde: ' + (err.message || 'errorea')); }
+        renderContent();
+      };
+      row.append(pick, name, seg, special);
+      root.append(row);
     }
-    const [r, g] = await Promise.all([
-      fetchList('sr_app_content_rules', 'kind,resource_id,guest_visible,member_visible'),
-      fetchList('sr_app_grants', 'user_id,kind,resource_id,allowed')
-    ]);
-    s.rules = r;
-    s.grants = g;
+    updateBulk();
   }
 
   async function toggleActive() {
@@ -321,7 +391,12 @@
     $('refresh').onclick = () => load().catch((e) => status(e.message));
     $('studentSearch').oninput = renderStudents;
     $('contentSearch').oninput = renderContent;
-    $('contentType').onchange = renderContent;
+    $('contentState').onchange = renderContent;
+    $('contentOrganism').onchange = renderContent;
+    document.querySelectorAll('#contentKinds button').forEach((btn) => {
+      btn.onclick = () => { s.kind = btn.dataset.kind; picked.clear(); renderContent(); };
+    });
+    document.querySelectorAll('#contentBulk button').forEach((btn) => { btn.onclick = () => bulk(btn.dataset.state); });
     $('userActive').onclick = toggleActive;
     document.querySelectorAll('.work-filters .chip').forEach((btn) => {
       btn.onclick = () => {

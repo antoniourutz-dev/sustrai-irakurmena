@@ -96,7 +96,9 @@ Deno.serve(async (request: Request) => {
           client_attempt_key:key,
           score:result.score,max_score:result.max_score,
           correct:result.correct,total:result.total,elapsed_seconds:elapsed,
-          response_summary:{mode}
+          // The student's own answer sheet, so a later attempt can be compared with this one.
+          // Only right/wrong is kept per question, never the accepted options.
+          response_summary:{mode,answers,marks:items.map((it:Record<string,unknown>)=>[it.position,it.n,it.correct?1:0])}
         };
         const recorded=await fetch(url+"/rest/v1/sr_app_reading_results",{
           method:"POST",

@@ -96,3 +96,16 @@ body.focus-mode .site-nav{display:none}
 @media(prefers-reduced-motion:reduce){
   *,*::before,*::after{scroll-behavior:auto!important;transition-duration:.01ms!important;animation-duration:.01ms!important}
 }
+/* Bost atal goiburuan: tarteko zabaleretan tokia egin (nabigazioa ez da gainjartzen) */
+@media(min-width:761px) and (max-width:1279px){
+  .site-header{grid-template-columns:auto minmax(0,1fr) auto;column-gap:12px}
+  .site-header>.site-nav{justify-self:center}
+  .sustrai-account-status{display:none}
+  .sustrai-account-trigger{padding-right:4px}
+  .sustrai-account-trigger .sustrai-account-user{display:none}
+}
+@media(min-width:761px) and (max-width:1023px){
+  .site-nav{gap:2px}
+  .site-nav a{padding:0 9px;font-size:13px}
+  .site-brand-level{display:none}
+}

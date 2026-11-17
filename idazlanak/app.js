@@ -130,7 +130,7 @@ function supportSection(kind,target){
     if(kind==='planning')el.innerHTML='<p><span class="index">'+escapeHtml(item.step)+'.</span>'+escapeHtml(item.instruction)+'</p>';
     box.append(el);
   }
-  if(!box.childElementCount)box.textContent='Ez dago egiaztatutako laguntzarik oraingoz.';
+  if(!box.childElementCount)box.textContent='Ez dago gai honetarako laguntza zehatzik oraingoz.';
 }
 function renderSupports(){
   for(const id of ['planningDetails','lexiconDetails','structuresDetails'])$(id).open=false;
@@ -138,6 +138,8 @@ function renderSupports(){
   $('helpBadge').textContent='Laguntzarik erabili gabe';
   $('supportReady').hidden=mode==='simulation';
   $('simulationHelp').hidden=mode!=='simulation';
+  const auditNotice=$('supportAuditNote');
+  if(auditNotice)auditNotice.hidden=!selected||mode==='simulation'||!supports.some(s=>s.prompt_id===selected.id&&String(s.source_note||'').includes('behin-behineko'));
   if(!selected)return;
   supportSection('planning','planningSupport');
   supportSection('lexicon','lexiconSupport');
@@ -233,14 +235,14 @@ async function start(){await window.SustraiCloud.ready;
   try{
     const [raw,supportData]=await Promise.all([
       readTable('sr_writing_prompts','id,slug,organism_id,level,exam_reference,title_eu,genre,audience_eu,context_eu,instruction_eu,exam_guidance,min_words,recommended_minutes,source_url,source_section,source_status,official_material,source_excerpt_eu,source_excerpt_kind'),
-      readTable('sr_writing_supports','prompt_id,support_kind,version,items,is_official')
+      readTable('sr_writing_supports','prompt_id,support_kind,version,items,is_official,source_note')
     ]);
     const mapping={'IVAP':'IVAP','HABE':'HABE'};
     // The organization IDs are obtained through the existing published catalog, never inferred from slug.
     const organismData=await (async()=>{const response=await fetch(API_URL+'/rest/v1/sr_organisms?select=id,code',{headers});if(!response.ok)throw Error('Erakundeak ezin izan dira irakurri');return response.json()})();
     const organizations=new Map(organismData.map(x=>[x.id,x.code]));
     tasks=raw.filter(x=>organizations.has(x.organism_id)).map(x=>({...x,org_code:organizations.get(x.organism_id)})).sort((a,b)=>a.org_code.localeCompare(b.org_code)||b.exam_reference.localeCompare(a.exam_reference)||a.title_eu.localeCompare(b.title_eu,'eu'));
-    supports=supportData.filter(x=>!x.is_official);
+    supports=supportData.filter(x=>!x.is_official).sort((a,b)=>Number(b.version||0)-Number(a.version||0));
     $('taskList').setAttribute('aria-busy','false');
     if(!tasks.length)throw Error('Oraindik ez dago idazlanik argitaratuta.');
     let previous;try{previous=sessionStorage.getItem('sustrai-writer-last')}catch{}

@@ -40,7 +40,7 @@
     for (const e of ex.value?.data || []) {
       const org = e.sr_organisms?.code || (String(e.slug).startsWith('habe') ? 'HABE' : 'IVAP');
       catalog.exams.set(e.slug, {
-        title: e.session_label ? org + ' · ' + e.session_label : e.title,
+        title: org + ' · ' + (window.SustraiExamName ? window.SustraiExamName.name(org, e.slug, e.session_label || e.title) : (e.session_label || e.title)),
         total: Number(e.metadata?.expected_items) || null
       });
     }
@@ -98,7 +98,7 @@
         const mode = a.mode === 'simulation' ? 'simulation' : 'practice';
         const ms = a.elapsed ?? a.time;
         out.push({
-          title: info?.title || rec.org + ' · ' + rec.examId,
+          title: info?.title || rec.org + ' · ' + (window.SustraiExamName ? window.SustraiExamName.name(rec.org, rec.examId) : rec.examId),
           when: a.at, mode,
           pct: total ? Math.round((Number(a.correct) || 0) / total * 100) : null,
           correct: a.correct, total, score: a.score, max: null,
@@ -128,7 +128,7 @@
         const id = rec.slug + '|' + mode;
         if (!reading.has(id)) {
           const info = catalog.exams.get(rec.slug);
-          reading.set(id, { skill: 'reading', rec, mode, title: info?.title || rec.org + ' · ' + rec.examId, total: info?.total || null, answered: 0, done: false, keys: [], updated: 0 });
+          reading.set(id, { skill: 'reading', rec, mode, title: info?.title || rec.org + ' · ' + (window.SustraiExamName ? window.SustraiExamName.name(rec.org, rec.examId) : rec.examId), total: info?.total || null, answered: 0, done: false, keys: [], updated: 0 });
         }
         const task = reading.get(id);
         touch(task, row);

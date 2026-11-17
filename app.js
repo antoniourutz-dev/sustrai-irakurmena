@@ -20,6 +20,7 @@ function srSafeUrl(value,field,required=false){
  return url.href;
 }
 function srExamLabel(label,id,organism){
+ if(window.SustraiExamName)return window.SustraiExamName.name(organism,id,label);
  const clean=typeof label==='string'?label.trim():'';
  if(clean)return clean;
  const date=id.match(/^(\d{4})-(\d{2})-(\d{2})/);

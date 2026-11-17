@@ -262,3 +262,54 @@ body.focus-mode .passage,body.focus-mode .source-note{max-width:720px}
   .session:has(.time-actions.expanded) .session-modes{display:flex;flex:1 1 100%}
   .session:has(.time-actions.expanded) .session-modes .mode{flex:1;min-height:44px}
 }
+/* Reading result (result-kit.js): score and verdict, pass mark, facts, exercise breakdown, next focus */
+.rs-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:4px}
+.rs-score{display:flex;align-items:baseline;gap:8px;margin:0}
+.rs-score strong{color:var(--s-ink);font:700 52px/1 var(--s-font-display);letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.rs-score span{color:var(--s-muted);font-size:17px}
+.rs-badge{flex:none;padding:6px 12px;border-radius:999px;font-size:14px;font-weight:700}
+.rs-badge.pass{background:var(--s-ok-soft);color:var(--s-ok)}
+.rs-badge.fail{background:var(--s-accent-soft);color:var(--s-accent)}
+.rs-bar{position:relative;height:10px;margin:16px 0 8px;border-radius:999px;background:var(--s-line)}
+.rs-bar>span{display:block;height:100%;border-radius:inherit}
+.rs-bar>span.pass{background:var(--s-ok)}
+.rs-bar>span.fail{background:var(--s-accent)}
+.rs-bar>i{position:absolute;top:-4px;bottom:-4px;width:2px;margin-left:-1px;border-radius:1px;background:var(--s-ink)}
+.rs-note{margin:0;color:var(--s-muted);font-size:14px;line-height:1.5}
+.rs-delta{font-weight:700;color:var(--s-ink-3)}
+.rs-delta.up{color:var(--s-ok)}
+.rs-delta.down{color:var(--s-accent)}
+.rs-facts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:18px 0 0}
+.rs-facts div{padding:10px 12px;border-radius:var(--s-r-sm);background:var(--s-bg)}
+.rs-facts dt{color:var(--s-muted);font-size:12px;font-weight:600}
+.rs-facts dd{margin:2px 0 0;color:var(--s-ink);font-size:16px;font-weight:700;font-variant-numeric:tabular-nums}
+.rs-title{margin:22px 0 8px;font:700 15px/1.3 var(--s-font-display)}
+.rs-parts{display:grid;gap:12px;margin:0;padding:0;list-style:none}
+.rs-part-head{display:flex;justify-content:space-between;gap:12px;font-size:14px}
+.rs-part-head span{min-width:0;color:var(--s-ink-3)}
+.rs-part-head b{color:var(--s-ink)}
+.rs-part-head strong{flex:none;font-variant-numeric:tabular-nums}
+.rs-mini{height:6px;margin:6px 0 4px;border-radius:999px;background:var(--s-line);overflow:hidden}
+.rs-mini span{display:block;height:100%;background:var(--s-primary)}
+.rs-mini span.low{background:var(--s-accent)}
+.rs-parts small{color:var(--s-muted);font-size:13px}
+.rs-focus{margin-top:18px;padding:14px 16px;border-left:4px solid var(--s-primary);border-radius:var(--s-r-sm);background:var(--s-primary-soft)}
+.rs-focus.good{border-color:var(--s-ok);background:var(--s-ok-soft)}
+.rs-focus strong{font-size:15px}
+.rs-focus p{margin:4px 0 0;color:var(--s-ink-3);font-size:14px;line-height:1.5}
+.rs-focus+.rs-note{margin-top:12px}
+.rs-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:20px}
+.rs-actions button{min-height:44px}
+.rs-actions .quiet:last-child{margin-left:auto}
+#modal .modal-card{width:min(600px,100%)}
+/* Question numbers once their exercise is graded */
+.numbers button.q-ok{border-color:var(--s-ok-line);background:var(--s-ok-soft);color:var(--s-ok)}
+.numbers button.q-bad{border-color:var(--s-bad-line);background:var(--s-bad-soft);color:var(--s-bad)}
+.numbers button.q-blank{border-style:dashed;border-color:var(--s-line-strong);background:var(--s-surface);color:var(--s-muted)}
+.numbers button.current.q-ok,.numbers button.current.q-bad,.numbers button.current.q-blank{outline:3px solid var(--s-ink);outline-offset:1px}
+@media(max-width:560px){
+  .rs-facts{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .rs-score strong{font-size:44px}
+  .rs-actions button{flex:1 1 100%}
+  .rs-actions .quiet:last-child{margin-left:0}
+}

@@ -67,7 +67,7 @@ function renderCatalog(){
   btn.setAttribute('aria-pressed',String(selected?.slug===t.slug));
   btn.append(textNode('span',t.org_code+' · '+t.exam_reference+' · '+(t.variant||''),'meta'));
   btn.append(textNode('strong',t.title_eu));btn.append(textNode('span',GENRE[t.exercise_type]||t.exercise_type,'kind'));
-  btn.onclick=()=>choose(t.slug,true);list.append(btn);
+  btn.onclick=()=>{if(!window.SustraiStage){choose(t.slug,true);return}choose(t.slug,false);if(selected?.slug===t.slug)window.SustraiStage.opened(t.slug)};list.append(btn);
  }
 }
 function appendList(containerId,items){
@@ -289,6 +289,7 @@ async function init(){await window.SustraiCloud.ready;
   let last=null;try{last=sessionStorage.getItem('sustrai-oral-last')}catch{}
   choose(tasks.some(t=>t.slug===requested)?requested:(tasks.some(t=>t.slug===last)?last:tasks[0].slug),false);
   if(params.get('mode')==='simulation')setMode('simulation');
+  window.SustraiStage?.init({breakpoint:900,open:slug=>{choose(slug,false);return selected?.slug===slug},title:()=>selected?.title_eu||''});
  }catch(error){$('taskList').setAttribute('aria-busy','false');$('taskList').textContent=error.message;show('Ahozko atazak ezin izan dira kargatu.');console.error(error)}
 }
 init();

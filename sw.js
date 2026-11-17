@@ -1,5 +1,5 @@
 /* SUSTRAI PWA service worker */
-const CACHE_VERSION = 'sustrai-pwa-v23-hitzbira';
+const CACHE_VERSION = 'sustrai-pwa-v24-ikonoak';
 const SHELL = [
   '/',
   '/index.html',
@@ -49,6 +49,7 @@ const SHELL = [
   '/icons/icon-512.png',
   '/icons/apple-touch-icon.png',
   '/icons/favicon-32.png',
+  '/icons/icon.svg',
   '/irakurmena/',
   '/irakurmena/index.html',
   '/irakurmena/style.css',

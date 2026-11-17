@@ -104,8 +104,9 @@ function renderTimers(){
   const stamp=String(Math.floor(t.elapsed/60)).padStart(2,'0')+':'+String(t.elapsed%60).padStart(2,'0');
   $(k+'Time').textContent=stamp;
   const top=$(k+'TimeTop');if(top)top.textContent=stamp;
-  $(k+'Target').textContent=target===null||target===undefined?'Denbora ez egiaztatua':target+' min (fitxa)';
-  $(k+'Start').disabled=!selected||target===null||target===undefined;
+  $(k+'Target').textContent=target===null||target===undefined?'Denbora librea':target+' min (fitxa)';
+  // No official time on the sheet: the stopwatch still counts up, it just has no limit to warn about.
+  $(k+'Start').disabled=!selected;
   $(k+'Start').textContent=t.running?'Gelditu':'Hasi';
   $(k+'Reset').disabled=!selected;
  }
@@ -114,8 +115,6 @@ function renderTimers(){
 function stopAllTimers(){for(const k of ['prep','speak'])timers[k].running=false;renderTimers()}
 function startTimer(k){
  if(!selected)return;
- const target=k==='prep'?selected.preparation_minutes:selected.speaking_minutes;
- if(target===null||target===undefined)return;
  const was=timers[k].running;for(const x of ['prep','speak'])timers[x].running=false;
  timers[k].running=!was;
  renderTimers();

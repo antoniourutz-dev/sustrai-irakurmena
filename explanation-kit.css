@@ -1,0 +1,14 @@
+/* SUSTRAI · Irakurmeneko azalpen pedagogikoak */
+.sr-explanation{margin-top:12px;border:1px solid #c7dfe5;border-radius:12px;background:#f8fcfd;color:#183745;overflow:hidden}
+.sr-explanation summary{padding:12px 15px;font-weight:700;cursor:pointer;list-style-position:inside}
+.sr-explanation summary:hover,.sr-explanation summary:focus-visible{background:#ecf7fa}
+.sr-explanation[open] summary{border-bottom:1px solid #d7e8ed}
+.sr-explanation-body{padding:14px 16px;line-height:1.55;font-size:.94rem}
+.sr-explanation-body p{margin:0 0 12px}
+.sr-explanation-body strong{display:block;margin:12px 0 4px}
+.sr-exp-label{font-size:.79rem;color:#517383}
+.sr-exp-reason{font-weight:500}
+.sr-exp-quote{border-left:3px solid #1c86a4;padding:8px 11px;margin:7px 0 12px;background:#eff8fb;font-style:italic}
+.sr-exp-location{font-size:.83rem;color:#517383}
+.sr-exp-distractors{padding-left:20px;margin:6px 0 14px}
+.sr-exp-distractors li{margin-bottom:5px}

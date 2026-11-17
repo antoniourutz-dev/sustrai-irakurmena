@@ -125,8 +125,8 @@ function supportSection(kind,target){
   const box=$(target);box.replaceChildren();
   for(const item of (Array.isArray(support?.items)?support.items:[])){
     const el=document.createElement('div');el.className='support-item';
-    if(kind==='lexicon')el.innerHTML='<strong>'+escapeHtml(item.expression)+'</strong><p>'+escapeHtml(item.example)+'</p>';
-    if(kind==='structures')el.innerHTML='<strong>'+escapeHtml(item.function_eu)+'</strong><p>'+escapeHtml(item.example)+'</p>';
+    if(kind==='lexicon')el.innerHTML='<strong>'+escapeHtml(item.expression)+'</strong><p>'+escapeHtml(item.example)+'</p>'+(item.nuance_eu?'<small>'+escapeHtml(item.nuance_eu)+'</small>':'');
+    if(kind==='structures')el.innerHTML='<strong>'+escapeHtml(item.function_eu)+'</strong><p>'+escapeHtml(item.example)+'</p>'+(item.usage_note_eu?'<small>'+escapeHtml(item.usage_note_eu)+'</small>':'');
     if(kind==='planning')el.innerHTML='<p><span class="index">'+escapeHtml(item.step)+'.</span>'+escapeHtml(item.instruction)+'</p>';
     box.append(el);
   }

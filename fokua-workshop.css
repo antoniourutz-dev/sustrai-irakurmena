@@ -57,3 +57,21 @@ body{background-image:none}
 @media(max-width:900px),(pointer:coarse){
   .layout :is(.soft,.primary,.outline-primary),#timerToggle,.layout .modes button{min-height:44px}
 }
+/* Kontrastea (WCAG AA ≥ 4.5:1): testu txiki grisak --s-muted kolorera */
+.task-card .task-genre,.task-card .kind,.task-card .meta,.footer,.app>footer{color:var(--s-muted)}
+/* Panel plegagarriak: idazteko/grabatzeko eremua goian, gainerakoa aukerakoa */
+.fold{background:var(--s-surface);border:1px solid var(--s-line);border-radius:var(--s-r-xl);overflow:hidden;min-width:0}
+.fold[open]{border-color:var(--s-line-strong)}
+.fold-summary{display:flex;align-items:center;gap:14px;padding:18px 22px;cursor:pointer;list-style:none}
+.fold-summary::-webkit-details-marker{display:none}
+.fold-summary::after{content:'';flex:none;width:10px;height:10px;margin-left:auto;border-right:2px solid var(--s-primary);border-bottom:2px solid var(--s-primary);transform:rotate(45deg) translate(-2px,-2px);transition:transform .15s}
+.fold[open]>.fold-summary::after{transform:rotate(-135deg) translate(-2px,-2px)}
+.fold-summary:hover{background:var(--s-bg)}
+.fold-summary:focus-visible{outline:2px solid var(--s-primary);outline-offset:-2px}
+.fold-text{display:flex;flex-direction:column;gap:3px;min-width:0}
+.fold-text .overline{font-size:11px;font-weight:700;letter-spacing:.08em;color:var(--s-muted)}
+.fold-text strong{font:700 18px/1.25 var(--s-font-display);color:var(--s-ink)}
+.fold-hint{font-size:13px;color:var(--s-muted)}
+.fold>.panel{border:0;border-top:1px solid var(--s-line);border-radius:0;box-shadow:none;position:static;min-height:0;max-height:none;overflow:visible}
+.fold>.support .support-heading h2,.fold>.help .help-intro h2{display:none}
+@media (max-width:760px){.fold-summary{padding:15px 16px}.fold-text strong{font-size:16px}}

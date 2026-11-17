@@ -32,10 +32,41 @@
     return String(fallback || id || 'Proba');
   }
 
+  const MONTH_NAME = ['urtarrila', 'otsaila', 'martxoa', 'apirila', 'maiatza', 'ekaina',
+    'uztaila', 'abuztua', 'iraila', 'urria', 'azaroa', 'abendua'];
+
+  // Short form for narrow selects: «2019 · maiatza», «2014 · 1. deialdia», «2023 · urria · eredua».
+  function short(id, fallback) {
+    const raw = String(id || '').replace(/^(habe|ivap)-/i, '');
+    let m;
+    if ((m = raw.match(/^(\d{4})-(\d{2})-(\d{2})(?:-(.+))?$/))) {
+      const month = MONTH_NAME[Number(m[2]) - 1];
+      return m[1] + (month ? ' · ' + month : '') + (m[4] ? ' · eredua' : '');
+    }
+    if ((m = raw.match(/^(\d{4})-(\d)$/))) return m[1] + ' · ' + m[2] + '. deialdia';
+    if ((m = raw.match(/^(\d{4})-(I{1,3}|IV)$/))) return m[1] + ' · ' + ROMAN[m[2]] + '. deialdia';
+    return String(fallback || id || 'Proba');
+  }
+
+  // Fills an exam <select>: full label on wide screens, short label on phones (≤760px).
+  function fillSelect(select, exams, countOf) {
+    const mq = window.matchMedia('(max-width:760px)');
+    const paint = () => [...select.options].forEach((o) => { o.textContent = mq.matches ? o.dataset.short : o.dataset.full; });
+    select.replaceChildren(...exams.map((e) => {
+      const o = document.createElement('option');
+      o.value = e.id;
+      o.dataset.full = e.label + ' · ' + countOf(e) + ' galdera';
+      o.dataset.short = short(e.id, e.label);
+      return o;
+    }));
+    paint();
+    if (!select.dataset.sizeWatch) { select.dataset.sizeWatch = '1'; mq.addEventListener('change', paint); }
+  }
+
   function year(id) {
     const m = String(id || '').match(/(\d{4})/);
     return m ? m[1] : '';
   }
 
-  window.SustraiExamName = { name, year, yearKo };
+  window.SustraiExamName = { name, short, fillSelect, year, yearKo };
 })();

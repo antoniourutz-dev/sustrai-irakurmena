@@ -313,3 +313,15 @@ body.focus-mode .passage,body.focus-mode .source-note{max-width:720px}
   .rs-actions button{flex:1 1 100%}
   .rs-actions .quiet:last-child{margin-left:0}
 }
+/* Hutsunearen testuingurua galdera-panelean */
+.questiontext .gap-context{margin:12px 0 0;padding:12px 14px;border-left:3px solid var(--s-primary-line);border-radius:0 var(--s-r-sm) var(--s-r-sm) 0;background:var(--s-bg);color:var(--s-ink);font:400 16px/1.6 var(--s-font-reading);letter-spacing:0}
+.gap-context .gap-slot{display:inline-flex;align-items:baseline;gap:6px;margin:0 3px;padding:1px 9px;border:1px dashed var(--s-primary);border-radius:999px;background:var(--s-surface);color:var(--s-primary);font:600 14px/1.5 var(--s-font-ui);white-space:nowrap}
+.gap-context .gap-slot b{font-weight:700;font-size:12px;color:var(--s-muted)}
+.gap-context .gap-slot.filled{border-style:solid;background:var(--s-primary-soft);color:var(--s-ink)}
+.gap-context .gap-word{padding:0 3px;border-radius:4px;background:var(--s-mark,#ffe174);font-weight:700}
+@media (max-width:760px){.questiontext .gap-context{font-size:15px;padding:10px 12px}.gap-context .gap-slot{white-space:normal}}
+/* Praktikan kronometroa aukerakoa da: ez da ekintza nagusia */
+body:not(.mode-sim) .time-actions #start.primary{border-color:var(--s-line-strong);background:var(--s-surface);color:var(--s-ink)}
+body:not(.mode-sim) .time-actions #start.primary:hover{border-color:var(--s-primary);background:var(--s-primary-soft);color:var(--s-primary)}
+/* Mugikorrean, praktikan, kronometroa ⋯ menuan: deialdiaren izenak lekua izan dezan */
+@media(max-width:760px){body:not(.mode-sim):not(.focus-mode) .time-actions:not(.expanded) #start{display:none}}

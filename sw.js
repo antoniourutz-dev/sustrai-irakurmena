@@ -1,5 +1,5 @@
 /* SUSTRAI PWA service worker */
-const CACHE_VERSION = 'sustrai-pwa-v6-lanak';
+const CACHE_VERSION = 'sustrai-pwa-v7-paragrafoak';
 const SHELL = [
   '/',
   '/index.html',

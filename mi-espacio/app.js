@@ -137,6 +137,36 @@
     );
   }
 
+  const TRASH = '<svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M6 7l1 13h10l1-13"/><path d="M9 7V4h6v3"/></svg>';
+
+  // Deletes one reading result: from the account (signed in) and from the workshop's attempt history.
+  async function deleteResult(r, button) {
+    if (!confirm('«' + r.title + '» (' + kit().euWhen(r.when) + ') emaitza ezabatu? Ezin da desegin.')) return;
+    button.disabled = true;
+    const A = window.SustraiAttempts;
+    let ok = true;
+    if (r.rec) {
+      const hk = r.historyKey || P().historyKeyOf(r.rec);
+      const i = A.matchIndex(hk, { key: r.key, at: r.when, correct: r.correct });
+      if (i >= 0) await A.removeFromHistory(hk, [i], { cloud: false });
+    }
+    if (signedIn) ok = await A.removeCloud({ id: r.id, key: r.key, at: r.when, correct: r.correct });
+    await window.SustraiCloud.flush();
+    await load();
+    say(ok ? 'Emaitza ezabatuta.' : 'Ezin izan da emaitza zure kontutik ezabatu. Saiatu berriro geroago.');
+  }
+
+  // Erases an unfinished reading exam: answers, timer, highlights and its pending attempt key.
+  function readingKeys(task) {
+    const keys = new Set(task.keys);
+    for (const row of rows) {
+      const rec = kit().parseReadingKey(row.storage_key);
+      if (rec && rec.slug === task.rec.slug && rec.kind === 'marks') keys.add(row.storage_key);
+    }
+    keys.add('sustrai-client-attempt-v1-' + task.rec.examId + '-' + (task.mode === 'simulation' ? 'simulation' : 'practice'));
+    return [...keys];
+  }
+
   function renderResults() {
     const root = $('myResults');
     if (!results.length) {
@@ -160,7 +190,15 @@
       right.append(el('span', detail.join(' · ')));
       row.append(left, right);
       if (r.pct !== null && r.pct !== undefined) row.append(meter(r.pct / 100, '%' + r.pct));
-      return row;
+      const item = el('div', undefined, 'result-item');
+      const del = el('button', undefined, 'result-del');
+      del.type = 'button';
+      del.title = 'Emaitza ezabatu';
+      del.setAttribute('aria-label', '«' + r.title + '» emaitza ezabatu (' + kit().euWhen(r.when) + ')');
+      del.innerHTML = TRASH;
+      del.onclick = () => deleteResult(r, del);
+      item.append(row, del);
+      return item;
     });
     root.replaceChildren(...items);
     if (results.length > 6) {
@@ -173,11 +211,11 @@
 
   function renderWorks(tasks) {
     const root = $('myWorks');
-    const list = [...(filter !== 'speaking' ? tasks.writing : []), ...(filter !== 'writing' ? tasks.speaking : [])]
+    const list = [...(filter === 'all' || filter === 'reading' ? tasks.reading : []), ...(filter === 'all' || filter === 'writing' ? tasks.writing : []), ...(filter === 'all' || filter === 'speaking' ? tasks.speaking : [])]
       .sort((a, b) => b.updated - a.updated);
     if (!list.length) {
-      emptyState(root, filter === 'speaking' ? 'Oraindik ez duzu ahozko oharrik.' : filter === 'writing' ? 'Oraindik ez duzu idazlanik.' : 'Oraindik ez duzu idazlanik edo ahozko oharrik.',
-        [['Idazmena', '/idazlanak/'], ['Ahozkoa', '/ahozkoa/']]);
+      emptyState(root, filter === 'speaking' ? 'Oraindik ez duzu ahozko oharrik.' : filter === 'writing' ? 'Oraindik ez duzu idazlanik.' : filter === 'reading' ? 'Ez duzu irakurmen-probarik martxan.' : 'Oraindik ez duzu lanik martxan.',
+        [['Irakurmena', '/irakurmena/'], ['Idazmena', '/idazlanak/'], ['Ahozkoa', '/ahozkoa/']]);
       return;
     }
     root.replaceChildren(...list.map((task) => {
@@ -196,9 +234,10 @@
         if (task.glossary) facts.push(task.glossary + ' hitz hiztegian');
       } else {
         facts.push(progressOf(task).text);
+        if (task.skill === 'reading' && task.done) facts.push('amaituta');
       }
       card.append(el('p', facts.join(' · '), 'card-facts'));
-      const excerpt = (task.skill === 'writing' ? task.text : task.opening).replace(/\s+/g, ' ').trim();
+      const excerpt = (task.skill === 'writing' ? task.text : task.skill === 'speaking' ? task.opening : '').replace(/\s+/g, ' ').trim();
       if (excerpt) card.append(el('p', excerpt, 'card-excerpt'));
 
       const actions = el('div', undefined, 'card-actions');
@@ -208,8 +247,11 @@
       del.type = 'button';
       del.setAttribute('aria-label', '«' + task.title + '» ezabatu');
       del.onclick = async () => {
-        if (!confirm('«' + task.title + '» atazako lan guztiak ezabatu? Ezin da desegin.')) return;
-        for (const key of task.keys) window.SustraiCloud.storage.removeItem(key);
+        const question = task.skill === 'reading'
+          ? '«' + task.title + '»: erantzunak, kronometroa eta azpimarrak ezabatu? Amaitutako saiakeren emaitzak ez dira ezabatzen.'
+          : '«' + task.title + '» atazako lan guztiak ezabatu? Ezin da desegin.';
+        if (!confirm(question)) return;
+        for (const key of (task.skill === 'reading' ? readingKeys(task) : task.keys)) window.SustraiCloud.storage.removeItem(key);
         await window.SustraiCloud.flush();
         await load();
         say('«' + task.title + '» ezabatuta.');

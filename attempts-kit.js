@@ -1,11 +1,14 @@
 /* SUSTRAI reading attempts: shows the answer sheet of every finished attempt of an exam side by
    side, so the student can repeat the exam another day and compare. Shared by IVAP and HABE.
-   A sheet is {questionNumber: [letter, 1|0]}; it never contains the official solution. */
+   A sheet is {questionNumber: [letter, 1|0]}; it never contains the official solution.
+   Also owns deleting attempts (this device's history and, when signed in, the saved result)
+   and the «start again, erase everything» confirmation. */
 (function (global) {
   'use strict';
   const MAX_COLUMNS = 6;
   let dialog = null;
   let returnFocus = null;
+  let pending = null; // resolve() of an open «Hasi berriro» dialog
 
   const el = (tag, className, text) => {
     const node = document.createElement(tag);
@@ -36,6 +39,7 @@
   }
 
   function close() {
+    if (pending) { const r = pending; pending = null; r({ ok: false }); }
     if (!dialog) return;
     dialog.remove();
     dialog = null;
@@ -83,6 +87,18 @@
           el('span', 'attempts-score', points(a.score) + ' / 20 · ' + (a.correct ?? '–') + '/' + options.total),
           el('span', '', clock(a.elapsedMs))
         );
+        if (options.onDelete) {
+          const del = el('button', 'attempts-del', 'Ezabatu');
+          del.type = 'button';
+          del.setAttribute('aria-label', a.number + '. saiakera ezabatu');
+          del.onclick = async () => {
+            if (!confirm(a.number + '. saiakera ezabatu? Emaitza eta erantzun-orria betiko ezabatuko dira.')) return;
+            del.disabled = true;
+            const next = await options.onDelete([a.number - 1]);
+            show({ ...options, attempts: next });
+          };
+          th.append(del);
+        }
         head.append(th);
       }
       const thead = el('thead');
@@ -124,6 +140,17 @@
       card.append(el('p', 'attempts-note', 'Puntu urdina: aurreko saiakeratik aldatu duzun erantzuna.'));
     }
     const actions = el('div', 'attempts-actions');
+    if (options.onDelete && all.length > 1) {
+      const wipe = el('button', 'quiet danger', 'Ezabatu guztiak');
+      wipe.type = 'button';
+      wipe.onclick = async () => {
+        if (!confirm('Azterketa honetako ' + all.length + ' saiakerak ezabatu? Ezin da desegin.')) return;
+        wipe.disabled = true;
+        const next = await options.onDelete(all.map((_, i) => i));
+        show({ ...options, attempts: next });
+      };
+      actions.append(wipe);
+    }
     if (options.onRepeat) {
       const again = el('button', 'outline', 'Azterketa berriz egin');
       again.type = 'button';
@@ -142,5 +169,103 @@
     card.focus();
   }
 
-  global.SustraiAttempts = { show, sheetOf };
+  /* ---------- Deleting ---------- */
+
+  const store = () => global.SustraiCloud?.storage || localStorage;
+  const readList = (key) => { try { const v = JSON.parse(store().getItem(key)); return Array.isArray(v) ? v : []; } catch { return []; } };
+
+  // Deletes the saved result of one attempt from the account (signed-in students only).
+  // Matches by the attempt's key; older attempts without one by time (±3 min) and number correct.
+  // Returns true when a row was deleted or there was nothing to delete, false when the server refused.
+  async function removeCloud(attempt) {
+    const cloud = global.SustraiCloud;
+    const client = cloud?.client?.();
+    const profile = cloud?.profile?.();
+    if (!client || !profile?.active || !attempt) return true;
+    let q = client.from('sr_app_reading_results').delete().eq('user_id', profile.id);
+    if (attempt.id) q = q.eq('id', attempt.id);
+    else if (attempt.key) q = q.eq('client_attempt_key', attempt.key);
+    else {
+      const t = new Date(attempt.at).getTime();
+      if (!t) return true;
+      q = q.gte('created_at', new Date(t - 180000).toISOString()).lte('created_at', new Date(t + 180000).toISOString());
+      if (attempt.correct != null) q = q.eq('correct', attempt.correct);
+    }
+    const { data, error } = await q.select('id');
+    if (error) { console.warn('HitzBira: result not deleted', error.code || ''); return false; }
+    return (data || []).length > 0 || !attempt.id;
+  }
+
+  // Removes attempts (by index) from a history key on this device / account state, and their results.
+  async function removeFromHistory(historyKey, indexes, opts = {}) {
+    const list = readList(historyKey);
+    const drop = new Set(indexes);
+    const removed = list.filter((_, i) => drop.has(i));
+    const kept = list.filter((_, i) => !drop.has(i));
+    if (kept.length) store().setItem(historyKey, JSON.stringify(kept));
+    else store().removeItem(historyKey);
+    let ok = true;
+    if (opts.cloud !== false) for (const a of removed) ok = (await removeCloud(a)) && ok;
+    if (!ok) toastless('Ezin izan da emaitza zure kontutik ezabatu. Saiatu berriro geroago.');
+    return kept;
+  }
+
+  // Finds the history entry that matches a result shown elsewhere (key first, then time ±3 min).
+  function matchIndex(historyKey, result) {
+    const list = readList(historyKey);
+    if (result.key) { const i = list.findIndex((a) => a && a.key === result.key); if (i >= 0) return i; }
+    const t = new Date(result.at || result.when).getTime();
+    return list.findIndex((a) => a && Math.abs(new Date(a.at).getTime() - t) < 180000 && (result.correct == null || a.correct == null || a.correct === result.correct));
+  }
+
+  function toastless(message) { try { global.alert(message); } catch { /* no UI */ } }
+
+  /* ---------- «Hasi berriro»: erase everything of the current attempt ---------- */
+
+  function confirmRestart(opts = {}) {
+    return new Promise((resolve) => {
+      close();
+      returnFocus = document.activeElement;
+      dialog = el('div', 'modal restart-modal');
+      dialog.setAttribute('role', 'alertdialog');
+      dialog.setAttribute('aria-modal', 'true');
+      dialog.setAttribute('aria-labelledby', 'restartTitle');
+      dialog.setAttribute('aria-describedby', 'restartText');
+      const card = el('div', 'modal-card restart-card');
+      card.tabIndex = -1;
+      const title = el('h2', '', 'Hasi berriro, hutsetik?');
+      title.id = 'restartTitle';
+      const text = el('p', '', 'Azterketa honetako erantzunak, kronometroa eta azpimarrak ezabatuko dira. ' +
+        (opts.finished ? '' : 'Saiakera hau ez da gordeko.'));
+      text.id = 'restartText';
+      card.append(el('span', 'eyebrow', opts.examTitle || 'IRAKURMENA'), title, text);
+      let box = null;
+      if (opts.finished) {
+        const label = el('label', 'restart-check');
+        box = el('input');
+        box.type = 'checkbox';
+        box.checked = true;
+        label.append(box, el('span', '', 'Ezabatu saiakera honen emaitza ere nire historiatik'));
+        card.append(label);
+      }
+      pending = resolve;
+      const finish = (ok) => { pending = null; close(); resolve(ok ? { ok: true, dropResult: !!(box && box.checked) } : { ok: false }); };
+      const actions = el('div', 'attempts-actions');
+      const keep = el('button', 'outline', 'Utzi');
+      keep.type = 'button';
+      keep.onclick = () => finish(false);
+      const go = el('button', 'primary', 'Dena ezabatu eta hasi');
+      go.type = 'button';
+      go.onclick = () => finish(true);
+      actions.append(keep, go);
+      card.append(actions);
+      dialog.append(card);
+      dialog.addEventListener('click', (event) => { if (event.target === dialog) finish(false); });
+      document.body.append(dialog);
+      document.addEventListener('keydown', onKey, true);
+      requestAnimationFrame(() => keep.focus());
+    });
+  }
+
+  global.SustraiAttempts = { show, sheetOf, removeCloud, removeFromHistory, matchIndex, confirmRestart };
 })(window);

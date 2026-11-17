@@ -55,7 +55,7 @@
     await window.SustraiCloud.flush();
     const [a, b] = await Promise.all([
       client.from('sr_app_state').select('storage_key,value_text,updated_at').eq('user_id', profile.id).order('updated_at', { ascending: false }).limit(1500),
-      client.from('sr_app_reading_results').select('score,max_score,correct,total,created_at,elapsed_seconds,response_summary,sr_exams(slug,title)').eq('user_id', profile.id).order('created_at', { ascending: false }).limit(500)
+      client.from('sr_app_reading_results').select('id,client_attempt_key,score,max_score,correct,total,created_at,elapsed_seconds,response_summary,sr_exams(slug,title)').eq('user_id', profile.id).order('created_at', { ascending: false }).limit(500)
     ]);
     if (a.error) throw a.error;
     if (b.error) throw b.error;
@@ -72,7 +72,8 @@
         pct: kit().scorePct(r.score, r.max_score),
         correct: r.correct, total: r.total, score: r.score, max: r.max_score,
         minutes: r.elapsed_seconds ? Math.round(r.elapsed_seconds / 60) : null,
-        href: rec ? kit().readingHref(rec, mode) : '/irakurmena/'
+        href: rec ? kit().readingHref(rec, mode) : '/irakurmena/',
+        id: r.id, key: r.client_attempt_key || null, rec
       };
     });
   }
@@ -95,7 +96,8 @@
           pct: total ? Math.round((Number(a.correct) || 0) / total * 100) : null,
           correct: a.correct, total, score: a.score, max: null,
           minutes: ms ? Math.round(ms / 60000) : null,
-          href: kit().readingHref(rec, mode)
+          href: kit().readingHref(rec, mode),
+          key: a.key || null, rec, historyKey: row.storage_key
         });
       }
     }
@@ -221,5 +223,8 @@
     return { signedIn, profile, client, rows, results, tasks: buildTasks() };
   }
 
-  window.SustraiProgress = { load, openTasks, hrefOf, progressOf, SKILL, MODE, words, time };
+  // Where the reading workshop keeps the attempt history of an exam (see ivap/app.js, habe/app.js).
+  const historyKeyOf = (rec) => (rec.org === 'HABE' ? 'sustrai-habe-' + rec.examId + '-attempts' : 'sustrai-attempts-v3-' + rec.examId);
+
+  window.SustraiProgress = { load, openTasks, hrefOf, progressOf, historyKeyOf, SKILL, MODE, words, time };
 })();

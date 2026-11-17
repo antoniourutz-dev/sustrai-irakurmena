@@ -4,9 +4,62 @@
 
   const HIDDEN_KEYS = /^(sustrai-markerbar-pos|sustrai-current-exam|sustrai-client-attempt-|sustrai-reading-last|sustrai-oral-last)/;
 
+  // Basque dates written by hand: many browsers ship no 'eu' locale data and fall back to English.
+  const EU_MONTHS = ['urtarrilaren', 'otsailaren', 'martxoaren', 'apirilaren', 'maiatzaren', 'ekainaren',
+    'uztailaren', 'abuztuaren', 'irailaren', 'urriaren', 'azaroaren', 'abenduaren'];
+  const two = (n) => String(n).padStart(2, '0');
+  function euDay(d) {
+    const day = d.getDate();
+    // «azaroaren 17a», «azaroaren 1ean» reads naturally in a list; the article form is the most neutral.
+    return EU_MONTHS[d.getMonth()] + ' ' + day + 'a';
+  }
   function euDate(value) {
-    try { return new Date(value).toLocaleString('eu', { dateStyle: 'medium', timeStyle: 'short' }); }
-    catch { return String(value || ''); }
+    const d = new Date(value);
+    if (Number.isNaN(d.getTime())) return String(value || '');
+    return d.getFullYear() + 'ko ' + euDay(d) + ', ' + two(d.getHours()) + ':' + two(d.getMinutes());
+  }
+  // Short, relative form for lists: «gaur, 11:23», «atzo, 10:14», «azaroaren 17a», «2025eko azaroaren 17a».
+  function euWhen(value, now = new Date()) {
+    const d = new Date(value);
+    if (Number.isNaN(d.getTime())) return '';
+    const day = (x) => new Date(x.getFullYear(), x.getMonth(), x.getDate()).getTime();
+    const diff = Math.round((day(now) - day(d)) / 864e5);
+    const time = two(d.getHours()) + ':' + two(d.getMinutes());
+    if (diff === 0) return 'gaur, ' + time;
+    if (diff === 1) return 'atzo, ' + time;
+    if (d.getFullYear() === now.getFullYear()) return euDay(d);
+    return d.getFullYear() + 'ko ' + euDay(d);
+  }
+
+  /* Reading keys grew over several releases; this maps every known shape to one record:
+     {org: 'IVAP'|'HABE', examId, slug, part, kind: 'answers'|'marks'|'attempts'|'timer', mode}.
+     examId is the id the reading workshop uses in its URL (?exam=…). */
+  function parseReadingKey(key) {
+    const k = String(key || '');
+    const ivap = (examId, part, kind, mode) => ({ org: 'IVAP', examId, slug: 'ivap-' + examId, part, kind, mode });
+    const habe = (examId, part, kind, mode) => ({ org: 'HABE', examId, slug: examId, part, kind, mode });
+    let m;
+    if (k === 'sustrai-gini-verified') return ivap('2019-05-04', 0, 'answers', 'practice');
+    if (k === 'sustrai-gene-v1') return ivap('2019-05-04', 1, 'answers', 'practice');
+    if ((m = k.match(/^sustrai-2019-0-(\d+)$/))) return ivap('2019-05-04', +m[1], 'answers', 'practice');
+    if ((m = k.match(/^sustrai-2019-1-(\d+)$/))) return ivap('2019-10-26', +m[1], 'answers', 'practice');
+    if ((m = k.match(/^sustrai-ivap-sim-answers-v1-(.+)-(\d+)$/))) return ivap(m[1], +m[2], 'answers', 'simulation');
+    if ((m = k.match(/^sustrai-answers-v[23]-(.+)-(\d+)$/))) return ivap(m[1], +m[2], 'answers', 'practice');
+    if ((m = k.match(/^sustrai-highlights-v2-(.+)-(\d+)$/))) return ivap(m[1], +m[2], 'marks', '');
+    if ((m = k.match(/^sustrai-attempts-v3-(.+)$/))) return ivap(m[1], null, 'attempts', '');
+    if ((m = k.match(/^sustrai-ivap-sim-timer-v1-(.+)$/))) return ivap(m[1], null, 'timer', 'simulation');
+    if ((m = k.match(/^sustrai-timer-v2-(.+)$/))) return ivap(m[1], null, 'timer', 'practice');
+    if ((m = k.match(/^sustrai-habe-sim-answers-v1-(.+)-(\d+)$/))) return habe(m[1], +m[2], 'answers', 'simulation');
+    if ((m = k.match(/^sustrai-habe-sim-timer-v1-(.+)$/))) return habe(m[1], null, 'timer', 'simulation');
+    if ((m = k.match(/^sustrai-habe-(.+)-answers-(\d+)$/))) return habe(m[1], +m[2], 'answers', 'practice');
+    if ((m = k.match(/^sustrai-habe-(.+)-marks-(\d+)$/))) return habe(m[1], +m[2], 'marks', '');
+    if ((m = k.match(/^sustrai-habe-(.+)-attempts$/))) return habe(m[1], null, 'attempts', '');
+    if ((m = k.match(/^sustrai-habe-(.+)-timer$/))) return habe(m[1], null, 'timer', 'practice');
+    return null;
+  }
+  function readingHref(rec, mode) {
+    const base = rec.org === 'HABE' ? '/habe/' : '/ivap/';
+    return base + '?exam=' + encodeURIComponent(rec.examId) + '&mode=' + (mode === 'simulation' ? 'simulation' : 'practice');
   }
 
   function parseWork(key) {
@@ -163,6 +216,6 @@
   }
 
   window.SustraiAccountKit = {
-    parseWork, previewValue, isMeaningful, euDate, modeLabel, skillLabel, scorePct, examTitle, resultMode, HIDDEN_KEYS
+    parseWork, previewValue, isMeaningful, euDate, euWhen, parseReadingKey, readingHref, modeLabel, skillLabel, scorePct, examTitle, resultMode, HIDDEN_KEYS
   };
 })();

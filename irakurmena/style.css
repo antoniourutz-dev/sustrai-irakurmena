@@ -9,7 +9,7 @@ button{cursor:pointer}
 .skip{position:absolute;left:12px;top:-64px;z-index:50;padding:10px 14px;border-radius:10px;background:var(--s-ink);color:#fff;text-decoration:none}
 .skip:focus{top:10px}
 .app{min-height:100vh;display:flex;flex-direction:column}
-.layout{flex:1;width:100%;max-width:1240px;margin:0 auto;padding:20px clamp(16px,3vw,32px) 28px;display:grid;grid-template-columns:minmax(300px,380px) minmax(0,1fr);gap:20px;align-items:start}
+.layout{flex:1;width:100%;max-width:var(--s-page-max);margin:0 auto;padding:20px var(--s-page-pad) 28px;display:grid;grid-template-columns:minmax(300px,380px) minmax(0,1fr);gap:20px;align-items:start}
 .panel{min-width:0;border:1px solid var(--s-line);border-radius:var(--s-r-xl);background:var(--s-surface)}
 .eyebrow{display:block;color:var(--s-primary);font-size:11px;font-weight:700;letter-spacing:.1em}
 

@@ -42,15 +42,19 @@
   --s-shadow-sheet:0 -10px 30px rgb(15 23 42 / .10);
   --s-header-h:64px;
   --s-tabbar-h:64px;
+  /* One content width for every working page (Irakurmena, Idazmena, Ahozkoa, Nire espazioa) */
+  --s-page-max:1440px;
+  --s-page-pad:clamp(16px,3vw,32px);
   color-scheme:light;
 }
 
-html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%;scrollbar-gutter:stable}
+/* scrollbar-gutter keeps the page the same width whether or not it scrolls, so the header never jumps between pages */
 :where(a,button,input,select,textarea,summary,[tabindex]):focus-visible{outline:3px solid var(--s-primary);outline-offset:2px}
 .sr-only{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
 
 /* ---------- Site header ---------- */
-.site-header{position:relative;z-index:30;display:flex;align-items:center;gap:8px 20px;min-height:var(--s-header-h);padding:8px clamp(16px,3vw,40px);background:var(--s-surface);border-bottom:1px solid var(--s-line);color:var(--s-ink);font-family:var(--s-font-ui)}
+.site-header{position:relative;z-index:30;display:flex;align-items:center;gap:8px 20px;box-sizing:border-box;height:var(--s-header-h);min-height:var(--s-header-h);padding:8px clamp(16px,3vw,40px);background:var(--s-surface);border-bottom:1px solid var(--s-line);color:var(--s-ink);font-family:var(--s-font-ui)}
 .site-brand{display:inline-flex;align-items:center;gap:10px;min-height:44px;color:var(--s-ink);text-decoration:none;flex:none}
 .site-brand-mark{display:grid;place-items:center;width:36px;height:36px;border-radius:10px;background:var(--s-primary);color:#fff;font:700 21px/1 var(--s-font-display)}
 .site-brand-name{font:700 18px/1 var(--s-font-display);letter-spacing:.04em}
@@ -62,11 +66,20 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 .site-back{display:none;place-items:center;width:44px;height:44px;margin-left:-8px;border-radius:12px;color:var(--s-ink);text-decoration:none;flex:none}
 .site-back:hover{background:var(--s-bg)}
 body.focus-mode .site-nav{display:none}
+/* Desktop: brand · nav · account in three fixed columns, so the nav sits in exactly the same
+   place on every page whatever the width of the account button. */
+@media(min-width:761px){
+  .site-header{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr)}
+  .site-header>.site-brand{grid-column:1;justify-self:start}
+  .site-header>.site-nav{grid-column:2;margin:0}
+  .site-header>.sustrai-account{grid-column:3;justify-self:end}
+}
 
 /* ---------- Mobile tab bar ---------- */
 .tabbar{display:none}
 @media(max-width:760px){
-  .site-header{min-height:56px;padding:6px 14px;gap:8px}
+  :root{--s-header-h:56px}
+  .site-header{padding:6px 14px;gap:8px}
   .site-brand-mark{width:34px;height:34px;font-size:20px}
   .site-brand-name{font-size:17px}
   .site-nav{display:none}

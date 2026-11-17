@@ -14,7 +14,7 @@
     const body=node('div','sr-explanation-body');
     const attribution=typeof data.attribution==='string'&&data.attribution.length<=200
       ? data.attribution
-      : 'SUSTRAIren azalpen didaktikoa · ez da azterketako testu ofiziala';
+      : 'HitzBiraren azalpen didaktikoa · ez da azterketako testu ofiziala';
     body.append(node('p','sr-exp-label',attribution));
     body.append(node('p','sr-exp-reason',data.reason));
     if(data.excerpt){

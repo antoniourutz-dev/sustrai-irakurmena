@@ -25,7 +25,7 @@ body{background-image:none}
 #timerToggle{border-color:var(--s-primary);background:var(--s-primary);color:#fff}
 #timerToggle:hover:not(:disabled){border-color:var(--s-primary-hover);background:var(--s-primary-hover)}
 /* Disabled reads as disabled (grey), never as a faded primary */
-.layout :is(.soft,.primary,.outline-primary):disabled,#timerToggle:disabled{opacity:1;border-color:var(--s-line);background:var(--s-bg);color:#94A3B8;cursor:not-allowed}
+.layout :is(.soft,.primary,.outline-primary):disabled,#timerToggle:disabled{opacity:1;border-color:var(--s-line);background:var(--s-bg);color:#8a8fa8;cursor:not-allowed}
 
 /* Segmented control (Entrenatu / Simulatu) */
 .layout .modes{display:inline-flex;gap:3px;padding:3px;border-radius:var(--s-r-md);background:var(--s-line);box-shadow:none}

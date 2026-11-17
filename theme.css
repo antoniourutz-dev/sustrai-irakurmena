@@ -1,4 +1,4 @@
-/* SUSTRAI design system: tokens, self-hosted fonts and the chrome shared by every page
+/* HitzBira design system (B · Bizia): tokens, self-hosted fonts and the chrome shared by every page
    (site header, account menu anchor, mobile tab bar). Page stylesheets load after this file. */
 
 @font-face{font-family:"Inter";src:url("/fonts/inter-400.woff2") format("woff2");font-weight:400;font-style:normal;font-display:swap}
@@ -7,38 +7,56 @@
 @font-face{font-family:"Inter";src:url("/fonts/inter-700.woff2") format("woff2");font-weight:700 900;font-style:normal;font-display:swap}
 @font-face{font-family:"Inter Display";src:url("/fonts/inter-display-600.woff2") format("woff2");font-weight:500 600;font-style:normal;font-display:swap}
 @font-face{font-family:"Inter Display";src:url("/fonts/inter-display-700.woff2") format("woff2");font-weight:700 900;font-style:normal;font-display:swap}
+@font-face{font-family:"HitzBira Sans";src:url("/fonts/hitzbira-sans-var.woff") format("woff");font-weight:400 800;font-style:normal;font-display:swap}
+@font-face{font-family:"HitzBira Display";src:url("/fonts/hitzbira-display-var.woff") format("woff");font-weight:500 800;font-style:normal;font-display:swap}
 @font-face{font-family:"Sustrai Serif";src:url("/fonts/sustrai-serif-var.woff2") format("woff2");font-weight:400 700;font-style:normal;font-display:swap}
 
 :root{
-  --s-bg:#F4F6FA;
+  --s-bg:#F4F5FA;
   --s-surface:#FFFFFF;
-  --s-ink:#0F172A;
-  --s-ink-2:#1E293B;
-  --s-ink-3:#334155;
-  --s-muted:#475569;
-  --s-line:#E2E8F0;
-  --s-line-strong:#CBD5E1;
-  --s-primary:#2A45C9;
-  --s-primary-hover:#1E3399;
-  --s-primary-soft:#E8ECFB;
-  --s-primary-line:#B9C4F2;
-  --s-accent:#9A3B0A;
-  --s-accent-soft:#FDEBDD;
-  --s-ok:#0F6B4F;
-  --s-ok-soft:#E3F4EE;
-  --s-ok-line:#8CCBB3;
+  --s-ink:#11132B;
+  --s-ink-2:#1E2140;
+  --s-ink-3:#3C4058;
+  --s-muted:#565B78;
+  --s-line:#E3E5EF;
+  --s-line-strong:#C9CCE0;
+  --s-primary:#3F35C8;
+  --s-primary-hover:#2A2290;
+  --s-primary-soft:#ECE9FE;
+  --s-primary-line:#C9C2FA;
+  --s-accent:#A8361A;
+  --s-accent-soft:#FFE7DF;
+  --s-ok:#0B7A5C;
+  --s-ok-soft:#DDF8EF;
+  --s-ok-line:#8FE3C8;
   --s-bad:#B42318;
   --s-bad-soft:#FEECEA;
   --s-bad-line:#F0A9A1;
+  /* B · Bizia: noche, coral, menta, lila. Cada destreza tiene su color. */
+  --s-night:#11132B;
+  --s-night-2:#252850;
+  --s-night-3:#3A3E6B;
+  --s-on-night:#E6E8F5;
+  --s-on-night-muted:#B9BCD6;
+  --s-coral:#FF6B4A;
+  --s-coral-hover:#FF8466;
+  --s-mint:#2DD4A7;
+  --s-lilac:#8B7CF6;
+  --s-skill-read:#0B7A5C;--s-skill-read-soft:#DDF8EF;
+  --s-skill-write:#5B4BD6;--s-skill-write-soft:#ECE9FE;
+  --s-skill-speak:#C2401F;--s-skill-speak-soft:#FFE7DF;
+  /* Zona tranquila: donde se lee y se escribe */
+  --s-paper:#FAF8F3;
+  --s-paper-line:#ECE8DE;
   --s-mark:#FFE27A;
-  --s-font-ui:"Inter",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
-  --s-font-display:"Inter Display","Inter",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --s-font-ui:"HitzBira Sans","Inter",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --s-font-display:"HitzBira Display","Inter Display","Inter",system-ui,-apple-system,"Segoe UI",sans-serif;
   --s-font-reading:"Sustrai Serif",Georgia,"Times New Roman",serif;
   --s-r-sm:8px;
-  --s-r-md:12px;
-  --s-r-lg:16px;
-  --s-r-xl:20px;
-  --s-shadow-pop:0 12px 32px rgb(15 23 42 / .14);
+  --s-r-md:14px;
+  --s-r-lg:18px;
+  --s-r-xl:24px;
+  --s-shadow-pop:0 16px 40px rgb(17 19 43 / .16);
   --s-shadow-sheet:0 -10px 30px rgb(15 23 42 / .10);
   --s-header-h:64px;
   --s-tabbar-h:64px;
@@ -51,20 +69,23 @@
 html{-webkit-text-size-adjust:100%;text-size-adjust:100%;scrollbar-gutter:stable}
 /* scrollbar-gutter keeps the page the same width whether or not it scrolls, so the header never jumps between pages */
 :where(a,button,input,select,textarea,summary,[tabindex]):focus-visible{outline:3px solid var(--s-primary);outline-offset:2px}
+.site-header :focus-visible,.tabbar :focus-visible{outline-color:var(--s-mint)}
 .sr-only{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
 
 /* ---------- Site header ---------- */
-.site-header{position:relative;z-index:30;display:flex;align-items:center;gap:8px 20px;box-sizing:border-box;height:var(--s-header-h);min-height:var(--s-header-h);padding:8px clamp(16px,3vw,40px);background:var(--s-surface);border-bottom:1px solid var(--s-line);color:var(--s-ink);font-family:var(--s-font-ui)}
-.site-brand{display:inline-flex;align-items:center;gap:10px;min-height:44px;color:var(--s-ink);text-decoration:none;flex:none}
-.site-brand-mark{display:grid;place-items:center;width:36px;height:36px;border-radius:10px;background:var(--s-primary);color:#fff;font:700 21px/1 var(--s-font-display)}
-.site-brand-name{font:700 18px/1 var(--s-font-display);letter-spacing:.04em}
-.site-brand-level{padding:3px 7px;border-radius:6px;background:var(--s-primary-soft);color:var(--s-primary);font:700 12px/1.2 var(--s-font-ui)}
+.site-header{position:relative;z-index:30;display:flex;align-items:center;gap:8px 20px;box-sizing:border-box;height:var(--s-header-h);min-height:var(--s-header-h);padding:8px clamp(16px,3vw,40px);background:var(--s-night);border-bottom:1px solid var(--s-night);color:var(--s-on-night);font-family:var(--s-font-ui)}
+.site-brand{display:inline-flex;align-items:center;gap:10px;min-height:44px;color:#fff;text-decoration:none;flex:none}
+.site-brand-mark{display:grid;place-items:center;width:38px;height:38px;border-radius:12px;background:var(--s-coral);color:var(--s-night)}
+.site-brand-mark svg{display:block;width:24px;height:24px}
+.site-brand-name{font:800 23px/1 var(--s-font-display);letter-spacing:-.025em}
+.site-brand-name b{font-weight:inherit;color:var(--s-coral)}
+.site-brand-level{padding:3px 7px;border-radius:7px;background:var(--s-night-2);color:var(--s-mint);font:700 12px/1.2 var(--s-font-ui)}
 .site-nav{display:flex;align-items:center;gap:4px;margin-inline:auto}
-.site-nav a{display:inline-flex;align-items:center;min-height:40px;padding:0 14px;border-radius:10px;color:var(--s-ink-3);font-size:14px;font-weight:500;text-decoration:none;white-space:nowrap}
-.site-nav a:hover{background:var(--s-bg);color:var(--s-ink)}
-.site-nav a[aria-current="page"]{background:var(--s-primary-soft);color:var(--s-primary);font-weight:700}
-.site-back{display:none;place-items:center;width:44px;height:44px;margin-left:-8px;border-radius:12px;color:var(--s-ink);text-decoration:none;flex:none}
-.site-back:hover{background:var(--s-bg)}
+.site-nav a{display:inline-flex;align-items:center;min-height:40px;padding:0 14px;border-radius:12px;color:var(--s-on-night-muted);font-size:14px;font-weight:500;text-decoration:none;white-space:nowrap}
+.site-nav a:hover{background:var(--s-night-2);color:#fff}
+.site-nav a[aria-current="page"]{background:var(--s-night-2);color:#fff;font-weight:700}
+.site-back{display:none;place-items:center;width:44px;height:44px;margin-left:-8px;border-radius:12px;color:#fff;text-decoration:none;flex:none}
+.site-back:hover{background:var(--s-night-2)}
 body.focus-mode .site-nav{display:none}
 /* Desktop: brand · nav · account in three fixed columns, so the nav sits in exactly the same
    place on every page whatever the width of the account button. */
@@ -80,16 +101,17 @@ body.focus-mode .site-nav{display:none}
 @media(max-width:760px){
   :root{--s-header-h:56px}
   .site-header{padding:6px 14px;gap:8px}
-  .site-brand-mark{width:34px;height:34px;font-size:20px}
-  .site-brand-name{font-size:17px}
+  .site-brand-mark{width:34px;height:34px}
+  .site-brand-mark svg{width:21px;height:21px}
+  .site-brand-name{font-size:21px}
   .site-nav{display:none}
   .site-back{display:grid}
-  .tabbar{position:fixed;inset:auto 0 0;z-index:35;display:flex;height:calc(var(--s-tabbar-h) + env(safe-area-inset-bottom,0px));padding-bottom:env(safe-area-inset-bottom,0px);background:var(--s-surface);border-top:1px solid var(--s-line)}
-  .tabbar a{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:var(--s-muted);font:500 11px/1.2 var(--s-font-ui);text-decoration:none}
-  .tabbar-icon{display:grid;place-items:center;width:48px;height:28px;border-radius:14px}
-  .tabbar a[aria-current="page"]{color:var(--s-primary);font-weight:700}
-  .tabbar a[aria-current="page"] .tabbar-icon{background:var(--s-primary-soft)}
-  body.has-tabbar{padding-bottom:calc(var(--s-tabbar-h) + env(safe-area-inset-bottom,0px))}
+  .tabbar{position:fixed;inset:auto 10px calc(10px + env(safe-area-inset-bottom,0px)) 10px;z-index:35;display:flex;height:var(--s-tabbar-h);padding:0 4px;border-radius:22px;background:var(--s-night);box-shadow:0 12px 30px rgb(17 19 43 / .28)}
+  .tabbar a{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:var(--s-on-night-muted);font:500 11px/1.2 var(--s-font-ui);text-decoration:none}
+  .tabbar-icon{display:grid;place-items:center;width:46px;height:28px;border-radius:10px}
+  .tabbar a[aria-current="page"]{color:#fff;font-weight:800}
+  .tabbar a[aria-current="page"] .tabbar-icon{background:var(--s-coral);color:var(--s-night)}
+  body.has-tabbar{padding-bottom:calc(var(--s-tabbar-h) + 20px + env(safe-area-inset-bottom,0px))}
   body.focus-mode .tabbar{display:none}
   body.focus-mode.has-tabbar{padding-bottom:0}
 }
@@ -109,3 +131,11 @@ body.focus-mode .site-nav{display:none}
   .site-nav a{padding:0 9px;font-size:13px}
   .site-brand-level{display:none}
 }
+
+/* Kontua goiburu ilunean */
+.site-header .sustrai-account-status{color:var(--s-on-night-muted)}
+.site-header .sustrai-account-button{background:var(--s-coral);color:var(--s-night);font-weight:800}
+.site-header .sustrai-account-button:hover{background:var(--s-coral-hover)}
+.site-header .sustrai-account-trigger{border-color:var(--s-night-3);background:var(--s-night-2);color:#fff}
+.site-header .sustrai-account-trigger:hover{background:var(--s-night-3)}
+.site-header .sustrai-account-avatar{border-radius:12px;background:var(--s-lilac);color:var(--s-night);font-weight:800}

@@ -29,9 +29,9 @@ button{font:inherit}
 /* Account + modes */
 .home-extras{display:grid;grid-template-columns:1fr;gap:12px}
 .home-account{display:flex;flex-direction:column;gap:16px;padding:20px;border-radius:var(--s-r-lg);background:var(--s-ink);color:#fff}
-.home-account .home-eyebrow{color:#B4C0F5}
+.home-account .home-eyebrow{color:#c9c2fa}
 .home-account h2{margin:6px 0;font:600 22px/1.2 var(--s-font-display);letter-spacing:-.01em}
-.home-account p{margin:0;color:#CBD5E1;font-size:14px;line-height:1.5}
+.home-account p{margin:0;color:#c9cce0;font-size:14px;line-height:1.5}
 .home-account-actions{display:flex;flex-wrap:wrap;align-items:center;gap:8px 16px}
 .home-account-cta{display:inline-flex;align-items:center;justify-content:center;min-height:46px;padding:0 20px;border:0;border-radius:var(--s-r-md);background:#fff;color:var(--s-ink);font:700 15px var(--s-font-ui);text-decoration:none;cursor:pointer}
 .home-account-cta:hover{background:var(--s-primary-soft)}
@@ -53,7 +53,7 @@ button{font:inherit}
 @media(min-width:1000px){
   .skill-list{grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
   .skill-card{flex-direction:column;align-items:stretch;gap:16px;padding:24px;border-radius:var(--s-r-xl)}
-  .skill-card:hover{box-shadow:0 8px 24px rgb(15 23 42 / .08)}
+  .skill-card:hover{box-shadow:0 8px 24px rgb(17 19 43 / .08)}
   .skill-title{font-size:24px;letter-spacing:-.01em}
   .skill-tagline{display:block}
   .skill-body{flex:none;gap:4px}
@@ -74,7 +74,7 @@ button{font:inherit}
 .home-continue-all:hover{text-decoration:underline}
 .home-continue-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}
 .hc-card{display:flex;flex-direction:column;padding:18px;border:1px solid var(--s-line);border-radius:var(--s-r-lg);background:var(--s-surface);color:var(--s-ink);text-decoration:none;transition:border-color .15s,box-shadow .15s}
-.hc-card:hover{border-color:var(--s-primary-line);box-shadow:0 6px 18px rgb(15 23 42 / .06)}
+.hc-card:hover{border-color:var(--s-primary-line);box-shadow:0 6px 18px rgb(17 19 43 / .06)}
 .hc-top{display:flex;align-items:center;gap:8px}
 .hc-skill{color:var(--s-primary);font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
 .skill-writing .hc-skill{color:#7A3F0D}

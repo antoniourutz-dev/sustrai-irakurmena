@@ -17,7 +17,7 @@
 .sustrai-auth-open{overflow:hidden}
 #sustrai-auth-modal[hidden]{display:none!important}
 #sustrai-auth-modal{position:fixed;inset:0;z-index:9999;display:grid;place-items:center;padding:16px;overflow-y:auto}
-.sustrai-auth-backdrop{position:fixed;inset:0;background:rgb(15 23 42 / .62)}
+.sustrai-auth-backdrop{position:fixed;inset:0;background:rgb(17 19 43 / .62)}
 .sustrai-auth-card{position:relative;width:100%;max-width:440px;padding:28px;border-radius:var(--s-r-xl);background:var(--s-surface);color:var(--s-ink);box-shadow:var(--s-shadow-pop);font:15px/1.5 var(--s-font-ui)}
 .sustrai-auth-card h2{margin:6px 0 10px;font:700 28px/1.15 var(--s-font-display);letter-spacing:-.015em}
 .sustrai-auth-card p{margin:8px 0 16px;color:var(--s-muted);font-size:14px}

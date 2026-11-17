@@ -228,7 +228,7 @@ function setMode(next){
 }
 function copyNotes(){
  if(!selected)return;
- const msg=['SUSTRAI · AHOZKO ESKEMA',selected.title_eu,'',
+ const msg=['HitzBira · AHOZKO ESKEMA',selected.title_eu,'',
   ...KEYS.map((k,i)=>['Hasiera','1. ideia','2. ideia','Amaiera'][i]+': '+$(k).value.trim())].join('\n');
  navigator.clipboard?.writeText(msg).then(()=>show('Eskema kopiatu da.')).catch(()=>show('Ez da kopiatu. Aukeratu eskema eskuz.'));
 }

@@ -136,3 +136,9 @@ body{margin:0;background:var(--s-bg);color:var(--s-ink);font-family:var(--s-font
   .skill-tile{padding:16px}
   .tile-number strong{font-size:30px}
 }
+/* Emaitza bat ezabatu */
+.result-item{display:flex;align-items:stretch;gap:8px}
+.result-item>.result-row{flex:1;min-width:0}
+.result-del{flex:none;display:grid;place-items:center;width:44px;border:1px solid var(--s-line);border-radius:var(--s-r-md);background:var(--s-surface);color:var(--s-muted);cursor:pointer}
+.result-del:hover{border-color:var(--s-bad-line);background:var(--s-bad-soft);color:var(--s-bad)}
+.result-del:disabled{opacity:.5;cursor:wait}

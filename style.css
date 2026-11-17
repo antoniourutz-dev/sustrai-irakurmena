@@ -325,3 +325,13 @@ body:not(.mode-sim) .time-actions #start.primary{border-color:var(--s-line-stron
 body:not(.mode-sim) .time-actions #start.primary:hover{border-color:var(--s-primary);background:var(--s-primary-soft);color:var(--s-primary)}
 /* Mugikorrean, praktikan, kronometroa ⋯ menuan: deialdiaren izenak lekua izan dezan */
 @media(max-width:760px){body:not(.mode-sim):not(.focus-mode) .time-actions:not(.expanded) #start{display:none}}
+/* Saiakerak ezabatu eta «Hasi berriro, hutsetik» */
+.footeractions .danger,.attempts-actions .danger{color:var(--s-bad)}
+.footeractions .danger:hover,.attempts-actions .danger:hover{background:var(--s-bad-soft)}
+.attempts-del{display:inline-flex!important;align-items:center;justify-content:center;min-height:32px;margin-top:6px;padding:0 10px;border:1px solid var(--s-line);border-radius:10px;background:var(--s-surface);color:var(--s-bad);font:600 12px/1 var(--s-font-ui);cursor:pointer}
+.attempts-del:hover{border-color:var(--s-bad-line);background:var(--s-bad-soft)}
+.restart-card{width:min(480px,100%)}
+.restart-card h2{margin:6px 0 8px}
+.restart-card p{margin:0 0 14px;color:var(--s-ink-3)}
+.restart-check{display:flex;align-items:flex-start;gap:10px;margin:0 0 16px;padding:12px 14px;border-radius:var(--s-r-md);background:var(--s-bad-soft);color:var(--s-ink);font-size:14px;cursor:pointer}
+.restart-check input{width:20px;height:20px;margin:1px 0 0;accent-color:var(--s-bad)}

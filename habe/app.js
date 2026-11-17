@@ -365,7 +365,22 @@ function clearPart(){if(!confirm("Ariketa honetako erantzunak garbitu?"))return;
 function renderProgress(){let c=answered();$('progressLabel').textContent=c+'/30 erantzunda';$('trackfill').style.width=(100*c/30)+'%';$('progress').setAttribute('aria-valuenow',String(c));$('progress').setAttribute('aria-valuetext',c+' galdera erantzunda, 30etik')}
 function renderTabs(){const names=["Ulermena","Ulermena","Hutsuneak","Baliokideak"];$('tabs').innerHTML=exam().items.map((it,i)=>{let a=answers(i),done=Object.keys(a).filter(n=>+n>=it.r[0]&&+n<=it.r[1]&&a[n]).length;return '<button data-part="'+i+'" class="tab '+(i===part?'active':'')+'" aria-pressed="'+(i===part)+'">'+(i+1)+'. '+names[i]+' <small>'+done+'/'+count(it)+'</small></button>'}).join('');document.querySelectorAll('[data-part]').forEach(el=>el.onclick=()=>pickPart(+el.dataset.part))}
 function highlighted(content,area){let sections=markVisible?marks().filter(m=>m.area===area).sort((a,b)=>a.start-b.start):[],prev=0,out='';for(let m of sections){if(m.start<prev||m.end>content.length||m.end<=m.start)continue;out+=escapeText(content.slice(prev,m.start))+'<mark class="highlit" style="background:'+COLORS[m.color]+'">'+escapeText(content.slice(m.start,m.end))+'</mark>';prev=m.end}return out+escapeText(content.slice(prev))}
-function paragraphs(txt){let items=txt.split(/(?<=[.!?])\s+(?=[A-ZÁÉÍÓÚÜÑ«])/u),arr=[],p='';for(let x of items){if(p.length>470){arr.push(p.trim());p=''}p+=(p?' ':'')+x}if(p.trim())arr.push(p.trim());return arr}
+function paragraphs(input){
+ const source=String(input).replace(/\r\n?/g,'\n').trim();
+ if(!source)return [];
+ // Real document boundaries take priority over visual wrapping.
+ const originalBlocks=source.split(/\n\s*\n/u).map(s=>s.trim()).filter(Boolean);
+ if(originalBlocks.length>1)return originalBlocks;
+ // Some imported source PDFs lost their line breaks but kept numbered paragraphs.
+ const numbered=source.split(/(?<=[.!?])\s+(?=\d{1,2}\.\s+\p{Lu})/u);
+ if(numbered.length>1)return numbered.map(s=>s.trim()).filter(Boolean);
+ // Legacy layout for source texts with no explicit paragraph boundaries.
+ const parts=source.split(/(?<=[.!?])\s+(?=[A-ZÁÉÍÓÚÜÑ«])/u),out=[];
+ let p='';
+ for(const s of parts){if(p.length>470){out.push(p.trim());p=''}p+=(p?' ':'')+s}
+ if(p.trim())out.push(p.trim());
+ return out;
+}
 
 function readingLayout(it){
  const title=String(it.title||'').replace(/\s*·\s*(?:lotu bi zutabeak|bi zutabeak lotu)\s*$/iu,'').trim();

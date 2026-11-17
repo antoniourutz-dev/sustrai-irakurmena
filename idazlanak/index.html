@@ -17,7 +17,7 @@
   <link rel="preload" href="/fonts/inter-400.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="/fonts/inter-display-700.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="/theme.css?v=20261117-oinarria">
-  <link rel="stylesheet" href="/idazlanak/style.css?v=20261117-oinarria">
+  <link rel="stylesheet" href="/idazlanak/style.css?v=20261117-berrikusi">
   <link rel="stylesheet" href="/marker.css?v=20261117-oinarria">
 <link rel="stylesheet" href="/study-kit.css?v=20261117-oinarria">
   <link rel="stylesheet" href="/auth.css?v=20261117-oinarria">
@@ -276,8 +276,10 @@
           <span id="saveState" aria-live="polite">Zirriborroa lokalean edo hodeian gordetzen da</span>
         </div>
         <div class="editor-bottom">
+          <button id="reviewDraft" type="button" class="primary" aria-expanded="false" aria-controls="draftReview" disabled>Berrikusi testua</button>
           <button id="clearDraft" type="button" class="text-action" disabled>Testua ezabatu</button>
         </div>
+        <section id="draftReview" class="draft-review" aria-label="Testuaren berrikuspena" hidden></section>
         <p class="privacy-note">Gonbidatu gisa zirriborroa gailu honetan gordetzen da. Kontuarekin, hodeian sinkronizatzen da eta administratzaileak ikus dezake jarraipena egiteko.</p>
       </section>
       <section id="savedDrafts" aria-label="Gordetako idazlanak" hidden></section>
@@ -296,8 +298,9 @@
 <script src="/marker-kit.js?v=20261117-oinarria" defer></script>
 <script src="/study-kit.js?v=20261117-oinarria" defer></script>
 <script src="/stage-kit.js?v=20261117-oinarria" defer></script>
-<script src="/idazlanak/app.js?v=20261117-oinarria" defer></script>
+<script src="/idazlanak/app.js?v=20261117-berrikusi" defer></script>
 <script src="/idazlanak/eskema.js?v=20261117-oinarria" defer></script>
+<script src="/idazlanak/review.js?v=20261117-berrikusi" defer></script>
 <script src="/pwa.js?v=20261117-oinarria" defer></script>
 </body>
 </html>

@@ -132,7 +132,7 @@
       const key = row.storage_key;
       let m;
       if ((m = key.match(/^sustrai-(writer-c1|outline-v1):([^:]+):(training|simulation)$/)) ||
-          (m = key.match(/^sustrai-(writer-saved|writer-marks):([^:]+)$/)) ||
+          (m = key.match(/^sustrai-(writer-saved|writer-marks|writer-review):([^:]+)$/)) ||
           (m = key.match(/^sustrai-glossary:(writing):([^:]+)$/))) {
         const slug = m[2];
         if (!writing.has(slug)) {

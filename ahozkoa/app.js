@@ -84,6 +84,8 @@ function renderSupports(){
    box.append(textNode('strong',item.title||''));
    const desc=item.detail||item.example;
    if(desc)box.append(textNode('p',desc));
+   const usage=item.nuance_eu||item.usage_note_eu;
+   if(usage)box.append(textNode('small',usage));
    target.append(box);
   }
   if(!target.childElementCount)target.append(textNode('p','Oraingoz ez dago laguntza zehatzik.'));
@@ -281,7 +283,7 @@ async function init(){await window.SustraiCloud.ready;
   ]);
   const byId=new Map(orgs.map(x=>[x.id,x.code]));
   tasks=raw.filter(x=>byId.has(x.organism_id)&&x.review_status==='verified').map(x=>({...x,org_code:byId.get(x.organism_id)})).sort((a,b)=>a.org_code.localeCompare(b.org_code)||b.exam_reference.localeCompare(a.exam_reference)||a.title_eu.localeCompare(b.title_eu,'eu'));
-  supports=help;
+  supports=help.sort((a,b)=>Number(b.version||0)-Number(a.version||0));
   $('taskList').setAttribute('aria-busy','false');
   if(!tasks.length)throw new Error('Ahozko atazarik ez da eskuragarri.');
   const params=new URLSearchParams(location.search),requested=params.get('ataza');

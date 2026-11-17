@@ -275,3 +275,7 @@ body.focus-mode .editor textarea{flex:1;min-height:0;font-size:18px;line-height:
   body.focus-mode .session-timer{flex-direction:row!important;flex-wrap:nowrap!important;width:auto!important;justify-content:flex-start}
   body.focus-mode .session-timer button{width:auto!important;flex:none}
 }
+/* Mobile: a plain 1fr column grows to the min-content width of the task carousel (45 cards × 190px),
+   blowing the page up to ~9,400px. minmax(0,1fr) keeps the column at the viewport width so the
+   carousel scrolls inside itself. */
+@media(max-width:850px){.layout{grid-template-columns:minmax(0,1fr)}.layout>*{min-width:0}}

@@ -1,5 +1,5 @@
 /* SUSTRAI PWA service worker */
-const CACHE_VERSION = 'sustrai-pwa-v11-urratsak';
+const CACHE_VERSION = 'sustrai-pwa-v12-fokua';
 const SHELL = [
   '/',
   '/index.html',
@@ -32,6 +32,7 @@ const SHELL = [
   '/marker-bar.js',
   '/study-kit.js',
   '/stage-kit.js',
+  '/fokua-workshop.css',
   '/attempts-kit.js',
   '/study-kit.css',
   '/app.js',

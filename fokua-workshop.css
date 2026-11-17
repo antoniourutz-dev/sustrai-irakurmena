@@ -1,0 +1,59 @@
+/* SUSTRAI · Fokua components for the Idazmena and Ahozkoa workshops.
+   Loaded after each page's own stylesheet so the three skills share Irakurmena's pieces:
+   flat page, white panels without shadows, 40px buttons with 12px corners, a dark segmented
+   control, blue eyebrows and quiet chips. Only colours and shapes change here; layout stays
+   in the page stylesheets. Uses the tokens from theme.css. */
+
+/* Page and panels */
+html,body{background:var(--s-bg)}
+body{background-image:none}
+.layout .panel{background:var(--s-surface);background-image:none;border:1px solid var(--s-line);border-radius:var(--s-r-xl);box-shadow:none}
+.layout :is(.catalog-heading,.catalog-intro,.support-heading){background:none}
+.layout .catalog{background:var(--s-surface)}
+
+/* Type */
+.layout :is(.overline,.eyebrow){color:var(--s-primary);font-size:12px;font-weight:700;letter-spacing:.1em}
+.layout :is(h1,h2,h3){color:var(--s-ink);font-family:var(--s-font-display);letter-spacing:-.015em}
+
+/* Buttons: one primary action, quiet secondary ones */
+.layout :is(.soft,.primary,.outline-primary){display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:40px;padding:0 16px;border-radius:var(--s-r-md);font:600 14px/1.1 var(--s-font-ui);box-shadow:none;transform:none}
+.layout .soft{border:1px solid var(--s-line-strong);background:var(--s-surface);color:var(--s-ink)}
+.layout .soft:hover:not(:disabled){background:var(--s-bg);border-color:var(--s-line-strong)}
+.layout :is(.primary,.outline-primary){border:1px solid var(--s-primary);background:var(--s-primary);color:#fff}
+.layout :is(.primary,.outline-primary):hover:not(:disabled){border-color:var(--s-primary-hover);background:var(--s-primary-hover)}
+/* The writing stopwatch's «Hasi» is the main action of its bar, as in Irakurmena */
+#timerToggle{border-color:var(--s-primary);background:var(--s-primary);color:#fff}
+#timerToggle:hover:not(:disabled){border-color:var(--s-primary-hover);background:var(--s-primary-hover)}
+/* Disabled reads as disabled (grey), never as a faded primary */
+.layout :is(.soft,.primary,.outline-primary):disabled,#timerToggle:disabled{opacity:1;border-color:var(--s-line);background:var(--s-bg);color:#94A3B8;cursor:not-allowed}
+
+/* Segmented control (Entrenatu / Simulatu) */
+.layout .modes{display:inline-flex;gap:3px;padding:3px;border-radius:var(--s-r-md);background:var(--s-line);box-shadow:none}
+.layout .modes button{min-height:34px;padding:0 14px;border:0;border-radius:9px;background:transparent;color:var(--s-ink-3);font:600 13px/1 var(--s-font-ui);box-shadow:none}
+.layout .modes button:hover{background:rgb(255 255 255 / .6)}
+.layout .modes button:is(.active,[aria-pressed="true"]){background:var(--s-ink);color:#fff;font-weight:700;box-shadow:none}
+
+/* Chips with the task's facts */
+.layout :is(.chips,.tags) span{border:1px solid var(--s-line);border-radius:999px;background:var(--s-bg);box-shadow:none;color:var(--s-ink-3);font-weight:600}
+
+/* Task cards in the catalog */
+.layout .task-card{border:1px solid var(--s-line);border-radius:var(--s-r-md);background:var(--s-surface);background-image:none;box-shadow:none;color:var(--s-ink);transform:none;transition:border-color .15s,background-color .15s}
+.layout .task-card:hover{border-color:var(--s-line-strong);background:var(--s-surface);box-shadow:none;transform:none}
+.layout .task-card:is(.selected,.active){border-color:var(--s-primary-line);background:var(--s-primary-soft);background-image:none;box-shadow:inset 3px 0 0 var(--s-primary)}
+.layout .task-card strong{color:var(--s-ink)}
+
+/* Form fields */
+.layout :is(select,input[type="search"],input[type="text"],input:not([type])){border:1px solid var(--s-line-strong);border-radius:var(--s-r-sm);background:var(--s-surface);box-shadow:none;color:var(--s-ink)}
+.layout :is(select,input,textarea):focus-visible{outline:3px solid var(--s-primary-line);outline-offset:1px;border-color:var(--s-primary)}
+
+/* Phones: Ahozkoa's two stopwatches (preparation, speaking) line up at full width */
+@media(max-width:900px){
+  .layout .session-timer:has(>.mini-timer){display:grid;grid-template-columns:minmax(0,1fr);gap:8px;width:100%}
+  .layout .mini-timer{display:flex;align-items:center;justify-content:space-between;width:100%}
+  .layout .session-timer:has(>.mini-timer)>.soft{justify-self:start}
+}
+
+/* Touch floor wins over the shapes above on phones and touch screens */
+@media(max-width:900px),(pointer:coarse){
+  .layout :is(.soft,.primary,.outline-primary),#timerToggle,.layout .modes button{min-height:44px}
+}

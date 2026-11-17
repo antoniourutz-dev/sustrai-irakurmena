@@ -242,3 +242,23 @@ body.focus-mode .passage,body.focus-mode .source-note{max-width:720px}
 .attempts-actions{display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end;margin-top:6px}
 .attempts-actions button{min-height:44px}
 @media(max-width:760px){.attempts-actions button{flex:1}}
+/* Phones: the exam bar fits in one row (call · clock · start · ⋯) so the text starts ~60px higher.
+   Praktika/Simulazioa moves into the «Gehiago» panel together with Amaitu and Nabarmendu. */
+@media(max-width:760px){
+  .session{flex-wrap:nowrap;gap:6px}
+  .pickexam{flex:1 1 auto;min-width:0}
+  .pickexam select{min-width:0;font-size:16px;text-overflow:ellipsis}
+  .session-modes{display:none}
+  .timer{flex:0 0 auto;margin-right:0;padding:0 9px}
+  .time{font-size:16px}
+  .time-actions{flex:0 0 auto;flex-wrap:nowrap;gap:6px}
+  .time-actions button{padding:0 12px}
+  #actionsToggle{width:44px;padding:0;font-size:0;line-height:1}
+  #actionsToggle::before{content:'⋯';font-size:22px;font-weight:700}
+  #actionsToggle[aria-expanded="true"]::before{content:'✕';font-size:16px}
+  .session:has(.time-actions.expanded){flex-wrap:wrap}
+  .session:has(.time-actions.expanded) .pickexam{flex:1 1 100%;flex-wrap:wrap}
+  .session:has(.time-actions.expanded) .pickexam select{flex:1 1 100%}
+  .session:has(.time-actions.expanded) .session-modes{display:flex;flex:1 1 100%}
+  .session:has(.time-actions.expanded) .session-modes .mode{flex:1;min-height:44px}
+}

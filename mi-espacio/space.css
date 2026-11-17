@@ -1,6 +1,7 @@
 /* SUSTRAI · Nire espazioa (Fokua). Tokens come from theme.css. */
-body{background:var(--s-bg);color:var(--s-ink);font-family:var(--s-font-ui)}
-.space{max-width:1120px;margin:0 auto;padding:32px clamp(16px,3vw,32px) 96px}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;background:var(--s-bg);color:var(--s-ink);font-family:var(--s-font-ui)}
+.space{max-width:var(--s-page-max);margin:0 auto;padding:32px var(--s-page-pad) 96px}
 
 [hidden]{display:none!important}
 

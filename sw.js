@@ -1,5 +1,5 @@
 /* SUSTRAI PWA service worker */
-const CACHE_VERSION = 'sustrai-pwa-v16-izenak';
+const CACHE_VERSION = 'sustrai-pwa-v18-berrikusi';
 const SHELL = [
   '/',
   '/index.html',
@@ -34,6 +34,7 @@ const SHELL = [
   '/stage-kit.js',
   '/result-kit.js',
   '/exam-names.js',
+  '/progress-kit.js',
   '/fokua-workshop.css',
   '/attempts-kit.js',
   '/study-kit.css',
@@ -51,6 +52,7 @@ const SHELL = [
   '/idazlanak/style.css',
   '/idazlanak/app.js',
   '/idazlanak/eskema.js',
+  '/idazlanak/review.js',
   '/ahozkoa/',
   '/ahozkoa/index.html',
   '/ahozkoa/style.css',

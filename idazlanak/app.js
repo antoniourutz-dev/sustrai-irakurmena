@@ -99,6 +99,7 @@ function selectTaskBySlug(slug){
   updateWordCount();
   renderSupports(); renderList();
   window.SustraiEskema?.setTask(item,mode);
+  window.SustraiReview?.setTask(item,mode);
   savedKit?.refresh();glossaryKit?.refresh();
   try{sessionStorage.setItem('sustrai-writer-last',slug)}catch{}
 }
@@ -154,6 +155,7 @@ function setMode(next){
   $('draft').value=loadDraft();
   updateWordCount();renderSupports();
   window.SustraiEskema?.setMode(next);
+  if(selected)window.SustraiReview?.setTask(selected,next);
   glossaryKit?.refresh();
   if(next==='simulation')notify('Simulazioan laguntzak ezkutuan daude.');
 }

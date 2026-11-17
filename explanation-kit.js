@@ -12,7 +12,10 @@
     const details=node('details','sr-explanation');
     details.append(node('summary','','Zergatik? · Ikusi azalpena'));
     const body=node('div','sr-explanation-body');
-    body.append(node('p','sr-exp-label','SUSTRAIren azalpen didaktikoa · ez da azterketako testu ofiziala'));
+    const attribution=typeof data.attribution==='string'&&data.attribution.length<=200
+      ? data.attribution
+      : 'SUSTRAIren azalpen didaktikoa · ez da azterketako testu ofiziala';
+    body.append(node('p','sr-exp-label',attribution));
     body.append(node('p','sr-exp-reason',data.reason));
     if(data.excerpt){
       const quote=node('blockquote','sr-exp-quote',data.excerpt);

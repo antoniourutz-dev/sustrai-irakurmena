@@ -169,3 +169,15 @@ body.focus-mode .official{grid-row:2/span 2}
 }
 /* Comfortable reading measure: the official material ran to ~110 characters per line on desktop. */
 .source-text{max-width:72ch}
+/* Two-step flow on compact screens (stage-kit.js): choose a task, then work on it. */
+.stage-back{display:none}
+@media(max-width:900px){
+  body[data-stage=catalog] .layout>.maincol{display:none}
+  body[data-stage=work] .layout>.catalog{display:none}
+  body[data-stage=catalog] .catalog .task-list{display:grid;grid-template-columns:minmax(0,1fr);gap:8px;overflow:visible;padding:4px 12px 14px}
+  body[data-stage=catalog] .catalog .task-card{min-width:0;max-width:none;width:100%;margin:0}
+  body[data-stage=work] .stage-back{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:6px;min-height:52px;margin:-11px -11px 0;padding:4px 11px;background:var(--s-surface);border-bottom:1px solid var(--s-line);box-shadow:0 6px 14px rgb(15 23 42 / .06)}
+  .stage-back-button{display:inline-flex;align-items:center;gap:2px;flex:0 0 auto;min-height:44px;padding:0 10px 0 4px;border:0;border-radius:var(--s-r-sm);background:transparent;color:var(--s-primary);font:600 15px/1 var(--s-font-ui)}
+  .stage-back-button:active{background:var(--s-primary-soft)}
+  .stage-back-title{min-width:0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;color:var(--s-muted);font-size:14px}
+}

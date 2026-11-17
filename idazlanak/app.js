@@ -115,7 +115,7 @@ function renderList(){
     const btn=document.createElement('button');btn.type='button';btn.className='task-card'+(task.slug===selected?.slug?' selected':'');
     btn.setAttribute('aria-pressed',String(task.slug===selected?.slug));
     btn.innerHTML='<span class="small">'+escapeHtml(task.org_code)+' · '+escapeHtml(task.exam_reference)+'</span><strong>'+escapeHtml(task.title_eu)+'</strong><span class="task-genre">'+escapeHtml(GENRES[task.genre]||task.genre)+'</span>';
-    btn.onclick=()=>{selectTaskBySlug(task.slug);try{const url=new URL(window.location.href);url.searchParams.set('ataza',task.slug);window.history.replaceState(null,'',url.toString())}catch{}};
+    btn.onclick=()=>{selectTaskBySlug(task.slug);if(window.SustraiStage)window.SustraiStage.opened(task.slug);else try{const url=new URL(window.location.href);url.searchParams.set('ataza',task.slug);window.history.replaceState(null,'',url.toString())}catch{}};
     list.append(btn);
   }
 }
@@ -245,6 +245,7 @@ async function start(){await window.SustraiCloud.ready;
     let requested=null,requestedMode=null;try{const params=new URLSearchParams(window.location.search);requested=params.get('ataza');requestedMode=params.get('mode')}catch{}
     selectTaskBySlug(tasks.some(t=>t.slug===requested)?requested:(tasks.some(t=>t.slug===previous)?previous:tasks[0].slug));
     if(requestedMode==='simulation')setMode('simulation');
+    window.SustraiStage?.init({breakpoint:850,open:slug=>{selectTaskBySlug(slug);return selected?.slug===slug},title:()=>selected?.title_eu||''});
   }catch(error){
     $('taskList').setAttribute('aria-busy','false');
     $('taskList').textContent=error.message||'Ezin izan da kargatu.';

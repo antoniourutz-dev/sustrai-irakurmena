@@ -1,10 +1,13 @@
 /* SUSTRAI PWA service worker */
-const CACHE_VERSION = 'sustrai-pwa-v22-idazmen-v2';
+const CACHE_VERSION = 'sustrai-pwa-v23-hitzbira';
 const SHELL = [
   '/',
   '/index.html',
   '/manifest.webmanifest',
   '/theme.css',
+  '/hitzbira.css',
+  '/fonts/hitzbira-sans-var.woff',
+  '/fonts/hitzbira-display-var.woff',
   '/start.css',
   '/home.js',
   '/fonts/inter-400.woff2',

@@ -1,6 +1,6 @@
 {
-  "name": "SUSTRAI · Euskara C1",
-  "short_name": "SUSTRAI",
+  "name": "HitzBira · Euskara C1",
+  "short_name": "HitzBira",
   "description": "Prestatu euskarako C1 irakurmen-, idazmen- eta mintzamen-probak, IVAP eta HABEko benetako deialdiekin.",
   "lang": "eu",
   "dir": "ltr",
@@ -8,8 +8,8 @@
   "scope": "/",
   "display": "standalone",
   "orientation": "any",
-  "background_color": "#F4F6FA",
-  "theme_color": "#FFFFFF",
+  "background_color": "#F4F5FA",
+  "theme_color": "#11132B",
   "categories": ["education", "productivity"],
   "icons": [
     {

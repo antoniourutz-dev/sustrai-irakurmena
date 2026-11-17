@@ -106,7 +106,7 @@
     <div class="sustrai-auth-backdrop"></div>
     <section class="sustrai-auth-card" role="dialog" aria-modal="true" aria-labelledby="sustrai-auth-title">
       <button type="button" id="sustrai-auth-close" class="sustrai-auth-close" aria-label="Itxi">×</button>
-      <p class="sustrai-auth-eyebrow">SUSTRAI · IKASLEAREN KONTUA</p>
+      <p class="sustrai-auth-eyebrow">HitzBira · IKASLEAREN KONTUA</p>
       <h2 id="sustrai-auth-title">Saioa hasi</h2>
       <p id="sustrai-auth-help">Gonbidatu gisa ere jarrai dezakezu. Kontuarekin zure lanak hodeian gordetzen dira, Nire espazioan ikusgai, eta administratzaileak jarraipena egin dezake.</p>
       <form id="sustrai-auth-form">

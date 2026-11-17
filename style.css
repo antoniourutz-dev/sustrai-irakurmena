@@ -114,7 +114,7 @@ mark.highlit{padding:1px 0;border-radius:3px;color:inherit;box-decoration-break:
 /* ---------- Toast + result dialog ---------- */
 .toast{position:fixed;left:50%;top:72px;z-index:45;max-width:calc(100vw - 24px);padding:12px 18px;border-radius:var(--s-r-md);background:var(--s-ink);color:#fff;box-shadow:var(--s-shadow-pop);font-size:14px;opacity:0;pointer-events:none;transform:translate(-50%,-12px);transition:opacity .15s,transform .15s}
 .toast.show{opacity:1;transform:translate(-50%,0)}
-.modal{position:fixed;inset:0;z-index:50;display:grid;place-items:center;padding:16px;overflow-y:auto;background:rgb(15 23 42 / .62)}
+.modal{position:fixed;inset:0;z-index:50;display:grid;place-items:center;padding:16px;overflow-y:auto;background:rgb(17 19 43 / .62)}
 .modal-card{position:relative;width:min(520px,100%);padding:28px;border-radius:var(--s-r-xl);background:var(--s-surface);box-shadow:var(--s-shadow-pop)}
 .modal-card h2{margin:6px 0 16px;font:700 26px/1.15 var(--s-font-display);letter-spacing:-.015em}
 .modalclose{position:absolute;top:12px;right:12px;width:44px;min-height:44px;padding:0;border:0;font-size:24px;line-height:1}

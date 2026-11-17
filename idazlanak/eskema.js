@@ -109,7 +109,7 @@ const REVIEW_CHECKS=[
  {key:'originality',label:'Nire hitzekin osatu dut, eredu osoa kopiatu gabe'}
 ];
 function previewText(){
- const lines=['SUSTRAI · NIRE AURRETIKO ESKEMA','Ataza: '+task.title_eu,'Modua: '+(mode==='simulation'?'simulazioa':'entrenamendua'),''];
+ const lines=['HitzBira · NIRE AURRETIKO ESKEMA','Ataza: '+task.title_eu,'Modua: '+(mode==='simulation'?'simulazioa':'entrenamendua'),''];
  const add=(name,value)=>{if(String(value||'').trim())lines.push(name+': '+String(value).trim())};
  add('Hartzailea',data.audience);add('Xedea',data.goal);add('Mezu nagusia',data.thesis);
  lines.push('','IDEIAK');

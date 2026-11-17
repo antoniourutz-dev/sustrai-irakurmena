@@ -186,7 +186,7 @@ async function copyDraft(){
 }
 function downloadDraft(){
   if(!selected||!$('draft').value.trim())return;
-  const title='SUSTRAI IDAZLANA\n'+selected.org_code+' · '+selected.exam_reference+'\n'+selected.title_eu+'\n\n';
+  const title='HitzBira · IDAZLANA\n'+selected.org_code+' · '+selected.exam_reference+'\n'+selected.title_eu+'\n\n';
   const blob=new Blob([title+$('draft').value],{type:'text/plain;charset=utf-8'});
   const url=URL.createObjectURL(blob);
   const a=document.createElement('a');a.href=url;a.download='sustrai-'+selected.slug+'.txt';document.body.append(a);a.click();a.remove();

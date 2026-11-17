@@ -93,7 +93,7 @@ async function srGrade(activeExam,getAnswers,options={}) {
     .then(result=>{
       if(!Array.isArray(result?.items) || result.total!==activeExam.items.reduce((sum,it)=>sum+it.r[1]-it.r[0]+1,0))
         throw new Error('Ezin izan dira erantzunak zuzendu');
-      const correct=new Map();
+      const correct=new Map(),pedagogical=new Map();
       for(const row of result.items){
         const pos=Number(row?.position),n=Number(row?.n),accepted=row?.accepted??null;
         const item=activeExam.items[pos-1];
@@ -103,6 +103,10 @@ async function srGrade(activeExam,getAnswers,options={}) {
         const given=byPart[String(pos)]?.[n]||'';
         if(!correct.has(pos))correct.set(pos,new Map());
         correct.get(pos).set(n,{accepted:accepted?accepted.slice():null,answer:given,correct:typeof row?.correct==='boolean'?row.correct:accepted.includes(given)});
+        if(given&&row.explanation&&typeof row.explanation.reason==='string'&&row.explanation.reason.length<=12000){
+          if(!pedagogical.has(pos))pedagogical.set(pos,{});
+          pedagogical.get(pos)[n]=row.explanation;
+        }
       }
       activeExam.items.forEach((it,index)=>{
         const answers=correct.get(index+1),alternative={},checked={};
@@ -117,6 +121,7 @@ async function srGrade(activeExam,getAnswers,options={}) {
           return row.accepted[0];
         }).join('');
         it.alternatives=alternative;it.checked=checked;
+        it.explanations={...(it.explanations||{}),...(pedagogical.get(index+1)||{})};
       });
       return result;
     }).finally(()=>srAwaiting.delete(requestKey));
@@ -447,7 +452,10 @@ function renderQuestion(){let it=task(),a=answersOf(),n=current,index=n-it.r[0],
  $('prev').disabled=n===it.r[0];$('next').disabled=n===it.r[1];
  $('numbers').innerHTML=Array.from({length:numberOf(it)},(_,i)=>{let k=i+it.r[0],state=graded[part]?(!a[k]?'blank':srIsCorrect(it,k,a[k])?'ok':'bad'):'',label=k+(state==='ok'?', zuzena':state==='bad'?', okerra':state==='blank'?', erantzun gabe':'');return '<button data-q="'+k+'" aria-label="'+label+'" class="'+(k===n?'current ':'')+(a[k]?'done ':'')+window.SustraiResult.gridClass(state)+'">'+k+'</button>'}).join('');
  document.querySelectorAll('[data-q]').forEach(b=>b.onclick=()=>selectQuestion(+b.dataset.q));
- $('gradeResult').innerHTML='';if(graded[part]){let good=0;for(let k=it.r[0];k<=it.r[1];k++)if(srIsCorrect(it,k,a[k]))good++;let note=exam().id==='2019-10-26'&&part===0&&current===2?'<small>Oharra: 2. galderako soluzioa ez dator bat argitaratutako bi iturri ofizialetan (C/D).</small>':'',selectedAnswer=a[n]||'Erantzun gabe',isCorrect=srIsCorrect(it,n,a[n]),errors=mistakeList(true);$('gradeResult').innerHTML='<div class="result">'+window.SustraiResult.partLine({correct:good,total:numberOf(it),points:good*weight(it),maxPoints:numberOf(it)*weight(it),blank:Array.from({length:numberOf(it)},(_,i)=>i+it.r[0]).filter(k=>!a[k]).length})+' <small>'+(isCorrect?'Galdera hau zuzen dago.':'Zure erantzuna: '+selectedAnswer+srSolutionHint(it,n,a[n],requestedMode()))+'</small>'+note+'<span class="learning-tip">'+learningTip(it)+'</span>'+(errors.length?'<button type="button" id="nextMistake" class="outline mistake-action">Hurrengo akatsa</button>':'')+'</div>';if($('nextMistake'))$('nextMistake').onclick=nextMistake}}
+ $('gradeResult').innerHTML='';if(graded[part]){let good=0;for(let k=it.r[0];k<=it.r[1];k++)if(srIsCorrect(it,k,a[k]))good++;let note=exam().id==='2019-10-26'&&part===0&&current===2?'<small>Oharra: 2. galderako soluzioa ez dator bat argitaratutako bi iturri ofizialetan (C/D).</small>':'',selectedAnswer=a[n]||'Erantzun gabe',isCorrect=srIsCorrect(it,n,a[n]),errors=mistakeList(true);$('gradeResult').innerHTML='<div class="result">'+window.SustraiResult.partLine({correct:good,total:numberOf(it),points:good*weight(it),maxPoints:numberOf(it)*weight(it),blank:Array.from({length:numberOf(it)},(_,i)=>i+it.r[0]).filter(k=>!a[k]).length})+' <small>'+(isCorrect?'Galdera hau zuzen dago.':'Zure erantzuna: '+selectedAnswer+srSolutionHint(it,n,a[n],requestedMode()))+'</small>'+note+'<span class="learning-tip">'+learningTip(it)+'</span>'+(errors.length?'<button type="button" id="nextMistake" class="outline mistake-action">Hurrengo akatsa</button>':'')+'</div>';if($('nextMistake'))$('nextMistake').onclick=nextMistake}
+ if(graded[part]&&requestedMode()==='practice'&&a[n]&&it.explanations?.[n])
+   window.SustraiExplanation?.append($('gradeResult'),it.explanations[n]);
+}
 function render(reset=false){if(!exams.length)return;$('exam').value=exam().id;$('readingTitle').textContent=(part+1)+'. ariketa · '+task().title;document.querySelector('.source-note').replaceChildren('Iturria: ',externalLink(exam().source,'IVAP · Azterketa ofiziala (A eredua) ↗'));tabs();progressBar();renderPassage(reset);renderQuestion();tick()}
 function capture(){let selection=window.getSelection();if(!selection||selection.isCollapsed||!selection.rangeCount)return;let range=selection.getRangeAt(0),res=[];document.querySelectorAll('.selectable[data-area]').forEach(el=>{if(!range.intersectsNode(el))return;let whole=document.createRange();whole.selectNodeContents(el);let clipped=range.cloneRange();try{if(range.compareBoundaryPoints(Range.START_TO_START,whole)<0)clipped.setStart(whole.startContainer,whole.startOffset);if(range.compareBoundaryPoints(Range.END_TO_END,whole)>0)clipped.setEnd(whole.endContainer,whole.endOffset);let prefix=whole.cloneRange();prefix.setEnd(clipped.startContainer,clipped.startOffset);let start=prefix.toString().length,len=clipped.toString().length;if(len)res.push({area:el.dataset.area,start,end:start+len})}catch{}});if(res.length){pendingSelection=res;}}
 function paint(color){capture();if(!pendingSelection.length){if(!activeMarker)toast('Hautatu hitz edo esaldi bat lehenik');return}let list=highlights();for(let s of pendingSelection){list=list.filter(m=>m.area!==s.area||m.end<=s.start||m.start>=s.end);list.push({...s,color})}write(highlightsKey(),list);pendingSelection=[];window.getSelection()?.removeAllRanges();renderPassage(false);renderQuestion();if(!activeMarker)toast('Marka gordeta')}

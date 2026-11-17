@@ -391,7 +391,22 @@ async function correct(){
 function progressBar(){let p=progress(),total=totalOf(exam());$('progressLabel').textContent=p+'/'+total+' erantzunda';$('trackfill').style.width=(100*p/total)+'%';$('progress').setAttribute('aria-valuemax',String(total));$('progress').setAttribute('aria-valuenow',String(p));$('progress').setAttribute('aria-valuetext',p+' galdera erantzunda, '+total+'etik')}
 function tabs(){let content='';exam().items.forEach((it,i)=>{let a=answersOf(i),done=Object.keys(a).filter(n=>+n>=it.r[0]&&+n<=it.r[1]&&a[n]).length;content+='<button class="tab '+(i===part?'active':'')+'" data-part="'+i+'" aria-pressed="'+(i===part)+'">'+(i+1)+'. '+(it.type==='fill'?'Hutsuneak':it.type==='mcq'?'Ulermena':'Testu zatiak')+' <small>'+done+'/'+numberOf(it)+'</small></button>'});$('tabs').innerHTML=content;document.querySelectorAll('[data-part]').forEach(b=>b.onclick=()=>selectPart(+b.dataset.part))}
 function marked(content,area){let ms=visible?highlights().filter(m=>m.area===area).sort((a,b)=>a.start-b.start):[];let index=0,out='';for(let m of ms){if(m.start<index||m.start<0||m.end>content.length||m.end<=m.start)continue;out+=htmlEscape(content.slice(index,m.start))+'<mark class="highlit" style="background:'+colors[m.color]+'">'+htmlEscape(content.slice(m.start,m.end))+'</mark>';index=m.end}return out+htmlEscape(content.slice(index))}
-function paragraphs(input){let parts=String(input).split(/(?<=[.!?])\s+(?=[A-ZÁÉÍÓÚÜÑ«])/u),out=[],p='';for(let s of parts){if(p.length>520){out.push(p.trim());p=''}p+=(p?' ':'')+s}if(p.trim())out.push(p.trim());return out}
+function paragraphs(input){
+ const source=String(input).replace(/\r\n?/g,'\n').trim();
+ if(!source)return [];
+ // Real document boundaries take priority over visual wrapping.
+ const originalBlocks=source.split(/\n\s*\n/u).map(s=>s.trim()).filter(Boolean);
+ if(originalBlocks.length>1)return originalBlocks;
+ // Some imported source PDFs lost their line breaks but kept numbered paragraphs.
+ const numbered=source.split(/(?<=[.!?])\s+(?=\d{1,2}\.\s+\p{Lu})/u);
+ if(numbered.length>1)return numbered.map(s=>s.trim()).filter(Boolean);
+ // Legacy layout for source texts with no explicit paragraph boundaries.
+ const parts=source.split(/(?<=[.!?])\s+(?=[A-ZÁÉÍÓÚÜÑ«])/u),out=[];
+ let p='';
+ for(const s of parts){if(p.length>520){out.push(p.trim());p=''}p+=(p?' ':'')+s}
+ if(p.trim())out.push(p.trim());
+ return out;
+}
 
 function readingLayout(it){
  const title=String(it.title||'').replace(/\s*·\s*(?:lotu bi zutabeak|bi zutabeak lotu)\s*$/iu,'').trim();

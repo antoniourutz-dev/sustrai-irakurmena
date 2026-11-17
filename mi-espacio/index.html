@@ -17,8 +17,7 @@
   <link rel="preload" href="/fonts/inter-display-700.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="/theme.css?v=20261117-zatiak">
   <link rel="stylesheet" href="/auth.css?v=20261117-zatiak">
-  <link rel="stylesheet" href="/admin/admin.css?v=20261117-zatiak">
-  <link rel="stylesheet" href="/mi-espacio/space.css?v=20261117-zatiak">
+  <link rel="stylesheet" href="/mi-espacio/space.css?v=20261117-espazioa">
 </head>
 <body class="has-tabbar">
 <header class="site-header">
@@ -26,97 +25,79 @@
   <nav class="site-nav" aria-label="Atalak"><a href="/">Hasiera</a><a href="/irakurmena/">Irakurmena</a><a href="/idazlanak/">Idazmena</a><a href="/ahozkoa/">Ahozkoa</a></nav>
 </header>
 
-<main class="admin-layout my-space">
-  <section class="intro">
+<main class="space" id="main">
+  <section class="space-hero" aria-labelledby="greeting">
     <div>
-      <p class="eyebrow">NIRE IKASKUNTZA</p>
-      <h1>Nire espazioa</h1>
-      <p>Jarraitu utzitako tokian, ikusi hiru trebetasunen aurrerapena eta kudeatu zure hodeiko lanak.</p>
+      <p class="space-eyebrow">NIRE ESPAZIOA</p>
+      <h1 id="greeting">Nire espazioa</h1>
+      <p id="summary" class="space-lead">Zure lana kargatzen…</p>
     </div>
-    <p id="myStatus" class="status" role="status">Saioa egiaztatzen…</p>
+    <p id="myStatus" class="sr-only" role="status" aria-live="polite"></p>
   </section>
 
-  <section id="guest" class="card guest-card" hidden>
-    <p class="eyebrow">KONTUA BEHARREZKOA</p>
-    <h2>Hasi saioa zure espazioa irekitzeko</h2>
-    <p>Gonbidatu gisa lan egin dezakezu gailuan. Kontuarekin, lanak hodeian gordetzen dira eta hemendik berreskura ditzakezu.</p>
-    <div class="actions">
-      <button id="login" type="button">Saioa hasi / erregistratu</button>
-      <a class="soft-link" href="/irakurmena/">Jarraitu gonbidatu gisa</a>
+  <section id="guest" class="space-notice" hidden>
+    <div>
+      <strong>Gailu honetan bakarrik gordeta</strong>
+      <p>Ikusten duzuna nabigatzaile honetan dago. Sortu kontua lanak ez galtzeko eta beste gailuetan jarraitzeko.</p>
     </div>
+    <button id="login" type="button" class="space-btn primary">Sartu edo erregistratu</button>
   </section>
 
-  <div id="signedIn" hidden>
-    <section class="stats" id="overview" aria-label="Aurrerapenaren laburpena"></section>
+  <section class="space-block" aria-labelledby="continueTitle">
+    <div class="space-head"><h2 id="continueTitle">Jarraitu non utzi zenuen</h2></div>
+    <div id="continueList" class="continue-grid"></div>
+  </section>
 
-    <section class="card continue-card" id="continueCard">
-      <div class="section-head">
-        <div>
-          <p class="eyebrow">JARRAITU</p>
-          <h2>Non utzi zenuen</h2>
-        </div>
-      </div>
-      <div id="continueList" class="continue-list"></div>
-    </section>
+  <section class="space-block" aria-labelledby="progressTitle">
+    <div class="space-head"><h2 id="progressTitle">Zure aurrerapena</h2></div>
+    <div id="overview" class="skill-grid"></div>
+  </section>
 
-    <div class="grid space-grid">
-      <section class="card">
-        <div class="section-head">
-          <div>
-            <p class="eyebrow">IRAKURMENA</p>
-            <h2>Emaitzak</h2>
-          </div>
-          <a class="soft-link" href="/irakurmena/">Proba berria</a>
-        </div>
-        <div id="myResults" class="results"></div>
-      </section>
-
-      <section class="card">
-        <div class="section-head">
-          <div>
-            <p class="eyebrow">LANAK</p>
-            <h2>Zirriborroak eta oharrak</h2>
-          </div>
-        </div>
-        <div class="work-filters" role="group" aria-label="Lan mota">
-          <button type="button" class="chip active" data-filter="all">Denak</button>
-          <button type="button" class="chip" data-filter="writing">Idazmena</button>
-          <button type="button" class="chip" data-filter="speaking">Ahozkoa</button>
-          <button type="button" class="chip" data-filter="reading">Irakurmena</button>
-        </div>
-        <div id="myWorks" class="works"></div>
-      </section>
+  <section class="space-block" aria-labelledby="resultsTitle">
+    <div class="space-head">
+      <h2 id="resultsTitle">Irakurmen-emaitzak</h2>
+      <a class="space-link" href="/irakurmena/">Proba berria</a>
     </div>
+    <div id="myResults" class="result-list"></div>
+  </section>
 
-    <section class="card profile-card">
-      <div class="section-head">
-        <div>
-          <p class="eyebrow">KONTUA</p>
-          <h2>Profila eta datuak</h2>
-        </div>
+  <section class="space-block" aria-labelledby="worksTitle">
+    <div class="space-head">
+      <h2 id="worksTitle">Zure lanak</h2>
+      <div class="segmented" role="group" aria-label="Lanak iragazi">
+        <button type="button" class="active" data-filter="all" aria-pressed="true">Denak</button>
+        <button type="button" data-filter="writing" aria-pressed="false">Idazmena</button>
+        <button type="button" data-filter="speaking" aria-pressed="false">Ahozkoa</button>
       </div>
-      <form id="profileForm" class="profile-form">
-        <label for="displayName">Izena</label>
-        <input id="displayName" name="displayName" type="text" maxlength="120" required minlength="2" autocomplete="nickname">
-        <p id="identity" class="subtle"></p>
-        <div class="actions">
-          <button type="submit">Izena gorde</button>
-          <button id="import" type="button" class="soft">Gonbidatu-lanak inportatu</button>
-          <button id="export" type="button" class="soft">Datuen kopia deskargatu</button>
-          <button id="eraseAll" type="button" class="soft danger">Hodeiko lanak ezabatu</button>
-          <button id="refresh" type="button" class="soft">Eguneratu</button>
+    </div>
+    <div id="myWorks" class="work-list"></div>
+  </section>
+
+  <section id="signedIn" class="space-block account" aria-labelledby="accountTitle" hidden>
+    <details>
+      <summary><h2 id="accountTitle">Kontua eta datuak</h2><span id="identity" class="account-mail"></span></summary>
+      <form id="profileForm" class="account-form">
+        <label for="displayName">Zure izena</label>
+        <div class="account-row">
+          <input id="displayName" name="displayName" type="text" maxlength="120" required minlength="2" autocomplete="nickname">
+          <button type="submit" class="space-btn primary">Gorde</button>
         </div>
-        <p class="subtle">Administratzaileak zure lanak ikus ditzake jarraipena egiteko. Ahozko grabazioak ez dira hodeira igotzen.</p>
       </form>
-    </section>
-  </div>
+      <div class="account-actions">
+        <button id="import" type="button" class="space-btn">Gailu honetako lanak ekarri</button>
+        <button id="export" type="button" class="space-btn">Datuen kopia deskargatu</button>
+        <button id="eraseAll" type="button" class="space-btn danger">Hodeiko lan guztiak ezabatu</button>
+      </div>
+      <p class="space-note">Zure irakasleak edo administratzaileak lanak ikus ditzake jarraipena egiteko. Ahozko grabazioak ez dira hodeira igotzen.</p>
+    </details>
+  </section>
 </main>
 
 <nav class="tabbar" aria-label="Atal nagusiak"><a href="/"><span class="tabbar-icon"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg></span><span>Hasiera</span></a><a href="/irakurmena/"><span class="tabbar-icon"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6c-2-1.5-5-2-8-2v14c3 0 6 .5 8 2 2-1.5 5-2 8-2V4c-3 0-6 .5-8 2zM12 6v14"/></svg></span><span>Irakurmena</span></a><a href="/idazlanak/"><span class="tabbar-icon"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20l4-1L19 8l-3-3L5 16l-1 4zM14 7l3 3"/></svg></span><span>Idazmena</span></a><a href="/ahozkoa/"><span class="tabbar-icon"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a3 3 0 0 0-3 3v5a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3zM5 11a7 7 0 0 0 14 0M12 18v3"/></svg></span><span>Ahozkoa</span></a></nav>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.0" defer></script>
 <script src="/auth.js?v=20261117-zatiak" defer></script>
-<script src="/account-kit.js?v=20261117-zatiak" defer></script>
-<script src="/mi-espacio/app.js?v=20261117-zatiak" defer></script>
+<script src="/account-kit.js?v=20261117-espazioa" defer></script>
+<script src="/mi-espacio/app.js?v=20261117-espazioa" defer></script>
 <script src="/pwa.js?v=20261117-zatiak" defer></script>
 </body>
 </html>

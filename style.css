@@ -335,3 +335,35 @@ body:not(.mode-sim) .time-actions #start.primary:hover{border-color:var(--s-prim
 .restart-card p{margin:0 0 14px;color:var(--s-ink-3)}
 .restart-check{display:flex;align-items:flex-start;gap:10px;margin:0 0 16px;padding:12px 14px;border-radius:var(--s-r-md);background:var(--s-bad-soft);color:var(--s-ink);font-size:14px;cursor:pointer}
 .restart-check input{width:20px;height:20px;margin:1px 0 0;accent-color:var(--s-bad)}
+/* ---------- Saio-barra garbia: «Aukerak» menua ---------- */
+.actions-toggle,#actionsToggle{display:none!important}
+.pickexam .mode-badge{display:inline-flex}
+body.mode-sim .mode-badge{background:var(--s-night);color:#fff}
+.more{position:relative}
+.more-toggle{display:inline-flex;align-items:center;gap:6px;min-height:40px;padding:0 12px;border:1px solid var(--s-line-strong);border-radius:var(--s-r-md);background:var(--s-surface);color:var(--s-ink);font-weight:600;cursor:pointer}
+.more-toggle[aria-expanded="true"]{border-color:var(--s-night);background:var(--s-night);color:#fff}
+.more-menu{position:absolute;top:calc(100% + 8px);right:0;z-index:40;display:flex;flex-direction:column;gap:2px;width:264px;padding:8px;border:1px solid var(--s-line);border-radius:var(--s-r-lg);background:var(--s-surface);box-shadow:var(--s-shadow-pop);white-space:normal}
+.more-menu[hidden]{display:none}
+.more-label{margin:4px 8px 6px;color:var(--s-muted);font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase}
+.more-menu .session-modes{display:flex;margin:0 4px 6px}
+.more-menu .session-modes .mode{flex:1;min-height:38px}
+.more-item{display:flex;align-items:center;gap:10px;width:100%;min-height:44px;padding:0 10px;border:0;border-radius:10px;background:transparent;color:var(--s-ink);font:600 14px var(--s-font-ui);text-align:left;cursor:pointer}
+.more-item svg{flex:none;color:var(--s-muted)}
+.more-item:hover,.more-item:focus-visible{background:var(--s-bg)}
+.more-item.danger,.more-item.danger svg{color:var(--s-bad)}
+.more-item.danger:hover{background:var(--s-bad-soft)}
+.more-menu hr{width:100%;margin:6px 0;border:0;border-top:1px solid var(--s-line)}
+.more-mobile{display:none}
+body.mode-sim #moreTimer{display:none}
+.footeractions{justify-content:flex-start}
+@media(max-width:760px){
+  .more-mobile{display:flex}
+  .more-menu .session-modes{display:flex!important}
+  .time-actions #markerTool{display:none!important}
+  .time-actions #finish{display:inline-block!important}
+  .more-toggle{width:44px;min-height:44px;justify-content:center;padding:0}
+  .more-toggle span{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+  .more-menu{position:fixed;top:auto;right:10px;left:10px;bottom:calc(10px + env(safe-area-inset-bottom,0px));width:auto;z-index:60}
+  .pickexam .mode-badge{display:none}
+}
+body:not(.mode-sim):not(.focus-mode) .time-actions #start{display:none}

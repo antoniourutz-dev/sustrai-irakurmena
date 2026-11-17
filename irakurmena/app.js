@@ -34,8 +34,9 @@ async function readExams(organism) {
     }, 0);
     return {
       id: String(exam.id || ''),
-      label: String(exam.label || exam.id || 'Proba'),
+      label: window.SustraiExamName ? window.SustraiExamName.name(organism, exam.id, exam.label) : String(exam.label || exam.id || 'Proba'),
       organism,
+      rawLabel: String(exam.label || ''),
       source: typeof exam.source === 'string' ? exam.source : '',
       questions,
       parts: items.map((item, index) => ({
@@ -53,7 +54,7 @@ function filtered() {
   return exams.filter((exam) =>
     (org === 'all' || exam.organism === org) &&
     (size === 'all' || String(exam.questions) === size) &&
-    (!term || [exam.label, exam.id, exam.organism].some((value) => String(value).toLocaleLowerCase('eu').includes(term)))
+    (!term || [exam.label, exam.rawLabel, exam.id, exam.organism].some((value) => String(value).toLocaleLowerCase('eu').includes(term)))
   );
 }
 
@@ -74,7 +75,7 @@ function renderList() {
     const btn = document.createElement('button');
     btn.type = 'button';
     btn.className = 'task-card' + (selected?.id === exam.id && selected?.organism === exam.organism ? ' active' : '');
-    const meta=document.createElement('span');meta.className='meta';meta.textContent=exam.organism+' · '+exam.id;
+    const meta=document.createElement('span');meta.className='meta';meta.textContent=exam.organism;
     const label=document.createElement('strong');label.textContent=exam.label;
     const kind=document.createElement('span');kind.className='kind';kind.textContent=exam.questions+' galdera · '+exam.parts.length+' ariketa';
     btn.append(meta,label,kind);
@@ -88,7 +89,7 @@ function selectExam(exam) {
   renderList();
   $('examTitle').textContent = exam.label;
   $('examTags').replaceChildren(
-    ...[exam.organism, exam.id, exam.questions + ' galdera', exam.parts.length + ' ariketa'].map((text) => {
+    ...[exam.organism, exam.questions + ' galdera', exam.parts.length + ' ariketa'].map((text) => {
       const span = document.createElement('span');
       span.textContent = text;
       return span;
@@ -97,7 +98,7 @@ function selectExam(exam) {
   $('examLead').textContent = 'Proba hau irekita, barruan aukeratuko duzu praktika librea edo simulazioa.';
   $('examDetail').hidden = false;
   $('detailLabel').textContent = exam.label;
-  $('detailMeta').textContent = exam.organism + ' · ' + exam.id + ' · ' + exam.questions + ' galdera';
+  $('detailMeta').textContent = exam.organism + ' · ' + exam.questions + ' galdera · ' + exam.parts.length + ' ariketa';
   $('openExam').href = workshopPath(exam);
   const pdf = $('sourcePdf');
   try {

@@ -1,5 +1,5 @@
 /* SUSTRAI PWA service worker */
-const CACHE_VERSION = 'sustrai-pwa-v25-ezabatu';
+const CACHE_VERSION = 'sustrai-pwa-v26-papera';
 const SHELL = [
   '/',
   '/index.html',
@@ -25,6 +25,14 @@ const SHELL = [
   '/admin/index.html',
   '/admin/admin.js',
   '/admin/admin.css',
+  '/ibilbidea/',
+  '/ibilbidea/index.html',
+  '/ibilbidea/unitatea/',
+  '/hizkuntza/',
+  '/hizkuntza/hizkuntza.css',
+  '/hizkuntza/game-kit.js',
+  '/hizkuntza/edukia/b1.json',
+  '/lorpenak/',
   '/mi-espacio/',
   '/mi-espacio/index.html',
   '/mi-espacio/app.js',

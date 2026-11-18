@@ -1,4 +1,4 @@
-/* HitzBira design system (B · Bizia): tokens, self-hosted fonts and the chrome shared by every page
+/* HitzBira design system (Papera): tokens, self-hosted fonts and the chrome shared by every page
    (site header, account menu anchor, mobile tab bar). Page stylesheets load after this file. */
 
 @font-face{font-family:"Inter";src:url("/fonts/inter-400.woff2") format("woff2");font-weight:400;font-style:normal;font-display:swap}
@@ -12,51 +12,58 @@
 @font-face{font-family:"Sustrai Serif";src:url("/fonts/sustrai-serif-var.woff2") format("woff2");font-weight:400 700;font-style:normal;font-display:swap}
 
 :root{
-  --s-bg:#F4F5FA;
+  /* HitzBira · Papera: paper, forest green for action, one warm accent (eguzkia) for play. */
+  --s-bg:#FAF8F3;
   --s-surface:#FFFFFF;
-  --s-ink:#11132B;
-  --s-ink-2:#1E2140;
-  --s-ink-3:#3C4058;
-  --s-muted:#565B78;
-  --s-line:#E3E5EF;
-  --s-line-strong:#C9CCE0;
-  --s-primary:#3F35C8;
-  --s-primary-hover:#2A2290;
-  --s-primary-soft:#ECE9FE;
-  --s-primary-line:#C9C2FA;
-  --s-accent:#A8361A;
-  --s-accent-soft:#FFE7DF;
-  --s-ok:#0B7A5C;
-  --s-ok-soft:#DDF8EF;
-  --s-ok-line:#8FE3C8;
-  --s-bad:#B42318;
-  --s-bad-soft:#FEECEA;
-  --s-bad-line:#F0A9A1;
-  /* B · Bizia: noche, coral, menta, lila. Cada destreza tiene su color. */
-  --s-night:#11132B;
-  --s-night-2:#252850;
-  --s-night-3:#3A3E6B;
-  --s-on-night:#E6E8F5;
-  --s-on-night-muted:#B9BCD6;
-  --s-coral:#FF6B4A;
-  --s-coral-hover:#FF8466;
-  --s-mint:#2DD4A7;
-  --s-lilac:#8B7CF6;
-  --s-skill-read:#0B7A5C;--s-skill-read-soft:#DDF8EF;
-  --s-skill-write:#5B4BD6;--s-skill-write-soft:#ECE9FE;
-  --s-skill-speak:#C2401F;--s-skill-speak-soft:#FFE7DF;
+  --s-ink:#22261F;
+  --s-ink-2:#2E3229;
+  --s-ink-3:#4A4A40;
+  --s-muted:#6E6A5E;
+  --s-line:#ECE8DE;
+  --s-line-strong:#D9D3C3;
+  --s-primary:#1F5E4A;
+  --s-primary-hover:#164536;
+  --s-primary-soft:#E6EFE9;
+  --s-primary-line:#B9D3C5;
+  --s-accent:#8A5A22;
+  --s-accent-soft:#F6EBDA;
+  --s-ok:#2E7D5B;
+  --s-ok-soft:#E6EFE9;
+  --s-ok-line:#B9D3C5;
+  --s-bad:#A33A2A;
+  --s-bad-soft:#F8E7E3;
+  --s-bad-line:#E2B4AA;
+  /* Eguzkia: the only warm accent. XP, streaks, combos and medals; never inside reading text. */
+  --s-sun:#F2A93B;
+  --s-sun-soft:#FCEFD6;
+  --s-sun-ink:#8A5A22;
+  --s-progress:#4E8C73;
+  /* Legacy Bizia names, repointed so older selectors keep working */
+  --s-night:#1F5E4A;
+  --s-night-2:#E6EFE9;
+  --s-night-3:#B9D3C5;
+  --s-on-night:#22261F;
+  --s-on-night-muted:#4A4A40;
+  --s-coral:#1F5E4A;
+  --s-coral-hover:#164536;
+  --s-mint:#4E8C73;
+  --s-lilac:#F6EBDA;
+  --s-skill-read:#1F5E4A;--s-skill-read-soft:#E6EFE9;
+  --s-skill-write:#6A4C7D;--s-skill-write-soft:#EFE8F2;
+  --s-skill-speak:#8A3F22;--s-skill-speak-soft:#F6E6DC;
+  --s-skill-lang:#8A5A22;--s-skill-lang-soft:#F6EBDA;
   /* Zona tranquila: donde se lee y se escribe */
-  --s-paper:#FAF8F3;
+  --s-paper:#FFFEFA;
   --s-paper-line:#ECE8DE;
-  --s-mark:#FFE27A;
-  --s-font-ui:"HitzBira Sans","Inter",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
-  --s-font-display:"HitzBira Display","Inter Display","Inter",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --s-mark:#F3E3B5;
+  --s-font-ui:"Inter",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --s-font-display:"Sustrai Serif",Georgia,"Times New Roman",serif;
   --s-font-reading:"Sustrai Serif",Georgia,"Times New Roman",serif;
   --s-r-sm:8px;
   --s-r-md:14px;
   --s-r-lg:18px;
   --s-r-xl:24px;
-  --s-shadow-pop:0 16px 40px rgb(17 19 43 / .16);
+  --s-shadow-pop:0 12px 32px rgb(34 38 31 / .12);
   --s-shadow-sheet:0 -10px 30px rgb(15 23 42 / .10);
   --s-header-h:64px;
   --s-tabbar-h:64px;
@@ -69,23 +76,22 @@
 html{-webkit-text-size-adjust:100%;text-size-adjust:100%;scrollbar-gutter:stable}
 /* scrollbar-gutter keeps the page the same width whether or not it scrolls, so the header never jumps between pages */
 :where(a,button,input,select,textarea,summary,[tabindex]):focus-visible{outline:3px solid var(--s-primary);outline-offset:2px}
-.site-header :focus-visible,.tabbar :focus-visible{outline-color:var(--s-mint)}
+
 .sr-only{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
 
 /* ---------- Site header ---------- */
-.site-header{position:relative;z-index:30;display:flex;align-items:center;gap:8px 20px;box-sizing:border-box;height:var(--s-header-h);min-height:var(--s-header-h);padding:8px clamp(16px,3vw,40px);background:var(--s-night);border-bottom:1px solid var(--s-night);color:var(--s-on-night);font-family:var(--s-font-ui)}
-.site-brand{display:inline-flex;align-items:center;gap:10px;min-height:44px;color:#fff;text-decoration:none;flex:none}
-.site-brand-mark{display:grid;place-items:center;width:38px;height:38px;border-radius:12px;background:var(--s-coral);color:var(--s-night)}
-.site-brand-mark svg{display:block;width:24px;height:24px}
-.site-brand-name{font:800 23px/1 var(--s-font-display);letter-spacing:-.025em}
-.site-brand-name b{font-weight:inherit;color:var(--s-coral)}
-.site-brand-level{padding:3px 7px;border-radius:7px;background:var(--s-night-2);color:var(--s-mint);font:700 12px/1.2 var(--s-font-ui)}
+.site-header{position:relative;z-index:30;display:flex;align-items:center;gap:8px 20px;box-sizing:border-box;height:var(--s-header-h);min-height:var(--s-header-h);padding:8px clamp(16px,3vw,40px);background:var(--s-bg);border-bottom:1px solid var(--s-line);color:var(--s-ink);font-family:var(--s-font-ui)}
+.site-brand{display:inline-flex;align-items:center;gap:10px;min-height:44px;color:var(--s-ink);text-decoration:none;flex:none}
+.site-brand-mark{display:none}
+.site-brand-name{font:700 23px/1 var(--s-font-display);letter-spacing:-.01em}
+.site-brand-name b{font-weight:inherit;color:var(--s-primary)}
+.site-brand-level{padding:3px 8px;border-radius:999px;border:1px solid var(--s-line-strong);color:var(--s-muted);font:600 12px/1.2 var(--s-font-ui)}
 .site-nav{display:flex;align-items:center;gap:4px;margin-inline:auto}
-.site-nav a{display:inline-flex;align-items:center;min-height:40px;padding:0 14px;border-radius:12px;color:var(--s-on-night-muted);font-size:14px;font-weight:500;text-decoration:none;white-space:nowrap}
-.site-nav a:hover{background:var(--s-night-2);color:#fff}
-.site-nav a[aria-current="page"]{background:var(--s-night-2);color:#fff;font-weight:700}
-.site-back{display:none;place-items:center;width:44px;height:44px;margin-left:-8px;border-radius:12px;color:#fff;text-decoration:none;flex:none}
-.site-back:hover{background:var(--s-night-2)}
+.site-nav a{display:inline-flex;align-items:center;min-height:40px;padding:0 14px;border-radius:10px;color:var(--s-ink-3);font-size:14px;font-weight:500;text-decoration:none;white-space:nowrap}
+.site-nav a:hover{background:#F2EFE7;color:var(--s-ink)}
+.site-nav a[aria-current="page"]{background:var(--s-primary-soft);color:var(--s-primary);font-weight:600}
+.site-back{display:none;place-items:center;width:44px;height:44px;margin-left:-8px;border-radius:12px;color:var(--s-ink);text-decoration:none;flex:none}
+.site-back:hover{background:#F2EFE7}
 body.focus-mode .site-nav{display:none}
 /* Desktop: brand · nav · account in three fixed columns, so the nav sits in exactly the same
    place on every page whatever the width of the account button. */
@@ -101,17 +107,15 @@ body.focus-mode .site-nav{display:none}
 @media(max-width:760px){
   :root{--s-header-h:56px}
   .site-header{padding:6px 14px;gap:8px}
-  .site-brand-mark{width:34px;height:34px}
-  .site-brand-mark svg{width:21px;height:21px}
   .site-brand-name{font-size:21px}
   .site-nav{display:none}
   .site-back{display:grid}
-  .tabbar{position:fixed;inset:auto 10px calc(10px + env(safe-area-inset-bottom,0px)) 10px;z-index:35;display:flex;height:var(--s-tabbar-h);padding:0 4px;border-radius:22px;background:var(--s-night);box-shadow:0 12px 30px rgb(17 19 43 / .28)}
-  .tabbar a{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:var(--s-on-night-muted);font:500 11px/1.2 var(--s-font-ui);text-decoration:none}
-  .tabbar-icon{display:grid;place-items:center;width:46px;height:28px;border-radius:10px}
-  .tabbar a[aria-current="page"]{color:#fff;font-weight:800}
-  .tabbar a[aria-current="page"] .tabbar-icon{background:var(--s-coral);color:var(--s-night)}
-  body.has-tabbar{padding-bottom:calc(var(--s-tabbar-h) + 20px + env(safe-area-inset-bottom,0px))}
+  .tabbar{position:fixed;inset:auto 0 0 0;z-index:35;display:flex;height:calc(var(--s-tabbar-h) + env(safe-area-inset-bottom,0px));padding:0 4px env(safe-area-inset-bottom,0px);background:var(--s-bg);border-top:1px solid var(--s-line)}
+  .tabbar a{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:var(--s-muted);font:500 11px/1.2 var(--s-font-ui);text-decoration:none}
+  .tabbar-icon{display:grid;place-items:center;width:46px;height:28px;border-radius:14px}
+  .tabbar a[aria-current="page"]{color:var(--s-primary);font-weight:700}
+  .tabbar a[aria-current="page"] .tabbar-icon{background:var(--s-primary-soft);color:var(--s-primary)}
+  body.has-tabbar{padding-bottom:calc(var(--s-tabbar-h) + 8px + env(safe-area-inset-bottom,0px))}
   body.focus-mode .tabbar{display:none}
   body.focus-mode.has-tabbar{padding-bottom:0}
 }
@@ -119,23 +123,27 @@ body.focus-mode .site-nav{display:none}
   *,*::before,*::after{scroll-behavior:auto!important;transition-duration:.01ms!important;animation-duration:.01ms!important}
 }
 /* Bost atal goiburuan: tarteko zabaleretan tokia egin (nabigazioa ez da gainjartzen) */
-@media(min-width:761px) and (max-width:1279px){
+@media(min-width:761px) and (max-width:1439px){
   .site-header{grid-template-columns:auto minmax(0,1fr) auto;column-gap:12px}
   .site-header>.site-nav{justify-self:center}
   .sustrai-account-status{display:none}
   .sustrai-account-trigger{padding-right:4px}
   .sustrai-account-trigger .sustrai-account-user{display:none}
 }
-@media(min-width:761px) and (max-width:1023px){
+@media(min-width:761px) and (max-width:1179px){
   .site-nav{gap:2px}
   .site-nav a{padding:0 9px;font-size:13px}
   .site-brand-level{display:none}
 }
 
-/* Kontua goiburu ilunean */
-.site-header .sustrai-account-status{color:var(--s-on-night-muted)}
-.site-header .sustrai-account-button{background:var(--s-coral);color:var(--s-night);font-weight:800}
-.site-header .sustrai-account-button:hover{background:var(--s-coral-hover)}
-.site-header .sustrai-account-trigger{border-color:var(--s-night-3);background:var(--s-night-2);color:#fff}
-.site-header .sustrai-account-trigger:hover{background:var(--s-night-3)}
-.site-header .sustrai-account-avatar{border-radius:12px;background:var(--s-lilac);color:var(--s-night);font-weight:800}
+/* Kontua goiburuan */
+.site-header .sustrai-account-status{color:var(--s-muted)}
+.site-header .sustrai-account-button{background:var(--s-primary);color:#fff;font-weight:600}
+.site-header .sustrai-account-button:hover{background:var(--s-primary-hover)}
+.site-header .sustrai-account-trigger{border-color:var(--s-line-strong);background:var(--s-surface);color:var(--s-ink)}
+.site-header .sustrai-account-trigger:hover{background:#F2EFE7}
+.site-header .sustrai-account-avatar{border-radius:50%;background:var(--s-primary-soft);color:var(--s-primary);font-weight:700}
+
+/* Bolada (streak) chip in the header: the warm accent, small */
+.hb-streak{display:inline-flex;align-items:center;gap:6px;min-height:32px;padding:0 10px;border-radius:999px;background:var(--s-sun-soft);color:var(--s-sun-ink);font:600 13px/1 var(--s-font-ui);text-decoration:none}
+.hb-streak svg{color:#C47A12}

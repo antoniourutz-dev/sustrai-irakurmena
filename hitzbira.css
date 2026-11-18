@@ -1,8 +1,8 @@
-/* HitzBira · B (Bizia) layer, loaded last on every page.
-   Energy around the work: night chrome, coral for the main action, mint/lilac/coral per skill.
-   Calm where students read and write: warm paper, serif, no coral inside the text. */
+/* HitzBira · Papera layer, loaded last on every page.
+   Paper and forest green around the work; one warm accent (eguzkia) only for play: XP, streaks, medals.
+   Calm where students read and write: white paper, serif, no accent inside the text. */
 
-/* ---------- Main actions: coral with night text (each selector on its own: no :is() specificity jumps) ---------- */
+/* ---------- Main actions: forest green, white text (each selector on its own: no :is() specificity jumps) ---------- */
 button.primary,
 .primary,
 .prevnext #next,
@@ -12,7 +12,7 @@ button.primary,
 .layout .outline-primary,
 #timerToggle,
 .sustrai-auth-card form button,
-.home-account-cta{border-color:var(--s-coral);background:var(--s-coral);color:var(--s-night);font-weight:800}
+.home-account-cta{border-color:var(--s-primary);background:var(--s-primary);color:#fff;font-weight:600}
 button.primary:hover,
 .primary:hover,
 .prevnext #next:hover,
@@ -22,77 +22,75 @@ button.primary:hover,
 .layout .outline-primary:hover,
 #timerToggle:hover,
 .sustrai-auth-card form button:hover,
-.home-account-cta:hover{border-color:var(--s-coral-hover);background:var(--s-coral-hover);color:var(--s-night)}
+.home-account-cta:hover{border-color:var(--s-primary-hover);background:var(--s-primary-hover);color:#fff}
 button.primary:disabled,.primary:disabled{opacity:.55}
 
-/* ---------- Selected states: night, firm ---------- */
-.hole.active,.hole.active:hover{border-color:var(--s-night);background:var(--s-night);color:#fff}
-.choice.chosen{border-color:var(--s-night);box-shadow:4px 4px 0 var(--s-coral)}
-.choice.chosen .choose{background:var(--s-night);color:#fff}
-.numbers button.current{border-color:var(--s-night);background:var(--s-night);color:#fff}
-.markerbar .marker-erase.active{border-color:var(--s-night);background:var(--s-night);color:#fff}
+/* ---------- Selected states: green, quiet ---------- */
+.hole.active,.hole.active:hover{border-color:var(--s-primary);background:var(--s-primary);color:#fff}
+.choice.chosen{border-color:var(--s-primary);background:var(--s-primary-soft);box-shadow:none}
+.choice.chosen .choose{background:var(--s-primary);color:#fff}
+.numbers button.current{border-color:var(--s-primary);background:var(--s-primary);color:#fff}
+.markerbar .marker-erase.active{border-color:var(--s-primary);background:var(--s-primary);color:#fff}
 
-/* ---------- Progress: mint ---------- */
-.trackfill,.meter span,.hc-meter span,.rs-mini span{background:var(--s-mint)}
+/* ---------- Progress: soft green ---------- */
+.trackfill,.meter span,.hc-meter span,.rs-mini span{background:var(--s-progress)}
 .spark span:last-child{background:var(--s-ok)}
 
 /* ---------- Calm zone: reading and writing ---------- */
 .paper{border-color:var(--s-paper-line);background:var(--s-paper)}
 .paperhead{border-bottom-color:var(--s-paper-line)}
-.passage{color:#23273F;font-size:20px;line-height:1.85}
+.passage{color:var(--s-ink);font-size:20px;line-height:1.85}
 .passage .hole{font-family:var(--s-font-ui)}
-.editor textarea{border-color:var(--s-paper-line);background:var(--s-paper);color:#23273F;font-family:var(--s-font-reading)}
+.editor textarea{border-color:var(--s-paper-line);background:var(--s-paper);color:var(--s-ink);font-family:var(--s-font-reading)}
 .editor textarea:focus{border-color:var(--s-ink-3);outline:3px solid var(--s-primary-soft)}
 @media(max-width:760px){.passage{font-size:18px;line-height:1.8}}
 
-/* ---------- Headings: Bricolage, tight ---------- */
-h1,h2{letter-spacing:-.02em}
+/* ---------- Headings: serif, calm ---------- */
+h1,h2{letter-spacing:-.01em}
 
-/* ---------- Home (B hero band) ---------- */
-body:has(> .home){overflow-x:clip}
-.home{position:relative;z-index:0}
-.home-hero{position:relative;gap:16px;max-width:none;padding:clamp(0px,1.5vw,16px) 0 clamp(88px,10vw,128px);color:var(--s-on-night)}
-.home-hero::before{content:"";position:absolute;inset:calc(-1 * clamp(24px,5vw,56px)) calc(50% - 50vw) 0;z-index:-1;background:var(--s-night)}
-.home-chip{align-self:flex-start;display:inline-flex;align-items:center;gap:8px;padding:7px 14px;border-radius:999px;background:var(--s-night-2);color:var(--s-mint);font-size:13px;font-weight:800}
-.home-chip::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--s-mint)}
-.home-hero h1{max-width:15ch;color:#fff;font-weight:800;font-size:clamp(40px,6.4vw,76px);line-height:.98;letter-spacing:-.035em}
-.home-hero h1 span{color:var(--s-coral)}
-.home-hero p{color:var(--s-on-night-muted);font-size:clamp(16px,1.7vw,19px)}
+/* ---------- Home ---------- */
+.home-hero{gap:14px;padding-bottom:clamp(24px,4vw,40px);border-bottom:1px solid var(--s-line)}
+.home-chip{align-self:flex-start;display:inline-flex;align-items:center;gap:8px;padding:6px 12px;border-radius:999px;border:1px solid var(--s-line-strong);color:var(--s-accent);font-size:12px;font-weight:600;letter-spacing:.06em}
+.home-hero h1{max-width:18ch;color:var(--s-ink);font-weight:600;font-size:clamp(36px,5.6vw,64px);line-height:1.05}
+.home-hero h1 span{color:var(--s-primary);font-style:italic;font-weight:500}
+.home-hero p{color:var(--s-ink-3);font-family:var(--s-font-reading);font-size:clamp(16px,1.7vw,19px);line-height:1.65}
 .home-hero-actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:8px}
-.home-hero-actions a{display:inline-flex;align-items:center;gap:10px;min-height:54px;padding:0 24px;border-radius:16px;font-weight:800;font-size:16px;text-decoration:none}
-.home-hero-actions .go{background:var(--s-coral);color:var(--s-night)}
-.home-hero-actions .go:hover{background:var(--s-coral-hover)}
-.home-hero-actions .alt{background:var(--s-night-2);color:#fff;font-weight:700}
-.home-hero-actions .alt:hover{background:var(--s-night-3)}
-.home-hero :focus-visible{outline-color:var(--s-mint)}
-.home-hero + :not([hidden]),.home-hero + [hidden] + *{margin-top:calc(-1 * clamp(64px,8vw,96px))}
-.home-continue{padding:20px;border-radius:var(--s-r-xl);background:var(--s-surface);box-shadow:0 20px 50px rgb(17 19 43 / .12)}
+.home-hero-actions a{display:inline-flex;align-items:center;gap:10px;min-height:50px;padding:0 22px;border-radius:12px;font-weight:600;font-size:16px;text-decoration:none}
+.home-hero-actions .go{background:var(--s-primary);color:#fff}
+.home-hero-actions .go:hover{background:var(--s-primary-hover)}
+.home-hero-actions .alt{background:var(--s-surface);border:1px solid var(--s-line-strong);color:var(--s-ink)}
+.home-hero-actions .alt:hover{background:#F2EFE7}
+.home-continue{padding:20px;border-radius:var(--s-r-lg);background:var(--s-surface);border:1px solid var(--s-line)}
 
-/* Skill cards: one colour per skill */
-.skill-card{border:0;border-radius:var(--s-r-xl);box-shadow:0 20px 50px rgb(17 19 43 / .10)}
+/* Skill cards: one soft colour per skill */
 .skill-card:nth-child(1){--k:var(--s-skill-read);--k-soft:var(--s-skill-read-soft)}
 .skill-card:nth-child(2){--k:var(--s-skill-write);--k-soft:var(--s-skill-write-soft)}
 .skill-card:nth-child(3){--k:var(--s-skill-speak);--k-soft:var(--s-skill-speak-soft)}
-.skill-card{background:var(--k-soft)}
-.skill-card:hover{border-color:transparent;box-shadow:0 24px 56px rgb(17 19 43 / .16)}
-.skill-icon{background:#fff;color:var(--k)}
-.skill-title{font-weight:800}
-.skill-cta{background:#fff;color:var(--s-night)}
+.skill-card:nth-child(4){--k:var(--s-skill-lang);--k-soft:var(--s-skill-lang-soft)}
+.skill-card{border:1px solid var(--s-line);border-radius:var(--s-r-lg);background:var(--s-surface);box-shadow:none}
+.skill-card:hover{border-color:var(--k);box-shadow:none}
+.skill-icon{border-radius:50%;background:var(--k-soft);color:var(--k)}
+.skill-title{font-weight:600}
+.skill-cta{background:var(--k-soft);color:var(--k)}
 @media(min-width:1000px){
-  .skill-meta{color:var(--k);font-weight:800}
-  .skill-points{border-top-color:rgb(17 19 43 / .10);color:var(--s-ink-2)}
+  .skill-list{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .skill-meta{color:var(--k);font-weight:600}
+  .skill-points{border-top-color:var(--s-line);color:var(--s-ink-3)}
   .skill-points li::before{border-color:var(--k)}
-  .skill-cta{background:var(--s-night);color:#fff;border-radius:16px}
-  .skill-card:hover .skill-cta{background:var(--s-coral);color:var(--s-night)}
+  .skill-cta{background:var(--k-soft);color:var(--k);border-radius:12px}
+  .skill-card:hover .skill-cta{background:var(--k);color:#fff}
 }
-.home-account{border-radius:var(--s-r-xl);background:var(--s-night)}
-.home-account .home-eyebrow{color:var(--s-mint)}
-.home-modes{border:0;border-radius:var(--s-r-xl)}
-.home-modes .home-eyebrow{color:var(--s-skill-write)}
-.hc-card{border:0;background:var(--s-bg)}
+@media(min-width:1280px){.skill-list{grid-template-columns:repeat(4,minmax(0,1fr))}}
+.home-account{border:0;border-radius:var(--s-r-lg);background:var(--s-primary-soft);color:var(--s-ink)}
+.home-account h2,.home-account p{color:var(--s-ink)}
+.home-account .home-eyebrow{color:var(--s-primary)}
+.home-account-link{color:var(--s-primary)}
+.home-modes{border:1px solid var(--s-line);border-radius:var(--s-r-lg)}
+.home-modes .home-eyebrow{color:var(--s-accent)}
+.hc-card{border:1px solid var(--s-line);background:var(--s-bg)}
 .hc-skill{color:var(--s-skill-read)}
 .skill-writing .hc-skill{color:var(--s-skill-write)}
-.skill-writing .hc-meter span{background:var(--s-lilac)}
+.skill-writing .hc-meter span{background:var(--s-skill-write)}
 .skill-speaking .hc-skill{color:var(--s-skill-speak)}
-.skill-speaking .hc-meter span{background:var(--s-coral)}
-.hc-mode{background:var(--s-night)}
+.skill-speaking .hc-meter span{background:var(--s-skill-speak)}
+.hc-mode{background:var(--s-primary)}

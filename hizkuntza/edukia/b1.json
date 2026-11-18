@@ -1,0 +1,46 @@
+{
+  "level": "B1",
+  "units": [
+    { "id": "b1-1", "n": 1, "title": "Lagunak eta familia", "grammar": "NOR-NORK aditza, orainaldia", "ready": false },
+    { "id": "b1-2", "n": 2, "title": "Etxea eta auzoa", "grammar": "Aditz trinkoak: egon, izan", "ready": false },
+    { "id": "b1-3", "n": 3, "title": "Lana eta ikasketak", "grammar": "Iraganeko aditzak (NOR-NORK)", "ready": false },
+    { "id": "b1-4", "n": 4, "title": "Osasuna eta kirola", "grammar": "Behar izan, ahal izan", "ready": false },
+    {
+      "id": "b1-5", "n": 5, "title": "Bidaiak eta lekuak", "grammar": "Leku-kasuak: -n, -ra, -tik, -ko", "ready": true,
+      "lead": "Bidaia bat kontatu, norabideak eman eta lekuei buruz hitz egin. Gramatika: non, nora, nondik eta nongo.",
+      "reward": 150,
+      "steps": [
+        { "id": "irakurgaia", "kind": "read", "label": "Irakurgaia", "title": "Donostiatik Baionara trenez", "meta": "5 min · testu laburra", "href": "/hizkuntza/irakurgaia/?u=b1-5" },
+        { "id": "gramatika", "kind": "grammar", "label": "Gramatika", "title": "Leku-kasuak: -n, -ra, -tik, -ko", "meta": "Fitxa · 5 min", "href": "/hizkuntza/gramatika/?id=leku-kasuak&u=b1-5" },
+        { "id": "ariketak", "kind": "practice", "label": "Ariketak", "title": "Aukeratu forma zuzena", "meta": "12 galdera", "href": "/hizkuntza/ariketak/?u=b1-5" },
+        { "id": "bikoteak", "kind": "game", "label": "Jolasa", "title": "Bikoteak: sinonimoak", "meta": "6 bikote", "href": "/hizkuntza/bikoteak/?u=b1-5" }
+      ],
+      "words": ["geltokia", "txartela", "bidaiaria", "hegaldia", "ostatua", "ibilbidea", "maleta", "atzerria", "itzuli", "abiatu"],
+      "reading": {
+        "title": "Donostiatik Baionara trenez",
+        "paragraphs": [
+          "Uztailaren hasieran, Donostiatik Baionara joan ginen trenez. Geltokian txartelak erosi eta leihoaren ondoan eseri ginen. Bidaia laburra izan zen, baina oso polita: itsasoa ikusten zen ia bide osoan.",
+          "Baionara iritsi ginenean, alde zaharreko ostatu txiki batean utzi genituen maletak, eta Errobi ibaiaren ondotik paseatzera atera ginen."
+        ]
+      },
+      "exercises": [
+        { "s": "Bihar goizean ___ joango gara trenez.", "o": ["Baionan", "Baionara", "Baionatik", "Baionako"], "a": 1, "why": "Joan aditzak norabidea adierazten du: nora? → -ra." },
+        { "s": "Gaur ___ nago, lanean.", "o": ["Bilbon", "Bilbora", "Bilbotik", "Bilboko"], "a": 0, "why": "Egon aditzarekin lekua: non? → -n." },
+        { "s": "Trena ___ irten da zortzietan.", "o": ["Irunen", "Irunera", "Irundik", "Irungo"], "a": 2, "why": "Irten: nondik? → -tik. n ondoren -dik: Irundik." },
+        { "s": "___ geltokian elkartuko gara.", "o": ["Baionan", "Baionara", "Baionatik", "Baionako"], "a": 3, "why": "Zein geltokitan? Nongoa? → -ko: Baionako geltokia." },
+        { "s": "Ama ___ etorri da gaur goizean.", "o": ["etxean", "etxera", "etxetik", "etxeko"], "a": 2, "why": "Etorri: nondik? → -tik: etxetik." },
+        { "s": "Udan ___ joan nahi dut.", "o": ["mendian", "mendira", "menditik", "mendiko"], "a": 1, "why": "Joan: nora? → -ra: mendira." },
+        { "s": "Gure ___ jaiak irailean dira.", "o": ["herrian", "herrira", "herritik", "herriko"], "a": 3, "why": "Zein jaiak? Nongoak? → -ko: herriko jaiak." },
+        { "s": "Liburua ___ dago, mahai gainean.", "o": ["gelan", "gelara", "gelatik", "gelako"], "a": 0, "why": "Egon: non? → -n: gelan." },
+        { "s": "Hegazkina ___ irten da goizeko seietan.", "o": ["Madrilen", "Madrilera", "Madrildik", "Madrilgo"], "a": 2, "why": "Irten: nondik? l ondoren -dik: Madrildik." },
+        { "s": "Ikasleak ___ daude orain.", "o": ["geletan", "geletara", "geletatik", "geletako"], "a": 0, "why": "Plurala, non? → -etan: geletan." },
+        { "s": "Zenbat ___ egon zara?", "o": ["herritan", "herritara", "herritatik", "herritako"], "a": 0, "why": "Zenbat-ekin mugagabea: non? → -tan: herritan." },
+        { "s": "Lagunarekin ___ goaz.", "o": ["hondartzan", "hondartzara", "hondartzatik", "hondartzako"], "a": 1, "why": "Joan (goaz): nora? → -ra: hondartzara." }
+      ],
+      "pairs": [["polita", "ederra"], ["azkar", "bizkor"], ["hasi", "ekin"], ["itzuli", "bueltatu"], ["geltokia", "estazioa"], ["abiatu", "irten"]]
+    },
+    { "id": "b1-6", "n": 6, "title": "Ingurumena", "grammar": "Baldintza errealak (ba-)", "ready": false },
+    { "id": "b1-7", "n": 7, "title": "Kultura eta jaiak", "grammar": "Erlatibozko perpausak: -(e)n", "ready": false },
+    { "id": "b1-8", "n": 8, "title": "Gizartea eta albisteak", "grammar": "Zehar-galderak: -(e)n", "ready": false }
+  ]
+}

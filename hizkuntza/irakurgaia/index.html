@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="eu">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#FAF8F3">
+  <meta name="description" content="Unitateko irakurgaia.">
+  <title>Irakurgaia · HitzBira</title>
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="icon" type="image/svg+xml" href="/icons/icon.svg?v=hitzbira"><link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32.png?v=hitzbira">
+  <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png?v=hitzbira">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="HitzBira">
+  <link rel="preload" href="/fonts/inter-400.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/fonts/sustrai-serif-var.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="/theme.css?v=20261118-bizia">
+  <link rel="stylesheet" href="/auth.css?v=20261118-bizia">
+  <link rel="stylesheet" href="/hitzbira.css?v=20261118-bizia">
+  <link rel="stylesheet" href="/hizkuntza/hizkuntza.css?v=20261118-bizia">
+</head>
+<body class="has-tabbar">
+  <a class="skip" href="#main">Joan edukira</a>
+  <header class="site-header">
+  <a class="site-back" href="/hizkuntza/" aria-label="Itzuli"><svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg></a>
+  <a class="site-brand" href="/" aria-label="HitzBira hasiera"><span class="site-brand-name">hitz<b>bira</b></span><span class="site-brand-level">B1</span></a>
+  <nav class="site-nav" aria-label="Atalak"><a href="/">Hasiera</a><a href="/irakurmena/">Irakurmena</a><a href="/idazlanak/">Idazmena</a><a href="/ahozkoa/">Ahozkoa</a><a href="/hizkuntza/" aria-current="page">Hizkuntza</a><a href="/mi-espacio/">Nire espazioa</a></nav>
+</header>
+
+<main class="hz hz-narrow" id="main">
+  <a class="hz-back" id="back" href="/hizkuntza/"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg>Unitatea</a>
+  <article class="hz-sheet" style="flex:none">
+    <span class="hz-eyebrow" style="color:var(--s-skill-read)">Irakurgaia</span>
+    <h1 id="pageTitle" style="font-size:34px;line-height:1.2">…</h1>
+    <div id="text"></div>
+  </article>
+  <div class="hz-actions"><span class="hz-muted">Irakurri lasai. Ez dago denborarik.</span><button type="button" class="hz-btn" id="doneBtn">Irakurrita · +10 XP</button></div>
+</main>
+  <nav class="tabbar" aria-label="Atal nagusiak"><a href="/"><span class="tabbar-icon"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg></span><span>Hasiera</span></a><a href="/irakurmena/"><span class="tabbar-icon"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6c-2-1.5-5-2-8-2v14c3 0 6 .5 8 2 2-1.5 5-2 8-2V4c-3 0-6 .5-8 2zM12 6v14"/></svg></span><span>Irakurmena</span></a><a href="/idazlanak/"><span class="tabbar-icon"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20l4-1L19 8l-3-3L5 16l-1 4zM14 7l3 3"/></svg></span><span>Idazmena</span></a><a href="/hizkuntza/" aria-current="page"><span class="tabbar-icon"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19 9 5l5 14M6 14h6"/><path d="M15 12h6M18 9v10"/></svg></span><span>Hizkuntza</span></a><a href="/mi-espacio/"><span class="tabbar-icon"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></span><span>Nirea</span></a></nav>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.0" defer></script>
+  <script src="/auth.js?v=20261118-bizia" defer></script>
+  <script src="/account-kit.js?v=20261118-bizia" defer></script>
+  <script src="/hizkuntza/game-kit.js?v=20261118-bizia" defer></script>
+  <script src="/hizkuntza/irakurgaia.js?v=20261118-bizia" defer></script>
+  <script src="/pwa.js?v=20261118-bizia" defer></script>
+</body>
+</html>

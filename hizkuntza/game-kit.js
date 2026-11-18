@@ -90,7 +90,46 @@
   }
   function stepsDone(unit) { return (state.steps[unit] || []).slice(); }
 
+
+  /* ---- Feedback: soinu laburrak (WebAudio), bibrazioa eta animazio txikiak ---- */
+  var SKEY = 'hb-sound', ctx = null;
+  function soundOn() { try { return localStorage.getItem(SKEY) !== 'off'; } catch (e) { return true; } }
+  function tone(freqs, dur, type, gain) {
+    if (!soundOn()) return;
+    try {
+      ctx = ctx || new (window.AudioContext || window.webkitAudioContext)();
+      var t = ctx.currentTime;
+      freqs.forEach(function (f, i) {
+        var o = ctx.createOscillator(), g = ctx.createGain(), st = t + i * dur * 0.8;
+        o.type = type || 'sine'; o.frequency.value = f;
+        g.gain.setValueAtTime(0.0001, st); g.gain.exponentialRampToValueAtTime(gain || 0.12, st + 0.015); g.gain.exponentialRampToValueAtTime(0.0001, st + dur);
+        o.connect(g); g.connect(ctx.destination); o.start(st); o.stop(st + dur + 0.02);
+      });
+    } catch (e) { /* audiorik gabe */ }
+  }
+  function buzz(p) { try { if (navigator.vibrate) navigator.vibrate(p); } catch (e) { } }
+  var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var FX = {
+    ok: function () { tone([660, 880], 0.14, 'sine', 0.1); buzz(12); },
+    bad: function () { tone([220, 185], 0.16, 'triangle', 0.08); buzz([30, 40, 30]); },
+    tap: function () { tone([520], 0.05, 'sine', 0.04); },
+    win: function () { tone([523, 659, 784, 1047], 0.16, 'sine', 0.1); buzz([20, 40, 20, 40, 60]); },
+    soundOn: soundOn,
+    toggle: function () { var on = !soundOn(); try { localStorage.setItem(SKEY, on ? 'on' : 'off'); } catch (e) { } return on; },
+    pop: function (anchor, text) {
+      if (!anchor) return;
+      var r = anchor.getBoundingClientRect(), el = document.createElement('span');
+      el.className = 'hz-pop'; el.textContent = text; el.setAttribute('aria-hidden', 'true');
+      el.style.left = (r.left + r.width / 2) + 'px'; el.style.top = (r.top + window.scrollY) + 'px';
+      document.body.appendChild(el);
+      setTimeout(function () { el.remove(); }, reduced ? 600 : 1000);
+    },
+    bump: function (el) { if (!el || reduced) return; el.classList.remove('hz-bump'); void el.offsetWidth; el.classList.add('hz-bump'); },
+    shake: function (el) { if (!el || reduced) return; el.classList.remove('hz-shake'); void el.offsetWidth; el.classList.add('hz-shake'); }
+  };
+
   window.HB = {
+    fx: FX,
     addXP: addXP, award: award, completeStep: completeStep, stepsDone: stepsDone,
     level: level, streak: streak, weekDays: weekDays, weekXP: weekXP, WEEK_GOAL: WEEK_GOAL,
     medals: function () { return MEDALS.map(function (m) { return { id: m.id, name: m.name, desc: m.desc, got: state.medals.indexOf(m.id) > -1 }; }); },

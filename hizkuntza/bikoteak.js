@@ -1,11 +1,15 @@
 /* Bikoteak: sinonimoak lotzeko jolasa */
 (function () {
   'use strict';
-  var esc = HB.esc, id = new URLSearchParams(location.search).get('u') || 'b1-5';
+  var esc = HB.esc, fx = HB.fx, id = new URLSearchParams(location.search).get('u') || 'b1-5';
   var $ = function (x) { return document.getElementById(x); };
   var MEDAL = '<svg aria-hidden="true" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="15" r="6"/><path d="M8.5 9.5 6 3h4l2 4 2-4h4l-2.5 6.5"/></svg>';
-  var unitHref = '/ibilbidea/unitatea/?u=' + encodeURIComponent(id);
-  $('back').href = unitHref;
+  var unitHref = '/hizkuntza/';
+  var ON = '<svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H3v6h3l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/></svg>';
+  var OFF = '<svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H3v6h3l5 4z"/><path d="m16 9 5 6M21 9l-5 6"/></svg>';
+  function soundBtn() { var on = fx.soundOn(); $('sound').innerHTML = on ? ON : OFF; $('sound').setAttribute('aria-pressed', String(on)); }
+  $('sound').addEventListener('click', function () { fx.toggle(); soundBtn(); });
+  soundBtn();
 
   var words = [], total = 0, sel = null, done = {}, busy = false, gained = 0, combo = 0, t0 = 0, tick = null;
 
@@ -29,12 +33,12 @@
   function finish() {
     clearInterval(tick);
     HB.completeStep(id, 'bikoteak');
-    var bonus = 20; gained += bonus; HB.addXP(bonus);
+    var bonus = 20; gained += bonus; HB.addXP(bonus); fx.win();
     var m = HB.award('sinonimo-ehiztaria');
     stats();
     var end = $('end'); end.hidden = false;
     end.innerHTML = '<span class="hz-big">' + MEDAL + '</span><h2 style="font-size:28px" tabindex="-1">Bikote guztiak aurkitu dituzu</h2><p class="hz-lead" style="font-size:17px">' + $('timer').textContent + ' · +' + gained + ' XP' + (m ? ' · Domina berria: ' + esc(m.name) : '') + '</p>' +
-      '<div style="display:flex;flex-wrap:wrap;gap:10px;justify-content:center"><a class="hz-btn" href="' + unitHref + '">Itzuli unitatera</a><button type="button" class="hz-btn alt" id="again">Berriro jokatu</button></div>';
+      '<div style="display:flex;flex-wrap:wrap;gap:10px;justify-content:center"><a class="hz-btn big" href="' + unitHref + '">Jarraitu bidean</a><button type="button" class="hz-btn alt" id="again">Berriro jokatu</button></div>';
     end.querySelector('h2').focus();
     $('again').addEventListener('click', start);
   }
@@ -42,15 +46,17 @@
     var b = e.target.closest('.hz-tile'); if (!b || busy) return;
     var k = Number(b.dataset.k), w = words[k];
     if (done[w.p] || sel === k) return;
-    if (sel === null) { sel = k; draw(); return; }
+    if (sel === null) { sel = k; fx.tap(); draw(); return; }
     var a = words[sel];
     if (a.p === w.p) {
       done[w.p] = 1; sel = null; combo++;
       var pts = 10 + (combo >= 3 ? 5 : 0); gained += pts; HB.addXP(pts);
-      draw(); stats();
+      draw(); stats(); fx.ok();
+      fx.pop($('tiles').querySelector('[data-k="' + k + '"]'), '+' + pts);
+      fx.bump($('gain'));
       if (count() === total) finish();
     } else {
-      combo = 0; a.miss = w.miss = true; sel = null; busy = true; draw();
+      combo = 0; a.miss = w.miss = true; sel = null; busy = true; draw(); fx.bad();
       setTimeout(function () { a.miss = w.miss = false; busy = false; draw(); }, 650);
     }
   });

@@ -48,45 +48,51 @@ button.primary:disabled,.primary:disabled{opacity:.55}
 /* ---------- Headings: serif, calm ---------- */
 h1,h2{letter-spacing:-.01em}
 
-/* ---------- Home ---------- */
-.home-hero{gap:14px;padding-bottom:clamp(24px,4vw,40px);border-bottom:1px solid var(--s-line)}
-.home-chip{align-self:flex-start;display:inline-flex;align-items:center;gap:8px;padding:6px 12px;border-radius:999px;border:1px solid var(--s-line-strong);color:var(--s-accent);font-size:12px;font-weight:600;letter-spacing:.06em}
-.home-hero h1{max-width:18ch;color:var(--s-ink);font-weight:600;font-size:clamp(36px,5.6vw,64px);line-height:1.05}
-.home-hero h1 span{color:var(--s-primary);font-style:italic;font-weight:500}
-.home-hero p{color:var(--s-ink-3);font-family:var(--s-font-reading);font-size:clamp(16px,1.7vw,19px);line-height:1.65}
-.home-hero-actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:8px}
-.home-hero-actions a{display:inline-flex;align-items:center;gap:10px;min-height:50px;padding:0 22px;border-radius:12px;font-weight:600;font-size:16px;text-decoration:none}
-.home-hero-actions .go{background:var(--s-primary);color:#fff}
-.home-hero-actions .go:hover{background:var(--s-primary-hover)}
-.home-hero-actions .alt{background:var(--s-surface);border:1px solid var(--s-line-strong);color:var(--s-ink)}
-.home-hero-actions .alt:hover{background:#F2EFE7}
+/* ---------- Home: one focus card, then skill tiles ---------- */
+.home{gap:clamp(20px,3vw,28px)}
+.home-hero{gap:0;padding:0;border:0}
+.home-hero h1{max-width:none;color:var(--s-ink);font-weight:600;font-size:clamp(30px,4.4vw,44px);line-height:1.1}
+.home-hero h1 span{color:var(--s-muted);font-style:italic;font-weight:500}
+.home-focus{position:relative;overflow:hidden;display:flex;flex-direction:column;gap:12px;min-height:clamp(280px,32vw,340px);padding:clamp(24px,4vw,40px);border-radius:clamp(24px,3vw,32px);background:#133F31;color:#fff;text-decoration:none}
+.home-focus:hover{color:#fff}
+.home-focus>*{position:relative}
+.home-focus-deco{position:absolute!important;right:-60px;top:-60px;width:clamp(170px,22vw,280px);height:clamp(170px,22vw,280px);border-radius:50%;background:var(--s-sun)}
+.home-focus-deco::before{content:"";position:absolute;left:-70px;top:calc(100% - 30px);width:44px;height:44px;border-radius:50%;background:#2E7D5B}
+.home-focus::after{content:"";position:absolute;right:16%;bottom:-130px;width:220px;height:220px;border-radius:50%;border:26px solid var(--s-primary)}
+@media(max-width:760px){.home-focus::after{right:-90px;bottom:-120px;width:180px;height:180px}}
+.home-focus-chip{align-self:flex-start;padding:6px 12px;border-radius:999px;background:rgb(255 255 255 / .12);font-size:13px;font-weight:600}
+.home-focus-title{max-width:11em;margin-top:8px;font:600 clamp(28px,4.2vw,46px)/1.06 var(--s-font-display);color:#fff}
+.home-focus-meta{color:#CFE3D8;font-size:clamp(14px,1.6vw,17px)}
+.home-focus-go{z-index:1;margin-top:auto;align-self:flex-start;display:inline-flex;align-items:center;gap:14px;min-height:58px;padding:0 10px 0 26px;border-radius:18px;background:var(--s-sun);color:var(--s-ink);font-weight:700;font-size:18px;box-shadow:0 4px 0 #C47A12;transition:transform .08s,box-shadow .08s}
+.home-focus:active .home-focus-go{transform:translateY(3px);box-shadow:0 1px 0 #C47A12}
+.home-focus-arrow{display:grid;place-items:center;width:40px;height:40px;border-radius:12px;background:rgb(34 38 31 / .1)}
+@media(max-width:760px){.home-focus-go{align-self:stretch;justify-content:space-between}}
 .home-continue{padding:20px;border-radius:var(--s-r-lg);background:var(--s-surface);border:1px solid var(--s-line)}
 
-/* Skill cards: one soft colour per skill */
-.skill-card:nth-child(1){--k:var(--s-skill-read);--k-soft:var(--s-skill-read-soft)}
-.skill-card:nth-child(2){--k:var(--s-skill-write);--k-soft:var(--s-skill-write-soft)}
-.skill-card:nth-child(3){--k:var(--s-skill-speak);--k-soft:var(--s-skill-speak-soft)}
-.skill-card:nth-child(4){--k:var(--s-skill-lang);--k-soft:var(--s-skill-lang-soft)}
-.skill-card{border:1px solid var(--s-line);border-radius:var(--s-r-lg);background:var(--s-surface);box-shadow:none}
-.skill-card:hover{border-color:var(--k);box-shadow:none}
-.skill-icon{border-radius:50%;background:var(--k-soft);color:var(--k)}
-.skill-title{font-weight:600}
-.skill-cta{background:var(--k-soft);color:var(--k)}
+/* Skill tiles: soft colour, one shape, title and one line */
+.skill-card:nth-child(1){--k:var(--s-skill-read);--k-soft:var(--s-skill-read-soft);--k-shape:#B9D3C5}
+.skill-card:nth-child(2){--k:var(--s-skill-write);--k-soft:var(--s-skill-write-soft);--k-shape:#CDB6DA}
+.skill-card:nth-child(3){--k:var(--s-skill-speak);--k-soft:var(--s-skill-speak-soft);--k-shape:#E5B79D}
+.skill-card:nth-child(4){--k:var(--s-skill-lang);--k-soft:var(--s-sun-soft);--k-shape:#F2C77A}
+.skill-list{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.skill-card{position:relative;overflow:hidden;flex-direction:column;align-items:flex-start;justify-content:flex-end;gap:2px;min-height:130px;padding:18px;border:0;border-radius:22px;background:var(--k-soft);box-shadow:none;color:var(--s-ink)}
+.skill-card::after{content:"";position:absolute;right:-22px;top:-22px;width:84px;height:84px;border-radius:50%;border:14px solid var(--k-shape)}
+.skill-card:hover{border:0;box-shadow:none;transform:translateY(-2px)}
+.skill-icon,.skill-tagline,.skill-points,.skill-cta{display:none!important}
+.skill-body{flex:none;gap:2px}
+.skill-title{font-weight:600;font-size:clamp(18px,2vw,22px)}
+.skill-meta{display:block;color:var(--k);font-weight:600;font-size:13px}
 @media(min-width:1000px){
-  .skill-list{grid-template-columns:repeat(2,minmax(0,1fr))}
-  .skill-meta{color:var(--k);font-weight:600}
-  .skill-points{border-top-color:var(--s-line);color:var(--s-ink-3)}
-  .skill-points li::before{border-color:var(--k)}
-  .skill-cta{background:var(--k-soft);color:var(--k);border-radius:12px}
-  .skill-card:hover .skill-cta{background:var(--k);color:#fff}
+  .skill-list{grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
+  .skill-card{flex-direction:column;align-items:flex-start;padding:22px;min-height:150px;border-radius:24px}
+  .skill-title{font-size:22px}
+  .skill-meta{font-size:14px}
 }
-@media(min-width:1280px){.skill-list{grid-template-columns:repeat(4,minmax(0,1fr))}}
-.home-account{border:0;border-radius:var(--s-r-lg);background:var(--s-primary-soft);color:var(--s-ink)}
+.home-extras{grid-template-columns:1fr!important}
+.home-account{border:0;border-radius:var(--s-r-lg);background:var(--s-surface);border:1px solid var(--s-line);color:var(--s-ink)}
 .home-account h2,.home-account p{color:var(--s-ink)}
 .home-account .home-eyebrow{color:var(--s-primary)}
 .home-account-link{color:var(--s-primary)}
-.home-modes{border:1px solid var(--s-line);border-radius:var(--s-r-lg)}
-.home-modes .home-eyebrow{color:var(--s-accent)}
 .hc-card{border:1px solid var(--s-line);background:var(--s-bg)}
 .hc-skill{color:var(--s-skill-read)}
 .skill-writing .hc-skill{color:var(--s-skill-write)}
@@ -94,3 +100,9 @@ h1,h2{letter-spacing:-.01em}
 .skill-speaking .hc-skill{color:var(--s-skill-speak)}
 .skill-speaking .hc-meter span{background:var(--s-skill-speak)}
 .hc-mode{background:var(--s-primary)}
+@media(prefers-reduced-motion:reduce){.skill-card:hover{transform:none}}
+@media(max-width:999px){
+  .skill-card::after{right:-20px;top:-20px;width:58px;height:58px;border-width:10px}
+  .skill-card{min-height:118px}
+}
+@media(max-width:760px){.home-focus-deco::before{display:none}}

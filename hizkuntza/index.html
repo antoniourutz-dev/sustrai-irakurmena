@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#FAF8F3">
-  <meta name="description" content="Gramatika, lexikoa, jolasak eta hiztegia.">
+  <meta name="description" content="Gramatika, ariketak eta jolasak unitatez unitate.">
   <title>Hizkuntza · HitzBira</title>
   <link rel="manifest" href="/manifest.webmanifest">
   <link rel="icon" type="image/svg+xml" href="/icons/icon.svg?v=hitzbira"><link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32.png?v=hitzbira">
@@ -14,56 +14,36 @@
   <meta name="apple-mobile-web-app-title" content="HitzBira">
   <link rel="preload" href="/fonts/inter-400.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="/fonts/sustrai-serif-var.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="/theme.css?v=20261118-papera">
-  <link rel="stylesheet" href="/auth.css?v=20261118-papera">
-  <link rel="stylesheet" href="/hitzbira.css?v=20261118-papera">
-  <link rel="stylesheet" href="/hizkuntza/hizkuntza.css?v=20261118-papera">
+  <link rel="stylesheet" href="/theme.css?v=20261118-bizia">
+  <link rel="stylesheet" href="/auth.css?v=20261118-bizia">
+  <link rel="stylesheet" href="/hitzbira.css?v=20261118-bizia">
+  <link rel="stylesheet" href="/hizkuntza/hizkuntza.css?v=20261118-bizia">
 </head>
 <body class="has-tabbar">
   <a class="skip" href="#main">Joan edukira</a>
   <header class="site-header">
   <a class="site-back" href="/" aria-label="Itzuli"><svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg></a>
   <a class="site-brand" href="/" aria-label="HitzBira hasiera"><span class="site-brand-name">hitz<b>bira</b></span><span class="site-brand-level">B1</span></a>
-  <nav class="site-nav" aria-label="Atalak"><a href="/">Hasiera</a><a href="/ibilbidea/">Ibilbidea</a><a href="/irakurmena/">Irakurmena</a><a href="/idazlanak/">Idazmena</a><a href="/ahozkoa/">Ahozkoa</a><a href="/hizkuntza/" aria-current="page">Hizkuntza</a><a href="/mi-espacio/">Nire espazioa</a></nav>
+  <nav class="site-nav" aria-label="Atalak"><a href="/">Hasiera</a><a href="/irakurmena/">Irakurmena</a><a href="/idazlanak/">Idazmena</a><a href="/ahozkoa/">Ahozkoa</a><a href="/hizkuntza/" aria-current="page">Hizkuntza</a><a href="/mi-espacio/">Nire espazioa</a></nav>
 </header>
 
-<main class="hz" id="main">
-  <section class="hz-hero" aria-labelledby="pageTitle">
-    <div class="hz-hero-main">
-      <span class="hz-eyebrow">Hizkuntza</span>
-      <h1 id="pageTitle">Gramatika, lexikoa <em>eta jolasak.</em></h1>
-      <p class="hz-lead">Fitxa argiak, ariketa laburrak eta hitzekin jolasteko moduak. Ibilbideko unitateekin lotuta.</p>
-    </div>
-  </section>
-  <section style="display:flex;flex-direction:column;gap:12px" aria-labelledby="gTitle">
-    <h2 id="gTitle" style="font-size:22px">Gramatika</h2>
-    <div class="hz-units">
-      <a class="hz-unit" href="/hizkuntza/gramatika/?id=leku-kasuak"><div class="top"><span>B1 · 5. unitatea</span><span class="hz-pill ok">Fitxa</span></div><h3>Leku-kasuak</h3><span class="hz-muted">-n, -ra, -tik, -ko</span></a>
-      <a class="hz-unit" href="/hizkuntza/ariketak/?u=b1-5"><div class="top"><span>B1 · 5. unitatea</span><span class="hz-pill sun">+XP</span></div><h3>Ariketak: leku-kasuak</h3><span class="hz-muted">12 galdera</span></a>
-      <div class="hz-unit soon"><div class="top"><span>B1</span><span class="hz-pill soon">Laster</span></div><h3>Baldintza errealak</h3><span class="hz-muted">ba- + aditza</span></div>
-    </div>
-  </section>
-  <section style="display:flex;flex-direction:column;gap:12px" aria-labelledby="jTitle">
-    <h2 id="jTitle" style="font-size:22px">Jolasak</h2>
-    <div class="hz-units">
-      <a class="hz-unit" href="/hizkuntza/bikoteak/?u=b1-5"><div class="top"><span>Sinonimoak</span><span class="hz-pill sun">+XP</span></div><h3>Bikoteak</h3><span class="hz-muted">Lotu esanahi bera duten hitzak</span></a>
-      <div class="hz-unit soon"><div class="top"><span>Hiztegia</span><span class="hz-pill soon">Laster</span></div><h3>Zein da?</h3><span class="hz-muted">Definizioa irakurri, hitza aurkitu</span></div>
-      <div class="hz-unit soon"><div class="top"><span>Hitz-eraketa</span><span class="hz-pill soon">Laster</span></div><h3>Hitz-eraikitzailea</h3><span class="hz-muted">Atzizkiekin hitz berriak sortu</span></div>
-    </div>
-  </section>
-  <section style="display:flex;flex-direction:column;gap:12px" aria-labelledby="lTitle">
-    <h2 id="lTitle" style="font-size:22px">Lexikoa eta hiztegia</h2>
-    <div class="hz-units">
-      <div class="hz-unit soon"><div class="top"><span>Lexikoa</span><span class="hz-pill soon">Laster</span></div><h3>Hitz-txartelak</h3><span class="hz-muted">Errepaso espaziatua</span></div>
-      <div class="hz-unit soon"><div class="top"><span>Hiztegia</span><span class="hz-pill soon">Laster</span></div><h3>Hiztegia irakurtzean</h3><span class="hz-muted">Sakatu hitz bat, ikusi esanahia</span></div>
-    </div>
-  </section>
+<main class="hz hz-path-page" id="main">
+  <div class="hz-path-head">
+    <h1 id="pageTitle" style="font-size:clamp(30px,4vw,40px)">Hizkuntza</h1>
+    <a class="hz-flame" id="flame" href="/lorpenak/"></a>
+  </div>
+  <section class="hz-band" id="band" aria-label="Unitatea"></section>
+  <div class="hz-path-wrap">
+    <ol class="hz-path" id="path" aria-label="Unitatearen urratsak"></ol>
+    <aside class="hz-path-side" id="side"></aside>
+  </div>
 </main>
-  <nav class="tabbar" aria-label="Atal nagusiak"><a href="/"><span class="tabbar-icon"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg></span><span>Hasiera</span></a><a href="/ibilbidea/"><span class="tabbar-icon"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="19" r="2"/><circle cx="18" cy="5" r="2"/><path d="M8 19h8a3 3 0 0 0 0-6H8a3 3 0 0 1 0-6h8"/></svg></span><span>Ibilbidea</span></a><a href="/irakurmena/"><span class="tabbar-icon"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6c-2-1.5-5-2-8-2v14c3 0 6 .5 8 2 2-1.5 5-2 8-2V4c-3 0-6 .5-8 2zM12 6v14"/></svg></span><span>Irakurmena</span></a><a href="/hizkuntza/" aria-current="page"><span class="tabbar-icon"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19 9 5l5 14M6 14h6"/><path d="M15 12h6M18 9v10"/></svg></span><span>Hizkuntza</span></a><a href="/mi-espacio/"><span class="tabbar-icon"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></span><span>Nirea</span></a></nav>
+  <nav class="tabbar" aria-label="Atal nagusiak"><a href="/"><span class="tabbar-icon"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg></span><span>Hasiera</span></a><a href="/irakurmena/"><span class="tabbar-icon"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6c-2-1.5-5-2-8-2v14c3 0 6 .5 8 2 2-1.5 5-2 8-2V4c-3 0-6 .5-8 2zM12 6v14"/></svg></span><span>Irakurmena</span></a><a href="/idazlanak/"><span class="tabbar-icon"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20l4-1L19 8l-3-3L5 16l-1 4zM14 7l3 3"/></svg></span><span>Idazmena</span></a><a href="/hizkuntza/" aria-current="page"><span class="tabbar-icon"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19 9 5l5 14M6 14h6"/><path d="M15 12h6M18 9v10"/></svg></span><span>Hizkuntza</span></a><a href="/mi-espacio/"><span class="tabbar-icon"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></span><span>Nirea</span></a></nav>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.0" defer></script>
-  <script src="/auth.js?v=20261118-papera" defer></script>
-  <script src="/account-kit.js?v=20261118-papera" defer></script>
-  <script src="/hizkuntza/game-kit.js?v=20261118-papera" defer></script>
-  <script src="/pwa.js?v=20261118-papera" defer></script>
+  <script src="/auth.js?v=20261118-bizia" defer></script>
+  <script src="/account-kit.js?v=20261118-bizia" defer></script>
+  <script src="/hizkuntza/game-kit.js?v=20261118-bizia" defer></script>
+  <script src="/hizkuntza/hizkuntza.js?v=20261118-bizia" defer></script>
+  <script src="/pwa.js?v=20261118-bizia" defer></script>
 </body>
 </html>

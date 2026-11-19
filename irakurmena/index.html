@@ -33,21 +33,22 @@
       <div class="catalog-intro">
         <div class="catalog-heading-row">
           <div>
-            <span class="eyebrow">BENETAKO PROBAK · C1</span>
+            <span class="eyebrow">C1 · IRAKURMEN-PROBAK</span>
             <h1 id="catalogTitle">Irakurmena</h1>
           </div>
           <p id="catalogCount" class="count" aria-live="polite"></p>
         </div>
-        <p class="catalog-lead">Aukeratu IVAP edo HABEko irakurmen-proba bat.</p>
+        <p class="catalog-lead">Aukeratu IVAP edo HABEko proba bat. Administratzaileek «SUSTRAI · C1 · IVAP» pilotuko bost ariketak ere ikus ditzakete.</p>
       </div>
       <div class="catalog-toolbar" role="search" aria-label="Probak iragazi">
         <div class="filter-grid">
           <div class="filter-field">
             <label for="orgFilter">Erakundea</label>
             <select id="orgFilter">
-              <option value="all">IVAP eta HABE</option>
+              <option value="all">Denak</option>
               <option value="IVAP">IVAP</option>
               <option value="HABE">HABE</option>
+              <option value="SUSTRAI">SUSTRAI · C1 · IVAP</option>
             </select>
           </div>
           <div class="filter-field">
@@ -56,6 +57,7 @@
               <option value="all">Denak</option>
               <option value="25">25 galdera</option>
               <option value="30">30 galdera</option>
+              <option value="33">33 galdera</option>
               <option value="34">34 galdera</option>
             </select>
           </div>
@@ -68,7 +70,7 @@
       <div id="examList" class="task-list" aria-label="Irakurmen-proben katalogoa" aria-busy="true">
         <p class="loading">Probak kargatzen…</p>
       </div>
-      <p class="catalog-note">Jatorrizko azterketak. Lan-modua (praktika edo simulazioa) probaren barruan aukeratuko duzu.</p>
+      <p class="catalog-note">IVAP/HABE: jatorrizko probak. SUSTRAI · C1 · IVAP: jatorrizko material didaktiko ez-ofiziala, administratzaileentzako pilotuan eta berrikuspen akademikoaren zain. Lan-modua probaren barruan aukeratzen da.</p>
     </aside>
 
     <section class="maincol" aria-labelledby="examTitle">
@@ -86,7 +88,7 @@
       <article class="detail panel" id="examDetail" hidden>
         <div class="detail-grid">
           <div>
-            <span class="eyebrow">DEIALDIA</span>
+            <span class="eyebrow">PROBA</span>
             <h3 id="detailLabel"></h3>
             <p id="detailMeta" class="meta"></p>
           </div>
@@ -105,8 +107,8 @@
 <nav class="tabbar" aria-label="Atal nagusiak"><a href="/"><span class="tabbar-icon"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg></span><span>Hasiera</span></a><a href="/irakurmena/" aria-current="page"><span class="tabbar-icon"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6c-2-1.5-5-2-8-2v14c3 0 6 .5 8 2 2-1.5 5-2 8-2V4c-3 0-6 .5-8 2zM12 6v14"/></svg></span><span>Irakurmena</span></a><a href="/idazlanak/"><span class="tabbar-icon"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20l4-1L19 8l-3-3L5 16l-1 4zM14 7l3 3"/></svg></span><span>Idazmena</span></a><a href="/ahozkoa/"><span class="tabbar-icon"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a3 3 0 0 0-3 3v5a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3zM5 11a7 7 0 0 0 14 0M12 18v3"/></svg></span><span>Ahozkoa</span></a><a href="/mi-espacio/"><span class="tabbar-icon"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></span><span>Nire espazioa</span></a></nav>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.0" defer></script>
 <script src="/auth.js?v=20261117-ezabatu" defer></script>
-<script src="/exam-names.js?v=20261117-ezabatu" defer></script>
-<script src="/irakurmena/app.js?v=20261117-ezabatu" defer></script>
+<script src="/exam-names.js?v=20261119-sustrai-pilot" defer></script>
+<script src="/irakurmena/app.js?v=20261119-sustrai-pilot" defer></script>
 <script src="/pwa.js?v=20261117-ezabatu" defer></script>
 </body>
 </html>

@@ -362,7 +362,7 @@
       const grant = s.selected ? s.grants.find((x) => x.user_id === s.selected && x.kind === item.kind && x.resource_id === item.id) : null;
       const special = document.createElement('select');
       special.setAttribute('aria-label', (item.pilot ? 'Hautatutako ikaslearen pilotu-baimena: ' : 'Hautatutako ikaslearen salbuespena: ') + item.label);
-      for (const [value, title] of [['default', item.pilot ? 'Baimenik gabe' : 'Orokorra'], ['allow', 'Baimendu'], ['deny', 'Ukatu']]) {
+      for (const [value, title] of [['default', item.pilot ? 'Baimen berezirik ez' : 'Orokorra'], ['allow', 'Baimendu'], ['deny', 'Ukatu']]) {
         const o = el('option', title); o.value = value; special.append(o);
       }
       special.value = grant ? (grant.allowed ? 'allow' : 'deny') : 'default';

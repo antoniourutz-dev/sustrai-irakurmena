@@ -478,6 +478,9 @@ async function start(){await window.SustraiCloud.ready;
     srReadExams('SUSTRAI').catch(error=>{console.warn('Pilotua ez dago erabilgarri',error);return[]})
   ]);
   exams=[...ivap,...pilot].sort((a,b)=>a.id.localeCompare(b.id));
+  const pilotId=new URLSearchParams(location.search).get('exam');
+  if(/^sustrai-c1-irakurmena-00[1-5]$/.test(pilotId||'')&&!pilot.some(e=>e.id===pilotId))
+    throw new Error('SUSTRAI · C1 · IVAP pilotuaren sarbidea mugatua da. Hasi saioa baimendutako kontuarekin edo eskatu banakako baimena.');
  if(!exams.length)throw Error('Ez dago argitaratutako IVAP azterketarik');
  let ids=new Set;
  for(let e of exams){

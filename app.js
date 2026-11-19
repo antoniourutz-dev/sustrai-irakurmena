@@ -57,7 +57,7 @@ function srNormalizeExam(value,organism){
        srChoiceArray(question.o,'items.'+index+'.qs.'+questionIndex+'.o');
      });
    }else srOptions(item.opts,'items.'+index+'.opts');
-   if(item.weight!==undefined&&(!Number.isFinite(item.weight)||item.weight<=0))throw new Error('Azterketa-datu baliogabea: items.'+index+'.weight');
+   if(item.weight!==undefined&&(!Number.isFinite(item.weight)||item.weight<0||(item.weight===0&&type!=='fragments')))throw new Error('Azterketa-datu baliogabea: items.'+index+'.weight');
    return {...item,type,title,p:passage,key:'?'.repeat(last-first+1)};
  });
  return {...value,id,slug,label:srExamLabel(value.label,id,organism),source:srSafeUrl(value.source,'source',true),solution:srSafeUrl(value.solution,'solution'),items};
@@ -76,7 +76,8 @@ async function srRequest(path,body){
  throw lastError;
 }
 async function srReadExams(organism){
- const exams=await srRequest('/rest/v1/rpc/sr_public_exam_snapshot',{p_organism_code:organism});
+ const pilot=organism==='SUSTRAI';
+ const exams=await srRequest('/rest/v1/rpc/'+(pilot?'sr_pilot_exam_snapshot':'sr_public_exam_snapshot'),pilot?{}:{p_organism_code:organism});
  if(!Array.isArray(exams))throw new Error('Azterketa-datuak ez dira egokiak');
  return exams.map(exam=>srNormalizeExam(exam,organism));
 }
@@ -460,19 +461,29 @@ function renderQuestion(){let it=task(),a=answersOf(),n=current,index=n-it.r[0],
  if(graded[part]&&requestedMode()==='practice'&&a[n]&&it.explanations?.[n])
    window.SustraiExplanation?.append($('gradeResult'),it.explanations[n]);
 }
-function render(reset=false){if(!exams.length)return;$('exam').value=exam().id;$('readingTitle').textContent=(part+1)+'. ariketa · '+task().title;document.querySelector('.source-note').replaceChildren('Iturria: ',externalLink(exam().source,'IVAP · Azterketa ofiziala (A eredua) ↗'));tabs();progressBar();renderPassage(reset);renderQuestion();tick()}
+function render(reset=false){if(!exams.length)return;$('exam').value=exam().id;$('readingTitle').textContent=(part+1)+'. ariketa · '+task().title;document.querySelector('.source-note').replaceChildren(
+  exam().slug.startsWith('sustrai-c1-irakurmena-')
+    ? 'SUSTRAI · C1 · IVAP estiloko pilotua (ez ofiziala; berrikuspen akademikoa egiteke). Iturria: '
+    : 'Iturria: ',
+  externalLink(exam().source,exam().slug.startsWith('sustrai-c1-irakurmena-')
+    ? 'SUSTRAIren koadernoa ↗'
+    : 'IVAP · Azterketa ofiziala (A eredua) ↗'));tabs();progressBar();renderPassage(reset);renderQuestion();tick()}
 function capture(){let selection=window.getSelection();if(!selection||selection.isCollapsed||!selection.rangeCount)return;let range=selection.getRangeAt(0),res=[];document.querySelectorAll('.selectable[data-area]').forEach(el=>{if(!range.intersectsNode(el))return;let whole=document.createRange();whole.selectNodeContents(el);let clipped=range.cloneRange();try{if(range.compareBoundaryPoints(Range.START_TO_START,whole)<0)clipped.setStart(whole.startContainer,whole.startOffset);if(range.compareBoundaryPoints(Range.END_TO_END,whole)>0)clipped.setEnd(whole.endContainer,whole.endOffset);let prefix=whole.cloneRange();prefix.setEnd(clipped.startContainer,clipped.startOffset);let start=prefix.toString().length,len=clipped.toString().length;if(len)res.push({area:el.dataset.area,start,end:start+len})}catch{}});if(res.length){pendingSelection=res;}}
 function paint(color){capture();if(!pendingSelection.length){if(!activeMarker)toast('Hautatu hitz edo esaldi bat lehenik');return}let list=highlights();for(let s of pendingSelection){list=list.filter(m=>m.area!==s.area||m.end<=s.start||m.start>=s.end);list.push({...s,color})}write(highlightsKey(),list);pendingSelection=[];window.getSelection()?.removeAllRanges();renderPassage(false);renderQuestion();if(!activeMarker)toast('Marka gordeta')}
 function erase(){capture();if(!pendingSelection.length){if(!activeMarker)toast('Hautatu ezabatu nahi duzun zatia');return}let list=highlights().filter(m=>!pendingSelection.some(s=>s.area===m.area&&s.start<m.end&&s.end>m.start));write(highlightsKey(),list);pendingSelection=[];window.getSelection()?.removeAllRanges();renderPassage(false);renderQuestion();if(!activeMarker)toast('Marka ezabatuta')}
 async function start(){await window.SustraiCloud.ready;
  const mode=requestedMode();
- exams=(await srReadExams('IVAP')).sort((a,b)=>a.id.localeCompare(b.id));
+ const [ivap,pilot]=await Promise.all([
+    srReadExams('IVAP'),
+    srReadExams('SUSTRAI').catch(error=>{console.warn('Pilotua ez dago erabilgarri',error);return[]})
+  ]);
+  exams=[...ivap,...pilot].sort((a,b)=>a.id.localeCompare(b.id));
  if(!exams.length)throw Error('Ez dago argitaratutako IVAP azterketarik');
  let ids=new Set;
  for(let e of exams){
    if(ids.has(e.id))throw Error('Bikoiztutako deialdia');ids.add(e.id);
    let count=totalOf(e),max=e.items.reduce((x,it)=>x+numberOf(it)*weight(it),0);
-   if((count!==25&&count!==34)||Math.abs(max-20)>.01)throw Error('Galdera kopurua edo puntuazioa ez dira zuzenak: '+e.id);
+   if((count!==25&&count!==33&&count!==34)||Math.abs(max-20)>.01)throw Error('Galdera kopurua edo puntuazioa ez dira zuzenak: '+e.id);
    for(let it of e.items)if(it.key.length!==numberOf(it))throw Error('Ariketa osatu gabea: '+e.id);
  }
  window.SustraiExamName.fillSelect($('exam'),exams,totalOf);;

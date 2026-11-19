@@ -62,7 +62,7 @@
   <section class="card permissions" id="contentManager" aria-busy="false">
    <div class="section-head">
     <div><p class="eyebrow">MATERIALA</p><h2>Edukien kudeaketa</h2>
-     <p>Eduki bakoitzak egoera bat du: <strong>Publikoa</strong> (edonork ikus dezake), <strong>Kontuak soilik</strong> (saioa hasita) edo <strong>Ezkutuan</strong>. Aldaketak berehala gordetzen dira.</p></div>
+     <p>Argitaratutako edukien sarbidea: <strong>Publikoa</strong>, <strong>Kontuak soilik</strong> edo <strong>Ezkutuan</strong>. SUSTRAI · C1 · IVAP pilotuko probak <strong>berrikusteko</strong> egoeran daude; hautatutako ikasleari banakako baimena eman diezaiokezu, publikoki argitaratu gabe.</p></div>
     <p id="contentSummary" class="material-summary" role="status"></p>
    </div>
    <div id="contentKinds" class="material-kinds" role="group" aria-label="Arloa">
@@ -72,8 +72,8 @@
    </div>
    <div class="material-filters">
     <label for="contentSearch">Bilatu<input id="contentSearch" type="search" placeholder="Azterketa, gaia edo urtea"></label>
-    <label for="contentState">Egoera<select id="contentState"><option value="all">Denak</option><option value="public">Publikoa</option><option value="members">Kontuak soilik</option><option value="hidden">Ezkutuan</option></select></label>
-    <label for="contentOrganism">Erakundea<select id="contentOrganism"><option value="all">Denak</option><option value="IVAP">IVAP</option><option value="HABE">HABE</option></select></label>
+    <label for="contentState">Egoera<select id="contentState"><option value="all">Denak</option><option value="public">Publikoa</option><option value="members">Kontuak soilik</option><option value="hidden">Ezkutuan</option><option value="pilot">Pilotua</option></select></label>
+    <label for="contentOrganism">Erakundea<select id="contentOrganism"><option value="all">Denak</option><option value="IVAP">IVAP</option><option value="HABE">HABE</option><option value="SUSTRAI">SUSTRAI · C1 · IVAP</option></select></label>
    </div>
    <div class="material-bulk" id="contentBulk">
     <label class="material-pick"><input type="checkbox" id="contentPickAll" aria-label="Hautatu zerrendako guztiak"></label>
@@ -92,7 +92,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.0" defer></script>
 <script src="/auth.js?v=20261117-ezabatu" defer></script>
 <script src="/account-kit.js?v=20261117-ezabatu" defer></script>
-<script src="/admin/admin.js?v=20261117-ezabatu" defer></script>
+<script src="/admin/admin.js?v=20261119-admin-pilotu" defer></script>
 <script src="/pwa.js?v=20261117-ezabatu" defer></script>
 </body>
 </html>

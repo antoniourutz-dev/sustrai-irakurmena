@@ -21,9 +21,10 @@
 
   async function load() {
     status('Ikasleak eta edukiak kargatzen…');
-    const [students, exams, writings, orals, rules, grants] = await Promise.all([
+    const [students, exams, pilots, writings, orals, rules, grants] = await Promise.all([
       s.client.rpc('sr_admin_students'),
       fetchList('sr_exams', 'id,slug,title,publication_status'),
+      s.client.rpc('sr_admin_pilot_readings'),
       fetchList('sr_writing_prompts', 'id,slug,title_eu,exam_reference,publication_status'),
       fetchList('sr_speaking_prompts', 'id,slug,title_eu,exam_reference,publication_status'),
       fetchList('sr_app_content_rules', 'kind,resource_id,guest_visible,member_visible'),
@@ -31,9 +32,18 @@
     ]);
     if (students.error) throw students.error;
     if (!Array.isArray(students.data)) throw new Error('Administratzaile-baimenik ez.');
+    if (pilots.error) throw pilots.error;
+    if (!Array.isArray(pilots.data)) throw new Error('Pilotuko probak ezin izan dira kargatu.');
     s.users = students.data;
     s.contents = [
       ...exams.filter((e) => e.publication_status === 'published').map((e) => ({ kind: 'reading', id: e.id, label: e.title || e.slug, info: e.slug, slug: e.slug })),
+      ...pilots.map((e) => {
+        const number = String(e.slug).match(/-(00[1-5])$/)?.[1] || '';
+        return {
+          kind: 'reading', id: e.id, label: 'SUSTRAI · C1 · IVAP · Irakurmena ' + number,
+          info: 'Jatorrizko proba · berrikuspen akademikoa egiteke', slug: e.slug, pilot: true
+        };
+      }),
       ...writings.filter((e) => e.publication_status === 'published').map((e) => ({ kind: 'writing', id: e.id, label: e.title_eu || e.slug, info: e.exam_reference || e.slug, slug: e.slug })),
       ...orals.filter((e) => e.publication_status === 'published').map((e) => ({ kind: 'speaking', id: e.id, label: e.title_eu || e.slug, info: e.exam_reference || e.slug, slug: e.slug }))
     ];
@@ -207,6 +217,7 @@
   const picked = new Set();
 
   function stateOf(item) {
+    if (item.pilot) return 'pilot';
     const rule = s.rules.find((x) => x.kind === item.kind && x.resource_id === item.id);
     if (!rule || (rule.guest_visible !== false && rule.member_visible !== false)) return 'public';
     if (rule.member_visible === false) return rule.guest_visible === false ? 'hidden' : 'guests';
@@ -227,6 +238,7 @@
 
   async function setState(items, state) {
     if (!items.length) return;
+    if (items.some((item) => item.pilot)) throw new Error('Pilotuko probak ezin dira hemen argitaratu. Ikasleen sarbidea banaka kudeatu.');
     const kind = items[0].kind;
     const ids = items.map((x) => x.id);
     if (state === 'public') {
@@ -277,7 +289,11 @@
   function bulk(state) {
     const rows = visibleContent();
     const chosen = rows.filter((x) => picked.has(x.id));
-    const target = chosen.length ? chosen : rows;
+    const target = (chosen.length ? chosen : rows).filter((item) => !item.pilot);
+    if (!target.length) {
+      status('Pilotuko probak ez dira argitaratzen hemen. Hautatu ikaslea eta eman pilotuko baimena salbuespenen zutabean.');
+      return;
+    }
     const verb = state === 'public' ? 'argitaratu' : state === 'members' ? 'kontuentzat soilik utzi' : 'ezkutatu';
     const scope = chosen.length ? 'Hautatutako ' + target.length + ' eduki' : KIND_LABEL[s.kind] + ': zerrendako ' + target.length + ' eduki';
     applyState(target, state, scope + ' ' + verb + ' nahi dituzu?');
@@ -295,7 +311,7 @@
     });
     const all = s.contents.filter((x) => x.kind === s.kind);
     const count = (state) => all.filter((x) => stateOf(x) === state).length;
-    $('contentSummary').textContent = all.length + ' eduki · ' + count('public') + ' publiko · ' + count('members') + ' kontuentzat · ' + count('hidden') + ' ezkutuan';
+    $('contentSummary').textContent = all.length + ' eduki · ' + count('public') + ' publiko · ' + count('members') + ' kontuentzat · ' + count('hidden') + ' ezkutuan' + (count('pilot') ? ' · ' + count('pilot') + ' pilotuan' : '');
     const rows = visibleContent();
     for (const id of [...picked]) if (!rows.some((x) => x.id === id)) picked.delete(id);
     const selectedUser = s.selected ? s.users.find((u) => u.id === s.selected) : null;
@@ -305,7 +321,8 @@
       $('contentPickAll').checked = !!rows.length && n === rows.length;
       $('contentPickAll').indeterminate = n > 0 && n < rows.length;
       $('contentBulkLabel').textContent = n ? n + ' hautatuta' : 'Zerrenda osoa (' + rows.length + ')';
-      document.querySelectorAll('#contentBulk button').forEach((b) => { b.disabled = !rows.length; });
+      const editable = (n ? rows.filter((x) => picked.has(x.id)) : rows).some((x) => !x.pilot);
+      document.querySelectorAll('#contentBulk button').forEach((b) => { b.disabled = !editable; });
     };
     $('contentPickAll').onchange = (event) => {
       for (const x of rows) if (event.target.checked) picked.add(x.id); else picked.delete(x.id);
@@ -314,11 +331,12 @@
     if (!rows.length) { empty(root, 'Ez dago edukirik iragazki honekin.'); updateBulk(); return; }
     for (const item of rows) {
       const state = stateOf(item);
-      const row = el('div', undefined, 'material-row' + (state === 'hidden' ? ' is-hidden' : ''));
+      const row = el('div', undefined, 'material-row' + (state === 'hidden' ? ' is-hidden' : '') + (item.pilot ? ' is-pilot' : ''));
       row.setAttribute('role', 'row');
       const check = document.createElement('input');
       check.type = 'checkbox';
       check.checked = picked.has(item.id);
+      check.disabled = !!item.pilot;
       check.setAttribute('aria-label', 'Hautatu: ' + item.label);
       check.onchange = () => { if (check.checked) picked.add(item.id); else picked.delete(item.id); updateBulk(); };
       const pick = el('label', undefined, 'material-pick');
@@ -328,18 +346,23 @@
       const seg = el('div', undefined, 'material-state');
       seg.setAttribute('role', 'group');
       seg.setAttribute('aria-label', 'Egoera: ' + item.label);
-      for (const [value, title] of STATES) {
-        const b = el('button', title, 'state-' + value + (state === value ? ' active' : ''));
-        b.type = 'button';
-        b.setAttribute('aria-pressed', String(state === value));
-        b.onclick = () => { if (stateOf(item) !== value) applyState([item], value); };
-        seg.append(b);
+      if (item.pilot) {
+        seg.append(el('small', 'Pilotua · berrikusteko'));
+        seg.title = 'Ez dago argitaratuta. Ikasle bakoitzaren sarbidea salbuespenen zutabean kudeatu.';
+      } else {
+        for (const [value, title] of STATES) {
+          const b = el('button', title, 'state-' + value + (state === value ? ' active' : ''));
+          b.type = 'button';
+          b.setAttribute('aria-pressed', String(state === value));
+          b.onclick = () => { if (stateOf(item) !== value) applyState([item], value); };
+          seg.append(b);
+        }
       }
       if (state === 'guests') seg.append(el('small', 'Gonbidatuak soilik (arau zaharra)'));
       const grant = s.selected ? s.grants.find((x) => x.user_id === s.selected && x.kind === item.kind && x.resource_id === item.id) : null;
       const special = document.createElement('select');
-      special.setAttribute('aria-label', 'Hautatutako ikaslearen salbuespena: ' + item.label);
-      for (const [value, title] of [['default', 'Orokorra'], ['allow', 'Baimendu'], ['deny', 'Ukatu']]) {
+      special.setAttribute('aria-label', (item.pilot ? 'Hautatutako ikaslearen pilotu-baimena: ' : 'Hautatutako ikaslearen salbuespena: ') + item.label);
+      for (const [value, title] of [['default', item.pilot ? 'Baimenik gabe' : 'Orokorra'], ['allow', 'Baimendu'], ['deny', 'Ukatu']]) {
         const o = el('option', title); o.value = value; special.append(o);
       }
       special.value = grant ? (grant.allowed ? 'allow' : 'deny') : 'default';

@@ -20,6 +20,10 @@
   }
 
   function name(organism, id, fallback) {
+    if (String(organism).toUpperCase() === 'SUSTRAI') {
+      const pilot = String(id || '').match(/^sustrai-c1-irakurmena-(00[1-5])$/);
+      if (pilot) return 'SUSTRAI · C1 · IVAP · Irakurmena ' + pilot[1];
+    }
     const raw = String(id || '').replace(/^(habe|ivap)-/i, '');
     let m;
     if ((m = raw.match(/^(\d{4})-(\d{2})-(\d{2})(?:-(.+))?$/))) {
@@ -37,6 +41,8 @@
 
   // Short form for narrow selects: «2019 · maiatza», «2014 · 1. deialdia», «2023 · urria · eredua».
   function short(id, fallback) {
+    const pilot = String(id || '').match(/^sustrai-c1-irakurmena-(00[1-5])$/);
+    if (pilot) return 'SUSTRAI · ' + pilot[1];
     const raw = String(id || '').replace(/^(habe|ivap)-/i, '');
     let m;
     if ((m = raw.match(/^(\d{4})-(\d{2})-(\d{2})(?:-(.+))?$/))) {

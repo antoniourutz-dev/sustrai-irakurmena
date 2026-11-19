@@ -22,7 +22,8 @@ Deno.serve(async (request: Request) => {
     const body = JSON.parse(bodyText);
     const slug = body?.slug;
     const answers = body?.answers;
-    if (typeof slug !== "string" || !/^(?:ivap|habe)-[A-Za-z0-9][A-Za-z0-9-]{2,70}$/.test(slug))
+    const pilot = typeof slug === "string" && /^sustrai-c1-irakurmena-00[1-5]$/.test(slug);
+    if (typeof slug !== "string" || (!/^(?:ivap|habe)-[A-Za-z0-9][A-Za-z0-9-]{2,70}$/.test(slug) && !pilot))
       return json({ error: "invalid_exam" }, 400, origin);
     if (!answers || typeof answers !== "object" || Array.isArray(answers) ||
         Object.keys(answers).length > 6 ||
@@ -37,14 +38,14 @@ Deno.serve(async (request: Request) => {
     // Access rules are checked with the caller's JWT; the service role is never used for authorizing users.
     const anonKey = Deno.env.get("SUPABASE_ANON_KEY") || request.headers.get("apikey") || "";
     const caller = request.headers.get("authorization") || "";
-    const access = await fetch(url + "/rest/v1/rpc/sr_can_read_exam_slug", {
+    const access = await fetch(url + (pilot ? "/rest/v1/rpc/sr_can_read_pilot_slug" : "/rest/v1/rpc/sr_can_read_exam_slug"), {
       method: "POST",
       headers: {"apikey":anonKey, "Authorization":caller, "Content-Type":"application/json"},
       body: JSON.stringify({p_slug:slug})
     });
     if (!access.ok) return json({error:"access_check_failed"}, access.status===401?401:503, origin);
     if ((await access.json()) !== true) return json({error:"access_denied"},403,origin);
-    const backend = await fetch(url + "/rest/v1/rpc/sr_grade_exam", {
+    const backend = await fetch(url + (pilot ? "/rest/v1/rpc/sr_grade_pilot_exam" : "/rest/v1/rpc/sr_grade_exam"), {
       method: "POST",
       headers: { "apikey": serviceKey, "Authorization": "Bearer " + serviceKey, "Content-Type": "application/json" },
       body: JSON.stringify({ p_exam_slug: slug, p_answers: answers }),

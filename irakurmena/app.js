@@ -16,12 +16,15 @@ function show(message) {
 }
 
 async function readExams(organism) {
-  const response = await fetch(API_URL + '/rest/v1/rpc/sr_public_exam_snapshot', {
+  const pilot = organism === 'SUSTRAI';
+  const response = await fetch(API_URL + '/rest/v1/rpc/' + (pilot ? 'sr_pilot_exam_snapshot' : 'sr_public_exam_snapshot'), {
     method: 'POST',
     headers: await window.SustraiCloud.headers({ ...HEADERS, 'Content-Type': 'application/json' }),
-    body: JSON.stringify({ p_organism_code: organism }),
+    body: JSON.stringify(pilot ? {} : { p_organism_code: organism }),
     cache: 'no-store'
   });
+  // The pilot is intentionally hidden from unauthenticated users.
+  if (pilot && (response.status === 401 || response.status === 403 || response.status === 404)) return [];
   if (!response.ok) throw new Error('Ezin izan dira azterketak kargatu (' + response.status + ').');
   const rows = await response.json();
   if (!Array.isArray(rows)) throw new Error('Azterketa-datuak ez dira egokiak.');
@@ -75,7 +78,8 @@ function renderList() {
     const btn = document.createElement('button');
     btn.type = 'button';
     btn.className = 'task-card' + (selected?.id === exam.id && selected?.organism === exam.organism ? ' active' : '');
-    const meta=document.createElement('span');meta.className='meta';meta.textContent=exam.organism;
+    const meta=document.createElement('span');meta.className='meta';
+    meta.textContent=exam.organism === 'SUSTRAI' ? 'SUSTRAI · C1 · IVAP · PILOTUA' : exam.organism;
     const label=document.createElement('strong');label.textContent=exam.label;
     const kind=document.createElement('span');kind.className='kind';kind.textContent=exam.questions+' galdera · '+exam.parts.length+' ariketa';
     btn.append(meta,label,kind);
@@ -95,12 +99,15 @@ function selectExam(exam) {
       return span;
     })
   );
-  $('examLead').textContent = 'Proba hau irekita, barruan aukeratuko duzu praktika librea edo simulazioa.';
+  $('examLead').textContent = exam.organism === 'SUSTRAI'
+    ? 'SUSTRAIren C1 simulazio didaktikoa, IVAPen ereduan oinarritua. Pilotua: berrikuspen akademikoa egiteke. Ez da IVAPen azterketa ofiziala.'
+    : 'Proba hau irekita, barruan aukeratuko duzu praktika librea edo simulazioa.';
   $('examDetail').hidden = false;
   $('detailLabel').textContent = exam.label;
-  $('detailMeta').textContent = exam.organism + ' · ' + exam.questions + ' galdera · ' + exam.parts.length + ' ariketa';
+  $('detailMeta').textContent = (exam.organism === 'SUSTRAI' ? 'SUSTRAI · C1 · IVAP · pilotua' : exam.organism) + ' · ' + exam.questions + ' galdera · ' + exam.parts.length + ' ariketa';
   $('openExam').href = workshopPath(exam);
   const pdf = $('sourcePdf');
+  pdf.textContent = exam.organism === 'SUSTRAI' ? 'SUSTRAIren koadernoa ↗' : 'Jatorrizko PDFa ↗';
   try {
     const url = new URL(exam.source);
     const ok = url.protocol === 'https:';
@@ -126,8 +133,12 @@ async function start() {
   $('sizeFilter').onchange = renderList;
   $('search').oninput = renderList;
   try {
-    const [ivap, habe] = await Promise.all([readExams('IVAP'), readExams('HABE')]);
-    exams = [...ivap, ...habe].sort((a, b) =>
+    const [ivap, habe, pilot] = await Promise.all([
+      readExams('IVAP'),
+      readExams('HABE'),
+      readExams('SUSTRAI').catch(error => { console.warn('Pilotua ez dago erabilgarri', error); return []; })
+    ]);
+    exams = [...ivap, ...habe, ...pilot].sort((a, b) =>
       a.organism.localeCompare(b.organism) || b.id.localeCompare(a.id) || a.label.localeCompare(b.label, 'eu')
     );
     $('examList').setAttribute('aria-busy', 'false');

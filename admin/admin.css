@@ -54,3 +54,7 @@ label{font-size:12px;font-weight:700;display:grid;gap:6px}input,select{width:100
   .material-bulk-label{flex:1 1 60%}
 }
 .material-summary{white-space:nowrap}@media(max-width:900px){.material-summary{white-space:normal}}
+
+/* Editorial pilot content: review-only status, never a global publication control. */
+.material-row.is-pilot .material-state{background:var(--s-bg);border:1px solid var(--s-line);padding:6px 8px}
+.material-row.is-pilot .material-state small{color:var(--s-ink-2);font-size:12px;font-weight:700}

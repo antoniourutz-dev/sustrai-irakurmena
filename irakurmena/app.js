@@ -71,6 +71,31 @@ function renderList() {
   const list = $('examList');
   list.replaceChildren();
   if (!rows.length) {
+    if ($('orgFilter').value === 'SUSTRAI') {
+      list.replaceChildren();
+      const signedIn = !!window.SustraiCloud.user();
+      const active = !!window.SustraiCloud.profile()?.active;
+      const admin = !!window.SustraiCloud.isAdmin();
+      const note = document.createElement('p');
+      note.className = 'loading';
+      note.textContent = !signedIn
+        ? 'SUSTRAI · C1 · IVAP piloturako sarbidea mugatua da. Hasi saioa baimendutako kontuarekin.'
+        : !active
+          ? 'Kontua ez dago aktibo. SUSTRAI pilotuko probak ikusteko kontu aktiboa behar da.'
+          : admin
+            ? 'Ezin izan dira pilotuko probak kargatu. Freskatu orria eta saiatu berriro.'
+            : 'Sartu zara, baina kontu honi ez zaio oraindik SUSTRAI · C1 · IVAP piloturako baimenik eman.';
+      list.append(note);
+      if (!signedIn) {
+        const login = document.createElement('button');
+        login.type = 'button';
+        login.className = 'task-card';
+        login.textContent = 'Saioa hasi';
+        login.onclick = () => window.SustraiCloud.openLogin('login');
+        list.append(login);
+      }
+      return;
+    }
     list.textContent = 'Ez dago probarik iragazki honekin.';
     return;
   }
@@ -133,6 +158,11 @@ async function start() {
   $('sizeFilter').onchange = renderList;
   $('search').oninput = renderList;
   try {
+    try {
+      const query = new URLSearchParams(location.search);
+      const targetOrg = String(query.get('erakundea') || query.get('org') || '').toUpperCase();
+      if (['IVAP', 'HABE', 'SUSTRAI'].includes(targetOrg)) $('orgFilter').value = targetOrg;
+    } catch {}
     const [ivap, habe, pilot] = await Promise.all([
       readExams('IVAP'),
       readExams('HABE'),
@@ -161,7 +191,7 @@ async function start() {
       } catch {}
     }
     if (requested) selectExam(requested);
-    else selectExam(exams[0]);
+    else if ($('orgFilter').value !== 'SUSTRAI') selectExam(exams[0]);
   } catch (error) {
     $('examList').setAttribute('aria-busy', 'false');
     $('examList').textContent = error.message || 'Ezin izan da kargatu.';

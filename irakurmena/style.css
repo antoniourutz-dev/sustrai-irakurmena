@@ -39,16 +39,14 @@ button{cursor:pointer}
 
 /* Detail */
 .maincol{display:flex;flex-direction:column;gap:16px;min-width:0}
-.hero,.detail{padding:28px}
+.hero{padding:28px}
 .hero-row{display:flex;justify-content:space-between;align-items:flex-start;gap:16px}
 .hero h2{margin:6px 0 12px;font:700 clamp(26px,2.6vw,36px)/1.15 var(--s-font-display);letter-spacing:-.02em}
 .lead{margin:0;max-width:44rem;color:var(--s-muted);font-size:15px;line-height:1.6}
-.tags{display:flex;flex-wrap:wrap;gap:6px}
+.tags{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
 .tags span{padding:5px 10px;border-radius:999px;background:var(--s-bg);color:var(--s-ink-3);font-size:12px;font-weight:600}
-.detail-grid{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-start;gap:16px}
-.detail h3{margin:6px 0 4px;font:700 24px/1.2 var(--s-font-display);letter-spacing:-.015em}
 .meta{margin:0;color:var(--s-muted);font-size:14px}
-.detail-actions{display:flex;flex-wrap:wrap;gap:8px}
+.detail-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:20px}
 .primary,.soft{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:46px;padding:0 18px;border-radius:var(--s-r-md);font-size:15px;font-weight:700;text-decoration:none}
 .primary{border:1px solid var(--s-primary);background:var(--s-primary);color:#fff}
 .primary:hover{border-color:var(--s-primary-hover);background:var(--s-primary-hover)}
@@ -65,18 +63,18 @@ button{cursor:pointer}
   .layout{grid-template-columns:1fr;gap:12px;padding:12px 12px 20px}
   .catalog{position:static;max-height:none;overflow:visible}
   .task-list{overflow:visible}
-  .catalog-note,.hero{display:none}
+  .catalog-note{display:none}
   .catalog-intro{padding:16px 16px 10px}
   .catalog-toolbar{padding:0 16px 12px}
   .catalog-lead{display:none}
   /* The chosen exam stays reachable as a bottom action bar */
   .maincol{position:sticky;bottom:12px;z-index:20}
-  .detail{padding:14px 16px;border-color:var(--s-line-strong);box-shadow:var(--s-shadow-pop)}
-  .detail .eyebrow{display:none}
-  .detail h3{margin:0;font-size:17px}
+  .hero{padding:14px 16px;border-color:var(--s-line-strong);box-shadow:var(--s-shadow-pop)}
+  .hero .eyebrow,.hero .lead{display:none}
+  .hero h2{margin:0 0 8px;font-size:17px}
+  .tags{margin-bottom:0}
   .meta{font-size:13px}
-  .detail-grid{gap:10px}
-  .detail-actions{width:100%;flex-wrap:nowrap}
+  .detail-actions{width:100%;flex-wrap:nowrap;margin-top:12px}
   .detail-actions .primary{flex:1}
   .parts{display:none}
   .toast{left:12px;right:12px;bottom:calc(var(--s-tabbar-h) + 12px)}

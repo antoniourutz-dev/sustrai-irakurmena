@@ -17,7 +17,7 @@
   <link rel="preload" href="/fonts/inter-400.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="/fonts/inter-display-700.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="/theme.css?v=20261117-ezabatu">
-  <link rel="stylesheet" href="/irakurmena/style.css?v=20261117-ezabatu">
+  <link rel="stylesheet" href="/irakurmena/style.css?v=20261120-catalog-compact">
   <link rel="stylesheet" href="/auth.css?v=20261117-ezabatu">
 <link rel="stylesheet" href="/hitzbira.css?v=20261117-ezabatu"></head>
 <body class="has-tabbar">
@@ -83,21 +83,13 @@
           </div>
         </div>
         <p id="examLead" class="lead">Ezkerreko zerrendan aukeratu IVAP edo HABEko deialdi bat. Ondoren, proba irekiko da eta bertan erabakiko duzu praktika edo simulazioa.</p>
-      </article>
-
-      <article class="detail panel" id="examDetail" hidden>
-        <div class="detail-grid">
-          <div>
-            <span class="eyebrow">PROBA</span>
-            <h3 id="detailLabel"></h3>
-            <p id="detailMeta" class="meta"></p>
-          </div>
+        <div id="examDetail" hidden>
           <div class="detail-actions">
             <a id="openExam" class="primary" href="#">Ireki proba <span aria-hidden="true">→</span></a>
             <a id="sourcePdf" class="soft" href="#" target="_blank" rel="noopener noreferrer" hidden>Jatorrizko PDFa ↗</a>
           </div>
+          <ul id="detailParts" class="parts" aria-label="Ariketak"></ul>
         </div>
-        <ul id="detailParts" class="parts" aria-label="Ariketak"></ul>
       </article>
     </section>
   </main>
@@ -108,7 +100,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.0" defer></script>
 <script src="/auth.js?v=20261117-ezabatu" defer></script>
 <script src="/exam-names.js?v=20261119-sustrai-pilot" defer></script>
-<script src="/irakurmena/app.js?v=20261119-sustrai-pilot-access" defer></script>
+<script src="/irakurmena/app.js?v=20261120-catalog-compact" defer></script>
 <script src="/pwa.js?v=20261117-ezabatu" defer></script>
 </body>
 </html>

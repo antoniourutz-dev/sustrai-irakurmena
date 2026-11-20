@@ -128,8 +128,6 @@ function selectExam(exam) {
     ? 'SUSTRAIren C1 simulazio didaktikoa, IVAPen ereduan oinarritua. Pilotua: berrikuspen akademikoa egiteke. Ez da IVAPen azterketa ofiziala.'
     : 'Proba hau irekita, barruan aukeratuko duzu praktika librea edo simulazioa.';
   $('examDetail').hidden = false;
-  $('detailLabel').textContent = exam.label;
-  $('detailMeta').textContent = (exam.organism === 'SUSTRAI' ? 'SUSTRAI · C1 · IVAP · pilotua' : exam.organism) + ' · ' + exam.questions + ' galdera · ' + exam.parts.length + ' ariketa';
   $('openExam').href = workshopPath(exam);
   const pdf = $('sourcePdf');
   pdf.textContent = exam.organism === 'SUSTRAI' ? 'SUSTRAIren koadernoa ↗' : 'Jatorrizko PDFa ↗';

@@ -149,6 +149,11 @@
     $('levelFilter').disabled = true;
     $('activityTitle').textContent = titleOf(a);
     $('activityInstruction').textContent = a.prompt_json?.instruction_eu || '';
+    // E09 cloze tasks need the full text in addition to the four atomic prompts.
+    const fullContext = typeof a.prompt_json?.context_eu === 'string'
+      ? a.prompt_json.context_eu.trim() : '';
+    $('activityContextText').textContent = fullContext;
+    $('activityContext').hidden = !fullContext;
     const badge = $('activityBadge');
     badge.textContent = isDraft(a) ? 'Zirriborroa · aurrebista' : 'Argitaratua';
     badge.className = 'ad-badge' + (isDraft(a) ? ' draft' : '');

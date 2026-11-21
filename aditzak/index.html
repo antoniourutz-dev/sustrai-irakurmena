@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="eu">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#11132B">
+  <meta name="description" content="HitzBira Aditzak: euskarazko aditz-komunztadura eta adizkiak lantzeko unitateak.">
+  <title>HitzBira · Aditzak</title>
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="icon" type="image/svg+xml" href="/icons/icon.svg?v=hitzbira">
+  <link rel="preload" href="/fonts/inter-400.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="/theme.css?v=20261121-aditzak">
+  <link rel="stylesheet" href="/auth.css?v=20261121-aditzak">
+  <link rel="stylesheet" href="/aditzak/style.css?v=20261121-aditzak">
+  <link rel="stylesheet" href="/hitzbira.css?v=20261121-aditzak">
+</head>
+<body class="has-tabbar">
+<a class="skip" href="#pageTitle">Joan edukira</a>
+<header class="site-header">
+  <a class="site-brand" href="/" aria-label="HitzBira hasiera"><span class="site-brand-mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12a8 8 0 1 1-2.4-5.7"/><path d="M18 3v4h-4"/><path d="M8.5 10.5h7"/><path d="M8.5 13.5h4.5"/></svg></span><span class="site-brand-name">hitz<b>bira</b></span><span class="site-brand-level">C1</span></a>
+  <nav class="site-nav" aria-label="Atalak"><a href="/">Hasiera</a><a href="/irakurmena/">Irakurmena</a><a href="/idazlanak/">Idazmena</a><a href="/ahozkoa/">Ahozkoa</a><a href="/aditzak/" aria-current="page">Aditzak</a><a href="/mi-espacio/">Nire espazioa</a></nav>
+</header>
+<main class="ad-page">
+  <section class="ad-hero">
+    <div class="ad-kicker">HIZKUNTZA-LABORATEGIA · ADITZAK</div>
+    <h1 id="pageTitle">Aditzak <span>ulertu, landu eta erabili.</span></h1>
+    <p>Aditz-komunztadura eta adizkiak testuinguruan lantzeko jarduerak. Erantzun bakoitzaren jatorrizko bertsioa gordetzen da, zuzenketa linguistikotik bereizita.</p>
+    <div class="ad-legend"><span>Indikatiboa</span><span>B2 · C1</span><span>Ariketak Supabasetik</span></div>
+  </section>
+  <section id="authRequired" class="ad-notice" hidden>
+    <h2>Hasi saioa</h2>
+    <p>Ariketen bankua kontuekin dago lotuta. Sar zaitez argitaratutako jarduerak ikusteko eta erantzunak gordetzeko.</p>
+    <button type="button" id="loginBtn" class="ad-button primary">Saioa hasi</button>
+  </section>
+  <section class="ad-content" id="adContent">
+    <div class="ad-heading">
+      <div><span class="ad-overline">JARDUEREN BANKUA</span><h2>Indikatiboa eta komunztadura</h2></div>
+      <label for="levelFilter">Maila <select id="levelFilter"><option value="all">Maila guztiak</option><option value="B2">B2</option><option value="C1">C1</option><option value="C2">C2</option></select></label>
+    </div>
+    <p id="adStatus" class="ad-status" role="status" aria-live="polite">Jarduerak kargatzen…</p>
+    <div id="catalog" class="ad-catalog" aria-label="Jardueren katalogoa"></div>
+    <section id="activityPanel" class="ad-activity" aria-labelledby="activityTitle" hidden>
+      <div class="ad-activity-head"><button type="button" id="backToCatalog" class="ad-back">← Jardueretara itzuli</button><span id="activityBadge" class="ad-badge"></span></div>
+      <h2 id="activityTitle"></h2><p id="activityInstruction" class="ad-instruction"></p>
+      <div id="items" class="ad-items"></div>
+      <div class="ad-actions"><button type="button" id="saveResponses" class="ad-button primary">Erantzunak gorde</button><p id="saveMessage" class="ad-save-msg" role="status" aria-live="polite"></p></div>
+      <p class="ad-footnote">Zirriborroetako jarduerak administratzaileak soilik ikusten ditu, berrikusteko; ez dira automatikoki zuzentzen edo gordetzen. Argitaratutako jardueretan jatorrizko erantzunak gordetzen dira, baina puntuaziorik ez da asmatzen.</p>
+    </section>
+  </section>
+</main>
+<footer class="ad-footer">HitzBira · SUSTRAI · Prestakuntza didaktikoa, ez egiaztapen ofiziala</footer>
+<nav class="tabbar" aria-label="Atal nagusiak">
+ <a href="/"><span class="tabbar-icon">⌂</span><span>Hasiera</span></a>
+ <a href="/irakurmena/"><span class="tabbar-icon">▤</span><span>Irakurmena</span></a>
+ <a href="/aditzak/" aria-current="page"><span class="tabbar-icon">Aa</span><span>Aditzak</span></a>
+ <a href="/mi-espacio/"><span class="tabbar-icon">◯</span><span>Nire espazioa</span></a>
+</nav>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.0" defer></script>
+<script src="/auth.js?v=20261121-aditzak" defer></script>
+<script src="/aditzak/app.js?v=20261121-aditzak" defer></script>
+<script src="/pwa.js?v=20261121-aditzak" defer></script>
+</body></html>

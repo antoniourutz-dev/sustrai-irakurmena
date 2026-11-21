@@ -90,3 +90,7 @@ button{font:inherit}
 .hc-cta{flex:none;color:var(--s-primary);font-weight:700;font-size:14px}
 .hc-cta::after{content:' →'}
 @media(max-width:760px){.home-continue-list{grid-template-columns:minmax(0,1fr)}}
+
+/* Four training areas: avoid a single orphan card on desktop. */
+@media(min-width:1000px){.skill-list{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(min-width:1280px){.skill-list{grid-template-columns:repeat(4,minmax(0,1fr))}}

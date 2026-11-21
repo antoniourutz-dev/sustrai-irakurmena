@@ -129,3 +129,11 @@ The six B2 `Indikatiboa lehenaldian` activity revisions **2** have been released
 - Tester feedback form now includes an optional proposed correction (stored separately from the verbatim issue).
 - Pilot answer button explicitly promises **provisional answers** rather than validated grading.
 - Authorization and audit lifecycle verified using a transaction fully rolled back. No actual tester automatically enrolled.
+
+## B2 · Aditzak · Baldintza (2026-11-21)
+- Catalog section `B2-ADI-02`: six new activities, 28 original items, documented source links and one grammatical competency.
+- Answer keys are private in Supabase; **do not publish them to the public GitHub repository**.
+- Fourteen closed questions have explicit reference answers (8 E02, 6 E03); the other fourteen remain manually reviewed.
+- Available to authorized learner accounts via `smx_aditzak_pilot_releases` without upgrading academic editorial state. No automatic exam grading.
+- Student UI shows ordinary educational copy, not intrusive test banners. Answer models are explicitly advisory and user-submitted responses are stored.
+- Admin-only audit labels and membership controls continue unchanged.

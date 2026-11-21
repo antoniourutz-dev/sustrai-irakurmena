@@ -92,3 +92,6 @@ button,select,textarea{font:inherit}
 
 .ad-item:focus{outline:2px solid var(--s-primary);outline-offset:3px;scroll-margin-top:100px}
 .ad-finding-input{font-size:14px}
+
+/* Student learning copy: neutral guidance without conspicuous beta warning styling. */
+.ad-pilot-warning{border-color:var(--s-line)!important;background:var(--s-paper)!important;color:var(--s-muted)!important;font-weight:400}

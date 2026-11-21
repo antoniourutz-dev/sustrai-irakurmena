@@ -127,10 +127,10 @@
     $('practiceFilter').hidden=false;
     const search=$('topicSearch').value.trim().toLocaleLowerCase('eu');
     const shown=topics.filter(s=>s.title_eu.toLocaleLowerCase('eu').includes(search));
-    status(topics.length+' atal · '+shown.length+' ikusgai. Jarduerak argitaratzeko, berrikuspen akademikoa behar da.');
+    status(topics.length+' atal · '+shown.length+' ikusgai. Aukeratu atala ariketak ikusteko.');
     shown.forEach((s)=>{
-      const tag=s.editorial_state==='draft'?'Berrikusteko':null;
-      $('practiceGrid').append(card(String(s.position).padStart(2,'0'),s.title_eu,tag?'Ariketak berrikuspen akademikoan':'Ariketak prestatzeko', 'Ariketak ikusi',()=>go(state.level,b.code,s.code),tag));
+      const tag=s.editorial_state==='draft'?'Jarduerak':null;
+      $('practiceGrid').append(card(String(s.position).padStart(2,'0'),s.title_eu,tag?'Jarduerak eskuragarri, baimenaren arabera':'Ariketak prestatzen', 'Ariketak ikusi',()=>go(state.level,b.code,s.code),tag));
     });
     if(!shown.length)empty('Ez da bat datorren atalik aurkitu. Probatu beste bilaketa bat.');
   }
@@ -146,26 +146,26 @@
     const approved=list.filter(x=>x.status==='approved').length;
     const pilot=list.filter(x=>state.pilotVersions.has(x.id)).length;
     const drafts=list.filter(x=>x.status!=='approved'&&!state.pilotVersions.has(x.id)).length;
-    status(approved+' ariketa egiaztatu · '+pilot+' proba kontrolatuan'
+    status(approved+' ariketa egiaztatu · '+pilot+' jarduera erabilgarri'
       +(drafts?' · '+drafts+' barne-zirriborro':''));
     if(!list.length){
       if(!cloud?.user())empty('Ariketak ikusteko, hasi saioa. Katalogoaren atalak konturik gabe kontsulta daitezke.',true);
-      else empty('Atal honetan ez dago oraindik ikaslearentzako argitaratutako ariketarik. Edukia prestatzen eta egiaztatzen ari gara.');
+      else empty('Atal honetan oraindik ez dago zure kontuarentzat eskuragarri dagoen ariketarik.');
       return;
     }
     for(const a of list){
       const article=make('article',null,'practice-card practice-card--exercise');
       article.append(make('span',String(a.position).padStart(2,'0')+' · '+(a.prompt_json?.mechanism_code||a.kind||'Ariketa'),'practice-card-number'));
       const pilot=state.pilotVersions.has(a.id);
-      const badge=make('span',pilot?'PROBA · Ez egiaztatua':a.status==='approved'?'Argitaratua':'Berrikusteko',
-        'practice-tag'+(a.status==='approved'?'':' practice-tag--draft'));
+      const badge=make('span',pilot?'Jarduera erabilgarri':a.status==='approved'?'Argitaratua':'Barne-aurrebista',
+        'practice-tag'+(a.status==='approved'||pilot?'':' practice-tag--draft'));
       article.append(badge,make('h3',a.prompt_json?.title_eu || 'Jarduera','practice-card-title'));
       article.append(make('p',(a.itemCount??0)+' galdera · '
-        +(pilot?'Probatzaileentzat · erantzunak eta oharrak gordetzen dira.':a.status==='approved'
+        +(pilot?'Erantzunak eta iradokizunak gordetzeko aukera.':a.status==='approved'
           ?'Ikaslearentzako jarduera':'Barne-aurrebista, ez argitaratua.'),'practice-card-meta'));
       const foot=make('div',null,'practice-card-foot');
       if(state.block.endsWith('-ADI')){
-        const aLink=make('a',pilot?'Probatu ariketa':a.status==='approved'?'Hasi ariketa':'Berrikusi ariketa');
+        const aLink=make('a',pilot?'Hasi ariketa':a.status==='approved'?'Hasi ariketa':'Berrikusi ariketa');
         const from=location.pathname+location.search;
         aLink.href='/aditzak/?activity='+encodeURIComponent(a.id)+'&from='+encodeURIComponent(from);
         foot.append(aLink,make('span','→'));

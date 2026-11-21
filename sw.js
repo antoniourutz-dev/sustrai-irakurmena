@@ -1,5 +1,5 @@
 /* SUSTRAI PWA service worker */
-const CACHE_VERSION = 'sustrai-pwa-v34-pilot-triage';
+const CACHE_VERSION = 'sustrai-pwa-v35-baldintza-unit';
 const SHELL = [
   '/',
   '/index.html',

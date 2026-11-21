@@ -1,5 +1,5 @@
-/* SUSTRAI ADITZAK. Read only RLS-visible versions; answers never enter client data.
-   Drafts are visible only under the server-side sr_is_admin() RLS policy. */
+/* SUSTRAI ADITZAK. Activity visibility controlled by RLS (approved, admin or invited learner).
+   Answer keys stay in the private schema; only post-submission reference answers are returned. */
 (() => {
   'use strict';
   const prefix = /^(?:DRAFT-)?ADI-/i;
@@ -147,15 +147,15 @@
     const pilot = all.filter(isPilot);
     const draft = all.filter(a => isDraft(a) && !isPilot(a));
     status(all.length
-      ? approved.length+' egiaztatutako jarduera · '+pilot.length+' probetan'
+      ? approved.length+' jarduera egiaztatu · '+pilot.length+' jarduera erabilgarri'
         +(draft.length?' · '+draft.length+' barne-zirriborro':'')
       : 'Ez duzu argitaratutako edo baimendutako jarduerarik.');
     for (const a of all) {
       const items = state.items.filter((i) => i.activity_version_id === a.id);
       const button = node('button', null, 'ad-card');
       button.type = 'button';
-      const badge = node('span', isPilot(a)?'PROBA · Ez egiaztatua':isDraft(a)?'Barne-zirriborroa':'Argitaratua',
-        'ad-badge' + (isDraft(a) ? ' draft' : ''));
+      const badge = node('span', isPilot(a)?'Jarduera eskuragarri':isDraft(a)?'Berrikusteko':'Argitaratua',
+        'ad-badge' + (isDraft(a) && !isPilot(a) ? ' draft' : ''));
       const n = state.progress.get(a.id) || 0;
       const tail = n ? ' · ' + n + ' saiakera' : '';
       button.append(badge, node('strong', titleOf(a)),
@@ -170,7 +170,7 @@
   // editorial review or an official academic approval.
   function appendFindingForm(card, a, item) {
     const details=node('details',null,'ad-finding');
-    details.append(node('summary','Ohartarazi zalantza edo akatsa'));
+    details.append(node('summary','Iradokizuna egin'));
     const form=node('form',null,'ad-finding-form');
     const categories=[
       ['arau_akatsa','Arau-akatsa'],['aldaera_onargarria','Aldaera onargarria'],
@@ -238,9 +238,9 @@
     $('activityContextText').textContent = fullContext;
     $('activityContext').hidden = !fullContext;
     const badge = $('activityBadge');
-    badge.textContent = isPilot(a) ? 'PROBA KONTROLATUA · EZ EGIAZTATUA'
-      : isDraft(a) ? 'Zirriborroa · aurrebista' : 'Argitaratua';
-    badge.className = 'ad-badge' + (isDraft(a) ? ' draft' : '');
+    badge.textContent = isPilot(a) ? 'Jarduera eskuragarri'
+      : isDraft(a) ? 'Barne-aurrebista' : 'Argitaratua';
+    badge.className = 'ad-badge' + (isDraft(a) && !isPilot(a) ? ' draft' : '');
     $('adPilotWarning').hidden = !isPilot(a);
     const list = $('items');
     list.replaceChildren();
@@ -299,9 +299,9 @@
     const save = $('saveResponses');
     save.hidden = !canSubmit(a);
     save.disabled = !canSubmit(a);
-    save.textContent=isPilot(a)?'Erantzunak gorde eta proposamenak ikusi':'Erantzunak gorde eta zuzendu';
+    save.textContent=isPilot(a)?'Erantzunak gorde eta berrikusi':'Erantzunak gorde eta zuzendu';
     saveNotice(isPilot(a)
-      ? 'PROBA: erantzunak gordeko dira. Ondoren behin-behineko gakoen proposamenak ikusiko dituzu, notarik gabe. Bidali oharrak galderaz galdera.'
+      ? 'Erantzunak gordeko dira. Ondoren, erantzun-ereduak eta azalpenak ikusiko dituzu, notarik gabe. Nahi baduzu, egin iradokizunak galderaz galdera.'
       : isDraft(a)
       ? 'Barne-aurrebista: ezin da erantzunik gorde.'
       : 'Jatorrizko erantzunak gordeko dira; soilik egiaztatutako gakoak zuzenduko dira.');
@@ -339,15 +339,16 @@
     }
     const s=payload.summary;
     const n=(s.correct || 0)+(s.incorrect || 0);
-    area.append(node('h3',payload.pilot?'Probaren berrikuspena':'Ariketaren emaitza','ad-grade-heading'));
+    area.append(node('h3',payload.pilot?'Ariketaren berrikuspena':'Ariketaren emaitza','ad-grade-heading'));
     const title=payload.pilot
-      ? s.answered+' erantzun gordeta · ez da kalifikaziorik eman'
+      ? s.answered+' erantzun gordeta · eredu orientagarriak eskura'
       : n ? s.correct+' / '+n+' erantzun objektibo zuzen'
       : 'Erantzunak jasota, baina zuzenketa automatiko baliozkorik ez';
     area.append(node('p',title,'ad-grade-count'));
-    if(s.needs_review)area.append(node('p',s.needs_review + ' erantzun irakaslearen berrikuspenaren zain.','ad-grade-detail'));
+    if(s.needs_review && !payload.pilot)
+      area.append(node('p',s.needs_review + ' erantzun irakaslearen berrikuspenaren zain.','ad-grade-detail'));
     area.append(node('p',payload.pilot
-      ? 'Erantzun-ereduak eta azalpenak behin-behineko proposamenak dira. Erabili galdera bakoitzeko oharrak haiek auditatzeko.'
+      ? 'Erantzun-ereduak orientagarriak dira, eta aldaera onargarriak egon daitezke. Ez dira azterketa ofizialaren notak.'
       : 'Barne-praktikako emaitza orientagarria da, ez azterketa ofizialaren nota.','ad-grade-detail'));
     area.hidden=false;
     for(const result of payload.results) {
@@ -360,7 +361,7 @@
       feedback.append(title,msg);
       const details=result.details || {};
       if(payload.pilot && details.pilot_reference_answer_eu) {
-        feedback.append(node('p','PROPOSAMENA (ez egiaztatua): '+details.pilot_reference_answer_eu,'ad-item-solution'));
+        feedback.append(node('p','Erantzun-eredua: '+details.pilot_reference_answer_eu,'ad-item-solution'));
       }
       if(result.outcome==='incorrect' && details.accepted_answer_eu) {
         feedback.append(node('p','Gako egiaztatuko aukera: '+details.accepted_answer_eu,'ad-item-solution'));
@@ -380,7 +381,7 @@
     renderFeedback(result.data);
     $('gradeAgain').hidden=true;
     saveNotice(isPilot(state.current)
-      ? 'Zure erantzunak gordeta. Ereduak behin-behinekoak dira: adierazi zalantzak auditoretzako oharren bidez.'
+      ? 'Erantzunak gordeta. Ikusi eredu orientagarriak eta, nahi baduzu, partekatu zure iradokizunak.'
       : 'Erantzunak eta ebaluazioaren bertsioa gordeta. Zure saiakera historialean geratuko da.');
   }
 

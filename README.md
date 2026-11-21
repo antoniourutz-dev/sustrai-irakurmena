@@ -96,3 +96,15 @@ La portada presenta exactamente tres vías de aprendizaje: **Azterketak** (/azte
 - El catálogo abre `/aditzak/?activity=<uuid>&from=<ruta>`, validando el ID contra lo que devuelve RLS. El ejecutor ADITZAK **no corrige ni publica**.
 - C2 está reservado sin inventar bloques o actividades. La mención `planned` significa contenido pendiente, no publicación.
 - Pruebas obligatorias: anon (taxonomía pública, sin ejercicios), alumno autenticado (sin borradores), admin (6), menú móvil, enlaces directos, navegación atrás, accesibilidad y actualización PWA.
+
+
+## ADITZAK motor de corrección (2026-11-21)
+
+- RPC protegido `public.smx_grade_attempt(uuid)` (invoker), que delega exclusivamente en `smx_private.grade_attempt_v1(uuid)` (definer en esquema no expuesto).
+- Permisos: `anon` no puede ejecutar la RPC ni leer soluciones; `authenticated` no puede hacer SELECT en `smx_private.answer_keys`; la función exige `auth.uid() = smx_attempts.user_id` y versión aprobada con cuatro revisiones y vinculación curricular.
+- Los tipos E02 y E03 pueden corregirse determinísticamente **solo si** `answer_keys.expected_json.status = "validated"`. Los tipos abiertos, otras mecánicas, respuestas inválidas o claves no validadas quedan `needs_review`.
+- La comparación se limita a respuestas explícitamente aceptadas, normalizando solo espacios y mayúsculas. No hace inferencias gramaticales ni penaliza variantes no auditadas de manera definitiva.
+- Evaluaciones append-only en `smx_evaluation_runs`, reintentos idempotentes por `response_id + evaluator_version`; se conserva `smx_attempt_responses.raw_response`.
+- `smx_my_practice_progress()` agrega únicamente los intentos propios, sin conceder notas oficiales.
+- La UI de `/aditzak/` permite guardar, solicitar corrección, recuperar errores de conexión, consultar feedback y repetir creando un nuevo intento. Las soluciones solo aparecen **tras** la entrega y si la clave se ha validado.
+- No se han aprobado ni publicado las seis actividades de la unidad piloto; toda su corrección automática permanece inactiva hasta auditoría.

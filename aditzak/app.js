@@ -5,7 +5,7 @@
   const prefix = /^(?:DRAFT-)?ADI-/i;
   const cloud = window.SustraiCloud;
   const $ = (id) => document.getElementById(id);
-  const state = { client: null, activities: [], items: [], current: null, answers: new Map(), attemptId: null, saving: false };
+  const state = { client: null, activities: [], items: [], current: null, answers: new Map(), attemptId: null, saving: false, progress: new Map() };
   const node = (tag, text, cls) => {
     const out = document.createElement(tag);
     if (text != null) out.textContent = String(text);
@@ -23,6 +23,23 @@
     el.classList.toggle('error', bad);
   };
   const check = (res) => { if (res.error) throw res.error; return res.data || []; };
+  async function loadProgress() {
+    if (!state.client || !cloud?.user()) return;
+    try {
+      const r = await state.client.rpc('smx_my_practice_progress');
+      if (r.error) throw r.error;
+      state.progress = new Map((r.data || []).map(x => [x.activity_version_id, Number(x.attempt_count || 0)]));
+      const attempts = [...state.progress.values()].reduce((n, x) => n+x, 0);
+      const label = $('adProgress');
+      if (label) label.textContent = attempts
+        ? 'Zure aurrerapena: ' + attempts + ' saiakera gordeta. Emaitzak ariketa bakoitzeko berrikus daitezke.'
+        : 'Oraindik ez duzu saiakerarik gorde. Ariketak argitaratu ondoren, hemen ikusiko dituzu.';
+    } catch (err) {
+      console.warn('ADITZAK progress temporarily unavailable',err?.code || 'network');
+      if($('adProgress')) $('adProgress').textContent='Aurrerapena ezin da une honetan kargatu.';
+    }
+  }
+
   const languageLevel = (a) => a.prompt_json?.target_level || '—';
   const titleOf = (a) => a.prompt_json?.title_eu || 'Jarduera';
   const isDraft = (a) => a.status !== 'approved';
@@ -71,6 +88,7 @@
           .order('position')
           .limit(2000));
       }
+      await loadProgress();
       renderCatalog();
       // Deep links always resolve against RLS-visible activity versions.
       const chosenId=new URLSearchParams(location.search).get('activity');
@@ -109,7 +127,10 @@
       const button = node('button', null, 'ad-card');
       button.type = 'button';
       const badge = node('span', isDraft(a) ? 'Berrikusteko · barne-pilotua' : 'Argitaratua', 'ad-badge' + (isDraft(a) ? ' draft' : ''));
-      button.append(badge, node('strong', titleOf(a)), node('small', languageLevel(a) + ' · ' + items.length + ' item · ' + (a.prompt_json?.mechanism_code || a.kind)));
+      const n = state.progress.get(a.id) || 0;
+      const tail = n ? ' · ' + n + ' saiakera' : '';
+      button.append(badge, node('strong', titleOf(a)),
+        node('small', languageLevel(a) + ' · ' + items.length + ' item · ' + (a.prompt_json?.mechanism_code || a.kind) + tail));
       button.addEventListener('click', () => showActivity(a));
       root.append(button);
     }
@@ -119,6 +140,10 @@
     state.current = a;
     state.answers = new Map();
     state.attemptId = null;
+    $('gradeSummary').hidden = true;
+    $('gradeSummary').replaceChildren();
+    $('gradeAgain').hidden = true;
+    $('newAttempt').hidden = true;
     $('activityPanel').hidden = false;
     $('catalog').hidden = true;
     $('levelFilter').disabled = true;
@@ -131,6 +156,7 @@
     list.replaceChildren();
     for (const item of state.items.filter((i) => i.activity_version_id === a.id)) {
       const card = node('div', null, 'ad-item');
+      card.dataset.position=String(item.position);
       const number = node('span', item.position + '. item', 'ad-item-number');
       const label = node('label', item.prompt_eu);
       const fieldId = 'ad-answer-' + item.id;
@@ -173,8 +199,8 @@
     save.hidden = isDraft(a);
     save.disabled = isDraft(a);
     saveNotice(isDraft(a)
-      ? 'Berrikuspen-aurrebista: erantzunak ez dira gordeko, eta soluzioak ez dira erakusten.'
-      : 'Zure jatorrizko erantzunak gordeko dira. Zuzenketa automatikoa ez dago oraindik gaituta.');
+      ? 'Berrikuspen-aurrebista: ez dira erantzunak gordetzen edo soluzioak erakusten.'
+      : 'Jatorrizko erantzunak gordeko dira. Gako akademiko egiaztatua duten E02 eta E03 ariketak soilik zuzenduko dira automatikoki.');
     $('activityPanel').scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
@@ -196,7 +222,61 @@
     $('activityPanel').hidden = true;
     $('catalog').hidden = false;
     $('levelFilter').disabled = false;
+    renderCatalog();
     $('adStatus').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  const outcomeText = { correct:'Zuzena', incorrect:'Berrikusteko', needs_review:'Irakaslearen berrikuspenaren zain', not_scored:'Ebaluatu gabe',partial:'Partziala' };
+  function renderFeedback(payload) {
+    const area=$('gradeSummary');
+    area.replaceChildren();
+    if (!payload || !payload.summary || !Array.isArray(payload.results)) {
+      throw new Error('Bad grade payload');
+    }
+    const s=payload.summary;
+    const n=(s.correct || 0)+(s.incorrect || 0);
+    area.append(node('h3','Ariketaren emaitza','ad-grade-heading'));
+    const title=n
+      ? s.correct + ' / ' + n + ' erantzun objektibo zuzen'
+      : 'Erantzunak jasota, baina zuzenketa automatiko baliozkorik ez';
+    area.append(node('p',title,'ad-grade-count'));
+    if(s.needs_review)area.append(node('p',s.needs_review + ' erantzun irakaslearen berrikuspenaren zain.','ad-grade-detail'));
+    area.append(node('p','Barne-praktikako emaitza orientagarria da, ez azterketa ofizialaren nota.','ad-grade-detail'));
+    area.hidden=false;
+    for(const result of payload.results) {
+      const card=[...$('items').children].find(el=>el.dataset.position===String(result.position));
+      if(!card)continue;
+      card.querySelector('.ad-item-result')?.remove();
+      const feedback=node('div',null,'ad-item-result ad-item-result--'+(outcomeText[result.outcome] ? result.outcome:'needs_review'));
+      const title=node('strong',outcomeText[result.outcome] || 'Berrikuspenaren zain');
+      const msg=node('p',result.feedback_eu || 'Erantzuna gordeta.');
+      feedback.append(title,msg);
+      const details=result.details || {};
+      if(result.outcome==='incorrect' && details.accepted_answer_eu) {
+        feedback.append(node('p','Gako egiaztatuko aukera: '+details.accepted_answer_eu,'ad-item-solution'));
+      }
+      if(details.explanation_eu)feedback.append(node('p',details.explanation_eu,'ad-item-explanation'));
+      card.append(feedback);
+    }
+  }
+
+  async function gradeAttempt() {
+    if(!state.attemptId || !state.client)return;
+    const result=await state.client.rpc('smx_grade_attempt',{p_attempt_id:state.attemptId});
+    if(result.error)throw result.error;
+    renderFeedback(result.data);
+    $('gradeAgain').hidden=true;
+    saveNotice('Erantzunak eta ebaluazioaren bertsioa gordeta. Zure saiakera historialean geratuko da.');
+  }
+
+  async function retryGrade() {
+    const btn=$('gradeAgain');btn.disabled=true;
+    saveNotice('Emaitzak zerbitzaritik eskuratzen…');
+    try {await gradeAttempt();}
+    catch(err) {
+      console.warn('ADITZAK grade retry unavailable',err?.code||'network');
+      saveNotice('Erantzunak gordeta daude; ezin izan da zuzenketa eskuratu. Saiatu berriro.',true);
+    } finally {btn.disabled=false;}
   }
 
   async function save() {
@@ -240,9 +320,19 @@
         .select('item_id').eq('attempt_id', state.attemptId));
       const saved = new Set(after.map((r) => r.item_id));
       if (!selected.every((i) => saved.has(i.id))) throw new Error('Ezin izan da erantzun bakoitza egiaztatu.');
+      // Original answers have been read back and confirmed before requesting evaluation.
       button.hidden = true;
+      $('newAttempt').hidden = false;
       for (const el of $('items').querySelectorAll('input,textarea')) el.disabled = true;
-      saveNotice('Gordeta: ' + selected.length + ' erantzun. Ez da puntuaziorik eman; zuzenketa akademikoa egiteke.');
+      saveNotice('Gordeta: ' + selected.length + ' erantzun. Zuzenketa eskatzen…');
+      await loadProgress();
+      try { await gradeAttempt(); }
+      catch(err) {
+        // Persistence was successful: do NOT present this as a failed save.
+        console.warn('ADITZAK server grading unavailable',err?.code || 'network');
+        $('gradeAgain').hidden=false;
+        saveNotice('Erantzunak gordeta. Zuzenketa ez dago eskuragarri; berreskuratu emaitzak berriz saiatzeko.',true);
+      }
     } catch (err) {
       console.warn('ADITZAK response storage failed', err?.code || 'network');
       saveNotice('Ezin izan da gordetzea baieztatu. Ez itxi orria; saiatu berriro. (' + (err?.code || 'konexioa') + ')', true);
@@ -252,6 +342,10 @@
     }
   }
 
+  $('gradeAgain').addEventListener('click',retryGrade);
+  $('newAttempt').addEventListener('click',()=>{
+    if(state.current && !isDraft(state.current))showActivity(state.current);
+  });
   $('backToCatalog').addEventListener('click', back);
   $('saveResponses').addEventListener('click', save);
   $('levelFilter').addEventListener('change', renderCatalog);

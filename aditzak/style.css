@@ -58,3 +58,19 @@ button,select,textarea{font:inherit}
 /* Parent-area breadcrumb */
 .ad-breadcrumb{display:flex;align-items:center;gap:10px;color:var(--s-muted);font-size:14px;font-weight:600}
 .ad-breadcrumb a{color:var(--s-primary);text-underline-offset:3px}
+
+/* Corrector feedback and progress, present only after submitted and server-verified. */
+.ad-progress{margin:0 0 16px;padding:11px 14px;border:1px solid var(--s-line);border-radius:12px;background:var(--s-paper);font-size:13px;color:var(--s-muted)}
+.ad-grade-summary{margin-top:20px;padding:20px;border:1px solid var(--s-line);border-radius:14px;background:var(--s-surface)}
+.ad-grade-heading{margin:0 0 8px;font:700 19px var(--s-font-display)}
+.ad-grade-count{font-weight:800;font-size:17px;margin:0 0 4px}
+.ad-grade-detail{margin:5px 0;color:var(--s-muted);font-size:13px}
+.ad-item-result{margin-top:16px;padding:14px 16px;border-left:4px solid var(--s-line-strong);border-radius:10px;background:var(--s-surface);font-size:14px;line-height:1.5}
+.ad-item-result strong{display:block}
+.ad-item-result p{margin:6px 0 0}
+.ad-item-result--correct{border-color:var(--s-ok)}
+.ad-item-result--incorrect{border-color:var(--s-bad)}
+.ad-item-result--needs_review,.ad-item-result--not_scored{border-color:var(--s-accent)}
+.ad-item-solution{font-weight:700}
+.ad-item-explanation{color:var(--s-ink-3)}
+.ad-actions .ad-button[hidden],.ad-grade-summary[hidden]{display:none!important}

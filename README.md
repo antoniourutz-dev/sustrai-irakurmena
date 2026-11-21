@@ -21,6 +21,7 @@ theme.css           # Sistema de diseño «Fokua»: tokens (--s-*), fuentes, cab
 start.css / home.js # Estilos y lógica del inicio
 auth.js / auth.css  # Cuenta, sesión y sincronización con Supabase
 fonts/              # Fuentes autoalojadas (Inter, Inter Display, Sustrai Serif) · ver fonts/README.md
+aditzak/            # Catálogo de actividades SMX, vista editorial y captura de respuestas
 irakurmena/         # Catálogo de exámenes de lectura
 ivap/ · habe/       # Taller de lectura (HTML); comparten style.css
 style.css           # Estilos del taller de lectura
@@ -65,3 +66,11 @@ Este repositorio contiene una copia del código de la versión de producción de
 ## Módulos futuros
 
 La arquitectura de datos compartida está preparada para ampliar la plataforma con **Idazlanak** y **Ahozkoak**. Sus interfaces y flujos de evaluación no forman parte de este código inicial.
+
+## ADITZAK · Piloto integrado (2026-11-21)
+
+El módulo de `/aditzak/` consulta las actividades de `smx_activities`, las versiones de `smx_activity_versions` y los ítems de `smx_activity_items` en Supabase Lexikoa. Las RLS limitan a alumnos a actividades aprobadas y autorizan al administrador a previsualizar borradores sin ver las claves. No se transfieren soluciones al navegador.
+
+Las actividades aprobadas pueden almacenar intentos en `smx_attempts` y respuestas originales en `smx_attempt_responses`. **La corrección automática todavía no está conectada**, y la interfaz no debe mostrar aciertos/puntuaciones. Las seis actividades B2 y 28 ítems actuales permanecen en estado `draft`; solo aparecen para la administración. El modo de previsualización no guarda intentos.
+
+Revisar antes de fusionar: carga con sesión administradora, ocultación para alumno, permisos RLS en REST, respuesta del servicio de guardado, accesibilidad móvil y versión PWA. No habilitar los cuatro controles `*_ok` ni promover actividades sin una auditoría independiente.

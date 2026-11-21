@@ -40,6 +40,16 @@
     }
   }
 
+  // Fisher–Yates shuffle: prevent positional clues, e.g. the first option
+  // being correct in each of the initial six objective items.
+  const mixedOptions = (choices) => {
+    const values = [...choices];
+    for (let i = values.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [values[i], values[j]] = [values[j], values[i]];
+    }
+    return values;
+  };
   const languageLevel = (a) => a.prompt_json?.target_level || '—';
   const titleOf = (a) => a.prompt_json?.title_eu || 'Jarduera';
   const isDraft = (a) => a.status !== 'approved';
@@ -171,7 +181,7 @@
         const group = node('div', null, 'ad-options');
         group.setAttribute('role', 'radiogroup');
         group.setAttribute('aria-label', item.prompt_eu);
-        item.public_payload.choices.forEach((choice, index) => {
+        mixedOptions(item.public_payload.choices).forEach((choice, index) => {
           const option = node('label', null, 'ad-option');
           const input = node('input');
           input.type = 'radio';

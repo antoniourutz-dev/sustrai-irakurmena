@@ -72,6 +72,22 @@
           .limit(2000));
       }
       renderCatalog();
+      // Deep links always resolve against RLS-visible activity versions.
+      const chosenId=new URLSearchParams(location.search).get('activity');
+      if(chosenId && /^[0-9a-f-]{36}$/i.test(chosenId)) {
+        const selected=state.activities.find(a=>a.id===chosenId);
+        if(selected) showActivity(selected);
+      }
+      const from=new URLSearchParams(location.search).get('from');
+      if(from) {
+        try {
+          const url=new URL(from,location.origin);
+          if(url.origin===location.origin && url.pathname==='/ariketak/') {
+            const backLink=document.querySelector('.ad-breadcrumb a');
+            if(backLink)backLink.href=url.pathname+url.search;
+          }
+        } catch { /* Ignore invalid external destinations. */ }
+      }
     } catch (err) {
       console.warn('ADITZAK catalog query failed', err?.code || 'network');
       status('Ezin dira jarduerak irakurri. Egiaztatu konexioa eta berriro kargatu.', true);

@@ -1,5 +1,5 @@
 /* SUSTRAI PWA service worker */
-const CACHE_VERSION = 'sustrai-pwa-v28-catalog-compact';
+const CACHE_VERSION = 'sustrai-pwa-v29-aditzak-pilot';
 const SHELL = [
   '/',
   '/index.html',
@@ -50,6 +50,10 @@ const SHELL = [
   '/icons/apple-touch-icon.png',
   '/icons/favicon-32.png',
   '/icons/icon.svg',
+  '/aditzak/',
+  '/aditzak/index.html',
+  '/aditzak/app.js',
+  '/aditzak/style.css',
   '/irakurmena/',
   '/irakurmena/index.html',
   '/irakurmena/style.css',
@@ -128,6 +132,7 @@ self.addEventListener('fetch', (event) => {
           if (cached) return cached;
           if (url.pathname.startsWith('/ivap/')) return caches.match('/ivap/index.html');
           if (url.pathname.startsWith('/habe/')) return caches.match('/habe/index.html');
+          if (url.pathname.startsWith('/aditzak/')) return caches.match('/aditzak/index.html');
           if (url.pathname.startsWith('/irakurmena/')) return caches.match('/irakurmena/index.html');
           if (url.pathname.startsWith('/idazlanak/')) return caches.match('/idazlanak/index.html');
           if (url.pathname.startsWith('/ahozkoa/')) return caches.match('/ahozkoa/index.html');

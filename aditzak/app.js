@@ -110,7 +110,17 @@
       const chosenId=new URLSearchParams(location.search).get('activity');
       if(chosenId && /^[0-9a-f-]{36}$/i.test(chosenId)) {
         const selected=state.activities.find(a=>a.id===chosenId);
-        if(selected) showActivity(selected);
+        if(selected){
+          showActivity(selected);
+          const itemPosition=new URLSearchParams(location.search).get('item');
+          if(itemPosition && /^[1-9][0-9]{0,2}$/.test(itemPosition)){
+            const anchor=$('ad-item-'+itemPosition);
+            if(anchor){
+              anchor.focus({preventScroll:true});
+              anchor.scrollIntoView({behavior:'auto',block:'start'});
+            }
+          }
+        }
       }
       const from=new URLSearchParams(location.search).get('from');
       if(from) {
@@ -175,6 +185,10 @@
     for(const [value,label] of [['normal','Arrunta'],['high','Garrantzitsua'],['blocking','Larria'],['low','Arina']]){
       const option=node('option',label);option.value=value;priority.append(option);
     }
+    const suggestion=node('textarea',null,'ad-finding-input');
+    suggestion.maxLength=2000;suggestion.rows=2;
+    suggestion.placeholder='Nahi baduzu, proposatu formulazio edo erantzun egokiago bat…';
+    suggestion.setAttribute('aria-label','Proposatutako zuzenketa (aukerakoa)');
     const comment=node('textarea',null,'ad-finding-input');
     comment.required=true;comment.maxLength=3000;comment.minLength=5;comment.rows=3;
     comment.placeholder='Zein da arazoa? Nola konponduko zenuke?';
@@ -182,7 +196,7 @@
     const send=node('button','Oharra bidali','ad-button');
     send.type='submit';
     const message=node('p',null,'ad-finding-status');message.setAttribute('role','status');
-    form.append(category,priority,comment,send,message);
+    form.append(category,priority,comment,suggestion,send,message);
     form.addEventListener('submit',async(event)=>{
       event.preventDefault();
       if(!form.reportValidity())return;
@@ -191,11 +205,12 @@
         const {error}=await state.client.from('smx_aditzak_pilot_findings').insert({
           activity_version_id:a.id,item_id:item.id,
           attempt_id:state.attemptId||null,
-          category:category.value,priority:priority.value,comment_eu:comment.value.trim()
+          category:category.value,priority:priority.value,comment_eu:comment.value.trim(),
+          suggested_text:suggestion.value.trim()||null
         });
         if(error)throw error;
         message.textContent='Jasota: zure oharra auditoretzarako gorde da.';
-        comment.value='';
+        comment.value='';suggestion.value='';
       }catch(err){
         console.warn('Pilot finding error',err?.code||'network');
         message.textContent='Ez da oharra gorde. Saiatu berriro.';
@@ -232,6 +247,8 @@
     for (const item of state.items.filter((i) => i.activity_version_id === a.id)) {
       const card = node('div', null, 'ad-item');
       card.dataset.position=String(item.position);
+      card.id='ad-item-'+item.position;
+      card.tabIndex=-1;
       const number = node('span', item.position + '. item', 'ad-item-number');
       const label = node('label', item.prompt_eu);
       const fieldId = 'ad-answer-' + item.id;
@@ -282,6 +299,7 @@
     const save = $('saveResponses');
     save.hidden = !canSubmit(a);
     save.disabled = !canSubmit(a);
+    save.textContent=isPilot(a)?'Erantzunak gorde eta proposamenak ikusi':'Erantzunak gorde eta zuzendu';
     saveNotice(isPilot(a)
       ? 'PROBA: erantzunak gordeko dira. Ondoren behin-behineko gakoen proposamenak ikusiko dituzu, notarik gabe. Bidali oharrak galderaz galdera.'
       : isDraft(a)

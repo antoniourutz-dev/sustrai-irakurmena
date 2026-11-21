@@ -3,7 +3,7 @@
 (() => {
   const $ = (id) => document.getElementById(id);
   const kit = () => window.SustraiAccountKit;
-  const s = { client: null, users: [], contents: [], rules: [], grants: [], selected: null, kind: 'reading', works: [], results: [], filter: 'all', adPilotMembers: [], adPilotFindings: [] };
+  const s = { client: null, users: [], contents: [], rules: [], grants: [], selected: null, kind: 'reading', works: [], results: [], filter: 'all', adPilotMembers: [], adPilotFindings: [], adPilotSummary: [], adPilotItems: [] };
   const status = (message) => { $('status').textContent = message; };
   const el = (tag, text, cls) => {
     const n = document.createElement(tag);
@@ -21,7 +21,7 @@
 
   async function load() {
     status('Ikasleak eta edukiak kargatzen…');
-    const [students, exams, pilots, writings, orals, rules, grants, adPilotMembers, adPilotFindings] = await Promise.all([
+    const [students, exams, pilots, writings, orals, rules, grants, adPilotMembers, adPilotFindings, adPilotSummary] = await Promise.all([
       s.client.rpc('sr_admin_students'),
       fetchList('sr_exams', 'id,slug,title,publication_status'),
       s.client.rpc('sr_admin_pilot_readings'),
@@ -30,12 +30,15 @@
       fetchList('sr_app_content_rules', 'kind,resource_id,guest_visible,member_visible'),
       fetchList('sr_app_grants', 'user_id,kind,resource_id,allowed'),
       fetchList('smx_aditzak_pilot_members', 'user_id,enabled,member_role,enrolled_at,changed_at'),
-      fetchList('smx_aditzak_pilot_findings','id,user_id,activity_version_id,item_id,category,priority,comment_eu,status,created_at')
+      fetchList('smx_aditzak_pilot_findings','id,user_id,activity_version_id,item_id,category,priority,comment_eu,suggested_text,status,created_at'),
+      s.client.rpc('smx_aditzak_pilot_summary')
     ]);
     if (students.error) throw students.error;
     if (!Array.isArray(students.data)) throw new Error('Administratzaile-baimenik ez.');
     if (pilots.error) throw pilots.error;
     if (!Array.isArray(pilots.data)) throw new Error('Pilotuko probak ezin izan dira kargatu.');
+    if (adPilotSummary.error) throw adPilotSummary.error;
+    if (!Array.isArray(adPilotSummary.data)) throw new Error('ADITZAK pilotuaren estatistikak ezin izan dira kargatu.');
     s.users = students.data;
     s.contents = [
       ...exams.filter((e) => e.publication_status === 'published').map((e) => ({ kind: 'reading', id: e.id, label: e.title || e.slug, info: e.slug, slug: e.slug })),
@@ -53,6 +56,15 @@
     s.grants = grants;
     s.adPilotMembers=adPilotMembers;
     s.adPilotFindings=adPilotFindings;
+    s.adPilotSummary=adPilotSummary.data;
+    const versionIds=s.adPilotSummary.map(row=>row.activity_version_id);
+    if(versionIds.length){
+      const r=await s.client.from('smx_activity_items')
+        .select('id,activity_version_id,position,prompt_eu')
+        .in('activity_version_id',versionIds).limit(300);
+      if(r.error)throw r.error;
+      s.adPilotItems=r.data||[];
+    }else{s.adPilotItems=[];}
     if (s.selected && !s.users.some((u) => u.id === s.selected)) s.selected = null;
     render();
     if (s.selected) await loadStudent(s.selected);
@@ -399,39 +411,125 @@
   }
 
 
+  const AD_FINDING_STATES={
+    new:'Berria',triaged:'Sailkatua',accepted:'Onartua',
+    rejected:'Baztertua',resolved:'Konponduta'
+  };
+  const AD_FINDING_TRANSITIONS={
+    new:['triaged','accepted','rejected'],
+    triaged:['accepted','rejected','resolved'],
+    accepted:['triaged','resolved'],
+    rejected:['triaged'],
+    resolved:['triaged']
+  };
   function renderAdPilot() {
-    const list=$('adPilotMembers');
-    const select=$('adPilotTester');
-    const previous=select.value;
+    const list=$('adPilotMembers'), select=$('adPilotTester'), previous=select.value;
     select.replaceChildren();
-    for(const user of s.users) {
-      const option=el('option',(user.name||user.email)+' · '+user.email);
-      option.value=user.id;option.disabled=!user.active;select.append(option);
+    for(const user of s.users){
+      const opt=el('option',(user.name||user.email)+' · '+user.email);
+      opt.value=user.id;opt.disabled=!user.active;select.append(opt);
     }
     if(s.selected && s.users.some(u=>u.id===s.selected))select.value=s.selected;
     else if(previous && s.users.some(u=>u.id===previous))select.value=previous;
     const current=s.adPilotMembers.filter(m=>m.enabled);
     list.replaceChildren();
-    list.append(el('p',current.length+' probatzaile aktibo (unitate honetarako soilik).','subtle'));
+    list.append(el('p',current.length+' probatzaile aktibo. Gainerako kontuek ezin dute unitate hau ireki.','subtle'));
     for(const member of current){
       const user=s.users.find(u=>u.id===member.user_id);
-      list.append(el('p',user?(user.name||user.email)+' · '+user.email:'Erabiltzaile ezezaguna','subtle'));
+      list.append(el('p',user ? (user.name||user.email)+' · '+user.email : 'Identifikatu gabeko kontua','subtle'));
     }
-    const feedback=$('adPilotFindings');
-    feedback.replaceChildren();
-    if(!s.adPilotFindings.length){
-      feedback.append(el('p','Oraindik ez da auditoria-oharrik jaso.','subtle'));
-    } else {
-      for(const finding of [...s.adPilotFindings].sort((a,b)=>String(b.created_at).localeCompare(String(a.created_at))).slice(0,60)){
-        const u=s.users.find(user=>user.id===finding.user_id);
-        const card=el('article',undefined,'ad-pilot-finding');
-        card.append(
-          el('strong',(u?.name||u?.email||'Probatzailea')+' · '+finding.category+' · '+finding.priority),
-          el('small',new Date(finding.created_at).toLocaleString('eu-ES')+' · '+finding.status),
-          el('p',finding.comment_eu));
-        feedback.append(card);
+
+    const overview=$('adPilotOverview');
+    overview.replaceChildren();
+    const total=s.adPilotSummary.reduce((acc,x)=>({
+      attempts:acc.attempts+Number(x.attempts||0),
+      answers:acc.answers+Number(x.answers||0),
+      findings:acc.findings+Number(x.findings||0),
+      open:acc.open+Number(x.open_findings||0)
+    }),{attempts:0,answers:0,findings:0,open:0});
+    const totals=el('p',s.adPilotSummary.length+' jarduera · '+total.attempts+' saiakera · '+total.answers
+      +' erantzun · '+total.findings+' ohar · '+total.open+' erabaki gabe','ad-pilot-totals');
+    overview.append(totals);
+    for(const row of s.adPilotSummary){
+      const card=el('article',undefined,'ad-pilot-activity');
+      const code=String(row.code||'').split('-').pop();
+      const link=el('a',code+' · '+(row.title||'Jarduera'));
+      link.href='/aditzak/?activity='+encodeURIComponent(row.activity_version_id);
+      const parts=el('p',row.item_count+' galdera · '+row.attempts+' saiakera · '+row.participants
+        +' probatzaile · '+row.findings+' ohar ('+row.open_findings+' irekita)','subtle');
+      card.append(link,parts);
+      if(Number(row.blocking_findings)>0)card.append(el('strong',row.blocking_findings+' ohar larri argitu gabe','ad-pilot-blocking'));
+      overview.append(card);
+    }
+    renderAdPilotFindings();
+  }
+
+  function renderAdPilotFindings(){
+    const root=$('adPilotFindings');
+    root.replaceChildren();
+    const filter=$('adPilotFindingsStatus').value;
+    const selected=s.adPilotFindings
+      .filter(f=>filter==='all'||f.status===filter)
+      .sort((a,b)=>String(b.created_at).localeCompare(String(a.created_at)));
+    $('adPilotFindingsCount').textContent=selected.length+' ohar ikusgai';
+    if(!selected.length){
+      root.append(el('p','Ez dago egoera honetako oharrik.','subtle'));
+      return;
+    }
+    for(const finding of selected.slice(0,120)){
+      const user=s.users.find(u=>u.id===finding.user_id);
+      const item=s.adPilotItems.find(i=>i.id===finding.item_id);
+      const activity=s.adPilotSummary.find(a=>a.activity_version_id===finding.activity_version_id);
+      const card=el('article',undefined,'ad-pilot-finding');
+      const title=el('strong',(user?.name||user?.email||'Probatzailea')+' · '+finding.category+' · '+finding.priority);
+      const itemLink=el('a',(activity?.code||'Jarduera').split('-').pop()
+        +(item?' · '+item.position+'. galdera':' · Ohar orokorra'));
+      itemLink.href='/aditzak/?activity='+encodeURIComponent(finding.activity_version_id)
+        +(item?'&item='+encodeURIComponent(item.position):'');
+      const meta=el('small',new Date(finding.created_at).toLocaleString('eu-ES')
+        +' · '+(AD_FINDING_STATES[finding.status]||finding.status));
+      card.append(title,itemLink,meta);
+      if(item)card.append(el('p',item.prompt_eu.slice(0,170),'ad-pilot-item-prompt'));
+      card.append(el('p',finding.comment_eu));
+      if(finding.suggested_text)card.append(el('p','Proposamena: '+finding.suggested_text,'ad-pilot-suggestion'));
+      const transitions=AD_FINDING_TRANSITIONS[finding.status]||[];
+      if(!transitions.length){root.append(card);continue;}
+      const form=el('form',undefined,'ad-pilot-triage');
+      const action=el('select');
+      action.setAttribute('aria-label','Erabakiaren egoera');
+      for(const next of transitions){
+        const option=el('option',AD_FINDING_STATES[next]||next);option.value=next;action.append(option);
       }
+      const why=el('textarea');
+      why.rows=2;why.maxLength=1500;why.minLength=10;why.required=true;
+      why.placeholder='Arrazoibidea (gutxienez 10 karaktere)';
+      why.setAttribute('aria-label','Erabakiaren arrazoibidea');
+      const save=el('button','Erabakia gorde','soft');
+      save.type='submit';
+      const msg=el('small');msg.setAttribute('role','status');
+      form.append(action,why,save,msg);
+      form.addEventListener('submit',async(event)=>{
+        event.preventDefault();
+        if(!form.reportValidity())return;
+        save.disabled=true;
+        msg.textContent='Erabakia gordetzen…';
+        try{
+          const result=await s.client.rpc('smx_aditzak_pilot_triage',{
+            p_finding_id:finding.id,p_next_status:action.value,p_reason_eu:why.value.trim()
+          });
+          if(result.error)throw result.error;
+          // Read the canonical state, preserving historical decisions server-side.
+          await load();
+          status('ADITZAK oharra berrikusia. Ebazpena eta arrazoia erregistratuta.');
+        }catch(err){
+          msg.textContent='Ezin izan da gorde: '+(err.message||'errorea');
+          save.disabled=false;
+        }
+      });
+      card.append(form);
+      root.append(card);
     }
+    if(selected.length>120)root.append(el('p','Lehen 120 oharrak erakusten dira. Iragazi egoeraren arabera.','subtle'));
   }
 
   async function setAdPilot(enabled) {
@@ -481,6 +579,7 @@
     $('refresh').onclick = () => load().catch((e) => status(e.message));
     $('adPilotEnable').onclick=()=>setAdPilot(true);
     $('adPilotDisable').onclick=()=>setAdPilot(false);
+    $('adPilotFindingsStatus').onchange=renderAdPilotFindings;
     $('studentSearch').oninput = renderStudents;
     $('contentSearch').oninput = renderContent;
     $('contentState').onchange = renderContent;

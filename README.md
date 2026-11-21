@@ -120,3 +120,12 @@ The six B2 `Indikatiboa lehenaldian` activity revisions **2** have been released
 - `smx_aditzak_pilot_review_attempt`: after persisting own answer, tester sees a **provisional, unverified reference** and draft explanation, **no correctness verdict or score**. Never exposes raw answer keys before submission or outside membership.
 - ADITZAK UI distinguishes pilot releases from approved content, stores actual answers, has optional self-transcription for oral tasks (no audio assessment), shows proposed explanations, and accepts individual findings. The admin panel can enroll/revoke testers and inspect their findings.
 - **Do not merge into production** without authentic user and mobile E2E tests. The release applies only to Vercel preview and controlled Supabase RLS; the database is shared with production, so all policies were designed to preserve ordinary student access.
+
+## ADITZAK pilot audit management (2026-11-21)
+
+- `public.smx_aditzak_pilot_summary()`: admin-only aggregate by released activity. Returns counts of submissions, answers, participants and findings, never answer bodies.
+- `public.smx_aditzak_pilot_triage(uuid,text,text)`: admin-only reasoned transitions for issue status; every change is recorded in `smx_aditzak_pilot_decisions`, readable only by authorized admins. Does not approve academic content.
+- Admin UI shows per-activity beta progress and structured findings, can filter by state, navigate to the exact item and save a reasoned decision.
+- Tester feedback form now includes an optional proposed correction (stored separately from the verbatim issue).
+- Pilot answer button explicitly promises **provisional answers** rather than validated grading.
+- Authorization and audit lifecycle verified using a transaction fully rolled back. No actual tester automatically enrolled.

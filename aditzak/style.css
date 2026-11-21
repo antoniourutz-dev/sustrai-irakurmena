@@ -89,3 +89,6 @@ button,select,textarea{font:inherit}
 .ad-finding-form button{justify-self:start}
 .ad-finding-status{margin:0;color:var(--s-muted);font-size:13px}
 .ad-finding-form select:focus-visible,.ad-finding-form textarea:focus-visible{outline:3px solid var(--s-primary);outline-offset:2px}
+
+.ad-item:focus{outline:2px solid var(--s-primary);outline-offset:3px;scroll-margin-top:100px}
+.ad-finding-input{font-size:14px}

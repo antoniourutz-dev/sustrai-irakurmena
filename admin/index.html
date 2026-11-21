@@ -16,7 +16,7 @@
   <link rel="preload" href="/fonts/inter-display-700.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="/theme.css?v=20261121-nav1">
   <link rel="stylesheet" href="/auth.css?v=20261117-ezabatu">
-<link rel="stylesheet" href="/admin/admin.css?v=20261121-aditzak-pilot1">
+<link rel="stylesheet" href="/admin/admin.css?v=20261121-aditzak-triage1">
 <link rel="stylesheet" href="/mi-espacio/space.css?v=20261117-ezabatu">
 <link rel="stylesheet" href="/hitzbira.css?v=20261117-ezabatu"></head>
 <body class="has-tabbar">
@@ -57,7 +57,22 @@
       <p id="adPilotMessage" class="subtle" role="status" aria-live="polite"></p>
       <div id="adPilotMembers" class="continue-list"></div>
     </div>
-    <h3>Jasotako auditoria-oharrak</h3>
+    <h3>Proba-jardueraren jarraipena</h3>
+    <div id="adPilotOverview" class="ad-pilot-overview"></div>
+    <div class="ad-pilot-findings-header">
+      <h3>Jasotako auditoria-oharrak</h3>
+      <label for="adPilotFindingsStatus">Egoera</label>
+      <select id="adPilotFindingsStatus">
+        <option value="all">Denak</option>
+        <option value="new">Berriak</option>
+        <option value="triaged">Sailkatuak</option>
+        <option value="accepted">Onartuak</option>
+        <option value="rejected">Baztertuak</option>
+        <option value="resolved">Konponduak</option>
+      </select>
+      <span id="adPilotFindingsCount" class="subtle"></span>
+    </div>
+    <p class="subtle">Ohar bat onartzeak ez du ariketa akademikoki onartzen. Erabaki bakoitzaren arrazoia historian gordetzen da.</p>
     <div id="adPilotFindings" class="continue-list"></div>
   </section>
   <section class="stats" id="stats"></section>
@@ -117,7 +132,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.0" defer></script>
 <script src="/auth.js?v=20261117-ezabatu" defer></script>
 <script src="/account-kit.js?v=20261117-ezabatu" defer></script>
-<script src="/admin/admin.js?v=20261121-aditzak-pilot1" defer></script>
+<script src="/admin/admin.js?v=20261121-aditzak-triage1" defer></script>
 <script src="/pwa.js?v=20261117-ezabatu" defer></script>
 </body>
 </html>

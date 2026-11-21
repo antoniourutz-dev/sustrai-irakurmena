@@ -3,7 +3,7 @@
 (() => {
   const $ = (id) => document.getElementById(id);
   const kit = () => window.SustraiAccountKit;
-  const s = { client: null, users: [], contents: [], rules: [], grants: [], selected: null, kind: 'reading', works: [], results: [], filter: 'all' };
+  const s = { client: null, users: [], contents: [], rules: [], grants: [], selected: null, kind: 'reading', works: [], results: [], filter: 'all', adPilotMembers: [], adPilotFindings: [] };
   const status = (message) => { $('status').textContent = message; };
   const el = (tag, text, cls) => {
     const n = document.createElement(tag);
@@ -21,14 +21,16 @@
 
   async function load() {
     status('Ikasleak eta edukiak kargatzen…');
-    const [students, exams, pilots, writings, orals, rules, grants] = await Promise.all([
+    const [students, exams, pilots, writings, orals, rules, grants, adPilotMembers, adPilotFindings] = await Promise.all([
       s.client.rpc('sr_admin_students'),
       fetchList('sr_exams', 'id,slug,title,publication_status'),
       s.client.rpc('sr_admin_pilot_readings'),
       fetchList('sr_writing_prompts', 'id,slug,title_eu,exam_reference,publication_status'),
       fetchList('sr_speaking_prompts', 'id,slug,title_eu,exam_reference,publication_status'),
       fetchList('sr_app_content_rules', 'kind,resource_id,guest_visible,member_visible'),
-      fetchList('sr_app_grants', 'user_id,kind,resource_id,allowed')
+      fetchList('sr_app_grants', 'user_id,kind,resource_id,allowed'),
+      fetchList('smx_aditzak_pilot_members', 'user_id,enabled,member_role,enrolled_at,changed_at'),
+      fetchList('smx_aditzak_pilot_findings','id,user_id,activity_version_id,item_id,category,priority,comment_eu,status,created_at')
     ]);
     if (students.error) throw students.error;
     if (!Array.isArray(students.data)) throw new Error('Administratzaile-baimenik ez.');
@@ -49,6 +51,8 @@
     ];
     s.rules = rules;
     s.grants = grants;
+    s.adPilotMembers=adPilotMembers;
+    s.adPilotFindings=adPilotFindings;
     if (s.selected && !s.users.some((u) => u.id === s.selected)) s.selected = null;
     render();
     if (s.selected) await loadStudent(s.selected);
@@ -394,10 +398,73 @@
     status('Kontuaren egoera eguneratua.');
   }
 
+
+  function renderAdPilot() {
+    const list=$('adPilotMembers');
+    const select=$('adPilotTester');
+    const previous=select.value;
+    select.replaceChildren();
+    for(const user of s.users) {
+      const option=el('option',(user.name||user.email)+' · '+user.email);
+      option.value=user.id;option.disabled=!user.active;select.append(option);
+    }
+    if(s.selected && s.users.some(u=>u.id===s.selected))select.value=s.selected;
+    else if(previous && s.users.some(u=>u.id===previous))select.value=previous;
+    const current=s.adPilotMembers.filter(m=>m.enabled);
+    list.replaceChildren();
+    list.append(el('p',current.length+' probatzaile aktibo (unitate honetarako soilik).','subtle'));
+    for(const member of current){
+      const user=s.users.find(u=>u.id===member.user_id);
+      list.append(el('p',user?(user.name||user.email)+' · '+user.email:'Erabiltzaile ezezaguna','subtle'));
+    }
+    const feedback=$('adPilotFindings');
+    feedback.replaceChildren();
+    if(!s.adPilotFindings.length){
+      feedback.append(el('p','Oraindik ez da auditoria-oharrik jaso.','subtle'));
+    } else {
+      for(const finding of [...s.adPilotFindings].sort((a,b)=>String(b.created_at).localeCompare(String(a.created_at))).slice(0,60)){
+        const u=s.users.find(user=>user.id===finding.user_id);
+        const card=el('article',undefined,'ad-pilot-finding');
+        card.append(
+          el('strong',(u?.name||u?.email||'Probatzailea')+' · '+finding.category+' · '+finding.priority),
+          el('small',new Date(finding.created_at).toLocaleString('eu-ES')+' · '+finding.status),
+          el('p',finding.comment_eu));
+        feedback.append(card);
+      }
+    }
+  }
+
+  async function setAdPilot(enabled) {
+    const select=$('adPilotTester');
+    const id=select.value;
+    const user=s.users.find(u=>u.id===id);
+    if(!user || (enabled && !user.active)){
+      $('adPilotMessage').textContent='Aukeratu kontu aktibo bat.';
+      return;
+    }
+    const btns=[$('adPilotEnable'),$('adPilotDisable')];
+    btns.forEach(b=>b.disabled=true);
+    $('adPilotMessage').textContent='Baimena gordetzen…';
+    try {
+      const {error}=await s.client.rpc('smx_aditzak_pilot_set_tester',{p_user_id:id,p_enabled:enabled});
+      if(error)throw error;
+      const rows=await fetchList('smx_aditzak_pilot_members','user_id,enabled,member_role,enrolled_at,changed_at');
+      s.adPilotMembers=rows;
+      renderAdPilot();
+      select.value=id;
+      $('adPilotMessage').textContent=enabled
+        ? 'Probatzailearen sarbidea gaituta. Orain ADITZAKen sei ariketak probatu eta auditatu ditzake.'
+        : 'Sarbidea kenduta. Aurretik gordetako oharrak eta saiakerak kontserbatzen dira.';
+    }catch(err){
+      $('adPilotMessage').textContent='Errorea: '+(err.message||'Baimena ezin izan da eguneratu.');
+    }finally{btns.forEach(b=>b.disabled=false);}
+  }
+
   function render() {
     renderStats();
     renderStudents();
     renderContent();
+    renderAdPilot();
   }
 
   async function start() {
@@ -412,6 +479,8 @@
     }
     $('adminPanels').hidden = false;
     $('refresh').onclick = () => load().catch((e) => status(e.message));
+    $('adPilotEnable').onclick=()=>setAdPilot(true);
+    $('adPilotDisable').onclick=()=>setAdPilot(false);
     $('studentSearch').oninput = renderStudents;
     $('contentSearch').oninput = renderContent;
     $('contentState').onchange = renderContent;

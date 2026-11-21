@@ -58,3 +58,12 @@ label{font-size:12px;font-weight:700;display:grid;gap:6px}input,select{width:100
 /* Editorial pilot content: review-only status, never a global publication control. */
 .material-row.is-pilot .material-state{background:var(--s-bg);border:1px solid var(--s-line);padding:6px 8px}
 .material-row.is-pilot .material-state small{color:var(--s-ink-2);font-size:12px;font-weight:700}
+
+.ad-pilot-manager{display:grid;gap:10px;margin:12px 0 20px}
+.ad-pilot-manager label{font-weight:750;font-size:14px}
+.ad-pilot-manager select{min-height:44px;width:100%;max-width:550px;border:1px solid var(--s-line-strong);border-radius:10px;padding:10px;background:var(--s-surface);color:var(--s-ink)}
+.ad-pilot-buttons{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.ad-pilot-finding{padding:13px 15px;border:1px solid var(--s-line);border-radius:12px;margin:9px 0;background:var(--s-paper);display:grid;gap:5px}
+.ad-pilot-finding strong{font-size:14px}
+.ad-pilot-finding small{color:var(--s-muted)}
+.ad-pilot-finding p{margin:0;white-space:pre-wrap;overflow-wrap:anywhere;font-size:14px}

@@ -1,5 +1,5 @@
 /* SUSTRAI PWA service worker */
-const CACHE_VERSION = 'sustrai-pwa-v32-aditzak-grader';
+const CACHE_VERSION = 'sustrai-pwa-v33-aditzak-selected-testers';
 const SHELL = [
   '/',
   '/index.html',

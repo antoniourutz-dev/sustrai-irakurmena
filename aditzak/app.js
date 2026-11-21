@@ -5,7 +5,7 @@
   const prefix = /^(?:DRAFT-)?ADI-/i;
   const cloud = window.SustraiCloud;
   const $ = (id) => document.getElementById(id);
-  const state = { client: null, activities: [], items: [], current: null, answers: new Map(), attemptId: null, saving: false, progress: new Map() };
+  const state = { client: null, activities: [], items: [], current: null, answers: new Map(), attemptId: null, saving: false, progress: new Map(), pilotVersions: new Set() };
   const node = (tag, text, cls) => {
     const out = document.createElement(tag);
     if (text != null) out.textContent = String(text);
@@ -53,6 +53,8 @@
   const languageLevel = (a) => a.prompt_json?.target_level || '—';
   const titleOf = (a) => a.prompt_json?.title_eu || 'Jarduera';
   const isDraft = (a) => a.status !== 'approved';
+  const isPilot = (a) => !!a && state.pilotVersions.has(a.id);
+  const canSubmit = (a) => !!a && (!isDraft(a) || isPilot(a));
 
   async function load() {
     await cloud?.ready;
@@ -78,6 +80,10 @@
         renderCatalog();
         return;
       }
+      // Server RLS restricts releases to appointed testers and administrators.
+      const releaseRows = check(await state.client.from('smx_aditzak_pilot_releases')
+        .select('activity_version_id').eq('active', true).limit(100));
+      state.pilotVersions = new Set(releaseRows.map(x=>x.activity_version_id));
       const ids = activities.map((a) => a.id);
       const versions = check(await state.client.from('smx_activity_versions')
         .select('id,activity_id,revision,prompt_json,status,linguistic_ok,factual_ok,pedagogical_ok,traceability_ok')
@@ -128,15 +134,18 @@
     const level = $('levelFilter').value;
     const all = state.activities.filter((a) => level === 'all' || languageLevel(a) === level);
     const approved = all.filter((a) => !isDraft(a));
-    const draft = all.filter(isDraft);
+    const pilot = all.filter(isPilot);
+    const draft = all.filter(a => isDraft(a) && !isPilot(a));
     status(all.length
-      ? approved.length + ' jarduera argitaratu' + (draft.length ? ' · ' + draft.length + ' berrikusteko (administratzaileak bakarrik)' : '')
-      : 'Oraindik ez dago jarduera argitaraturik. Edukiak berrikusten ari gara.');
+      ? approved.length+' egiaztatutako jarduera · '+pilot.length+' probetan'
+        +(draft.length?' · '+draft.length+' barne-zirriborro':'')
+      : 'Ez duzu argitaratutako edo baimendutako jarduerarik.');
     for (const a of all) {
       const items = state.items.filter((i) => i.activity_version_id === a.id);
       const button = node('button', null, 'ad-card');
       button.type = 'button';
-      const badge = node('span', isDraft(a) ? 'Berrikusteko · barne-pilotua' : 'Argitaratua', 'ad-badge' + (isDraft(a) ? ' draft' : ''));
+      const badge = node('span', isPilot(a)?'PROBA · Ez egiaztatua':isDraft(a)?'Barne-zirriborroa':'Argitaratua',
+        'ad-badge' + (isDraft(a) ? ' draft' : ''));
       const n = state.progress.get(a.id) || 0;
       const tail = n ? ' · ' + n + ' saiakera' : '';
       button.append(badge, node('strong', titleOf(a)),
@@ -144,6 +153,55 @@
       button.addEventListener('click', () => showActivity(a));
       root.append(button);
     }
+  }
+
+
+  // Findings are authored by the tester; they do not constitute a signed
+  // editorial review or an official academic approval.
+  function appendFindingForm(card, a, item) {
+    const details=node('details',null,'ad-finding');
+    details.append(node('summary','Ohartarazi zalantza edo akatsa'));
+    const form=node('form',null,'ad-finding-form');
+    const categories=[
+      ['arau_akatsa','Arau-akatsa'],['aldaera_onargarria','Aldaera onargarria'],
+      ['erantzun_proposatua','Beste erantzun bat'],['azalpena','Azalpena'],
+      ['zailtasuna','Zailtasuna'],['erabilgarritasuna','Erabilgarritasuna'],
+      ['teknikoa','Arazo teknikoa'],['bestelakoa','Bestelakoa']
+    ];
+    const category=node('select');category.required=true;
+    category.setAttribute('aria-label',item.position+'. galderako oharraren mota');
+    for(const [value,label] of categories){const option=node('option',label);option.value=value;category.append(option);}
+    const priority=node('select');priority.setAttribute('aria-label','Larritasuna');
+    for(const [value,label] of [['normal','Arrunta'],['high','Garrantzitsua'],['blocking','Larria'],['low','Arina']]){
+      const option=node('option',label);option.value=value;priority.append(option);
+    }
+    const comment=node('textarea',null,'ad-finding-input');
+    comment.required=true;comment.maxLength=3000;comment.minLength=5;comment.rows=3;
+    comment.placeholder='Zein da arazoa? Nola konponduko zenuke?';
+    comment.setAttribute('aria-label','Auditoretzako oharra');
+    const send=node('button','Oharra bidali','ad-button');
+    send.type='submit';
+    const message=node('p',null,'ad-finding-status');message.setAttribute('role','status');
+    form.append(category,priority,comment,send,message);
+    form.addEventListener('submit',async(event)=>{
+      event.preventDefault();
+      if(!form.reportValidity())return;
+      send.disabled=true;message.textContent='Oharra gordetzen…';
+      try{
+        const {error}=await state.client.from('smx_aditzak_pilot_findings').insert({
+          activity_version_id:a.id,item_id:item.id,
+          attempt_id:state.attemptId||null,
+          category:category.value,priority:priority.value,comment_eu:comment.value.trim()
+        });
+        if(error)throw error;
+        message.textContent='Jasota: zure oharra auditoretzarako gorde da.';
+        comment.value='';
+      }catch(err){
+        console.warn('Pilot finding error',err?.code||'network');
+        message.textContent='Ez da oharra gorde. Saiatu berriro.';
+      }finally{send.disabled=false;}
+    });
+    details.append(form);card.append(details);
   }
 
   function showActivity(a) {
@@ -165,8 +223,10 @@
     $('activityContextText').textContent = fullContext;
     $('activityContext').hidden = !fullContext;
     const badge = $('activityBadge');
-    badge.textContent = isDraft(a) ? 'Zirriborroa · aurrebista' : 'Argitaratua';
+    badge.textContent = isPilot(a) ? 'PROBA KONTROLATUA · EZ EGIAZTATUA'
+      : isDraft(a) ? 'Zirriborroa · aurrebista' : 'Argitaratua';
     badge.className = 'ad-badge' + (isDraft(a) ? ' draft' : '');
+    $('adPilotWarning').hidden = !isPilot(a);
     const list = $('items');
     list.replaceChildren();
     for (const item of state.items.filter((i) => i.activity_version_id === a.id)) {
@@ -194,7 +254,15 @@
         });
         card.append(group);
       } else if (item.response_kind === 'oral_recording') {
-        card.append(node('p', 'Ahozko jarduera: irakurri proposamena eta egin ariketa ahoz. Grabaketa ez da zerbitzarira bidaliko.', 'ad-footnote'));
+        card.append(node('p','Ahozko jarduera: oraingoz ez da audiorik grabatzen. Nahi baduzu, gehitu zeure transkripzioa edo saioaren laburpena. Ezingo da ahoskera edo jariotasuna neurtu.','ad-footnote'));
+        const input=node('textarea',null,'ad-answer');
+        input.id=fieldId;input.rows=4;input.maxLength=3000;
+        input.placeholder='Zure ahozko ekoizpenaren transkripzioa edo hausnarketa…';
+        input.addEventListener('input',()=>{
+          if(input.value.trim())state.answers.set(item.id,{text:input.value,evidence:'self_transcription_without_audio'});
+          else state.answers.delete(item.id);
+        });
+        card.append(input);
       } else {
         const input = node('textarea', null, 'ad-answer');
         input.id = fieldId;
@@ -208,14 +276,17 @@
         });
         card.append(input);
       }
+      if(isPilot(a)) appendFindingForm(card,a,item);
       list.append(card);
     }
     const save = $('saveResponses');
-    save.hidden = isDraft(a);
-    save.disabled = isDraft(a);
-    saveNotice(isDraft(a)
-      ? 'Berrikuspen-aurrebista: ez dira erantzunak gordetzen edo soluzioak erakusten.'
-      : 'Jatorrizko erantzunak gordeko dira. Gako akademiko egiaztatua duten E02 eta E03 ariketak soilik zuzenduko dira automatikoki.');
+    save.hidden = !canSubmit(a);
+    save.disabled = !canSubmit(a);
+    saveNotice(isPilot(a)
+      ? 'PROBA: erantzunak gordeko dira. Ondoren behin-behineko gakoen proposamenak ikusiko dituzu, notarik gabe. Bidali oharrak galderaz galdera.'
+      : isDraft(a)
+      ? 'Barne-aurrebista: ezin da erantzunik gorde.'
+      : 'Jatorrizko erantzunak gordeko dira; soilik egiaztatutako gakoak zuzenduko dira.');
     $('activityPanel').scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
@@ -250,13 +321,16 @@
     }
     const s=payload.summary;
     const n=(s.correct || 0)+(s.incorrect || 0);
-    area.append(node('h3','Ariketaren emaitza','ad-grade-heading'));
-    const title=n
-      ? s.correct + ' / ' + n + ' erantzun objektibo zuzen'
+    area.append(node('h3',payload.pilot?'Probaren berrikuspena':'Ariketaren emaitza','ad-grade-heading'));
+    const title=payload.pilot
+      ? s.answered+' erantzun gordeta · ez da kalifikaziorik eman'
+      : n ? s.correct+' / '+n+' erantzun objektibo zuzen'
       : 'Erantzunak jasota, baina zuzenketa automatiko baliozkorik ez';
     area.append(node('p',title,'ad-grade-count'));
     if(s.needs_review)area.append(node('p',s.needs_review + ' erantzun irakaslearen berrikuspenaren zain.','ad-grade-detail'));
-    area.append(node('p','Barne-praktikako emaitza orientagarria da, ez azterketa ofizialaren nota.','ad-grade-detail'));
+    area.append(node('p',payload.pilot
+      ? 'Erantzun-ereduak eta azalpenak behin-behineko proposamenak dira. Erabili galdera bakoitzeko oharrak haiek auditatzeko.'
+      : 'Barne-praktikako emaitza orientagarria da, ez azterketa ofizialaren nota.','ad-grade-detail'));
     area.hidden=false;
     for(const result of payload.results) {
       const card=[...$('items').children].find(el=>el.dataset.position===String(result.position));
@@ -267,6 +341,9 @@
       const msg=node('p',result.feedback_eu || 'Erantzuna gordeta.');
       feedback.append(title,msg);
       const details=result.details || {};
+      if(payload.pilot && details.pilot_reference_answer_eu) {
+        feedback.append(node('p','PROPOSAMENA (ez egiaztatua): '+details.pilot_reference_answer_eu,'ad-item-solution'));
+      }
       if(result.outcome==='incorrect' && details.accepted_answer_eu) {
         feedback.append(node('p','Gako egiaztatuko aukera: '+details.accepted_answer_eu,'ad-item-solution'));
       }
@@ -277,11 +354,16 @@
 
   async function gradeAttempt() {
     if(!state.attemptId || !state.client)return;
-    const result=await state.client.rpc('smx_grade_attempt',{p_attempt_id:state.attemptId});
+    const pilot=isPilot(state.current);
+    const result=await state.client.rpc(
+      pilot?'smx_aditzak_pilot_review_attempt':'smx_grade_attempt',
+      {p_attempt_id:state.attemptId});
     if(result.error)throw result.error;
     renderFeedback(result.data);
     $('gradeAgain').hidden=true;
-    saveNotice('Erantzunak eta ebaluazioaren bertsioa gordeta. Zure saiakera historialean geratuko da.');
+    saveNotice(isPilot(state.current)
+      ? 'Zure erantzunak gordeta. Ereduak behin-behinekoak dira: adierazi zalantzak auditoretzako oharren bidez.'
+      : 'Erantzunak eta ebaluazioaren bertsioa gordeta. Zure saiakera historialean geratuko da.');
   }
 
   async function retryGrade() {
@@ -295,7 +377,7 @@
   }
 
   async function save() {
-    if (state.saving || !state.current || isDraft(state.current)) return;
+    if (state.saving || !canSubmit(state.current)) return;
     const current = state.current;
     const selected = state.items.filter((item) => item.activity_version_id === current.id && state.answers.has(item.id));
     if (!selected.length) { saveNotice('Gutxienez erantzun bat idatzi behar duzu.', true); return; }
@@ -308,7 +390,8 @@
         const result = await state.client.from('smx_attempts').insert({
           user_id: cloud.user().id,
           activity_version_id: current.id,
-          response_json: { schema: 'smx_itemized_v1', modality: 'aditzak', item_count: selected.length },
+          response_json: { schema: 'smx_itemized_v1', modality: 'aditzak',
+            pilot: isPilot(current)?'aditzak_beta_v1':null,item_count: selected.length },
           hints_used: 0
         }).select('id').single();
         if (result.error) throw result.error;
@@ -338,7 +421,9 @@
       // Original answers have been read back and confirmed before requesting evaluation.
       button.hidden = true;
       $('newAttempt').hidden = false;
-      for (const el of $('items').querySelectorAll('input,textarea')) el.disabled = true;
+      for (const el of $('items').querySelectorAll('input,textarea')) {
+        if(!el.closest('.ad-finding'))el.disabled=true;
+      }
       saveNotice('Gordeta: ' + selected.length + ' erantzun. Zuzenketa eskatzen…');
       await loadProgress();
       try { await gradeAttempt(); }
@@ -359,7 +444,7 @@
 
   $('gradeAgain').addEventListener('click',retryGrade);
   $('newAttempt').addEventListener('click',()=>{
-    if(state.current && !isDraft(state.current))showActivity(state.current);
+    if(canSubmit(state.current))showActivity(state.current);
   });
   $('backToCatalog').addEventListener('click', back);
   $('saveResponses').addEventListener('click', save);

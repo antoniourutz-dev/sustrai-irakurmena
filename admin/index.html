@@ -16,7 +16,7 @@
   <link rel="preload" href="/fonts/inter-display-700.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="/theme.css?v=20261121-nav1">
   <link rel="stylesheet" href="/auth.css?v=20261117-ezabatu">
-<link rel="stylesheet" href="/admin/admin.css?v=20261119-admin-pilotu">
+<link rel="stylesheet" href="/admin/admin.css?v=20261121-aditzak-pilot1">
 <link rel="stylesheet" href="/mi-espacio/space.css?v=20261117-ezabatu">
 <link rel="stylesheet" href="/hitzbira.css?v=20261117-ezabatu"></head>
 <body class="has-tabbar">
@@ -39,8 +39,26 @@
     <div class="section-head"><div>
       <p class="eyebrow">HIZKUNTZA-LABORATEGIA</p>
       <h2 id="aditzakReviewTitle">Aditzak · berrikuspen-pilotua</h2>
-      <p>Supabaseko SMX bankuaren zirriborroak ikusi ahal dituzu, argitaratu eta ikasle-saiakerarik erregistratu gabe.</p>
+      <p>ADITZAK unitatearen sei ariketak hautatutako probatzaileentzat gaituta daude. Bertsioa oraindik zirriborro akademikoa da.</p>
     </div><a href="/aditzak/" class="soft">Aditzak berrikusi</a></div>
+  </section>
+  <section class="card" aria-labelledby="adPilotManageTitle">
+    <div class="section-head"><div><p class="eyebrow">B2 · ADITZAK · PROBA KONTROLATUA</p>
+      <h2 id="adPilotManageTitle">Probatzaileen sarbidea eta oharrak</h2>
+      <p>Hautatu kontu aktibo bat. Sarbidea banaka eman edo kendu, eta ikuskatzaileen oharrak berrikusi. Ez dira ariketa hauek automatikoki onartzen.</p></div>
+    </div>
+    <div class="ad-pilot-manager">
+      <label for="adPilotTester">Erregistratutako probatzailea</label>
+      <select id="adPilotTester"></select>
+      <div class="ad-pilot-buttons">
+        <button id="adPilotEnable" class="soft" type="button">Probatzailea gaitu</button>
+        <button id="adPilotDisable" class="soft" type="button">Sarbidea kendu</button>
+      </div>
+      <p id="adPilotMessage" class="subtle" role="status" aria-live="polite"></p>
+      <div id="adPilotMembers" class="continue-list"></div>
+    </div>
+    <h3>Jasotako auditoria-oharrak</h3>
+    <div id="adPilotFindings" class="continue-list"></div>
   </section>
   <section class="stats" id="stats"></section>
   <div class="grid">
@@ -99,7 +117,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.0" defer></script>
 <script src="/auth.js?v=20261117-ezabatu" defer></script>
 <script src="/account-kit.js?v=20261117-ezabatu" defer></script>
-<script src="/admin/admin.js?v=20261119-admin-pilotu" defer></script>
+<script src="/admin/admin.js?v=20261121-aditzak-pilot1" defer></script>
 <script src="/pwa.js?v=20261117-ezabatu" defer></script>
 </body>
 </html>

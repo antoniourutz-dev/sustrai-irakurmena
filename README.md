@@ -108,3 +108,15 @@ La portada presenta exactamente tres vías de aprendizaje: **Azterketak** (/azte
 - `smx_my_practice_progress()` agrega únicamente los intentos propios, sin conceder notas oficiales.
 - La UI de `/aditzak/` permite guardar, solicitar corrección, recuperar errores de conexión, consultar feedback y repetir creando un nuevo intento. Las soluciones solo aparecen **tras** la entrega y si la clave se ha validado.
 - No se han aprobado ni publicado las seis actividades de la unidad piloto; toda su corrección automática permanece inactiva hasta auditoría.
+
+## ADITZAK · selected tester release (2026-11-21)
+
+The six B2 `Indikatiboa lehenaldian` activity revisions **2** have been released in the **pilot channel**, without changing `smx_activity_versions.status='draft'` or claiming academic validation.
+
+- `smx_aditzak_pilot_releases`: exactly 6 active release entries, each pinned to an activity revision UUID.
+- `smx_aditzak_pilot_members`: separate member allowlist (not the older `smx_beta_members`). Default is **no testers**; administrator must select a registered active student and enroll through `smx_aditzak_pilot_set_tester`.
+- RLS of `smx_activities`, `smx_activity_versions`, `smx_activity_items`, `smx_exercise_activity_links` and `smx_attempts` permits only the released revisions for eligible testers, while existing approved and admin access remain intact.
+- `smx_aditzak_pilot_findings`: private per-question tester observations, with categories, priority, text, optional related attempt; only author and admin can read.
+- `smx_aditzak_pilot_review_attempt`: after persisting own answer, tester sees a **provisional, unverified reference** and draft explanation, **no correctness verdict or score**. Never exposes raw answer keys before submission or outside membership.
+- ADITZAK UI distinguishes pilot releases from approved content, stores actual answers, has optional self-transcription for oral tasks (no audio assessment), shows proposed explanations, and accepts individual findings. The admin panel can enroll/revoke testers and inspect their findings.
+- **Do not merge into production** without authentic user and mobile E2E tests. The release applies only to Vercel preview and controlled Supabase RLS; the database is shared with production, so all policies were designed to preserve ordinary student access.

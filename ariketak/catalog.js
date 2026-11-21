@@ -6,7 +6,7 @@
   const $ = (id) => document.getElementById(id);
   const cloud = window.SustraiCloud;
   const LEVELS = ['B2', 'C1', 'C2'];
-  const state = { client: null, blocks: [], sections: [], level:'B2', block:null, section:null, token:0 };
+  const state = { client: null, blocks: [], sections: [], level:'B2', block:null, section:null, token:0,pilotVersions:new Set() };
   const make = (tag, value, cls) => {
     const el = document.createElement(tag);
     if (value != null) el.textContent = String(value);
@@ -144,8 +144,10 @@
     if(token!==state.token || !state.section) return;
     clear();
     const approved=list.filter(x=>x.status==='approved').length;
-    const drafts=list.filter(x=>x.status!=='approved').length;
-    status(approved+' ariketa argitaratu'+(drafts?' · '+drafts+' berrikusteko (administratzailearen ikuspegia)':''));
+    const pilot=list.filter(x=>state.pilotVersions.has(x.id)).length;
+    const drafts=list.filter(x=>x.status!=='approved'&&!state.pilotVersions.has(x.id)).length;
+    status(approved+' ariketa egiaztatu · '+pilot+' proba kontrolatuan'
+      +(drafts?' · '+drafts+' barne-zirriborro':''));
     if(!list.length){
       if(!cloud?.user())empty('Ariketak ikusteko, hasi saioa. Katalogoaren atalak konturik gabe kontsulta daitezke.',true);
       else empty('Atal honetan ez dago oraindik ikaslearentzako argitaratutako ariketarik. Edukia prestatzen eta egiaztatzen ari gara.');
@@ -154,12 +156,16 @@
     for(const a of list){
       const article=make('article',null,'practice-card practice-card--exercise');
       article.append(make('span',String(a.position).padStart(2,'0')+' · '+(a.prompt_json?.mechanism_code||a.kind||'Ariketa'),'practice-card-number'));
-      const badge=make('span',a.status==='approved'?'Argitaratua':'Berrikusteko','practice-tag'+(a.status==='approved'?'':' practice-tag--draft'));
+      const pilot=state.pilotVersions.has(a.id);
+      const badge=make('span',pilot?'PROBA · Ez egiaztatua':a.status==='approved'?'Argitaratua':'Berrikusteko',
+        'practice-tag'+(a.status==='approved'?'':' practice-tag--draft'));
       article.append(badge,make('h3',a.prompt_json?.title_eu || 'Jarduera','practice-card-title'));
-      article.append(make('p',(a.itemCount??0)+' galdera · '+(a.status==='approved'?'Ikaslearentzako jarduera':'Aurrebista: erantzunak ez dira gordetzen.'),'practice-card-meta'));
+      article.append(make('p',(a.itemCount??0)+' galdera · '
+        +(pilot?'Probatzaileentzat · erantzunak eta oharrak gordetzen dira.':a.status==='approved'
+          ?'Ikaslearentzako jarduera':'Barne-aurrebista, ez argitaratua.'),'practice-card-meta'));
       const foot=make('div',null,'practice-card-foot');
       if(state.block.endsWith('-ADI')){
-        const aLink=make('a',a.status==='approved'?'Hasi ariketa':'Berrikusi ariketa');
+        const aLink=make('a',pilot?'Probatu ariketa':a.status==='approved'?'Hasi ariketa':'Berrikusi ariketa');
         const from=location.pathname+location.search;
         aLink.href='/aditzak/?activity='+encodeURIComponent(a.id)+'&from='+encodeURIComponent(from);
         foot.append(aLink,make('span','→'));
@@ -181,6 +187,9 @@
       const ids=links.map(x=>x.activity_id);
       const acts=check(await state.client.from('smx_activities')
         .select('id,kind,code').in('id',ids).limit(300));
+      const pilotRows=check(await state.client.from('smx_aditzak_pilot_releases')
+        .select('activity_version_id').eq('active',true).limit(100));
+      state.pilotVersions=new Set(pilotRows.map(x=>x.activity_version_id));
       const versions=check(await state.client.from('smx_activity_versions')
         .select('id,activity_id,revision,prompt_json,status').in('activity_id',ids).order('revision',{ascending:false}).limit(500));
       if(token!==state.token) return;

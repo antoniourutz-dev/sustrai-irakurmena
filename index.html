@@ -4,13 +4,13 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#11132B">
-  <meta name="description" content="Prestatu euskarako C1 irakurmen-, idazmen- eta mintzamen-probak, IVAP eta HABEko benetako deialdiekin.">
-  <title>HitzBira · Irakurmena, idazmena eta ahozkoa C1</title>
+  <meta name="description" content="HitzBira: euskara azterketak prestatu, gramatika ulertu eta ariketekin praktikatzeko plataforma.">
+  <title>HitzBira · Euskara lantzeko plataforma</title>
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="HitzBira">
   <meta property="og:locale" content="eu_ES">
   <meta property="og:title" content="HitzBira · Euskarako C1 prestaketa">
-  <meta property="og:description" content="Irakurmena, idazmena eta ahozkoa landu IVAP eta HABEko benetako deialdiekin.">
+  <meta property="og:description" content="Hiru ikasketa-eremu: azterketak, gramatika eta ariketak.">
   <meta property="og:image" content="https://sustrai-irakurmena.vercel.app/icons/icon-512.png">
   <meta name="twitter:card" content="summary">
   <link rel="manifest" href="/manifest.webmanifest">
@@ -23,23 +23,23 @@
   <meta name="apple-mobile-web-app-title" content="HitzBira">
   <link rel="preload" href="/fonts/inter-400.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="/fonts/inter-display-700.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="/theme.css?v=20261117-ezabatu">
-  <link rel="stylesheet" href="/start.css?v=20261117-ezabatu">
+  <link rel="stylesheet" href="/theme.css?v=20261121-nav1">
+  <link rel="stylesheet" href="/start.css?v=20261121-nav1">
   <link rel="stylesheet" href="/auth.css?v=20261117-ezabatu">
 <link rel="stylesheet" href="/hitzbira.css?v=20261117-ezabatu"></head>
 <body class="has-tabbar">
   <a class="skip" href="#pageTitle">Joan edukira</a>
   <header class="site-header">
   <a class="site-brand" href="/" aria-label="HitzBira hasiera"><span class="site-brand-mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12a8 8 0 1 1-2.4-5.7"/><path d="M18 3v4h-4"/><path d="M8.5 10.5h7"/><path d="M8.5 13.5h4.5"/></svg></span><span class="site-brand-name">hitz<b>bira</b></span><span class="site-brand-level">C1</span></a>
-  <nav class="site-nav" aria-label="Atalak"><a href="/" aria-current="page">Hasiera</a><a href="/irakurmena/">Irakurmena</a><a href="/idazlanak/">Idazmena</a><a href="/ahozkoa/">Ahozkoa</a><a href="/mi-espacio/">Nire espazioa</a></nav>
+  <nav class="site-nav" aria-label="Atal nagusiak"><a href="/" aria-current="page">Hasiera</a><a href="/azterketak/">Azterketak</a><a href="/gramatika/">Gramatika</a><a href="/ariketak/">Ariketak</a><a href="/mi-espacio/">Nire espazioa</a></nav>
 </header>
 
   <main class="home">
     <section class="home-hero" aria-labelledby="pageTitle">
-      <span class="home-chip">IVAP · HABE · C1 maila</span>
-      <h1 id="pageTitle">Hiru trebetasun. <span>Prestaketa bakarra.</span></h1>
-      <p>Irakurmena, idazmena eta ahozkoa C1 mailan landu, IVAP eta HABEko benetako deialdiekin.</p>
-      <div class="home-hero-actions"><a class="go" href="/irakurmena/">Hasi irakurmena <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a><a class="alt" href="/mi-espacio/">Nire espazioa</a></div>
+      <span class="home-chip">Euskara · ikasi, praktikatu eta prestatu</span>
+      <h1 id="pageTitle">Hiru bide. <span>Helburu bera.</span></h1>
+      <p>Azterketak prestatu, gramatika ulertu eta ariketekin trebetasunak sendotu. Hiru eremu argi, zure erritmora egokituta.</p>
+      <div class="home-hero-actions"><a class="go" href="/azterketak/">Azterketak prestatu <svg aria-hidden="true" viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3h8l2 4-6 4-6-4z"/><circle cx="12" cy="15" r="5"/><path d="m10 15 1.4 1.4L14 14"/></svg></a><a class="alt" href="/mi-espacio/">Nire espazioa</a></div>
     </section>
 
     <section class="home-continue" id="homeContinue" aria-labelledby="continueTitle" hidden>
@@ -50,38 +50,11 @@
       <div class="home-continue-list" id="homeContinueList"></div>
     </section>
 
-    <nav class="skill-list" aria-label="Trebetasunak">
-      <a class="skill-card" href="/irakurmena/">
-        <span class="skill-icon"><svg aria-hidden="true" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6c-2-1.5-5-2-8-2v14c3 0 6 .5 8 2 2-1.5 5-2 8-2V4c-3 0-6 .5-8 2zM12 6v14"/></svg></span>
-        <span class="skill-body">
-          <h2 class="skill-title">Irakurmena</h2>
-          <span class="skill-tagline">Ulertu, aztertu, erantzun.</span>
-          <span class="skill-meta">23 IVAP proba · 9 HABE proba</span>
-        </span>
-        <ul class="skill-points"><li>IVAP eta HABEko benetako deialdiak</li><li>Praktika edo simulazioa, proba barruan</li><li>Rotulagailua eta kontzentrazio-modua</li></ul>
-        <span class="skill-cta"><span class="skill-cta-label">Hasi irakurmena</span><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span>
-      </a>
-      <a class="skill-card" href="/idazlanak/">
-        <span class="skill-icon"><svg aria-hidden="true" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20l4-1L19 8l-3-3L5 16l-1 4zM14 7l3 3"/></svg></span>
-        <span class="skill-body">
-          <h2 class="skill-title">Idazmena</h2>
-          <span class="skill-tagline">Pentsatu, idatzi, hobetu.</span>
-          <span class="skill-meta">45 benetako ataza · IVAP eta HABE</span>
-        </span>
-        <ul class="skill-points"><li>Enuntziatu eta material ofiziala</li><li>Hitz-kontagailua eta kronometroa</li><li>Eskema eraikitzeko tailerra</li></ul>
-        <span class="skill-cta"><span class="skill-cta-label">Hasi idazmena</span><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span>
-      </a>
-      <a class="skill-card" href="/ahozkoa/">
-        <span class="skill-icon"><svg aria-hidden="true" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a3 3 0 0 0-3 3v5a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3zM5 11a7 7 0 0 0 14 0M12 18v3"/></svg></span>
-        <span class="skill-body">
-          <h2 class="skill-title">Ahozkoa</h2>
-          <span class="skill-tagline">Prestatu, azaldu, eztabaidatu.</span>
-          <span class="skill-meta">Bakarrizketa eta elkarrizketa</span>
-        </span>
-        <ul class="skill-points"><li>Testu eta fitxa ofizialak</li><li>Prestaketa- eta interbentzio-kronometroak</li><li>Grabazioa zure gailuan bakarrik</li></ul>
-        <span class="skill-cta"><span class="skill-cta-label">Hasi ahozkoa</span><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span>
-      </a>
-    </nav>
+    <section class="area-home" aria-labelledby="areasTitle"><div class="area-home-head"><span class="home-eyebrow">IKASTEKO HIRU BIDE</span><h2 id="areasTitle">Zer landu nahi duzu gaur?</h2></div><nav class="area-home-grid" aria-label="Ikasketa-eremuak">
+<a class="area-home-card area-exams" href="/azterketak/"><span class="area-home-icon"><svg aria-hidden="true" viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3h8l2 4-6 4-6-4z"/><circle cx="12" cy="15" r="5"/><path d="m10 15 1.4 1.4L14 14"/></svg></span><span class="area-home-kind">01 · AZTERKETAK</span><h2>Azterketak</h2><p>Azterketa ofizialen formatuak eta zereginak landu.</p><span class="area-home-meta">Irakurmena · Idazmena · Mintzamena</span><span class="area-home-cta">Azterketak prestatu<span aria-hidden="true">→</span></span></a>
+<a class="area-home-card area-grammar" href="/gramatika/"><span class="area-home-icon"><svg aria-hidden="true" viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6c-2-1.5-5-2-8-2v14c3 0 6 .5 8 2 2-1.5 5-2 8-2V4c-3 0-6 .5-8 2zM12 6v14"/></svg></span><span class="area-home-kind">02 · GRAMATIKA</span><h2>Gramatika</h2><p>Arauak, adibideak eta egiturak ulertzeko etorkizuneko gunea.</p><span class="area-home-meta">Pixkanaka garatuko dugu</span><span class="area-home-cta">Ikusi egitura<span aria-hidden="true">→</span></span></a>
+<a class="area-home-card area-practice" href="/ariketak/"><span class="area-home-icon"><svg aria-hidden="true" viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="4" width="14" height="16" rx="2"/><path d="m8 9 1.5 1.5L12 8m1 2h3M8 15h8"/></svg></span><span class="area-home-kind">03 · ARIKETAK</span><h2>Ariketak</h2><p>Maila eta gaien araberako lan-koadernoak, jarduerak eta galderak.</p><span class="area-home-meta">B2 · C1 · C2 etorkizunean</span><span class="area-home-cta">Ariketak ikusi<span aria-hidden="true">→</span></span></a>
+</nav></section>
 
     <div class="home-extras">
       <section class="home-account" aria-labelledby="accountTitle">
@@ -97,7 +70,7 @@
       </section>
 
       <section class="home-modes" aria-labelledby="modesTitle">
-        <span class="home-eyebrow">BI LAN-MODU</span>
+        <span class="home-eyebrow">AZTERKETAK · BI LAN-MODU</span>
         <h2 id="modesTitle">Entrenatu lasai, edo simulatu azterketa</h2>
         <dl class="mode-list">
           <div><dt>Entrenamendua</dt><dd>Laguntzak eskura, zuzenketa ariketaz ariketa eta denbora-presiorik gabe.</dd></div>
@@ -108,7 +81,7 @@
   </main>
 
   <footer class="home-footer">HitzBira · Euskarako C1 prestaketa · Prestakuntza didaktikoa, ez egiaztapen ofiziala</footer>
-  <nav class="tabbar" aria-label="Atal nagusiak"><a href="/" aria-current="page"><span class="tabbar-icon"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg></span><span>Hasiera</span></a><a href="/irakurmena/"><span class="tabbar-icon"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6c-2-1.5-5-2-8-2v14c3 0 6 .5 8 2 2-1.5 5-2 8-2V4c-3 0-6 .5-8 2zM12 6v14"/></svg></span><span>Irakurmena</span></a><a href="/idazlanak/"><span class="tabbar-icon"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20l4-1L19 8l-3-3L5 16l-1 4zM14 7l3 3"/></svg></span><span>Idazmena</span></a><a href="/ahozkoa/"><span class="tabbar-icon"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a3 3 0 0 0-3 3v5a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3zM5 11a7 7 0 0 0 14 0M12 18v3"/></svg></span><span>Ahozkoa</span></a><a href="/mi-espacio/"><span class="tabbar-icon"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></span><span>Nire espazioa</span></a></nav>
+  <nav class="tabbar" aria-label="Atal nagusiak"><a href="/" aria-current="page"><span class="tabbar-icon"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg></span><span>Hasiera</span></a><a href="/azterketak/"><span class="tabbar-icon"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3h8l2 4-6 4-6-4z"/><circle cx="12" cy="15" r="5"/><path d="m10 15 1.4 1.4L14 14"/></svg></span><span>Azterketak</span></a><a href="/gramatika/"><span class="tabbar-icon"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6c-2-1.5-5-2-8-2v14c3 0 6 .5 8 2 2-1.5 5-2 8-2V4c-3 0-6 .5-8 2zM12 6v14"/></svg></span><span>Gramatika</span></a><a href="/ariketak/"><span class="tabbar-icon"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="4" width="14" height="16" rx="2"/><path d="m8 9 1.5 1.5L12 8m1 2h3M8 15h8"/></svg></span><span>Ariketak</span></a><a href="/mi-espacio/"><span class="tabbar-icon"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></span><span>Nire espazioa</span></a></nav>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.0" defer></script>
   <script src="/auth.js?v=20261117-ezabatu" defer></script>
   <script src="/account-kit.js?v=20261117-ezabatu" defer></script>

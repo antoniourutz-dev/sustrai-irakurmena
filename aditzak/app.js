@@ -179,6 +179,17 @@
   }
 
   function back() {
+    // Keep the exercise inside the originating unit/catalog navigation.
+    const from = new URLSearchParams(location.search).get('from');
+    if (from) {
+      try {
+        const url=new URL(from,location.origin);
+        if (url.origin===location.origin && url.pathname==='/ariketak/') {
+          location.assign(url.pathname+url.search);
+          return;
+        }
+      } catch { /* Invalid external destination: use the local catalog. */ }
+    }
     state.current = null;
     state.answers.clear();
     state.attemptId = null;

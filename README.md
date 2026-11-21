@@ -74,3 +74,14 @@ El módulo de `/aditzak/` consulta las actividades de `smx_activities`, las vers
 Las actividades aprobadas pueden almacenar intentos en `smx_attempts` y respuestas originales en `smx_attempt_responses`. **La corrección automática todavía no está conectada**, y la interfaz no debe mostrar aciertos/puntuaciones. Las seis actividades B2 y 28 ítems actuales permanecen en estado `draft`; solo aparecen para la administración. El modo de previsualización no guarda intentos.
 
 Revisar antes de fusionar: carga con sesión administradora, ocultación para alumno, permisos RLS en REST, respuesta del servicio de guardado, accesibilidad móvil y versión PWA. No habilitar los cuatro controles `*_ok` ni promover actividades sin una auditoría independiente.
+
+
+## Navegación de tres áreas · piloto (2026-11-21)
+
+La portada presenta exactamente tres vías de aprendizaje: **Azterketak** (/azterketak/), **Gramatika** (/gramatika/) y **Ariketak** (/ariketak/).
+
+- **Azterketak** agrupa sin alterar rutas ni datos de /irakurmena/, /idazlanak/ y /ahozkoa/.
+- **Gramatika** es una entrada editorial futura: no muestra unidades sin publicar.
+- **Ariketak** organiza cuadernos por nivel y bloque. /aditzak/ es un bloque de Ariketak y mantiene la previsualización solo para administradores.
+- La cabecera y la barra inferior móvil comparten los mismos cinco enlaces (incluido inicio y espacio personal) en todas las páginas principales. Las rutas de examen siguen funcionando.
+- No se modifica el esquema ni se aprueban las actividades en esta fase. Revisar en preview escritorio, móvil, navegación de teclado, sesión administradora y alumnado, caché PWA y enlaces existentes antes de fusionar.

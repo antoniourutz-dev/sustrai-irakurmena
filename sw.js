@@ -1,5 +1,5 @@
 /* SUSTRAI PWA service worker */
-const CACHE_VERSION = 'sustrai-pwa-v29-aditzak-pilot';
+const CACHE_VERSION = 'sustrai-pwa-v30-three-areas';
 const SHELL = [
   '/',
   '/index.html',
@@ -50,6 +50,13 @@ const SHELL = [
   '/icons/apple-touch-icon.png',
   '/icons/favicon-32.png',
   '/icons/icon.svg',
+  '/areas.css',
+  '/azterketak/',
+  '/azterketak/index.html',
+  '/gramatika/',
+  '/gramatika/index.html',
+  '/ariketak/',
+  '/ariketak/index.html',
   '/aditzak/',
   '/aditzak/index.html',
   '/aditzak/app.js',
@@ -132,6 +139,9 @@ self.addEventListener('fetch', (event) => {
           if (cached) return cached;
           if (url.pathname.startsWith('/ivap/')) return caches.match('/ivap/index.html');
           if (url.pathname.startsWith('/habe/')) return caches.match('/habe/index.html');
+          if (url.pathname.startsWith('/azterketak/')) return caches.match('/azterketak/index.html');
+          if (url.pathname.startsWith('/gramatika/')) return caches.match('/gramatika/index.html');
+          if (url.pathname.startsWith('/ariketak/')) return caches.match('/ariketak/index.html');
           if (url.pathname.startsWith('/aditzak/')) return caches.match('/aditzak/index.html');
           if (url.pathname.startsWith('/irakurmena/')) return caches.match('/irakurmena/index.html');
           if (url.pathname.startsWith('/idazlanak/')) return caches.match('/idazlanak/index.html');

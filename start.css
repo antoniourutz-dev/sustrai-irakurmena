@@ -91,6 +91,26 @@ button{font:inherit}
 .hc-cta::after{content:' →'}
 @media(max-width:760px){.home-continue-list{grid-template-columns:minmax(0,1fr)}}
 
-/* Four training areas: avoid a single orphan card on desktop. */
-@media(min-width:1000px){.skill-list{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media(min-width:1280px){.skill-list{grid-template-columns:repeat(4,minmax(0,1fr))}}
+
+/* Three clear entry areas; exam skills live inside /azterketak/. */
+.area-home{display:grid;gap:16px}
+.area-home-head h2{margin:4px 0 0;font:700 clamp(23px,3vw,32px)/1.15 var(--s-font-display);letter-spacing:-.018em}
+.area-home-head .home-eyebrow{color:var(--s-primary)}
+.area-home-grid{display:grid;grid-template-columns:1fr;gap:14px}
+.area-home-card{display:flex;flex-direction:column;align-items:flex-start;gap:10px;min-width:0;padding:clamp(20px,3vw,28px);border:1px solid var(--s-line);border-radius:var(--s-r-xl);background:var(--s-surface);text-decoration:none;color:var(--s-ink);transition:border-color .15s,box-shadow .15s,transform .15s}
+.area-home-card:hover{border-color:var(--s-primary);box-shadow:0 10px 24px rgb(17 19 43 / .07);transform:translateY(-2px)}
+.area-home-card:focus-visible{outline:3px solid var(--s-primary);outline-offset:3px}
+.area-home-icon{width:54px;height:54px;display:grid;place-items:center;border-radius:16px;background:var(--s-primary-soft);color:var(--s-primary)}
+.area-home-kind{font-size:11px;font-weight:800;letter-spacing:.09em;color:var(--s-primary)}
+.area-home-card h2{margin:0;font:700 25px/1.15 var(--s-font-display)}
+.area-home-card p{margin:0;color:var(--s-muted);font-size:15px;line-height:1.5}
+.area-home-meta{display:block;margin-top:2px;color:var(--s-ink-3);font-size:13px;font-weight:650}
+.area-home-cta{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;min-height:44px;margin-top:auto;padding-top:10px;border-top:1px solid var(--s-line);color:var(--s-primary);font-size:14px;font-weight:750}
+.area-home-cta span{font-size:20px}
+.area-grammar .area-home-icon{background:#f1ebff;color:#5e42a0}
+.area-grammar .area-home-kind{color:#5e42a0}
+.area-practice .area-home-icon{background:#e3f6ec;color:#1d7654}
+.area-practice .area-home-kind{color:#1d7654}
+@media(min-width:690px){.area-home-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(min-width:1060px){.area-home-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(prefers-reduced-motion:reduce){.area-home-card{transition:none}.area-home-card:hover{transform:none}}

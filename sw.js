@@ -1,8 +1,21 @@
 /* SUSTRAI PWA service worker */
-const CACHE_VERSION = 'sustrai-pwa-v44-choice-feedback';
+const CACHE_VERSION = 'sustrai-pwa-v47-zinok-six-levels';
 const SHELL = [
   '/',
   '/index.html',
+  '/jokoak/',
+  '/jokoak/index.html',
+  '/jokoak/jokoak.css',
+  '/jokoak/teusk/',
+  '/jokoak/teusk/index.html',
+  '/jokoak/teusk/core.js',
+  '/jokoak/teusk/app.js',
+  '/jokoak/zinok/',
+  '/jokoak/zinok/index.html',
+  '/jokoak/zinok/zinok.css',
+  '/jokoak/zinok/core.js',
+  '/jokoak/zinok/data.js',
+  '/jokoak/zinok/app.js',
   '/manifest.webmanifest',
   '/theme.css',
   '/hitzbira.css',

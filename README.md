@@ -137,3 +137,24 @@ The six B2 `Indikatiboa lehenaldian` activity revisions **2** have been released
 - Available to authorized learner accounts via `smx_aditzak_pilot_releases` without upgrading academic editorial state. No automatic exam grading.
 - Student UI shows ordinary educational copy, not intrusive test banners. Answer models are explicitly advisory and user-submitted responses are stored.
 - Admin-only audit labels and membership controls continue unchanged.
+
+
+## Jokoak · TEUSK integrazio-pilotua (2026-11-22)
+
+- Laugarren sarrera nagusia: `/jokoak/`. Lehen aktiboa: `/jokoak/teusk/`.
+- TEUSKren `atarikoa_questions` banku bera erabiltzen du; ez da galderarik migratzen.
+- SUSTRAIren `SustraiCloud` saio bera eta `sr_app_state` giltza erabiltzen ditu amaitutako saioak sinkronizatzeko; gonbidatuak lokalean.
+- ZINOK eta MINTZAKATS katalogoan zain; haien eduki eta politika propioak ez dira aldatu.
+- Ikus `docs/pilotoak/20261122_JOKOAK_TEUSK_INTEGRAZIOA.md` argitaratu aurreko probetarako.
+
+
+
+## ZINOK · Sei mailako sinonimoen integrazioa (2026-11-22)
+
+- `/jokoak/zinok/`: ZINOKen **sei maila originalak** (B1, B2, C1, C2, Expert eta Maisu), 10 galderako partida bakoitzean eta hitz-bilatzailea.
+- Jatorria: `antoniourutz-dev/zinok/src/data/synonyms.ts`, **607 talde**; maila eta hitz multzo berak. Jatorrizko ID bikoiztuak `uid` bereiziarekin identifikatu dira.
+- **Mezu Zuzentzailea** aukera kenduta. Ez da lehengo `synonimoak_2` taulako 4 multzoko sailkapen desegokia erabiltzen.
+- Datuak fitxategi estatikoan, ez dago Supabaseko taularen kontsultarik edo SQL aldaketarik; gonbidatuek ere jolastu ahal dute.
+- Aurreko saioen laburpenak `SustraiCloud` bidez gordetzen dira, `sustrai-jokoak-zinok-v1` gakoan.
+- Materialaren hizkuntza-egiaztapena egiteko dago, eta ez da ebaluazio ofiziala.
+- Ikusi `docs/pilotoak/20261122_JOKOAK_ZINOK_INTEGRAZIOA.md`.

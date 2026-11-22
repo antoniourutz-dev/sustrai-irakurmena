@@ -114,3 +114,8 @@ button{font:inherit}
 @media(min-width:690px){.area-home-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(min-width:1060px){.area-home-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media(prefers-reduced-motion:reduce){.area-home-card{transition:none}.area-home-card:hover{transform:none}}
+
+/* Lau ikasketa-eremu nagusi, jokoak gehituta. */
+.area-games .area-home-icon{background:#fff2e8;color:#a44816;font-size:30px;font-weight:800}
+.area-games .area-home-kind{color:#a44816}
+@media(min-width:1060px){.area-home-grid{grid-template-columns:repeat(4,minmax(0,1fr))}}

@@ -48,7 +48,9 @@ test('ZINOK erantzun-markak laburrak dira, gehigarririk gabe',()=>{
  const app=fs.readFileSync(path.join(__dirname,'../jokoak/zinok/app.js'),'utf8');
  const page=fs.readFileSync(path.join(__dirname,'../jokoak/zinok/index.html'),'utf8');
  assert.equal(app.includes('(jokoaren arabera)'),false);
- assert.equal(app.includes(' · Zuzena'),true);
- assert.equal(app.includes(' · Okerra'),true);
- assert.equal(page.includes('zinok/app.js?v=20261122-zinok3'),true);
+ assert.equal(app.includes('zinok-feedback'),false);
+ assert.equal(app.includes("function next(){"),false);
+ assert.equal(app.includes('zinok-review-disclosure'),true);
+ assert.equal(page.includes('zinok/app.js?v=20261122-zinok4'),true);
+ assert.equal(page.includes('areas-support'),false);
 });

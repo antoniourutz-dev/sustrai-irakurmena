@@ -392,10 +392,16 @@
     if(solved(w))return;
     const typed=state.drafts[w.id]||'';
     const already=state.revealed[w.id]||[];
-    // Each paid hint reveals one previously unrevealed, currently missing letter.
-    const i=[...w.word].findIndex((ch,i)=>typed[i]!==ch&&!already.includes(i));
+    // Do not charge to reveal a letter the player already earned at a solved crossing.
+    const crossingRevealed=new Set();
+    for(let i=0;i<w.word.length;i++){
+      const [r,c]=pos(w,i),cell=grid.get(key(r,c));
+      if(cell.owners.some(id=>id!==w.id&&solved(byId.get(id))))crossingRevealed.add(i);
+    }
+    // Each paid hint reveals exactly one genuinely new letter.
+    const i=[...w.word].findIndex((ch,i)=>typed[i]!==ch&&!already.includes(i)&&!crossingRevealed.has(i));
     if(i<0){
-      state.feedback=typed===w.word?'Hitza osatuta dago; egiaztatu erantzuna.':'Ez dago beste pista berririk hitz honetan.';
+      state.feedback=typed===w.word?'Hitza osatuta dago; egiaztatu erantzuna.':'Beste pistarik ez: gainerako letrak dagoeneko agerian daude.';
       render();return;
     }
     const arr=typed.split('');

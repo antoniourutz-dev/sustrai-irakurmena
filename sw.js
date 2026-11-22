@@ -1,5 +1,5 @@
 /* SUSTRAI PWA service worker */
-const CACHE_VERSION = 'sustrai-pwa-v48-gramatika-catalog';
+const CACHE_VERSION = 'sustrai-pwa-v48-mintzakats-pilot';
 const SHELL = [
   '/',
   '/index.html',
@@ -16,6 +16,11 @@ const SHELL = [
   '/jokoak/zinok/core.js',
   '/jokoak/zinok/data.js',
   '/jokoak/zinok/app.js',
+  '/jokoak/mintzakats/',
+  '/jokoak/mintzakats/index.html',
+  '/jokoak/mintzakats/mintzakats.css',
+  '/jokoak/mintzakats/core.js',
+  '/jokoak/mintzakats/app.js',
   '/manifest.webmanifest',
   '/theme.css',
   '/hitzbira.css',

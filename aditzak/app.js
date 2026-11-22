@@ -203,6 +203,7 @@
       card.dataset.position=String(item.position);
       card.id='ad-item-'+item.position;
       card.tabIndex=-1;
+      card.setAttribute('aria-label', item.position + '. galdera');
       const number = node('span', item.position + '. galdera', 'ad-item-number');
       const label = node('label', item.prompt_eu);
       const fieldId = 'ad-answer-' + item.id;
@@ -260,6 +261,7 @@
       : isDraft(a)
       ? 'Barne-aurrebista: ezin da erantzunik gorde.'
       : 'Jatorrizko erantzunak gordeko dira; soilik egiaztatutako gakoak zuzenduko dira.');
+    renderQuestionNav();
     updateAnswerProgress();
     $('activityTitle').tabIndex = -1;
     $('activityTitle').focus({preventScroll:true});
@@ -421,13 +423,49 @@
     }
   }
 
+  function renderQuestionNav() {
+    const root=$('questionNav');
+    root.replaceChildren();
+    for (const item of state.items.filter(i=>i.activity_version_id===state.current.id)) {
+      const button=node('button',item.position,'ad-question-link');
+      button.type='button';
+      button.dataset.itemId=item.id;
+      button.dataset.position=String(item.position);
+      button.addEventListener('click',()=>{
+        const target=$('ad-item-'+item.position);
+        target.focus({preventScroll:true});
+        target.scrollIntoView({behavior:'auto',block:'start'});
+        markCurrentQuestion(String(item.position));
+      });
+      root.append(button);
+    }
+  }
+  function markCurrentQuestion(position) {
+    for (const button of $('questionNav').children) {
+      if (button.dataset.position===position) button.setAttribute('aria-current','location');
+      else button.removeAttribute('aria-current');
+    }
+  }
   function updateAnswerProgress() {
     if (!state.current) return;
     const total = state.items.filter(i => i.activity_version_id === state.current.id).length;
     $('answerProgress').max = total || 1;
     $('answerProgress').value = state.answers.size;
     $('answerProgressLabel').textContent = state.answers.size + ' / ' + total + ' erantzunda';
+    for (const button of $('questionNav').children) {
+      const answered=state.answers.has(button.dataset.itemId);
+      button.classList.toggle('is-answered',answered);
+      button.setAttribute('aria-label',button.dataset.position+'. galdera, '+(answered?'erantzunda':'erantzun gabe'));
+    }
   }
+  $('items').addEventListener('focusin',event=>{
+    const card=event.target.closest('.ad-item');
+    if (card) markCurrentQuestion(card.dataset.position);
+  });
+  $('jumpToActions').addEventListener('click',()=>{
+    $('activityActions').focus({preventScroll:true});
+    $('activityActions').scrollIntoView({behavior:'auto',block:'center'});
+  });
   $('items').addEventListener('input', updateAnswerProgress);
   $('items').addEventListener('change', updateAnswerProgress);
   $('gradeAgain').addEventListener('click',retryGrade);

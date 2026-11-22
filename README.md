@@ -146,3 +146,13 @@ The six B2 `Indikatiboa lehenaldian` activity revisions **2** have been released
 - SUSTRAIren `SustraiCloud` saio bera eta `sr_app_state` giltza erabiltzen ditu amaitutako saioak sinkronizatzeko; gonbidatuak lokalean.
 - ZINOK eta MINTZAKATS katalogoan zain; haien eduki eta politika propioak ez dira aldatu.
 - Ikus `docs/pilotoak/20261122_JOKOAK_TEUSK_INTEGRAZIOA.md` argitaratu aurreko probetarako.
+
+
+## ZINOK · Sinonimoen pilotua (2026-11-22)
+
+- `/jokoak/zinok/` — lau barne-sorta, 10 galderako sinonimo-jokoa, Mezu Zuzentzailea eta hitz-bilatzailea.
+- Sinonimoen erronkan eta bilatzailean **`public.synonimoak_2`** taula erabiltzen da, autentifikatutako SUSTRAI erabiltzaileek soilik irakurrita (oraingo GRANT/RLS baimenak ez dira aldatu).
+- Jatorrizko `zinok/src/services/puzzleService.ts` kodeko 35 ariketa hautatu dira piloturako; 66–100 behin-behineko errepikapenak eta hautu zalantzazkoak kanpo daude.
+- Azken saioen laburpena `SustraiCloud` bidez gordetzen da `sustrai-jokoak-zinok-v1` gakoarekin (erabiltzaile-kontua: `sr_app_state`; gonbidatua: nabigatzailean).
+- Arau-akatsak, onargarriak izan litezkeen aldaerak eta bestelako estilo-aukerak ez dira nahasten: pilotuko gakoa ez da egiaztapen ofiziala.
+- Ikusi `docs/pilotoak/20261122_JOKOAK_ZINOK_INTEGRAZIOA.md`; ZINOK jatorrizko React aplikazioa ez da ukitu.

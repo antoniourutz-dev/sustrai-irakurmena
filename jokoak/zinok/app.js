@@ -6,12 +6,20 @@
  const z=window.ZinokCore, data=window.ZinokSynonyms;
  if(!root||!z||!Array.isArray(data))return;
  const KEY='sustrai-jokoak-zinok-v1';
+ const FEEDBACK_MS=850;
+ let feedbackTimer=null;
+ let pendingKeyboard=false;
+ function clearFeedback(){
+   if(feedbackTimer!==null){window.clearTimeout(feedbackTimer);feedbackTimer=null;}
+   pendingKeyboard=false;
+ }
  const descriptions={B1:'1. MAILA · B1',B2:'2. MAILA · B2',C1:'3. MAILA · C1',C2:'4. MAILA · C2',EX:'5. MAILA · EXPERT',MA:'6. MAILA · MAISU'};
  const state={screen:'menu',level:'B2',questions:[],index:0,answers:[],startedAt:0,searchTerm:'',searchResults:null};
  const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
  const button=(action,label,light=false)=>'<button type="button" class="zinok-button'+(light?' zinok-button--light':'')+'" data-action="'+action+'">'+label+'</button>';
  const hero=document.querySelector?.('.zinok-main .areas-hero');
  function setScreen(name){
+   if(name!=='quiz')clearFeedback();
    state.screen=name;
    if(hero)hero.hidden=name==='quiz'||name==='summary';
  }
@@ -54,6 +62,8 @@
  function renderQuiz(){
    const q=state.questions[state.index];
    if(!q){renderMenu();return}
+   const choice=state.answers[state.index];
+   const answered=Number.isInteger(choice);
    const pct=Math.round(state.index/state.questions.length*100);
    root.innerHTML='<div class="zinok-panel zinok-panel--quiz">'+
      '<div class="zinok-top"><span class="zinok-overline">'+esc(descriptions[state.level])+
@@ -62,12 +72,21 @@
      state.questions.length+'" aria-valuenow="'+state.index+'"><span style="width:'+pct+'%"></span></div>'+
      '<h2 id="zinokPrompt" class="zinok-question">'+esc(q.word)+'</h2>'+
      '<p class="zinok-muted">Hautatu sinonimoa.</p><div class="zinok-options" role="group" aria-labelledby="zinokPrompt">'+
-     q.options.map((option,i)=>'<button class="zinok-option" type="button" data-action="answer" data-index="'+i+'">'+
-       '<span class="zinok-letter">'+String.fromCharCode(65+i)+'</span><span>'+esc(option)+'</span></button>'
-     ).join('')+'</div></div>';
+     q.options.map((option,i)=>{
+       const cls=!answered?'':i===q.correctIndex?' is-correct':i===choice?' is-wrong':' is-muted';
+       const verdict=!answered?'':i===q.correctIndex?' · Zuzena':i===choice?' · Okerra':'';
+       return '<button class="zinok-option'+cls+'" type="button" data-action="answer" data-index="'+i+'"'+
+         (answered?' disabled':'')+'>'+
+         '<span class="zinok-letter">'+String.fromCharCode(65+i)+'</span>'+
+         '<span>'+esc(option)+esc(verdict)+'</span></button>';
+     }).join('')+'</div>'+
+     (answered?'<span class="sr-only" role="status" aria-live="polite">'+
+       (choice===q.correctIndex?'Zuzena':'Okerra')+'</span>':'')+
+     '</div>';
  }
  function start(level){
    if(!z.LEVELS.includes(level))return;
+   clearFeedback();
    state.level=level;state.questions=z.quiz(data,level,10);
    state.answers=[];state.index=0;state.startedAt=Date.now();
    if(state.questions.length!==10){
@@ -83,12 +102,22 @@
    const q=state.questions[state.index];
    if(!Number.isInteger(index)||index<0||index>=q.options.length)return;
    state.answers[state.index]=index;
-   if(state.index+1<state.questions.length){
-     state.index++;
-     renderQuiz();
-     // Keyboard-only focus: stay on the next answer, never scroll to feedback.
-     if(keyboardActivation)root.querySelector?.('.zinok-option')?.focus?.({preventScroll:true});
-   }else finish();
+   pendingKeyboard=keyboardActivation;
+   // Show both selected verdict and correct choice, as in the original game;
+   // keep explanations and the mistakes list for the final summary only.
+   renderQuiz();
+   const answeredQuestion=state.index;
+   feedbackTimer=window.setTimeout(()=>{
+     feedbackTimer=null;
+     if(state.screen!=='quiz'||state.index!==answeredQuestion)return;
+     const moveKeyboardFocus=pendingKeyboard;
+     pendingKeyboard=false;
+     if(state.index+1<state.questions.length){
+       state.index++;
+       renderQuiz();
+       if(moveKeyboardFocus)root.querySelector?.('.zinok-option')?.focus?.({preventScroll:true});
+     }else finish();
+   },FEEDBACK_MS);
  }
  function finish(){
    if(state.screen!=='quiz'||state.answers.length!==state.questions.length)return;

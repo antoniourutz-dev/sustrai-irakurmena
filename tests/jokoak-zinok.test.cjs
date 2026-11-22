@@ -51,6 +51,6 @@ test('ZINOK erantzun-markak laburrak dira, gehigarririk gabe',()=>{
  assert.equal(app.includes('zinok-feedback'),false);
  assert.equal(app.includes("function next(){"),false);
  assert.equal(app.includes('zinok-review-disclosure'),true);
- assert.equal(page.includes('zinok/app.js?v=20261122-zinok4'),true);
+ assert.equal(page.includes('zinok/app.js?v=20261122-zinok5'),true);
  assert.equal(page.includes('areas-support'),false);
 });

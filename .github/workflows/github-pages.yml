@@ -1,0 +1,58 @@
+name: Publish SUSTRAI on GitHub Pages
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+    paths:
+      - '**/*.html'
+      - '**/*.css'
+      - '**/*.js'
+      - '**/*.json'
+      - '**/*.webmanifest'
+      - '**/*.svg'
+      - '**/*.png'
+      - '**/*.woff2'
+      - 'scripts/build-github-pages.mjs'
+      - '.github/workflows/github-pages.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: github-pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify B2 static learning studio
+        run: node --test tests/b2-learning-studio.test.mjs
+      - name: Build root-corrected static Pages site
+        run: node scripts/build-github-pages.mjs
+      - name: Upload static site
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: .github-pages-site
+
+  deploy:
+    if: github.event_name != 'pull_request'
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/deploy-pages@v4
+        id: deployment

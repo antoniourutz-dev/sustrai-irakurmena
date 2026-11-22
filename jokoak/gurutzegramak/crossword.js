@@ -405,6 +405,11 @@
       render();return;
     }
     const arr=typed.split('');
+    // Fill any gap exclusively with letters already visible at solved crossings
+    // or previously paid hints; never reveal another unknown letter for free.
+    for(let j=0;j<i;j++){
+      if(!arr[j]&&(crossingRevealed.has(j)||already.includes(j)))arr[j]=w.word[j];
+    }
     arr[i]=w.word[i];
     state.drafts[w.id]=arr.join('');
     state.revealed[w.id]=[...already,i];
@@ -447,7 +452,15 @@
     if(event.target.id!=='cxWordInput'||state.phase!=='playing')return;
     const w=byId.get(state.active);
     if(solved(w))return;
-    const value=event.target.value.toUpperCase().replace(/[^A-Z]/g,'').slice(0,w.word.length);
+    let value=event.target.value.toUpperCase().replace(/[^A-Z]/g,'').slice(0,w.word.length);
+    // An already solved intersection is authoritative: don't let the word input
+    // display a conflicting letter while the shared grid displays a correct one.
+    const typed=value.split('');
+    for(let i=0;i<typed.length;i++){
+      const [r,c]=pos(w,i),cell=grid.get(key(r,c));
+      if(cell.owners.some(id=>id!==w.id&&solved(byId.get(id))))typed[i]=w.word[i];
+    }
+    value=typed.join('');
     event.target.value=value;
     state.drafts[w.id]=value;
     delete state.checked[w.id];state.feedback='';

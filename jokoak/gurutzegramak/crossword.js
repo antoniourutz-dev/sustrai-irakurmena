@@ -1,0 +1,299 @@
+/* SUSTRAI · Gurutzegramak · pilotua 1.0
+   Fixed, verified interlocking layout; original clues adapted from Oposik osasun entries.
+   No external request, answer grading service, official-level claim or new DB table.
+   One shared cell per intersection; no independent, conflicting copies of letters. */
+(() => {
+  'use strict';
+  const root = document.getElementById('cxApp');
+  if (!root) return;
+
+  // Editorial status: corpus-backed terms, pilot clues; independent academic review is pending.
+  // Source identifiers remain traceable; source text is NOT used as a grading rubric.
+  const WORDS = [
+    { id:'ekografia',word:'EKOGRAFIA',r:5,c:3,dir:'H',source:'OS-C013',
+      clue:'Ultrasoinuak erabiliz gorputz barruko irudiak lortzeko egiten den proba.',
+      explanation:'Ultrasoinuen bidez irudiak lortzen dituen azterketa diagnostikoa da.' },
+    { id:'hitzordu',word:'HITZORDU',r:4,c:10,dir:'V',source:'OS-C023',
+      clue:'Osasun-arloko profesional batekin aurrez adostutako eguna eta ordua.',
+      explanation:'Osasun-zentroko kontsultak edo arretak antolatzeko erabiltzen da.' },
+    { id:'infekzio',word:'INFEKZIO',r:7,c:5,dir:'H',source:'OS-C014',
+      clue:'Mikroorganismo bat organismoan sartzearekin eta ugaltzearekin lotutako prozesua.',
+      explanation:'Infekzioa eta haren ondoriozko gaixotasuna ez dira nahitaez gauza bera.' },
+    { id:'sendagai',word:'SENDAGAI',r:4,c:3,dir:'V',source:'OS-C020',
+      clue:'Gaixotasunak prebenitzeko edo tratatzeko erabil daitekeen substantzia edo prestakina.',
+      explanation:'Sendagaiak erabilera eta indikazio zehatzak ditu; ez da tratamendu guztien sinonimoa.' },
+    { id:'ongizate',word:'ONGIZATE',r:0,c:8,dir:'V',source:'OS-C055',
+      clue:'Pertsonaren egoera fisiko, psikiko eta sozialarekin lotutako ondo egotea.',
+      explanation:'Osasunaz harago, pertsonaren bizi-baldintzei eta egoerari ere erreferentzia egin diezaioke.' },
+    { id:'arteria',word:'ARTERIA',r:9,c:6,dir:'H',source:'OS-C081',
+      clue:'Odola bihotzetik gorputzeko ehunetara eramaten duen odol-hodia.',
+      explanation:'Arteriak odola bihotzetik urruntzen du; zainak, oro har, bihotzera eramaten du.' },
+    { id:'orbain',word:'ORBAIN',r:3,c:4,dir:'H',source:'OS-C060',
+      clue:'Zauri bat sendatu ondoren ehunean geratzen den marka.',
+      explanation:'Orbaina sendatze-prozesu baten ondorengo ehun-markari esaten zaio.' },
+    { id:'txerto',word:'TXERTO',r:0,c:5,dir:'V',source:'OS-C019',
+      clue:'Immunitate-erantzuna eragiteko erabiltzen den prestakin biologikoa.',
+      explanation:'Txertoen helburua gaixotasun jakin batzuen aurkako babes immunologikoa sustatzea da.' },
+    { id:'sukar',word:'SUKAR',r:8,c:0,dir:'H',source:'OS-C001',
+      clue:'Gorputz-tenperatura ohiko balioetatik gora igotzea.',
+      explanation:'Sukarra sintoma edo zeinu kliniko bat izan daiteke; ez da berez gaixotasun baten izena.' },
+    { id:'zauri',word:'ZAURI',r:6,c:1,dir:'V',source:'OS-C015',
+      clue:'Gorputzeko ehun baten osotasuna hausten duen lesioa.',
+      explanation:'Zauria azalekoa edo sakonagoa izan daiteke, kokapenaren eta lesioaren arabera.' },
+    { id:'eztul',word:'EZTUL',r:11,c:7,dir:'H',source:'OS-C003',
+      clue:'Arnasbideetako airea bat-batean kanporatzeko erreflexua edo ekintza.',
+      explanation:'Eztula arnasbideak babesteko mekanismoa ere bada.' },
+    { id:'neke',word:'NEKE',r:1,c:8,dir:'H',source:'OS-C058',
+      clue:'Indar edo energia faltaren sentsazioa.',
+      explanation:'Nekea sintoma izan daiteke; testuinguruak bere kausa eta esanahia zehazten ditu.' }
+  ];
+  const ROWS = 12, COLS = 13, SAVE_KEY = 'sustrai-crossword-osasuna-001-v1';
+  const byId = new Map(WORDS.map(w => [w.id,w]));
+  const grid = new Map();
+  const key = (r,c) => r + ',' + c;
+  const pos = (w,i) => [w.r + (w.dir === 'V' ? i : 0),w.c + (w.dir === 'H' ? i : 0)];
+  for (const w of WORDS) {
+    if (!/^[A-Z]+$/.test(w.word) || !w.word || w.word.length > 18) throw new Error('Gurutzegramaren hitz okerra');
+    for (let i=0;i<w.word.length;i++) {
+      const [r,c] = pos(w,i);
+      if (r < 0 || c < 0 || r >= ROWS || c >= COLS) throw new Error('Gurutzegramaren kokaleku okerra');
+      const k = key(r,c), prev = grid.get(k);
+      if (prev && prev.letter !== w.word[i]) throw new Error('Gurutzegramaren gurutzaketa okerra');
+      if (!prev) grid.set(k,{letter:w.word[i],owners:[w.id],number:null});
+      else prev.owners.push(w.id);
+    }
+  }
+  const starts = [...new Set(WORDS.map(w => key(w.r,w.c)))].sort((a,b)=>{
+    const [ar,ac]=a.split(',').map(Number),[br,bc]=b.split(',').map(Number);
+    return ar-br || ac-bc;
+  });
+  starts.forEach((k,i) => { grid.get(k).number = i+1; });
+  WORDS.forEach(w => { w.number = grid.get(key(w.r,w.c)).number; });
+  const ordered = [...WORDS].sort((a,b)=>a.number-b.number);
+  const escapeHtml = value => String(value ?? '').replace(/[&<>"']/g,x=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[x]));
+  const fresh = () => ({active:ordered[0].id,drafts:{},checked:{},hints:{},modified:[],startedAt:Date.now()});
+  let state = fresh(), cloud;
+
+  function readSaved() {
+    try {
+      const raw = cloud?.storage?.getItem(SAVE_KEY) || window.localStorage.getItem(SAVE_KEY);
+      if (!raw) return;
+      const p = JSON.parse(raw);
+      if (p?.schema !== 1 || !p.drafts || typeof p.drafts !== 'object') return;
+      const v = fresh();
+      v.active = byId.has(p.active) ? p.active : v.active;
+      for (const w of WORDS) {
+        const s = p.drafts[w.id];
+        if (typeof s === 'string') v.drafts[w.id] = s.toUpperCase().replace(/[^A-Z]/g,'').slice(0,w.word.length);
+        if (p.checked?.[w.id] === 'correct' && v.drafts[w.id] === w.word) v.checked[w.id] = 'correct';
+        if (Number.isInteger(p.hints?.[w.id])) v.hints[w.id] = Math.max(0,Math.min(w.word.length,p.hints[w.id]));
+      }
+      v.modified = Array.isArray(p.modified) ? p.modified.filter(x=>byId.has(x)).slice(-WORDS.length) : [];
+      v.startedAt = Number.isFinite(p.startedAt) ? p.startedAt : Date.now();
+      state = v;
+    } catch { /* No persistence must never prevent playing. */ }
+  }
+  function save() {
+    const payload = JSON.stringify({schema:1,active:state.active,drafts:state.drafts,checked:state.checked,
+      hints:state.hints,modified:state.modified,startedAt:state.startedAt});
+    try {
+      if (cloud?.storage) cloud.storage.setItem(SAVE_KEY,payload);
+      else window.localStorage.setItem(SAVE_KEY,payload);
+    } catch { /* Play remains usable offline and without storage. */ }
+  }
+  function solved(w) { return state.checked[w.id] === 'correct' && state.drafts[w.id] === w.word; }
+  function solvedCount() { return WORDS.filter(solved).length; }
+  function setActive(id,focus) {
+    if (!byId.has(id)) return;
+    state.active = id; save(); render();
+    if (focus) root.querySelector('#cxWordInput')?.focus();
+  }
+  function touchWord(id) {
+    state.modified = state.modified.filter(x=>x!==id);
+    state.modified.push(id);
+  }
+  function displayLetters() {
+    const out = new Map();
+    const addDraft = w => {
+      const draft = state.drafts[w.id] || '';
+      for (let i=0;i<Math.min(draft.length,w.word.length);i++) {
+        if (draft[i]) { const [r,c]=pos(w,i);out.set(key(r,c),draft[i]); }
+      }
+    };
+    for (const id of state.modified) {
+      const w = byId.get(id);
+      if (w && !solved(w)) addDraft(w);
+    }
+    for (const w of WORDS) if (!state.modified.includes(w.id) && !solved(w)) addDraft(w);
+    // Correctly solved words are authoritative at their intersections.
+    for (const w of WORDS) if (solved(w)) for (let i=0;i<w.word.length;i++) {
+      const [r,c]=pos(w,i);out.set(key(r,c),w.word[i]);
+    }
+    return out;
+  }
+  function cellMarkup(r,c,values) {
+    const cell = grid.get(key(r,c));
+    if (!cell) return '<span class="cx-cell is-block" aria-hidden="true"></span>';
+    const current = byId.get(state.active);
+    const idx = cell.owners.includes(current.id) ?
+      (current.dir === 'H' ? c-current.c : r-current.r) : -1;
+    const selected = idx >= 0;
+    const currentStatus = state.checked[current.id];
+    const otherSolved = cell.owners.some(id=>solved(byId.get(id)));
+    const typed = (state.drafts[current.id] || '')[idx] || '';
+    const classes=['cx-cell'];
+    if (selected) classes.push('is-active');
+    if (selected && idx === 0) classes.push('is-focus');
+    if (otherSolved) classes.push('is-solved');
+    if (selected && currentStatus === 'wrong' && typed) classes.push(typed===current.word[idx]?'is-right':'is-wrong');
+    if (selected && currentStatus === 'correct') classes.push('is-solved');
+    const label = (cell.number ? cell.number + '. ' : '') +
+      'Gelaxka: ' + (values.get(key(r,c)) || 'hutsik') + '. Sakatu hitz bat aukeratzeko.';
+    return '<button type="button" class="'+classes.join(' ')+'" data-cell="'+key(r,c)+'" aria-label="'+
+      escapeHtml(label)+'">'+(cell.number?'<span class="cx-cell-number">'+cell.number+'</span>':'')+
+      '<span class="cx-cell-letter">'+escapeHtml(values.get(key(r,c)) || '')+'</span></button>';
+  }
+  function groupHtml(dir,label,arrow) {
+    const items = ordered.filter(w=>w.dir===dir);
+    return '<section class="cx-clue-group" aria-labelledby="cx-'+dir+'"><h3 id="cx-'+dir+'"><span aria-hidden="true">'+arrow+'</span>'+label+'</h3>'+
+      '<div class="cx-clue-list">'+items.map(w=>
+        '<button type="button" class="cx-clue'+(w.id===state.active?' is-active':'')+
+        (solved(w)?' is-correct':'')+'" data-word="'+w.id+'" aria-pressed="'+String(w.id===state.active)+'">'+
+        '<span class="cx-clue-no">'+w.number+'.</span><span class="cx-clue-copy">'+escapeHtml(w.clue)+'</span>'+
+        (solved(w)?'<span class="cx-clue-state" aria-label="Ondo">✓</span>':
+         '<span class="cx-clue-length">'+w.word.length+'</span>')+'</button>'
+      ).join('')+'</div></section>';
+  }
+  function feedbackHtml(w) {
+    const status = state.checked[w.id];
+    if (!status) return '';
+    if (status === 'correct') return '<div class="cx-feedback is-correct" id="cxFeedback" role="status">'+
+      '<span class="cx-feedback-icon" aria-hidden="true">✓</span><div><strong>Ondo! '+escapeHtml(w.word)+'</strong>'+
+      escapeHtml(w.explanation)+'<div class="cx-explanation">Hiztegi-erreferentzia: '+escapeHtml(w.source)+'</div></div></div>';
+    if (status === 'incomplete') return '<div class="cx-feedback is-neutral" id="cxFeedback" role="status">'+
+      '<span class="cx-feedback-icon" aria-hidden="true">i</span><div><strong>Hitz osoa idatzi.</strong>'+
+      'Hitz honek '+w.word.length+' letra ditu. Begiratu gurutzaketak eta saiatu berriro.</div></div>';
+    return '<div class="cx-feedback" id="cxFeedback" role="status"><span class="cx-feedback-icon" aria-hidden="true">×</span>'+
+      '<div><strong>Berrikusi erantzuna.</strong>Gorriz ageri dira hautatutako hitzean bat ez datozen letrak; berdez, bat datozenak. Ez da hitz osoa agerian utziko.</div></div>';
+  }
+  function render() {
+    const w=byId.get(state.active),done=solvedCount(),progress=Math.round(done/WORDS.length*100);
+    const values=displayLetters();
+    const cells=[];
+    for (let r=0;r<ROWS;r++) for (let c=0;c<COLS;c++) cells.push(cellMarkup(r,c,values));
+    const completed=done===WORDS.length;
+    root.innerHTML =
+      '<div class="cx-statusbar"><div><h2>Osasuna · 001. gurutzegrama</h2>'+
+      '<p>Hitzak osatu, eta azalpenekin ikasi. Pista bat behar baduzu, eska ezazu.</p></div>'+
+      '<div class="cx-progress-right"><div class="cx-progress-num" aria-label="'+done+' hitz, guztira '+WORDS.length+'">'+
+      done+' <small>/ '+WORDS.length+'</small></div>'+
+      '<div class="cx-progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="'+WORDS.length+
+      '" aria-valuenow="'+done+'" aria-label="Hitz osatuak"><div class="cx-progress-fill" style="width:'+progress+'%"></div></div></div></div>'+
+      '<div class="cx-layout"><section class="cx-board-card" aria-label="Gurutzegramaren taula">'+
+      '<div class="cx-board-top"><div><p class="cx-overline">001. ESPEDIENTEA · OSASUNA</p>'+
+      '<h2>Gurutzegrama</h2><p class="cx-board-note">Hautatu gelaxka edo eskuineko pista, eta idatzi hitza.</p></div>'+
+      '<button type="button" class="cx-reset" data-action="reset">Berrabiarazi</button></div>'+
+      '<div class="cx-grid-scroll" tabindex="0" aria-label="Gurutzegramaren taula; mugitu horizontalean behar izanez gero">'+
+      '<div class="cx-grid" role="group" aria-label="12 errenkada, 13 zutabe">'+cells.join('')+'</div></div>'+
+      '<div class="cx-legend" aria-hidden="true"><span><i></i>Hautatua</span><span><i></i>Zuzena</span><span><i></i>Okerra</span></div>'+
+      '<section class="cx-answer-card" aria-labelledby="cxAnswerLabel">'+
+      '<div class="cx-answer-header"><span class="cx-answer-label" id="cxAnswerLabel">'+w.number+'. '+(w.dir==='H'?'HORIZONTALA':'BERTIKALA')+'</span>'+
+      '<span class="cx-answer-count">'+w.word.length+' letra</span></div>'+
+      '<p class="cx-answer-clue">'+escapeHtml(w.clue)+'</p>'+
+      '<label class="sr-only" for="cxWordInput">Erantzuna, '+w.word.length+' letra</label>'+
+      '<div class="cx-input-row"><input id="cxWordInput" class="cx-word-input" type="text" inputmode="text" spellcheck="false" '+
+      'autocomplete="off" autocapitalize="characters" maxlength="'+w.word.length+'" value="'+
+      escapeHtml(state.drafts[w.id] || '')+'" placeholder="Idatzi hitza…" '+
+      (solved(w)?'disabled aria-label="Hitz zuzena"':'')+'>'+
+      '<button class="cx-button primary" type="button" data-action="check"'+(solved(w)?' disabled':'')+'>Egiaztatu ✓</button></div>'+
+      '<div class="cx-button-row"><button class="cx-button secondary" type="button" data-action="hint"'+(solved(w)?' disabled':'')+
+      '>💡 Pista bat</button><button class="cx-button secondary" type="button" data-action="next">Hurrengo hitza →</button></div>'+
+      feedbackHtml(w)+'</section>'+
+      (completed?'<div class="cx-complete" role="status"><h2>✓ Zorionak! Kasua osatu duzu.</h2>'+
+       '<p>12 hitzak asmatu dituzu. Saiatu beste egun batean berriz, definizioak laguntzarik gabe gogoratzeko.</p>'+
+       '<button class="cx-button secondary" type="button" data-action="reset">Berriz jokatu</button></div>':'')+
+      '</section><aside class="cx-sidebar" aria-label="Pista guztiak"><div class="cx-side-head"><p class="cx-overline">HITZEN GIDA</p>'+
+      '<h2 class="cx-side-title">Pistak</h2><p>Hautatu pista bat; zuzen osatutako hitzak ✓ ikurrarekin agertuko dira.</p></div>'+
+      groupHtml('H','Horizontalak','→')+groupHtml('V','Bertikalak','↓')+'</aside></div>';
+  }
+  function paintGrid() {
+    const values=displayLetters(),w=byId.get(state.active),status=state.checked[w.id];
+    for (const button of root.querySelectorAll('button[data-cell]')) {
+      const k=button.dataset.cell,cell=grid.get(k),[r,c]=k.split(',').map(Number);
+      const idx=cell.owners.includes(w.id) ? (w.dir==='H'?c-w.c:r-w.r):-1;
+      const typed=(state.drafts[w.id]||'')[idx]||'';
+      const solvedHere=cell.owners.some(id=>solved(byId.get(id)));
+      button.querySelector('.cx-cell-letter').textContent=values.get(k)||'';
+      button.classList.toggle('is-solved',solvedHere);
+      button.classList.toggle('is-right',idx>=0&&status==='wrong'&&!!typed&&typed===w.word[idx]);
+      button.classList.toggle('is-wrong',idx>=0&&status==='wrong'&&!!typed&&typed!==w.word[idx]);
+    }
+  }
+  function check() {
+    const w=byId.get(state.active);
+    if (solved(w)) return;
+    const typed=state.drafts[w.id]||'';
+    state.checked[w.id]=typed.length!==w.word.length?'incomplete':typed===w.word?'correct':'wrong';
+    save();render();
+    if (state.checked[w.id]!=='correct') root.querySelector('#cxWordInput')?.focus();
+  }
+  function hint() {
+    const w=byId.get(state.active);
+    if (solved(w)) return;
+    const typed=state.drafts[w.id]||'';
+    const i=[...w.word].findIndex((ch,i)=>typed[i]!==ch);
+    if (i<0) return;
+    const arr=typed.split('');
+    // A hint reveals exactly one position and never rewrites unrelated puzzle words.
+    arr[i]=w.word[i];
+    state.drafts[w.id]=arr.join('');
+    state.hints[w.id]=(state.hints[w.id]||0)+1;
+    delete state.checked[w.id];
+    touchWord(w.id);save();render();
+    root.querySelector('#cxWordInput')?.focus();
+  }
+  function next() {
+    const current=ordered.findIndex(w=>w.id===state.active);
+    const candidates=ordered.slice(current+1).concat(ordered.slice(0,current+1));
+    const candidate=candidates.find(w=>!solved(w))||ordered[(current+1)%ordered.length];
+    setActive(candidate.id,true);
+  }
+  root.addEventListener('click',event=>{
+    const el=event.target.closest('[data-action],[data-word],[data-cell]');
+    if (!el || !root.contains(el)) return;
+    if (el.dataset.word) {setActive(el.dataset.word,true);return;}
+    if (el.dataset.cell) {
+      const cell=grid.get(el.dataset.cell);
+      if (!cell) return;
+      const id=cell.owners.includes(state.active)&&cell.owners.length>1 ?
+        cell.owners.find(x=>x!==state.active) : (cell.owners.includes(state.active)?state.active:cell.owners[0]);
+      setActive(id,true);return;
+    }
+    const action=el.dataset.action;
+    if (action==='check') check();
+    else if (action==='hint') hint();
+    else if (action==='next') next();
+    else if (action==='reset') {
+      if (!window.confirm('Gurutzegrama berrabiarazi eta orain arteko erantzunak ezabatu?')) return;
+      state=fresh();save();render();root.querySelector('#cxWordInput')?.focus();
+    }
+  });
+  root.addEventListener('input',event=>{
+    if (event.target.id!=='cxWordInput') return;
+    const w=byId.get(state.active);
+    if (solved(w)) return;
+    const value=event.target.value.toUpperCase().replace(/[^A-Z]/g,'').slice(0,w.word.length);
+    event.target.value=value;
+    state.drafts[w.id]=value;
+    delete state.checked[w.id];
+    touchWord(w.id);save();paintGrid();
+    root.querySelector('#cxFeedback')?.remove();
+  });
+  root.addEventListener('keydown',event=>{
+    if (event.key==='Enter'&&event.target.id==='cxWordInput') {event.preventDefault();check();}
+  });
+  (async()=>{
+    try {cloud=window.SustraiCloud;await cloud?.ready;}catch { /* Guest mode does not need connectivity. */ }
+    readSaved();render();
+  })();
+})();

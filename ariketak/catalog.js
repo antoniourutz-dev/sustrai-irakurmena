@@ -6,7 +6,41 @@
   const $ = (id) => document.getElementById(id);
   const cloud = window.SustraiCloud;
   const LEVELS = ['B2', 'C1'];
-  const state = { client: null, blocks: [], sections: [], level:'B2', block:null, section:null, token:0,pilotVersions:new Set() };
+  const state = { client: null, blocks: [], sections: [], level:'B2', block:null, section:null, token:0,pilotVersions:new Set(), cacheOwner:null, cacheEpoch:0, sectionCache:new Map(), sectionRequests:new Map() };
+  // Cache only RLS-visible catalog metadata, never response keys or student work.
+  // In-memory and short-lived: a new page load always consults the server.
+  const SECTION_CACHE_TTL = 60_000;
+  const SECTION_CACHE_LIMIT = 20;
+  function cacheOwner() {
+    const owner = cloud?.user()?.id || null;
+    if (owner !== state.cacheOwner) {
+      state.cacheOwner = owner;
+      invalidateSectionCache();
+    }
+    return owner;
+  }
+  function invalidateSectionCache() {
+    state.cacheEpoch++;
+    state.sectionCache.clear();
+    state.sectionRequests.clear();
+  }
+  function cachedSection(section) {
+    if (!cacheOwner()) return null;
+    const cached = state.sectionCache.get(section);
+    if (!cached) return null;
+    if (Date.now() - cached.loadedAt >= SECTION_CACHE_TTL) {
+      state.sectionCache.delete(section);
+      return null;
+    }
+    return cached.data;
+  }
+  function rememberSection(section, data) {
+    state.sectionCache.delete(section);
+    state.sectionCache.set(section, {loadedAt: Date.now(), data});
+    while (state.sectionCache.size > SECTION_CACHE_LIMIT) {
+      state.sectionCache.delete(state.sectionCache.keys().next().value);
+    }
+  }
   const make = (tag, value, cls) => {
     const el = document.createElement(tag);
     if (value != null) el.textContent = String(value);
@@ -33,6 +67,7 @@
   };
   const clear = () => {
     $('practiceGrid').replaceChildren();
+    $('practiceGrid').setAttribute('aria-busy', 'false');
     $('practiceEmpty').hidden = true;
   };
   const chosenBlock = () => state.blocks.find(b => b.code === state.block && b.level === state.level);
@@ -136,10 +171,18 @@
     if(!shown.length)empty('Ez da bat datorren atalik aurkitu. Probatu beste bilaketa bat.');
   }
   function renderSectionLoading() {
-    const b=chosenBlock(),s=chosenSection();
-    $('catalogTitle').textContent=s.title_eu;
-    status(state.level+' · '+b.title_eu+' · '+s.title_eu);
-    empty('Ariketak egiaztatzen…');
+    $('catalogTitle').textContent=chosenSection().title_eu;
+    status('Ariketak kargatzen…');
+    $('practiceGrid').setAttribute('aria-busy','true');
+    // Decorative placeholders; the live status above announces loading once.
+    for (let i=0; i<6; i++) {
+      const card=make('div',null,'practice-skeleton');
+      card.setAttribute('aria-hidden','true');
+      for (const cls of ['tag','title','text','text-short','button']) {
+        card.append(make('span',null,'practice-skeleton-'+cls));
+      }
+      $('practiceGrid').append(card);
+    }
   }
   function renderExercises(list, token) {
     if(token!==state.token || !state.section) return;
@@ -175,59 +218,115 @@
       $('practiceGrid').append(article);
     }
   }
-  async function loadSection() {
-    const token=++state.token;
-    const section=state.section;
-    if(!state.client){status('Konexioa ez dago prest.',true);empty('Ezin izan da katalogoa kargatu. Eguneratu orria.');return;}
-    if(!cloud?.user()){renderExercises([],token);return;}
-    try {
-      const links=check(await state.client.from('smx_exercise_activity_links')
-        .select('activity_id,position').eq('section_code',section).order('position').limit(300));
-      if(token!==state.token) return;
-      if(!links.length){renderExercises([],token);return;}
+  async function fetchSection(section, owner, epoch) {
+    const client=state.client;
+    // Links and pilot permissions are independent. Fetch both in the first round.
+    const [linkResult, pilotResult]=await Promise.all([
+      client.from('smx_exercise_activity_links')
+        .select('activity_id,position').eq('section_code',section).order('position').limit(300),
+      client.from('smx_aditzak_pilot_releases')
+        .select('activity_version_id').eq('active',true).limit(100)
+    ]);
+    const links=check(linkResult);
+    const pilotVersions=check(pilotResult).map(x=>x.activity_version_id);
+    let list=[];
+    if (links.length) {
       const ids=links.map(x=>x.activity_id);
-      const acts=check(await state.client.from('smx_activities')
-        .select('id,kind,code').in('id',ids).limit(300));
-      const pilotRows=check(await state.client.from('smx_aditzak_pilot_releases')
-        .select('activity_version_id').eq('active',true).limit(100));
-      state.pilotVersions=new Set(pilotRows.map(x=>x.activity_version_id));
-      const versions=check(await state.client.from('smx_activity_versions')
-        .select('id,activity_id,revision,prompt_json,status').in('activity_id',ids).order('revision',{ascending:false}).limit(500));
-      if(token!==state.token) return;
+      // Both queries depend on links, but not on each other.
+      const [actResult, versionResult]=await Promise.all([
+        client.from('smx_activities').select('id,kind,code').in('id',ids).limit(300),
+        client.from('smx_activity_versions')
+          .select('id,activity_id,revision,prompt_json,status').in('activity_id',ids)
+          .order('revision',{ascending:false}).limit(500)
+      ]);
+      const acts=check(actResult), versions=check(versionResult);
       const byAct=new Map();
       versions.forEach(v=>{if(!byAct.has(v.activity_id))byAct.set(v.activity_id,v)});
       const actById=new Map(acts.map(a=>[a.id,a]));
-      const visible=links.flatMap(l=>{
+      list=links.flatMap(l=>{
         const a=actById.get(l.activity_id),v=byAct.get(l.activity_id);
         return a&&v ? [{...a,...v,position:l.position}] : [];
       });
-      const selectedVersionIds=visible.map(v=>v.id);
-      let counts=new Map();
-      if(selectedVersionIds.length){
-        const itemRows=check(await state.client.from('smx_activity_items')
-          .select('activity_version_id').in('activity_version_id',selectedVersionIds).limit(1000));
-        for(const row of itemRows) counts.set(row.activity_version_id,(counts.get(row.activity_version_id)||0)+1);
+      const versionIds=list.map(v=>v.id);
+      const counts=new Map();
+      if (versionIds.length) {
+        const rows=check(await client.from('smx_activity_items')
+          .select('activity_version_id').in('activity_version_id',versionIds).limit(1000));
+        for (const row of rows) counts.set(row.activity_version_id,(counts.get(row.activity_version_id)||0)+1);
       }
-      visible.forEach(v=>v.itemCount=counts.get(v.id)||0);
-      renderExercises(visible,token);
+      list.forEach(v=>v.itemCount=counts.get(v.id)||0);
+    }
+    const data={list,pilotVersions};
+    // An old response must never populate another account's cache.
+    if (owner===cacheOwner() && epoch===state.cacheEpoch) rememberSection(section,data);
+    return data;
+  }
+  async function loadSection() {
+    const token=++state.token, section=state.section;
+    if(!state.client){clear();status('Konexioa ez dago prest.',true);empty('Ezin izan da katalogoa kargatu. Eguneratu orria.');return;}
+    const owner=cacheOwner(), epoch=state.cacheEpoch;
+    if(!owner){renderExercises([],token);return;}
+    try {
+      // Reuse a pending request when rapid navigation returns to the same section.
+      let request=state.sectionRequests.get(section);
+      if (!request) {
+        request=fetchSection(section,owner,epoch);
+        state.sectionRequests.set(section,request);
+      }
+      let data;
+      try { data=await request; }
+      finally {
+        if(state.sectionRequests.get(section)===request)state.sectionRequests.delete(section);
+      }
+      if(token!==state.token || owner!==cacheOwner() || epoch!==state.cacheEpoch)return;
+      state.pilotVersions=new Set(data.pilotVersions);
+      renderExercises(data.list,token);
     } catch(err) {
-      if(token!==state.token)return;
+      if(token!==state.token || owner!==cacheOwner() || epoch!==state.cacheEpoch)return;
       console.warn('Ariketak catalog detail failed',err?.code||'network');
       clear();status('Ariketak ezin izan dira kargatu. Saiatu berriro.',true);
-      empty('Konexio- edo baimen-arazo bat izan da. Berriro saiatu.',false);
+      empty('Konexio- edo baimen-arazo bat izan da.');
+      const retry=make('button','Berriro saiatu');
+      retry.type='button';retry.addEventListener('click',render);
+      $('practiceEmpty').append(retry);
     }
   }
   function render() {
     levels(); crumbs(); clear();$('practiceFilter').hidden=true;
     if(!state.block){renderBlocks();return;}
     if(!state.section){renderTopics();return;}
-    renderSectionLoading();loadSection();
+    const cached=cachedSection(state.section);
+    if (cached) {
+      $('catalogTitle').textContent=chosenSection().title_eu;
+      state.pilotVersions=new Set(cached.pilotVersions);
+      renderExercises(cached.list,state.token);
+    } else if (!cloud?.user()) {
+      $('catalogTitle').textContent=chosenSection().title_eu;
+      renderExercises([],state.token);
+    } else {
+      renderSectionLoading();loadSection();
+    }
   }
   async function init() {
     try{
       await cloud?.ready;
       state.client=cloud?.client?.();
       if(!state.client) throw new Error('Supabase client unavailable');
+      cacheOwner();
+      state.client.auth?.onAuthStateChange((event,session)=>{
+        // Refreshing an unchanged session keeps metadata; account/access changes do not.
+        const owner=session?.user?.id || null;
+        if(event==='SIGNED_OUT' || event==='USER_UPDATED' || owner!==state.cacheOwner) {
+          state.cacheOwner=owner;
+          invalidateSectionCache();
+          state.token++;
+          state.pilotVersions.clear();
+          if (event==='SIGNED_OUT' && state.section) {
+            clear();
+            renderExercises([],state.token);
+          }
+        }
+      });
       const [b,s]=await Promise.all([
         state.client.from('smx_exercise_blocks').select('code,level,position,title_eu').order('position').limit(200),
         state.client.from('smx_exercise_sections').select('code,block_code,position,title_eu,editorial_state').order('position').limit(300)

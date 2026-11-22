@@ -10,42 +10,15 @@
     progress: new Map(), assigned: [], myGroups: [], teacherGroups: [], teacherAssignments: [],
     selected: null, step: 0, quizAnswers: new Map(), quizTries: new Map(), examplesCache: new Map()
   };
-  const QUESTIONS = {
-    subjektua_eta_aditza_oinarria: {
-      prompts: [
-        {q: '«Maddik liburua irakurri du» perpausean, zein da aditz multzoa?', a: ['irakurri du', 'liburua'], correct: 0, why: '«Irakurri du» aditz multzoa da; «liburua» osagarria da.'},
-        {q: '«Atea ireki da» perpausean, zein osagaik adierazten du gertakaria?', a: ['Atea', 'ireki da'], correct: 1, why: '«Ireki da» aditz multzoak adierazten du gertakaria.'}
-      ],
-      transfer: 'Idatzi zure egunerokoari buruzko bi perpaus. Azpimarratu edo izendatu bakoitzaren aditz multzoa, eta azaldu perpausak zer adierazten duen.'
-    },
-    subjektua_eta_predikatua: {
-      prompts: [
-        {q: '«Anek leihoa ireki du» perpausean, zein da predikatua?', a: ['Anek', 'leihoa ireki du'], correct: 1, why: '«Leihoa ireki du» predikatua da; «Anek» subjektuaren funtzioan dago.'},
-        {q: '«Haurrak jolasean ari dira» perpausean, zein da predikatua?', a: ['jolasean ari dira', 'Haurrak'], correct: 0, why: 'Predikatuak subjektuari buruz esaten dena biltzen du.'}
-      ],
-      transfer: 'Sortu bi perpaus eta idatzi bakoitzean zein den subjektua eta zein predikatua. Saiatu egitura desberdinak erabiltzen.'
-    },
-    b2_ergatiboa_eta_absolutiboa: {
-      prompts: [
-        {q: '«Ane__ liburua irakurri du» esaldian, zein da egokia?', a: ['Anek', 'Ane'], correct: 0, why: '«Irakurri du» egituran ekintzailea NORK kasuan dago: Anek.'},
-        {q: '«Ane__ etorri da» esaldian, zein da egokia?', a: ['Anek', 'Ane'], correct: 1, why: '«Etorri da» egituran subjektuak NOR kasua darama: Ane.'}
-      ],
-      transfer: 'Idatzi «Ane etorri da» eta «Anek atea ireki du» egituren antzeko bi esaldi berri. Azaldu zergatik daraman batek -k marka eta besteak ez.'
-    },
-    b2_nor_eta_nor_nork_komunztadura: {
-      prompts: [
-        {q: '«Mirenek bi liburu erosi ___» perpausean, zein laguntzaile?', a: ['ditu', 'du'], correct: 0, why: '«Bi liburu» osagai plurala da, eta «ditu» forma dagokio egitura honetan.'},
-        {q: '«Lagunak etorri ___» esaldian, zein laguntzaile?', a: ['ditu', 'dira'], correct: 1, why: '«Etorri» NOR egiturako aditza da; subjektu plurala «dira» formarekin doa.'}
-      ],
-      transfer: 'Idatzi NOR egiturako perpaus bat eta NOR-NORK egiturako beste bat. Azaldu bi laguntzaileen arteko aldea.'
-    },
-    b2_datiboa_eta_nori_komunztadura: {
-      prompts: [
-        {q: '«Nik Mireni liburu bat eman ___» perpausean, zein da egokia?', a: ['diot', 'dut'], correct: 0, why: '«Mireni» NORI osagaia da; «diot» laguntzaileak osagai hori jasotzen du.'},
-        {q: '«Guk lagunei gutun bana bidali ___» perpausean, zein da egokia?', a: ['dugu', 'diegu'], correct: 1, why: '«Lagunei» datibo plurala da eta «diegu» laguntzaileak NORI komunztadura jasotzen du.'}
-      ],
-      transfer: 'Idatzi norbaiti zerbait eman edo bidali diozula adierazten duen perpaus bat. Bereizi NOR, NORI eta NORK osagaiak eta azaldu laguntzailea.'
-    }
+  const QUESTIONS = Object.create(null);
+  const LESSONS = new Map();
+  const designFor = code => LESSONS.get(code)||null;
+  const day = d => new Date(d).toLocaleDateString('eu-ES',{year:'numeric',month:'short',day:'numeric'});
+  const listValues=(parent,items,className='b2-check-list')=>{
+    if(!Array.isArray(items)||!items.length)return;
+    const ul=el('ul',null,className);
+    items.forEach(v=>ul.append(el('li',v)));
+    parent.append(ul);
   };
   const STEPS = ['Ulertu', 'Kontrastatu', 'Praktikatu', 'Erabili'];
   const check = (res) => { if (res.error) throw res.error; return res.data || []; };
@@ -102,17 +75,18 @@
   }
   function readiness(unit) {
     return unit.review_snapshot === 'approved'
-      ? '2026-11-22ko egoera: berrikuspen editoriala onartuta.'
-      : '2026-11-22ko egoera: berrikuspen akademikoaren zain. Irakurgarri egoteak ez du onarpena esan nahi.';
+      ? '2026-11-22ko egoera: jatorrizko fitxa onartua. Ikasgai gehigarria pilotuko materiala da.'
+      : '2026-11-22ko egoera: jatorrizko fitxa berrikusteko. Ikasgai gehigarria pilotuko zirriborroa da.';
   }
   function completeCount() {
     return state.units.filter(u => !!own(u.entry_code).read_at).length;
   }
   function renderSummary() {
-    $('pathProgressText').textContent = hasAccount()
-      ? completeCount() + '/31 gai irakurrita · '
-        + state.units.filter(u => u.pilot_active && !!own(u.entry_code).transferred_at).length + '/5 pilotu-jarduera eginda'
-      : '31 gai antolatuta · 5 pilotu-jarduera. Saioa hastean gordeko da zure aurrerapena.';
+    const produced=state.units.filter(u=>u.pilot_active&&!!own(u.entry_code).transferred_at).length;
+    const reviewed=state.units.filter(u=>u.pilot_active&&!!own(u.entry_code).reviewed_again_at).length;
+    $('pathProgressText').textContent=hasAccount()
+      ? completeCount()+'/31 gai irakurrita · '+produced+'/5 ekoizpen gordeta · '+reviewed+'/5 gerora berrikusita'
+      : '31 gai · lehen 5 ikasgaietan praktika · hasi saioa aurrerapena gordetzeko.';
     $('pathProgressBar').style.width = (completeCount() / 31 * 100).toFixed(1) + '%';
   }
   function renderPath() {
@@ -137,7 +111,7 @@
         b.setAttribute('aria-current', state.selected === u.entry_code ? 'step' : 'false');
         const desc = el('span', null, 'b2-topic-meta');
         const status = own(u.entry_code);
-        desc.append(el('span', status.transferred_at ? 'Jarduera eginda' : status.read_at ? 'Irakurrita' : 'Hasteko'));
+        desc.append(el('span',status.reviewed_again_at?'Gerora berrikusia':status.transferred_at?'Ekoizpena gordeta':status.practiced_at?'Praktikatua':status.read_at?'Irakurrita':'Hasteko'));
         if (u.pilot_active) desc.append(el('span', '4 urratseko pilotua'));
         b.append(desc);
         li.append(b);
@@ -154,7 +128,9 @@
     const next = {
       user_id: state.user.id, entry_code: code, read_at: current.read_at || null,
       contrasted_at: current.contrasted_at || null, practiced_at: current.practiced_at || null,
-      transferred_at: current.transferred_at || null, practice_attempts: current.practice_attempts || 0,
+      transferred_at: current.transferred_at || null, reviewed_again_at: current.reviewed_again_at || null,
+      review_reflection_eu: current.review_reflection_eu || null,
+      practice_attempts: current.practice_attempts || 0,
       reflection_eu: current.reflection_eu || null, updated_at: new Date().toISOString(),
       ...fields
     };
@@ -201,10 +177,16 @@
     $('pathLesson').hidden = false;
     $('pathLessonTitle').textContent = e.title_eu;
     $('pathLessonSubtitle').textContent = e.short_explanation_eu || '';
+    const design=designFor(u.entry_code);
+    const goal=$('pathLessonGoal');if(goal){goal.hidden=!design;goal.textContent=design?design.learning_goal_eu:'';}
+    const duration=$('pathLessonDuration');if(duration){duration.hidden=!design;duration.textContent=design?design.suggested_minutes+' min inguru · zure erritmora':'';}
+
     $('pathLessonMeta').textContent = readiness(u);
     $('pathLessonMeta').classList.toggle('needs-review', u.review_snapshot !== 'approved');
-    $('pathLessonStatus').textContent = own(u.entry_code).transferred_at ? 'Jarduera eginda'
-      : own(u.entry_code).read_at ? 'Ikasten' : 'Hasi gabe';
+    $('pathLessonStatus').textContent=own(u.entry_code).reviewed_again_at?'Gerora berrikusia'
+      :own(u.entry_code).transferred_at?'Ekoizpena gordeta'
+      :own(u.entry_code).practiced_at?'Praktikatua'
+      :own(u.entry_code).read_at?'Ikasten':'Hasi gabe';
     const tabs = $('pathSteps');
     const body = $('pathStepContent');
     tabs.replaceChildren();
@@ -531,14 +513,27 @@
       state.profile=cloud?.profile?.()||null;
       state.user=cloud?.user?.()||null;
       if(!state.client)throw new Error('Supabase konexiorik ez');
-      const [mods,units,entries]=await Promise.all([
+      const [mods,units,entries,designs,items]=await Promise.all([
         state.client.from('smx_grammar_b2_modules').select('*').order('module_no').then(check),
         state.client.from('smx_grammar_b2_path_units').select('*').order('global_order').then(check),
         state.client.from('public_editorial_grammar_entries')
-          .select('id,code,title_eu,short_explanation_eu,explanation_eu,level').eq('level','B2').limit(100).then(check)
+          .select('id,code,title_eu,short_explanation_eu,explanation_eu,level').eq('level','B2').limit(100).then(check),
+        state.client.from('smx_grammar_b2_lesson_designs').select('*').limit(20).then(check),
+        state.client.from('smx_grammar_b2_practice_items').select('*').order('item_order').limit(100).then(check)
       ]);
       if(mods.length!==7 || units.length!==31)throw new Error('Ibilbidearen egitura osatu gabe dago');
       state.modules=mods;state.units=units;state.entries=new Map(entries.map(e=>[e.code,e]));
+      if(designs.length!==5||items.length!==20)throw new Error('Ikasgai eta praktiken datuak osatu gabe daude.');
+      designs.forEach(d=>LESSONS.set(d.entry_code,d));
+      for(const d of designs){
+        const selected=items.filter(it=>it.entry_code===d.entry_code).sort((a,b)=>a.item_order-b.item_order);
+        if(selected.length!==4)throw new Error('Lau galderak falta dira: '+d.entry_code);
+        QUESTIONS[d.entry_code]={prompts:selected.map(it=>({
+          q:it.question_eu,a:it.options_eu,correct:it.correct_index,why:it.explanation_eu,
+          feedback:it.feedback_eu,context:it.context_eu,
+          skill:({identifikatu:'Identifikatu',arrazoitu:'Arrazoitu',aplikatu:'Aplikatu',kontrastatu:'Kontrastatu'})[it.item_skill]||'Praktika'
+        })),transfer:d.transfer_task_eu};
+      }
       if(units.some(u=>!state.entries.has(u.entry_code)))throw new Error('Gramatika-fitxa bat ezin da irakurri');
       if(hasAccount()){
         const data=check(await state.client.from('smx_grammar_b2_progress')

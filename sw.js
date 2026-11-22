@@ -1,5 +1,5 @@
 /* SUSTRAI PWA service worker */
-const CACHE_VERSION = 'sustrai-pwa-v51-crossword-challenge';
+const CACHE_VERSION = 'sustrai-pwa-v52-daily-crosswords';
 const SHELL = [
   '/',
   '/index.html',

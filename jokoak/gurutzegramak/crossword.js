@@ -120,39 +120,77 @@
   }
   function readSaved() {
     try {
-      // Older sessions are migrated ONLY into unscored learning mode.
-      const raw = getStorage(SAVE_KEY);
-      const legacy = !raw && getStorage(LEGACY_KEY);
-      const p=JSON.parse(raw || legacy || 'null');
-      if (!p || !p.drafts || typeof p.drafts!=='object' || (p.schema!==1 && p.schema!==2)) return;
-      const v=fresh(p.schema===2&&p.mode==='erronka'?'erronka':'ikasi','playing');
-      if (p.schema===2 && ['setup','playing','finished'].includes(p.phase)) v.phase=p.phase;
+      const p=JSON.parse(getStorage(SAVE_KEY)||'null');
+      if(p?.schema!==2||p.version!==PUZZLE_VERSION||!p.drafts||typeof p.drafts!=='object')
+        return false;
+      const v=fresh(activePuzzle.mode,'playing');
+      if(['playing','finished'].includes(p.phase))v.phase=p.phase;
       v.active=byId.has(p.active)?p.active:v.active;
-      for (const w of WORDS) {
+      for(const w of WORDS){
         const val=p.drafts[w.id];
         if(typeof val==='string')v.drafts[w.id]=val.toUpperCase().replace(/[^A-Z]/g,'').slice(0,w.word.length);
-        if(p.checked?.[w.id]==='correct' && v.drafts[w.id]===w.word)v.checked[w.id]='correct';
+        if(p.checked?.[w.id]==='correct'&&v.drafts[w.id]===w.word)v.checked[w.id]='correct';
         if(Number.isInteger(p.hints?.[w.id]))v.hints[w.id]=Math.max(0,Math.min(w.word.length,p.hints[w.id]));
-        if (p.schema===2) {
-          const positions=p.revealed?.[w.id];
-          if (Array.isArray(positions))v.revealed[w.id]=[...new Set(positions.filter(n=>Number.isInteger(n)&&n>=0&&n<w.word.length))];
-          if(typeof p.lastWrong?.[w.id]==='string')v.lastWrong[w.id]=p.lastWrong[w.id].slice(0,w.word.length);
-        }
+        const positions=p.revealed?.[w.id];
+        if(Array.isArray(positions))v.revealed[w.id]=[...new Set(positions.filter(n=>Number.isInteger(n)&&n>=0&&n<w.word.length))];
+        if(typeof p.lastWrong?.[w.id]==='string')v.lastWrong[w.id]=p.lastWrong[w.id].slice(0,w.word.length);
       }
       v.modified=Array.isArray(p.modified)?p.modified.filter(x=>byId.has(x)).slice(-WORDS.length):[];
-      if(p.schema===2) {
-        v.startedAt=Number.isFinite(p.startedAt)&&p.startedAt>0?p.startedAt:0;
-        v.finishedAt=Number.isFinite(p.finishedAt)&&p.finishedAt>0?p.finishedAt:0;
-        v.stats.hints=Math.max(0,Math.min(500,Number.isInteger(p.stats?.hints)?p.stats.hints:0));
-        v.stats.wrong=Math.max(0,Math.min(500,Number.isInteger(p.stats?.wrong)?p.stats.wrong:0));
-      }
-      if(p.schema===1){v.startedAt=0;v.phase='playing';} // Old attempts must not earn time bonuses.
+      v.startedAt=Number.isFinite(p.startedAt)&&p.startedAt>0?p.startedAt:0;
+      v.finishedAt=Number.isFinite(p.finishedAt)&&p.finishedAt>0?p.finishedAt:0;
+      v.stats.hints=Math.max(0,Math.min(500,Number.isInteger(p.stats?.hints)?p.stats.hints:0));
+      v.stats.wrong=Math.max(0,Math.min(500,Number.isInteger(p.stats?.wrong)?p.stats.wrong:0));
       if(v.mode==='erronka'&&!v.startedAt&&v.phase==='playing')v.startedAt=Date.now();
-      if(v.phase==='finished' && WORDS.some(w=>v.checked[w.id]!=='correct'))v.phase='playing';
+      if(v.phase==='finished'&&WORDS.some(w=>v.checked[w.id]!=='correct'))v.phase='playing';
       if(v.phase==='playing'&&WORDS.every(w=>v.checked[w.id]==='correct'))v.phase='finished';
-      state=v;
-      if(legacy)save();
-    } catch { /* A corrupt cache must not prevent playing. */ }
+      state=v;return true;
+    }catch{return false;}
+  }
+  async function loadDaily() {
+    if(loading)return;
+    loading=true;dailyDate=madridDate();dailyNotice='';
+    root.innerHTML='<section class="cx-loading" role="status"><h2>Gaurko gurutzegramak prestatzen…</h2>'+
+      '<p>Ikasteko eta Erronka moduetako taulak kargatzen ari gara.</p></section>';
+    try{
+      let rows=null;
+      const client=cloud?.client?.();
+      if(client){
+        const {data,error}=await client.from('smx_crossword_daily')
+          .select('id,play_date,mode,level,theme_eu,title_eu,grid_rows,grid_cols,entries,status')
+          .eq('play_date',dailyDate).eq('level','C1')
+          .in('mode',['ikasi','erronka']).in('status',['pilot','published']);
+        if(!error&&Array.isArray(data)&&data.length===2)rows=data;
+      }
+      if(!rows){
+        try{
+          const cached=JSON.parse(getStorage(dailyCacheKey(dailyDate))||'null');
+          if(Array.isArray(cached)&&cached.length===2)rows=cached;
+        }catch{ /* Offline cache is optional. */ }
+      }
+      if(!rows||rows.length!==2||
+        !rows.some(x=>x.mode==='ikasi')||!rows.some(x=>x.mode==='erronka'))
+        throw Error('Gaurko bi gurutzegramak ez daude erabilgarri. Egiaztatu konexioa edo saiatu berriro.');
+      const byMode={};
+      for(const p of rows){
+        if(p.play_date!==dailyDate||p.level!=='C1'||!['ikasi','erronka'].includes(p.mode))
+          throw Error('Eguneko datuak ez datoz bat.');
+        setPuzzle(p);
+        byMode[p.mode]=p;
+      }
+      const sWords=new Set(byMode.ikasi.entries.map(w=>String(w.word).toUpperCase()));
+      if(byMode.erronka.entries.some(w=>sWords.has(String(w.word).toUpperCase())))
+        throw Error('Bi moduek erantzun bera dute: berrikusi katalogoa.');
+      dailyRecords=byMode;
+      setStorage(dailyCacheKey(dailyDate),JSON.stringify(rows));
+      state=fresh('ikasi','setup');
+      render();
+    }catch(error){
+      dailyRecords={};
+      root.innerHTML='<section class="cx-mode-intro cx-day-error" role="alert">'+
+        '<p class="cx-overline">GAURKO GURUTZEGRAMA</p><h2>Ezin izan dugu jokoa ireki.</h2>'+
+        '<p>'+escapeHtml(error?.message||'Katalogoa ezin izan da kargatu.')+'</p>'+
+        '<button class="cx-button primary" type="button" data-action="retry-daily">Berriz saiatu</button></section>';
+    }finally{loading=false;}
   }
   function save() {
     const payload=JSON.stringify({schema:2,version:PUZZLE_VERSION,phase:state.phase,mode:state.mode,
@@ -162,9 +200,17 @@
     setStorage(SAVE_KEY,payload);
   }
   function start(mode) {
-    if(mode!=='ikasi'&&mode!=='erronka')return;
-    state=fresh(mode,'playing');
-    state.startedAt=Date.now();
+    if(!['ikasi','erronka'].includes(mode)||!dailyRecords[mode])return;
+    try{setPuzzle(dailyRecords[mode]);}catch(error){
+      root.innerHTML='<p class="cx-feedback" role="alert">'+escapeHtml(error?.message||'Taula hondatuta dago.')+'</p>';
+      return;
+    }
+    readBest();
+    const restored=readSaved();
+    if(!restored||state.phase!=='playing'){
+      state=fresh(mode,'playing');
+      state.startedAt=Date.now();
+    }
     save();render();
     root.querySelector('#cxWordInput')?.focus();
   }

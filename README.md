@@ -158,3 +158,15 @@ The six B2 `Indikatiboa lehenaldian` activity revisions **2** have been released
 - Aurreko saioen laburpenak `SustraiCloud` bidez gordetzen dira, `sustrai-jokoak-zinok-v1` gakoan.
 - Materialaren hizkuntza-egiaztapena egiteko dago, eta ez da ebaluazio ofiziala.
 - Ikusi `docs/pilotoak/20261122_JOKOAK_ZINOK_INTEGRAZIOA.md`.
+
+
+## MINTZAKATS · Eguneko erronka (integrazio-pilotua, 2026-11-22)
+
+- `/jokoak/mintzakats/` eremu berria SUSTRAIren estiloan eta saioan.
+- Jatorrizko `antoniourutz-dev/mintzakats` aplikaziotik: zazpi eguneko galdera-banaketa determinista (**20 eguneko × 7, astero 140 galdera desberdin**), 40 puntu erantzun zuzenagatik + gehienez 10 abiaduragatik, bolada, XP, hutsen berrikuspena.
+- Supabase Lexikoako `euskera_questions` (141 galdera; SELECT bakarrik) eta `grammar_lessons`/ `grammar_daily_schedule` (argitaratutakoak bakarrik) berrerabiliak.
+- **Ez da** MINTZAKATSen `partidak` edo `jokalari_egoera` tauletan idazten, haien RLS politikak orokorregiak baitira (`anon/authenticated FOR ALL USING(true)`). Oraingo rankinga eta irakasleen kudeaketa ez daude gaituta, segurtasun-migrazioa eta emaitzen egiaztapen zerbitzarian osatu arte.
+- Emaitzak norberarentzat soilik gordetzen dira `SustraiCloud.storage` bidez (`sustrai-jokoak-mintzakats-v1`), autentifikatutakoan `sr_app_state` RLSrekin eta gonbidatuentzat gailu lokalarekin; lehendik zeuden taulak eta emaitzak ez dira aldatu.
+- Galdera bakoitzeko zuzen/oker feedback zehatza eta kolorez bereizia; amaierako berrikuspena ez da eguneko puntuazioarekin nahasten.
+- Galderen bankuaren maila-etiketa ez da B2 gisa egiaztatzen automatikoki, eta ez da nota ofizialik ematen.
+- Xehetasunak eta kalitate-probak: `docs/pilotoak/20261122_JOKOAK_MINTZAKATS_INTEGRAZIOA.md`.

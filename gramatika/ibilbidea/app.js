@@ -78,6 +78,7 @@
       ? '2026-11-22ko egoera: jatorrizko fitxa onartua. Ikasgai gehigarria pilotuko materiala da.'
       : '2026-11-22ko egoera: jatorrizko fitxa berrikusteko. Ikasgai gehigarria pilotuko zirriborroa da.';
   }
+  function guidedCount() { return state.units.filter(u=>u.pilot_active).length; }
   function completeCount() {
     return state.units.filter(u => !!own(u.entry_code).read_at).length;
   }
@@ -85,8 +86,8 @@
     const produced=state.units.filter(u=>u.pilot_active&&!!own(u.entry_code).transferred_at).length;
     const reviewed=state.units.filter(u=>u.pilot_active&&!!own(u.entry_code).reviewed_again_at).length;
     $('pathProgressText').textContent=hasAccount()
-      ? completeCount()+'/31 gai irakurrita · '+produced+'/5 ekoizpen gordeta · '+reviewed+'/5 gerora berrikusita'
-      : completeCount()+'/31 gai saio honetan · '+produced+'/5 jarduera probatuta · ez da hodeian gordetzen.';
+      ? completeCount()+'/31 gai irakurrita · '+produced+'/'+guidedCount()+' ekoizpen gordeta · '+reviewed+'/'+guidedCount()+' gerora berrikusita'
+      : completeCount()+'/31 gai saio honetan · '+produced+'/'+guidedCount()+' jarduera probatuta · ez da hodeian gordetzen.';
     $('pathProgressBar').style.width=(completeCount()/31*100).toFixed(1)+'%';
     $('pathProgressTrack')?.setAttribute('aria-valuenow',String(completeCount()));
     const next=state.units.find(u=>u.pilot_active&&own(u.entry_code).transferred_at
@@ -129,7 +130,7 @@
         const desc = el('span', null, 'b2-topic-meta');
         const status = own(u.entry_code);
         desc.append(el('span',status.reviewed_again_at?'Gerora berrikusia':status.transferred_at?'Ekoizpena gordeta':status.practiced_at?'Praktikatua':status.read_at?'Irakurrita':'Hasteko'));
-        if (u.pilot_active) desc.append(el('span', '4 urratseko pilotua'));
+        if (u.pilot_active) desc.append(el('span', '4 urratseko ikasgaia'));
         b.append(desc);
         li.append(b);
         ol.append(li);
@@ -220,7 +221,7 @@
     body.replaceChildren();
     if (!u.pilot_active) {
       tabs.hidden = true;
-      addP(body, 'Gai hau 31 unitateko ibilbidean dago. Lehen bertsioan lau urratseko jarduerak lehen bost gaientzat soilik aktibatuta daude.');
+      addP(body, 'Gai hau 31 unitateko ibilbidean dago. Une honetan '+guidedCount()+' gaik dituzte lau urratseko jarduera gidatuak.');
       const explanation = section(body, 'Gaia');
       addP(explanation, e.short_explanation_eu);
       row(body, aLink(grammarLink(u.entry_code), 'Ireki gramatika-fitxa osoa', 'b2-button is-secondary'),
@@ -620,7 +621,7 @@
         const started=ownRows.filter(d=>d.read_at).length;
         const transferred=ownRows.filter(d=>d.transferred_at).length;
         const item=el('div',null,'b2-student-row');
-        item.append(el('strong',s.name||'Ikaslea'),el('span',started+'/31 gai irakurrita · '+transferred+'/5 pilotu-jarduera eginda'));
+        item.append(el('strong',s.name||'Ikaslea'),el('span',started+'/31 gai irakurrita · '+transferred+'/'+guidedCount()+' ekoizpen gordeta'));
         const inspect=button('Ikusi ekoizpenak eta eman orientabidea',()=>{
           if(item.querySelector('.b2-teacher-student-detail')){
             item.querySelector('.b2-teacher-student-detail').remove();return;
@@ -714,8 +715,11 @@
         state.client.from('smx_grammar_b2_practice_items').select('*').order('item_order').limit(100).then(check)
       ]);
       if(mods.length!==7 || units.length!==31)throw new Error('Ibilbidearen egitura osatu gabe dago');
-      state.modules=mods;state.units=units;state.entries=new Map(entries.map(e=>[e.code,e]));
-      if(designs.length!==5||items.length!==20)throw new Error('Ikasgai eta praktiken datuak osatu gabe daude.');
+      state.modules=mods;state.units=units.map(u=>({...u,pilot_active:designs.some(d=>d.entry_code===u.entry_code)}));
+      state.entries=new Map(entries.map(e=>[e.code,e]));
+      const activeCount=state.units.filter(u=>u.pilot_active).length;
+      if(activeCount!==designs.length)throw new Error('Ikasgaien eta gramatika-ibilbidearen kodeak ez datoz bat.');
+      if(!designs.length||items.length<designs.length*4)throw new Error('Ikasgai eta praktiken datuak osatu gabe daude.');
       designs.forEach(d=>LESSONS.set(d.entry_code,d));
       for(const d of designs){
         const selected=items.filter(it=>it.entry_code===d.entry_code).sort((a,b)=>a.item_order-b.item_order);
@@ -737,7 +741,8 @@
       const target=new URLSearchParams(location.search).get('gaia');
       if(target && state.entries.has(target))openUnit(target,false);
       else openUnit(state.units[0].entry_code,false);
-      say('B2ko ibilbidea kargatuta: 7 modulu, 31 gai. Lehenengo 5 gaietan praktika gidatua dago.');
+      const stat=$('pathGuidedCount');if(stat)stat.textContent=guidedCount()+' ikasgai gidatu';
+      say('B2ko ibilbidea kargatuta: '+state.modules.length+' modulu, '+state.units.length+' gai eta '+guidedCount()+' ikasgai gidatu.');
     }catch(err){
       console.warn('SUSTRAI B2 path startup',err?.code||err?.message||'network');
       say('Ezin izan da B2ko ibilbidea kargatu. Freskatu orria edo egiaztatu konexioa.',true);

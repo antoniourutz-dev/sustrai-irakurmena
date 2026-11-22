@@ -1,5 +1,5 @@
 /* SUSTRAI PWA service worker */
-const CACHE_VERSION = 'sustrai-pwa-v44-choice-feedback';
+const CACHE_VERSION = 'sustrai-pwa-v45-grammar-theory';
 const SHELL = [
   '/',
   '/index.html',
@@ -55,6 +55,8 @@ const SHELL = [
   '/azterketak/index.html',
   '/gramatika/',
   '/gramatika/index.html',
+  '/gramatika/gramatika.css',
+  '/gramatika/gramatika.js',
   '/ariketak/',
   '/ariketak/index.html',
   '/ariketak/catalog.js',

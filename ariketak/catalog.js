@@ -138,7 +138,8 @@
     btn.type='button';
     btn.append(make('span',top,'practice-card-number'));
     if(tag) btn.append(make('span',tag,'practice-tag'+(tag==='Berrikusteko'?' practice-tag--draft':'')));
-    btn.append(make('strong',title,'practice-card-title'),make('span',meta,'practice-card-meta'));
+    btn.append(make('strong',title,'practice-card-title'));
+    if (meta) btn.append(make('span',meta,'practice-card-meta'));
     const foot=make('span',null,'practice-card-foot');
     foot.append(make('span',action));
     btn.append(foot);
@@ -166,7 +167,7 @@
     status(topics.length+' atal · '+shown.length+' ikusgai. Aukeratu atala ariketak ikusteko.');
     shown.forEach((s)=>{
       const tag=s.editorial_state==='draft'?'Jarduerak':null;
-      $('practiceGrid').append(card(String(s.position).padStart(2,'0'),s.title_eu,tag?'Jarduerak eskuragarri, baimenaren arabera':'Ariketak prestatzen', tag ? 'Ariketak ikusi' : 'Atalaren xehetasunak',()=>go(state.level,b.code,s.code),tag));
+      $('practiceGrid').append(card(String(s.position).padStart(2,'0'),s.title_eu,tag?'':'Ariketak prestatzen', tag ? 'Ariketak ikusi' : 'Atalaren xehetasunak',()=>go(state.level,b.code,s.code),tag));
     });
     if(!shown.length)empty('Ez da bat datorren atalik aurkitu. Probatu beste bilaketa bat.');
   }
@@ -204,9 +205,7 @@
       const badge=make('span',pilot?'Jarduera erabilgarri':a.status==='approved'?'Argitaratua':'Barne-aurrebista',
         'practice-tag'+(a.status==='approved'||pilot?'':' practice-tag--draft'));
       article.append(badge,make('h3',a.prompt_json?.title_eu || 'Jarduera','practice-card-title'));
-      article.append(make('p',(a.itemCount??0)+' galdera · '
-        +(pilot?'Erantzunak eta iradokizunak gordetzeko aukera.':a.status==='approved'
-          ?'Ikaslearentzako jarduera':'Barne-aurrebista, ez argitaratua.'),'practice-card-meta'));
+      article.append(make('p',(a.itemCount??0)+' galdera','practice-card-meta'));
       const foot=make('div',null,'practice-card-foot');
       if(state.block.endsWith('-ADI')){
         const aLink=make('a',pilot?'Hasi ariketa':a.status==='approved'?'Hasi ariketa':'Berrikusi ariketa');

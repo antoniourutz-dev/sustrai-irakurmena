@@ -12,7 +12,7 @@
 - `editorial_grammar_summary_tables`: taula pedagogikoak
 - `editorial_grammar_error_patterns`: arriskuak eta zuzenketa-proposamenak
 
-Frontendak `public_editorial_grammar_*` irakurketa-ikuspegiak erabiltzen ditu. `public_editorial_grammar_entries` ikuspegiak `published`, onartutako berrikuspena, `needs_review=false` eta bat datozen hash-ak eskatzen ditu; haren gainean oinarritutako ikuspegi osagarriek argitaratutako sarreren erregistroak bakarrik erakusten dituzte. Egiaztapen-data: **2026-11-22**. Abiapuntuan ikusgarri: **4 B2** eta **32 C1**; **C1 zirriborro 1** ezkutatuta. Kopuruak datu-basean aldatu daitezke.
+Frontendak `public_editorial_grammar_*` irakurketa-ikuspegiak erabiltzen ditu. `public_editorial_grammar_entries` ikuspegiak `published`, onartutako berrikuspena, `needs_review=false` eta bat datozen hash-ak eskatzen ditu; haren gainean oinarritutako ikuspegi osagarriek argitaratutako sarreren erregistroak bakarrik erakusten dituzte. Egiaztapen-data: **2026-11-22**. 2026-11-22ko egiaztapenean ikusgarri: **4 B2** eta **32 C1**. B2ko **6 sarrera** eta C1eko **sarrera 1** zirriborroan dira, ikaslearen katalogotik kanpo. Kopuruak datu-basean aldatu daitezke.
 
 ## Datuak eta erakusteko arauak
 
@@ -40,6 +40,15 @@ Frontendak `public_editorial_grammar_*` irakurketa-ikuspegiak erabiltzen ditu. `
 ## Argitalpenerako hurrengo pausoak
 
 1. Adibide eta arauen auditoria akademikoa, C1eko fitxa aberatsak B2ra egokitu aurretik.
-2. B2ko edukien hedapena —gaur 4 sarrera ditu; C1ek 32—, lehendik dauden edukiak bikoiztu gabe.
+2. B2ko edukien hedapena —4 argitaratuta eta 6 berrikusteko zirriborroan; C1ek 32 argitaratuta—, lehendik dauden edukiak bikoiztu gabe.
 3. Irakasle/administratzailearentzako edizio-fluxua berrikusi: sortu → berrikusi → onartu → argitaratu.
 4. Egoerak eta bertsioak argitaratzean errespetatzen direla probatu.
+
+## 2026-11-22ko B2 eduki-lote berria
+
+- Supabaseko sarrera berri hauek zirriborroan daude: `b2_ergatiboa_eta_absolutiboa`, `b2_nor_eta_nor_nork_komunztadura`, `b2_datiboa_eta_nori_komunztadura`, `b2_leku_kasuak_non_nora_nondik`, `b2_perpaus_osagarriak_la_nik`, `b2_baldintza_erreala_eta_alegiazkoa`.
+- Azken bi fitxak berriak dira 2026-11-22ko lan-saio honetan; kontsultatutako Euskaltzaindiaren deskribapenetan oinarrituta prestatu dira.
+- `-z gero`ren idazkera Euskara Batuaren Eskuliburuan egiaztatuta dago (*etorriz gero*, ez *etorri ezkero*). Baldintza jokatugabeak baditu aspektu-mugak ere; araua eta deskribapena bereizita gordeta daude.
+- Datiboaren fitxak ekialdeko hizkeretako komunztadura-aldakortasunari buruzko ohar deskribatzaile bat dauka.
+- Fitxen `status='draft'`, `review_status='not_reviewed'` eta `needs_review=true` mantendu dira. **Ez** dute bigarren irakurketa akademiko independentea gainditu, eta **ez** da argitalpen-prozesua saihestu.
+- Irakurketa-interfazean, `metadata.sources` eremuan benetako HTTPS erreferentziak baldin badaude, haien loturak, mota eta babesten duten baieztapena erakusten dira. Iturriaren mota zehaztu ez bada, ez da arauemaile gisa aurkezten.

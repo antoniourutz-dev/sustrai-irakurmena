@@ -7,81 +7,83 @@
   const root = document.getElementById('cxApp');
   if (!root) return;
 
-  // Editorial status: corpus-backed terms, pilot clues; independent academic review is pending.
-  // Source identifiers remain traceable; source text is NOT used as a grading rubric.
-  const WORDS = [
-    { id:'ekografia',word:'EKOGRAFIA',r:5,c:3,dir:'H',source:'OS-C013',
-      clue:'Ultrasoinuak erabiliz gorputz barruko irudiak lortzeko egiten den proba.',
-      explanation:'Ultrasoinuen bidez irudiak lortzen dituen azterketa diagnostikoa da.' },
-    { id:'hitzordu',word:'HITZORDU',r:4,c:10,dir:'V',source:'OS-C023',
-      clue:'Osasun-arloko profesional batekin aurrez adostutako eguna eta ordua.',
-      explanation:'Osasun-zentroko kontsultak edo arretak antolatzeko erabiltzen da.' },
-    { id:'infekzio',word:'INFEKZIO',r:7,c:5,dir:'H',source:'OS-C014',
-      clue:'Mikroorganismo bat organismoan sartzearekin eta ugaltzearekin lotutako prozesua.',
-      explanation:'Infekzioa eta haren ondoriozko gaixotasuna ez dira nahitaez gauza bera.' },
-    { id:'sendagai',word:'SENDAGAI',r:4,c:3,dir:'V',source:'OS-C020',
-      clue:'Gaixotasunak prebenitzeko edo tratatzeko erabil daitekeen substantzia edo prestakina.',
-      explanation:'Sendagaiak erabilera eta indikazio zehatzak ditu; ez da tratamendu guztien sinonimoa.' },
-    { id:'ongizate',word:'ONGIZATE',r:0,c:8,dir:'V',source:'OS-C055',
-      clue:'Pertsonaren egoera fisiko, psikiko eta sozialarekin lotutako ondo egotea.',
-      explanation:'Osasunaz harago, pertsonaren bizi-baldintzei eta egoerari ere erreferentzia egin diezaioke.' },
-    { id:'arteria',word:'ARTERIA',r:9,c:6,dir:'H',source:'OS-C081',
-      clue:'Odola bihotzetik gorputzeko ehunetara eramaten duen odol-hodia.',
-      explanation:'Arteriak odola bihotzetik urruntzen du; zainak, oro har, bihotzera eramaten du.' },
-    { id:'orbain',word:'ORBAIN',r:3,c:4,dir:'H',source:'OS-C060',
-      clue:'Zauri bat sendatu ondoren ehunean geratzen den marka.',
-      explanation:'Orbaina sendatze-prozesu baten ondorengo ehun-markari esaten zaio.' },
-    { id:'txerto',word:'TXERTO',r:0,c:5,dir:'V',source:'OS-C019',
-      clue:'Immunitate-erantzuna eragiteko erabiltzen den prestakin biologikoa.',
-      explanation:'Txertoen helburua gaixotasun jakin batzuen aurkako babes immunologikoa sustatzea da.' },
-    { id:'sukar',word:'SUKAR',r:8,c:0,dir:'H',source:'OS-C001',
-      clue:'Gorputz-tenperatura ohiko balioetatik gora igotzea.',
-      explanation:'Sukarra sintoma edo zeinu kliniko bat izan daiteke; ez da berez gaixotasun baten izena.' },
-    { id:'zauri',word:'ZAURI',r:6,c:1,dir:'V',source:'OS-C015',
-      clue:'Gorputzeko ehun baten osotasuna hausten duen lesioa.',
-      explanation:'Zauria azalekoa edo sakonagoa izan daiteke, kokapenaren eta lesioaren arabera.' },
-    { id:'eztul',word:'EZTUL',r:11,c:7,dir:'H',source:'OS-C003',
-      clue:'Arnasbideetako airea bat-batean kanporatzeko erreflexua edo ekintza.',
-      explanation:'Eztula arnasbideak babesteko mekanismoa ere bada.' },
-    { id:'neke',word:'NEKE',r:1,c:8,dir:'H',source:'OS-C058',
-      clue:'Indar edo energia faltaren sentsazioa.',
-      explanation:'Nekea sintoma izan daiteke; testuinguruak bere kausa eta esanahia zehazten ditu.' }
-  ];
-  const ROWS = 12, COLS = 13, SAVE_KEY = 'sustrai-crossword-osasuna-001-v2', LEGACY_KEY = 'sustrai-crossword-osasuna-001-v1';
-  const BEST_KEY = 'sustrai-crossword-osasuna-001-best-v2';
-  const PUZZLE_VERSION = 'osasuna-001-v1';
-  const COST_HINT = 40, COST_WRONG = 15;
-  const byId = new Map(WORDS.map(w => [w.id,w]));
-  const grid = new Map();
-  const key = (r,c) => r + ',' + c;
-  const pos = (w,i) => [w.r + (w.dir === 'V' ? i : 0),w.c + (w.dir === 'H' ? i : 0)];
-  for (const w of WORDS) {
-    if (!/^[A-Z]+$/.test(w.word) || !w.word || w.word.length > 18) throw new Error('Gurutzegramaren hitz okerra');
-    for (let i=0;i<w.word.length;i++) {
-      const [r,c] = pos(w,i);
-      if (r < 0 || c < 0 || r >= ROWS || c >= COLS) throw new Error('Gurutzegramaren kokaleku okerra');
-      const k = key(r,c), prev = grid.get(k);
-      if (prev && prev.letter !== w.word[i]) throw new Error('Gurutzegramaren gurutzaketa okerra');
-      if (!prev) grid.set(k,{letter:w.word[i],owners:[w.id],number:null});
-      else prev.owners.push(w.id);
+  // A new dated, authored board arrives from Supabase every Euskadi-local day.
+  // No future crossword answers are shipped in this public script.
+  let WORDS=[],ROWS=0,COLS=0,byId=new Map(),grid=new Map(),ordered=[];
+  let SAVE_KEY='',BEST_KEY='',PUZZLE_VERSION='',activePuzzle=null;
+  let dailyDate='', dailyRecords={}, cloud, best=null, loading=false, dailyNotice='';
+  const COST_HINT=40, COST_WRONG=15;
+  const key=(r,c)=>r+','+c;
+  const pos=(w,i)=>[w.r+(w.dir==='V'?i:0),w.c+(w.dir==='H'?i:0)];
+  const madridDate=()=>{
+    const p=new Intl.DateTimeFormat('en-GB',{timeZone:'Europe/Madrid',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date());
+    const value=part=>p.find(x=>x.type===part)?.value;
+    return value('year')+'-'+value('month')+'-'+value('day');
+  };
+  const dateDisplay=day=>{
+    if(!/^\d{4}-\d{2}-\d{2}$/.test(day))return '';
+    return new Intl.DateTimeFormat('eu-ES',{day:'numeric',month:'long',year:'numeric',timeZone:'UTC'})
+      .format(new Date(day+'T12:00:00Z'));
+  };
+  const dailySaveKey=id=>'sustrai-crossword-daily-'+id+'-progress-v1';
+  const dailyBestKey=id=>'sustrai-crossword-daily-'+id+'-best-v1';
+  const dailyCacheKey=date=>'sustrai-crossword-daily-cache-'+date+'-v1';
+  function setPuzzle(p) {
+    const rows=Number(p.grid_rows),cols=Number(p.grid_cols),raw=p.entries;
+    if(!p?.id||!Number.isInteger(rows)||!Number.isInteger(cols)||
+      rows<5||rows>19||cols<5||cols>19||!Array.isArray(raw)||raw.length<8||raw.length>18)
+      throw Error('Gurutzegramaren datuak ez dira zuzenak.');
+    const entries=raw.map(x=>({...x,
+      word:String(x.word||'').toUpperCase(),
+      r:Number(x.r),c:Number(x.c),
+      clue:String(x.clue||''),explanation:String(x.explanation||''),source:String(x.source||'')
+    }));
+    const ids=new Set(),terms=new Set(),cells=new Map();
+    for(const w of entries) {
+      if(!w.id||ids.has(w.id)||terms.has(w.word)||!/^[A-Z]{4,12}$/.test(w.word)||
+        !['H','V'].includes(w.dir)||!Number.isInteger(w.r)||!Number.isInteger(w.c)||
+        !w.clue.trim()||!w.explanation.trim()||!w.source.trim())throw Error('Hitz okerra edo errepikatua.');
+      ids.add(w.id);terms.add(w.word);
+      for(let i=0;i<w.word.length;i++){
+        const [r,c]=pos(w,i);
+        if(r<0||c<0||r>=rows||c>=cols)throw Error('Kokaleku okerra.');
+        const k=key(r,c),prev=cells.get(k);
+        if(prev&&(prev.letter!==w.word[i]||prev.dirs.has(w.dir)||prev.owners.length>=2))
+          throw Error('Gurutzaketa okerra.');
+        if(!prev)cells.set(k,{letter:w.word[i],owners:[w.id],dirs:new Set([w.dir]),number:null});
+        else{prev.owners.push(w.id);prev.dirs.add(w.dir);}
+      }
     }
+    const connected=new Set(),pending=[entries[0].id];
+    while(pending.length){
+      const id=pending.pop();if(connected.has(id))continue;
+      connected.add(id);
+      for(const cell of cells.values())if(cell.owners.includes(id))
+        for(const partner of cell.owners)if(!connected.has(partner))pending.push(partner);
+    }
+    if(connected.size!==entries.length)throw Error('Taula ez dago konektatuta.');
+    const starts=[...new Set(entries.map(w=>key(w.r,w.c)))].sort((x,y)=>{
+      const [xr,xc]=x.split(',').map(Number),[yr,yc]=y.split(',').map(Number);
+      return xr-yr||xc-yc;
+    });
+    starts.forEach((k,i)=>{cells.get(k).number=i+1;});
+    entries.forEach(w=>{w.number=cells.get(key(w.r,w.c)).number;});
+    WORDS=entries;ROWS=rows;COLS=cols;
+    grid=cells;byId=new Map(entries.map(w=>[w.id,w]));
+    ordered=[...entries].sort((x,y)=>x.number-y.number);
+    activePuzzle=p;PUZZLE_VERSION=p.id;
+    SAVE_KEY=dailySaveKey(p.id);BEST_KEY=dailyBestKey(p.id);
+    best=null;
   }
-  const starts = [...new Set(WORDS.map(w => key(w.r,w.c)))].sort((a,b)=>{
-    const [ar,ac]=a.split(',').map(Number),[br,bc]=b.split(',').map(Number);
-    return ar-br || ac-bc;
-  });
-  starts.forEach((k,i) => { grid.get(k).number = i+1; });
-  WORDS.forEach(w => { w.number = grid.get(key(w.r,w.c)).number; });
-  const ordered = [...WORDS].sort((a,b)=>a.number-b.number);
   const escapeHtml = value => String(value ?? '').replace(/[&<>"']/g,x=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[x]));
   // The competitive clock is wall-clock elapsed. Leaving the tab does not pause a challenge.
   // Scores are PERSONAL and device/account based, never a server-verified public ranking.
   const fresh = (mode = 'ikasi', phase = 'setup') => ({
-    phase,mode,active:ordered[0].id,drafts:{},checked:{},hints:{},
+    phase,mode,active:ordered[0]?.id||'',drafts:{},checked:{},hints:{},
     revealed:{},lastWrong:{},modified:[],startedAt:0,finishedAt:0,
     stats:{hints:0,wrong:0},feedback:''
   });
-  let state = fresh(), cloud, best = null;
+  let state = fresh();
 
   function elapsedSeconds() {
     if (state.mode !== 'erronka' || !state.startedAt) return 0;

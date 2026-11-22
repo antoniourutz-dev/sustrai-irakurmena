@@ -405,7 +405,26 @@
     renderPath(); renderLesson();
     if (scroll) $('pathLesson').scrollIntoView({behavior:'smooth',block:'start'});
   }
-  async function loadStudent() {
+  async function renderStudentFeedback(area) {
+    if(!hasAccount())return;
+    const box=section(area,'Irakaslearen orientabideak');
+    try{
+      const feedback=check(await state.client.from('smx_grammar_b2_teacher_feedback')
+        .select('entry_code,feedback_eu,next_step_eu,created_at')
+        .eq('student_id',state.user.id).order('created_at',{ascending:false}).limit(30));
+      if(!box.isConnected)return;
+      if(!feedback.length){addP(box,'Oraindik ez dago irakasle-oharrik. Zure ekoizpenak modu autonomoan berrikus ditzakezu.','b2-small');return;}
+      feedback.forEach(fb=>{
+        const note=el('article',null,'b2-feedback-note');
+        note.append(el('span',day(fb.created_at),'b2-mini-label'));
+        note.append(el('strong',state.entries.get(fb.entry_code)?.title_eu||fb.entry_code));
+        addP(note,fb.feedback_eu);
+        if(fb.next_step_eu)addP(note,'Hurrengo urratsa: '+fb.next_step_eu,'b2-next-note');
+        box.append(note);
+      });
+    }catch(err){addP(box,'Irakaslearen oharrak ezin izan dira kargatu.','b2-error');}
+  }
+    async function loadStudent() {
     const area = $('pathStudentArea');
     area.replaceChildren();
     if (!hasAccount()) {
@@ -429,6 +448,7 @@
       } catch(err){say('Ezin izan zara taldean sartu: '+(err.message||''),true);}
     };
     join.append(form);
+    void renderStudentFeedback(area);
     try {
       const memberships = check(await state.client.rpc('sr_my_groups'));
       state.myGroups = Array.isArray(memberships) ? memberships : [];
@@ -570,11 +590,83 @@
         const transferred=ownRows.filter(d=>d.transferred_at).length;
         const item=el('div',null,'b2-student-row');
         item.append(el('strong',s.name||'Ikaslea'),el('span',started+'/31 gai irakurrita · '+transferred+'/5 pilotu-jarduera eginda'));
+        const inspect=button('Ikusi ekoizpenak eta eman orientabidea',()=>{
+          if(item.querySelector('.b2-teacher-student-detail')){
+            item.querySelector('.b2-teacher-student-detail').remove();return;
+          }
+          const slot=el('div','Ikaslearen lanak kargatzen…','b2-teacher-student-detail');
+          item.append(slot);
+          void renderStudentEvidence(s,slot);
+        },'b2-link-button');
+        item.append(inspect);
         pupils.append(item);
       });
     }catch(err){addP(pupils,'Aurrerapena ezin izan da irakurri.','b2-error');}
   }
-  async function start() {
+  async function renderStudentEvidence(student,slot) {
+    if(!hasAccount()||!state.profile?.teacher)return;
+    slot.replaceChildren();
+    const heading=el('h4','Ikaslearen ekoizpenak eta feedback hezigarria');slot.append(heading);
+    try{
+      const [progress,feedback]=await Promise.all([
+        state.client.from('smx_grammar_b2_progress').select('entry_code,read_at,practiced_at,transferred_at,reflection_eu,reviewed_again_at,review_reflection_eu')
+          .eq('user_id',student.id).order('updated_at',{ascending:false}).limit(50).then(check),
+        state.client.from('smx_grammar_b2_teacher_feedback').select('entry_code,feedback_eu,next_step_eu,created_at')
+          .eq('student_id',student.id).order('created_at',{ascending:false}).limit(25).then(check)
+      ]);
+      const works=progress.filter(x=>x.reflection_eu||x.review_reflection_eu);
+      if(!works.length)addP(slot,'Ikasleak ez du oraindik ekoizpen idatzirik gorde.','b2-small');
+      else works.forEach(work=>{
+        const unit=el('article',null,'b2-student-work');
+        unit.append(el('strong',state.entries.get(work.entry_code)?.title_eu||work.entry_code));
+        if(work.reflection_eu){unit.append(el('span','Lehen ekoizpena','b2-mini-label'));addP(unit,work.reflection_eu);}
+        if(work.review_reflection_eu){unit.append(el('span','Geroko berrikuspena','b2-mini-label'));addP(unit,work.review_reflection_eu);}
+        slot.append(unit);
+      });
+      if(feedback.length){
+        const notes=section(slot,'Emandako orientabideak');
+        feedback.forEach(fb=>{
+          const note=el('article',null,'b2-feedback-note');
+          note.append(el('span',day(fb.created_at)+' · '+(state.entries.get(fb.entry_code)?.title_eu||''),'b2-mini-label'));
+          addP(note,fb.feedback_eu);
+          if(fb.next_step_eu)addP(note,'Hurrengo urratsa: '+fb.next_step_eu,'b2-next-note');
+          notes.append(note);
+        });
+      }
+      const form=el('form',null,'b2-teacher-form');
+      const label=el('label','Ikasgaia');label.htmlFor='b2FeedbackUnit';
+      const choose=el('select');choose.id='b2FeedbackUnit';
+      state.units.filter(u=>u.pilot_active).forEach(u=>{
+        const option=el('option',state.entries.get(u.entry_code)?.title_eu||u.entry_code);
+        option.value=u.entry_code;choose.append(option);
+      });
+      if(works[0] && state.units.some(u=>u.entry_code===works[0].entry_code))choose.value=works[0].entry_code;
+      const textLabel=el('label','Ikaslearen ekoizpenari buruzko orientabidea');textLabel.htmlFor='b2TeacherFeedback';
+      const area=el('textarea');area.id='b2TeacherFeedback';area.rows=4;area.required=true;area.minLength=12;area.maxLength=1500;
+      area.placeholder='Indargune frogatu bat eta hobetzeko aukera bat, ikaslearen testuan oinarrituta…';
+      const nextLabel=el('label','Hurrengo ekintza (aukerakoa)');nextLabel.htmlFor='b2TeacherNextStep';
+      const next=el('textarea');next.id='b2TeacherNextStep';next.rows=2;next.maxLength=500;
+      next.placeholder='Beste egoera bateko praktika edo berreraikuntza…';
+      const submit=el('button','Gorde feedbacka','b2-button');submit.type='submit';
+      form.append(label,choose,textLabel,area,nextLabel,next,submit);
+      form.onsubmit=async event=>{
+        event.preventDefault();
+        if(!area.value.trim()||area.value.trim().length<12){say('Feedbackak 12 karaktere behar ditu gutxienez.',true);return;}
+        submit.disabled=true;
+        try{
+          check(await state.client.from('smx_grammar_b2_teacher_feedback').insert({
+            student_id:student.id,teacher_id:state.user.id,entry_code:choose.value,
+            feedback_eu:area.value.trim(),next_step_eu:next.value.trim()||null
+          }).select('id').single());
+          say('Irakaslearen orientabidea gordeta. Ikasleak bere kontuan ikusi ahal izango du.');
+          await renderStudentEvidence(student,slot);
+        }catch(err){say('Feedbacka ezin izan da gorde: '+(err.message||''),true);}
+        finally{submit.disabled=false;}
+      };
+      slot.append(form);
+    }catch(err){addP(slot,'Ikaslearen ekoizpenak ezin izan dira kargatu: '+(err.message||''),'b2-error');}
+  }
+    async function start() {
     try{
       await cloud?.ready;
       state.client=cloud?.client?.()||null;

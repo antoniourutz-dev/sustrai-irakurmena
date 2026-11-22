@@ -512,8 +512,13 @@
     if(action==='start'){start(el.dataset.mode);return;}
     if(action==='reset'){
       if(state.phase==='playing'&&!window.confirm('Partida hau bertan behera utzi eta beste bat hasi?'))return;
+      const completed=state.phase==='finished';
       if(madridDate()!==dailyDate){state=fresh();loadDaily();return;}
-      state=fresh();save();render();return;
+      // Returning from a FINISHED game must not erase its saved completion.
+      // A subsequent start of the same mode creates a new attempt.
+      state=fresh('ikasi','setup');
+      if(!completed)save();
+      render();return;
     }
     if(state.phase==='setup')return;
     if(el.dataset.word){setActive(el.dataset.word,true);return;}

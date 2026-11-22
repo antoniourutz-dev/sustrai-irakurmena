@@ -94,3 +94,11 @@
 .grammar-table-card .grammar-table-wrap{width:100%}
 .grammar-table-card td,.grammar-table-card th{min-width:120px}
 @media(max-width:680px){.grammar-filters{grid-template-columns:1fr}.grammar-reading-top{align-items:flex-start}.grammar-form-body{padding:16px}.grammar-form summary{padding:14px 16px}.grammar-example-grid{grid-template-columns:1fr}.grammar-index-card{min-height:150px}}
+
+
+/* Source attribution: distinguish normative orthography from descriptive grammar. */
+.grammar-source-list{list-style:none;margin:8px 0 0;padding:0;display:grid;gap:12px}
+.grammar-source-list li{padding:12px 14px;border:1px solid var(--s-line);border-radius:12px;display:grid;gap:4px;min-width:0}
+.grammar-source-list li a{font-weight:750;text-underline-offset:3px;overflow-wrap:anywhere}
+.grammar-source-type{font-size:12px;font-weight:700;color:var(--s-muted)}
+.grammar-source-claim{margin:0;font-size:13px;line-height:1.55;color:var(--s-muted)}

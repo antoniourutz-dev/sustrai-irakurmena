@@ -34,3 +34,26 @@ Probak: JS sintaxia, hitzen bakartasuna eta posizioa, 13 gurutzaketen letra-bate
 - [ ] Akademikoa: bigarren berrikusle independenteak 12 pista eta 12 azalpenak ebaluatu
 
 **Ez fusio automatikoa produkziora:** proba horiek eta edukien berrikuspena behar dira.
+
+## 1.1 · Ikasteko modua eta Erronka modua (2026-11-22)
+- **Hasierako pantaila**: Ikasteko modua eta Erronka modua. Moduak partida hastean finkatzen dira; ez dago entrenamendutik puntuazio lehiakorrera bihurtzerik.
+- **Erronka**: 100 puntu zuzeneko hitzeko; 40 puntu letra berri baten pistagatik; 15 puntu erantzun oker *desberdinaren* egiaztapenagatik. Hitz guztiak osatuta, denbora-saria max(0, round(300 − segundoak/2)).
+- **Ikasteko modua**: ez du puntuazio edo zigorrik; haren letraz letrako zuzenketa ez da erronka moduan agertzen.
+- **Hutsegite berdinaren berriz egiaztatzeak** ez du beste 15 puntu kentzen, erantzuna aldatu ez bada.
+- **Pistak**: lehenagotik ebatzitako gurutzaketek emandako letrak ez dira berriz kobratzen. Erakutsitako letra bakoitza posizio bakar gisa erregistratzen da; aurretik argitutako posizio bera ezin da pista berri gisa ordaindu.
+- **Kronometroa**: hasiera-une absolututik amaiera-unera; orrialdetik irteteak ez du denbora geldiarazten. Berriz sartzean denbora erreala berreskuratzen da. Amaitutako saioetan denbora finkoa da.
+- **Emaitza**: hitz zuzenak, segundoak, pistak, hutsegiteak, denbora-saria eta azken puntuazioa. Marka pertsonalik onena gordetzen da jokoaren bertsio honetarako.
+- **Biltegiratzea**: saio berriak v2 gakoan gordetzen dira; v1 saio zaharrak *ikasteko moduan soilik* migratzen dira. Marka pertsonala bereizita gordetzen da. Parte hartzaileak berak ezabatu edo alda ditzake bezeroaren datuak.
+- **Ez dago publikoaren sailkapenik**: bezeroan biltegiratutako denbora eta puntuazioa ez dira egokiak sailkapen fidagarri baterako. Horretarako, zerbitzariko erregistroa, bertsioaren sinadura, berdintasunezko baldintzak eta abusuaren aurkako proba gehiago beharko lirateke.
+- **Urruneko fitxategia**: PRaren previewan bakarrik, ez produkzioan; lexikoaren berrikuspen akademiko eta nabigatzaile errealeko QA itxaron behar da.
+
+### Berriz-probatzeko kasuak
+- [x] Sarearen egitura (12 hitz, 13 gurutzaketa).
+- [x] Bi moduen hasiera, okerrak, pistak, puntuazio-zigorrak, amaierako emaitza.
+- [x] Emaitza berdin okerra bi aldiz egiaztatuta, kostu bikoitzik gabe.
+- [x] Denbora luzez orrialdetik irten eta saioa berriro irekitzean, denbora metatzen da.
+- [x] Marka pertsonala mantendu, partida berrabiarazi arren.
+- [x] Bertsio zaharreko saioa soilik ikasteko modura migratu.
+- [x] Gurutzaketa agerikoaren letra ez kobratu berriz eta testuaren posizioa mantendu.
+- [ ] Benetako mahaigain/mugikor nabigatzaileko zuzenketa, fokua, pantaila-irakurgailua eta kontrastea.
+- [ ] Hitz bakoitzaren pista eta azalpenaren bigarren berrikuspen akademikoa.

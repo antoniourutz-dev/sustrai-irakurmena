@@ -66,7 +66,7 @@
       return;
     }
 
-    status('Supabasetik jarduerak irakurtzen…');
+    status('Jarduerak kargatzen…');
     try {
       // Gate 1: Only ADITZAK codes. Gate 2: RLS returns only approved / admin draft versions.
       const activities = check(await state.client.from('smx_activities')
@@ -159,7 +159,7 @@
       const n = state.progress.get(a.id) || 0;
       const tail = n ? ' · ' + n + ' saiakera' : '';
       button.append(badge, node('strong', titleOf(a)),
-        node('small', languageLevel(a) + ' · ' + items.length + ' item · ' + (a.prompt_json?.mechanism_code || a.kind) + tail));
+        node('small', languageLevel(a) + ' · ' + items.length + ' galdera' + tail));
       button.addEventListener('click', () => showActivity(a));
       root.append(button);
     }
@@ -170,6 +170,9 @@
   // editorial review or an official academic approval.
   function showActivity(a) {
     state.current = a;
+    document.body.classList.add('is-practicing');
+    document.querySelector('.skip').href = '#activityTitle';
+    $('activityTitle').setAttribute('aria-level', '1');
     state.answers = new Map();
     state.attemptId = null;
     $('gradeSummary').hidden = true;
@@ -181,6 +184,8 @@
     $('levelFilter').disabled = true;
     $('activityTitle').textContent = titleOf(a);
     $('activityInstruction').textContent = a.prompt_json?.instruction_eu || '';
+    const activityItems = state.items.filter(i => i.activity_version_id === a.id);
+    $('activityMeta').textContent = languageLevel(a) + ' · Aditzak · ' + activityItems.length + ' galdera';
     // E09 cloze tasks need the full text in addition to the four atomic prompts.
     const fullContext = typeof a.prompt_json?.context_eu === 'string'
       ? a.prompt_json.context_eu.trim() : '';
@@ -198,7 +203,7 @@
       card.dataset.position=String(item.position);
       card.id='ad-item-'+item.position;
       card.tabIndex=-1;
-      const number = node('span', item.position + '. item', 'ad-item-number');
+      const number = node('span', item.position + '. galdera', 'ad-item-number');
       const label = node('label', item.prompt_eu);
       const fieldId = 'ad-answer-' + item.id;
       label.htmlFor = fieldId;
@@ -230,9 +235,11 @@
         });
         card.append(input);
       } else {
-        const input = node('textarea', null, 'ad-answer');
+        const shortAnswer = (item.mechanism_code || a.prompt_json?.mechanism_code) === 'E02';
+        const input = node(shortAnswer ? 'input' : 'textarea', null, 'ad-answer' + (shortAnswer ? ' ad-answer--short' : ''));
         input.id = fieldId;
-        input.rows = item.response_kind === 'open_writing' ? 6 : 2;
+        if (shortAnswer) { input.type = 'text'; input.autocomplete = 'off'; input.spellcheck = false; }
+        else input.rows = item.response_kind === 'open_writing' ? 6 : 3;
         input.maxLength = item.response_kind === 'open_writing' ? 5000 : 2000;
         input.placeholder = item.response_kind === 'open_writing' ? 'Idatzi hemen zure testua…' : 'Idatzi zure erantzuna…';
         input.addEventListener('input', () => {
@@ -253,7 +260,10 @@
       : isDraft(a)
       ? 'Barne-aurrebista: ezin da erantzunik gorde.'
       : 'Jatorrizko erantzunak gordeko dira; soilik egiaztatutako gakoak zuzenduko dira.');
-    $('activityPanel').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    updateAnswerProgress();
+    $('activityTitle').tabIndex = -1;
+    $('activityTitle').focus({preventScroll:true});
+    $('activityPanel').scrollIntoView({ behavior: 'auto', block: 'start' });
   }
 
   function back() {
@@ -269,6 +279,8 @@
       } catch { /* Invalid external destination: use the local catalog. */ }
     }
     state.current = null;
+    document.body.classList.remove('is-practicing');
+    document.querySelector('.skip').href = '#pageTitle';
     state.answers.clear();
     state.attemptId = null;
     $('activityPanel').hidden = true;
@@ -409,6 +421,15 @@
     }
   }
 
+  function updateAnswerProgress() {
+    if (!state.current) return;
+    const total = state.items.filter(i => i.activity_version_id === state.current.id).length;
+    $('answerProgress').max = total || 1;
+    $('answerProgress').value = state.answers.size;
+    $('answerProgressLabel').textContent = state.answers.size + ' / ' + total + ' erantzunda';
+  }
+  $('items').addEventListener('input', updateAnswerProgress);
+  $('items').addEventListener('change', updateAnswerProgress);
   $('gradeAgain').addEventListener('click',retryGrade);
   $('newAttempt').addEventListener('click',()=>{
     if(canSubmit(state.current))showActivity(state.current);

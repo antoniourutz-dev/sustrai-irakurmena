@@ -102,6 +102,11 @@ const flush=async()=>{await Promise.resolve();await Promise.resolve();};
   assert.equal(app.saved().stats.wrong,0,'Study mode never charges errors');
   app.click({action:'hint'});
   assert.equal(app.saved().stats.hints,0,'Study mode never charges hints');
+  app.click({action:'check'}); // EKOGRAFIA is now solved; it crosses HITZORDU at its second letter.
+  app.click({word:'hitzordu'});app.write('H');app.click({action:'hint'});
+  assert.equal(app.saved().drafts.hitzordu,'HIT','Earned crossing must fill skipped input position');
+  assert.deepEqual(Array.from(app.saved().revealed.hitzordu),[2],
+    'A paid hint must reveal one genuinely new letter, not the existing crossing');
 
   const old=new Map([[LEGACY,JSON.stringify({schema:1,active:'sukar',drafts:{sukar:'SUKAR'},checked:{sukar:'correct'}})]]);
   const migrated=spawn(old);await flush();

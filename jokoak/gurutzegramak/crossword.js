@@ -47,7 +47,10 @@
       clue:'Indar edo energia faltaren sentsazioa.',
       explanation:'Nekea sintoma izan daiteke; testuinguruak bere kausa eta esanahia zehazten ditu.' }
   ];
-  const ROWS = 12, COLS = 13, SAVE_KEY = 'sustrai-crossword-osasuna-001-v1';
+  const ROWS = 12, COLS = 13, SAVE_KEY = 'sustrai-crossword-osasuna-001-v2', LEGACY_KEY = 'sustrai-crossword-osasuna-001-v1';
+  const BEST_KEY = 'sustrai-crossword-osasuna-001-best-v2';
+  const PUZZLE_VERSION = 'osasuna-001-v1';
+  const COST_HINT = 40, COST_WRONG = 15;
   const byId = new Map(WORDS.map(w => [w.id,w]));
   const grid = new Map();
   const key = (r,c) => r + ',' + c;
@@ -71,36 +74,114 @@
   WORDS.forEach(w => { w.number = grid.get(key(w.r,w.c)).number; });
   const ordered = [...WORDS].sort((a,b)=>a.number-b.number);
   const escapeHtml = value => String(value ?? '').replace(/[&<>"']/g,x=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[x]));
-  const fresh = () => ({active:ordered[0].id,drafts:{},checked:{},hints:{},modified:[],startedAt:Date.now()});
-  let state = fresh(), cloud;
+  // The competitive clock is wall-clock elapsed. Leaving the tab does not pause a challenge.
+  // Scores are PERSONAL and device/account based, never a server-verified public ranking.
+  const fresh = (mode = 'ikasi', phase = 'setup') => ({
+    phase,mode,active:ordered[0].id,drafts:{},checked:{},hints:{},
+    revealed:{},lastWrong:{},modified:[],startedAt:0,finishedAt:0,
+    stats:{hints:0,wrong:0},feedback:''
+  });
+  let state = fresh(), cloud, best = null;
 
+  function elapsedSeconds() {
+    if (state.mode !== 'erronka' || !state.startedAt) return 0;
+    const end = state.finishedAt || Date.now();
+    return Math.max(0,Math.floor((end-state.startedAt)/1000));
+  }
+  function fmtTime(seconds) {
+    const n = Math.max(0,Math.floor(seconds));
+    return String(Math.floor(n/60)).padStart(2,'0')+':'+String(n%60).padStart(2,'0');
+  }
+  function scoreBreakdown() {
+    const correct = solvedCount(),seconds=elapsedSeconds();
+    const base=correct*100;
+    const bonus=correct === WORDS.length ? Math.max(0,Math.round(300-seconds/2)) : 0;
+    const hints=Math.max(0,state.stats.hints)*COST_HINT;
+    const wrong=Math.max(0,state.stats.wrong)*COST_WRONG;
+    return {correct,seconds,base,bonus,hints,wrong,total:Math.max(0,base+bonus-hints-wrong)};
+  }
+  function getStorage(key) {
+    try {return cloud?.storage?.getItem(key) ?? window.localStorage.getItem(key);} catch {return null;}
+  }
+  function setStorage(key,value) {
+    try {
+      if (cloud?.storage) cloud.storage.setItem(key,value);
+      else window.localStorage.setItem(key,value);
+    } catch { /* Device storage is optional. */ }
+  }
+  function readBest() {
+    try {
+      const p=JSON.parse(getStorage(BEST_KEY)||'null');
+      if(p?.version===PUZZLE_VERSION && Number.isInteger(p.score) && p.score>=0 && p.mode==='erronka'
+        && Number.isFinite(p.seconds) && p.seconds>=0) best=p;
+    } catch {best=null;}
+  }
   function readSaved() {
     try {
-      const raw = cloud?.storage?.getItem(SAVE_KEY) || window.localStorage.getItem(SAVE_KEY);
-      if (!raw) return;
-      const p = JSON.parse(raw);
-      if (p?.schema !== 1 || !p.drafts || typeof p.drafts !== 'object') return;
-      const v = fresh();
-      v.active = byId.has(p.active) ? p.active : v.active;
+      // Older sessions are migrated ONLY into unscored learning mode.
+      const raw = getStorage(SAVE_KEY);
+      const legacy = !raw && getStorage(LEGACY_KEY);
+      const p=JSON.parse(raw || legacy || 'null');
+      if (!p || !p.drafts || typeof p.drafts!=='object' || (p.schema!==1 && p.schema!==2)) return;
+      const v=fresh(p.schema===2&&p.mode==='erronka'?'erronka':'ikasi','playing');
+      if (p.schema===2 && ['setup','playing','finished'].includes(p.phase)) v.phase=p.phase;
+      v.active=byId.has(p.active)?p.active:v.active;
       for (const w of WORDS) {
-        const s = p.drafts[w.id];
-        if (typeof s === 'string') v.drafts[w.id] = s.toUpperCase().replace(/[^A-Z]/g,'').slice(0,w.word.length);
-        if (p.checked?.[w.id] === 'correct' && v.drafts[w.id] === w.word) v.checked[w.id] = 'correct';
-        if (Number.isInteger(p.hints?.[w.id])) v.hints[w.id] = Math.max(0,Math.min(w.word.length,p.hints[w.id]));
+        const val=p.drafts[w.id];
+        if(typeof val==='string')v.drafts[w.id]=val.toUpperCase().replace(/[^A-Z]/g,'').slice(0,w.word.length);
+        if(p.checked?.[w.id]==='correct' && v.drafts[w.id]===w.word)v.checked[w.id]='correct';
+        if(Number.isInteger(p.hints?.[w.id]))v.hints[w.id]=Math.max(0,Math.min(w.word.length,p.hints[w.id]));
+        if (p.schema===2) {
+          const positions=p.revealed?.[w.id];
+          if (Array.isArray(positions))v.revealed[w.id]=[...new Set(positions.filter(n=>Number.isInteger(n)&&n>=0&&n<w.word.length))];
+          if(typeof p.lastWrong?.[w.id]==='string')v.lastWrong[w.id]=p.lastWrong[w.id].slice(0,w.word.length);
+        }
       }
-      v.modified = Array.isArray(p.modified) ? p.modified.filter(x=>byId.has(x)).slice(-WORDS.length) : [];
-      v.startedAt = Number.isFinite(p.startedAt) ? p.startedAt : Date.now();
-      state = v;
-    } catch { /* No persistence must never prevent playing. */ }
+      v.modified=Array.isArray(p.modified)?p.modified.filter(x=>byId.has(x)).slice(-WORDS.length):[];
+      if(p.schema===2) {
+        v.startedAt=Number.isFinite(p.startedAt)&&p.startedAt>0?p.startedAt:0;
+        v.finishedAt=Number.isFinite(p.finishedAt)&&p.finishedAt>0?p.finishedAt:0;
+        v.stats.hints=Math.max(0,Math.min(500,Number.isInteger(p.stats?.hints)?p.stats.hints:0));
+        v.stats.wrong=Math.max(0,Math.min(500,Number.isInteger(p.stats?.wrong)?p.stats.wrong:0));
+      }
+      if(p.schema===1){v.startedAt=0;v.phase='playing';} // Old attempts must not earn time bonuses.
+      if(v.mode==='erronka'&&!v.startedAt&&v.phase==='playing')v.startedAt=Date.now();
+      if(v.phase==='finished' && WORDS.some(w=>v.checked[w.id]!=='correct'))v.phase='playing';
+      if(v.phase==='playing'&&WORDS.every(w=>v.checked[w.id]==='correct'))v.phase='finished';
+      state=v;
+      if(legacy)save();
+    } catch { /* A corrupt cache must not prevent playing. */ }
   }
   function save() {
-    const payload = JSON.stringify({schema:1,active:state.active,drafts:state.drafts,checked:state.checked,
-      hints:state.hints,modified:state.modified,startedAt:state.startedAt});
-    try {
-      if (cloud?.storage) cloud.storage.setItem(SAVE_KEY,payload);
-      else window.localStorage.setItem(SAVE_KEY,payload);
-    } catch { /* Play remains usable offline and without storage. */ }
+    const payload=JSON.stringify({schema:2,version:PUZZLE_VERSION,phase:state.phase,mode:state.mode,
+      active:state.active,drafts:state.drafts,checked:state.checked,hints:state.hints,
+      revealed:state.revealed,lastWrong:state.lastWrong,modified:state.modified,
+      startedAt:state.startedAt,finishedAt:state.finishedAt,stats:state.stats});
+    setStorage(SAVE_KEY,payload);
   }
+  function start(mode) {
+    if(mode!=='ikasi'&&mode!=='erronka')return;
+    state=fresh(mode,'playing');
+    state.startedAt=Date.now();
+    save();render();
+    root.querySelector('#cxWordInput')?.focus();
+  }
+  function finish() {
+    if(state.phase!=='playing'||solvedCount()!==WORDS.length)return;
+    state.phase='finished';state.finishedAt=Date.now();
+    if(state.mode==='erronka') {
+      const score=scoreBreakdown();
+      const result={version:PUZZLE_VERSION,mode:'erronka',score:score.total,
+        seconds:score.seconds,hints:state.stats.hints,wrong:state.stats.wrong,
+        completedAt:new Date(state.finishedAt).toISOString()};
+      if(!best || result.score>best.score ||
+        (result.score===best.score&&result.seconds<best.seconds)) {
+        best=result;setStorage(BEST_KEY,JSON.stringify(best));
+      }
+    }
+    save();
+  }
+
   function solved(w) { return state.checked[w.id] === 'correct' && state.drafts[w.id] === w.word; }
   function solvedCount() { return WORDS.filter(solved).length; }
   function setActive(id,focus) {

@@ -1,5 +1,5 @@
 /* SUSTRAI PWA service worker */
-const CACHE_VERSION = 'sustrai-pwa-v52-zinok-instant-verdict';
+const CACHE_VERSION = 'sustrai-pwa-v53-zinok-manual-next';
 const SHELL = [
   '/',
   '/index.html',

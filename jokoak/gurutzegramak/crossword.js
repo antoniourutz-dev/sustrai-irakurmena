@@ -308,25 +308,55 @@
       'Gorriz ageri dira bat ez datozen letrak; berdez, bat datozenak.')+'</div></div>';
   }
   function renderSetup() {
-    const record=best?'<div class="cx-record"><span class="cx-record-icon" aria-hidden="true">★</span><div><strong>Zure marka onena</strong><span>'+best.score+' puntu · '+fmtTime(best.seconds)+' · '+best.hints+' pista</span></div></div>':'';
+    const challenge=dailyRecords.erronka,study=dailyRecords.ikasi;
+    if(!challenge||!study)return;
+    let dailyBest=null;
+    try{
+      const found=JSON.parse(getStorage(dailyBestKey(challenge.id))||'null');
+      if(found?.version===challenge.id&&Number.isInteger(found.score))dailyBest=found;
+    }catch{/* no record yet */}
+    const progressFor=p=>{
+      try{
+        const x=JSON.parse(getStorage(dailySaveKey(p.id))||'null');
+        return x?.version===p.id&&x.phase==='playing'?'Jarraitu':
+          x?.version===p.id&&x.phase==='finished'?'Berriz jokatu':'Hasi';
+      }catch{return 'Hasi';}
+    };
+    const lastDays=[];
+    const from=new Date(dailyDate+'T12:00:00Z');
+    for(let i=1;i<=7;i++){
+      const d=new Date(from.getTime()-i*86400000).toISOString().slice(0,10);
+      try{
+        const found=JSON.parse(getStorage(dailyBestKey(d+'-C1-erronka'))||'null');
+        if(found?.version===d+'-C1-erronka'&&Number.isInteger(found.score))
+          lastDays.push({date:d,score:found.score,seconds:found.seconds});
+      }catch {/* no older score */}
+    }
     root.innerHTML='<section class="cx-mode-intro" aria-labelledby="cxModeTitle">'+
-      '<div class="cx-mode-title"><p class="cx-overline">ZURE PARTIDA, ZURE AUKERA</p>'+
-      '<h2 id="cxModeTitle">Nola jokatu nahi duzu?</h2>'+
-      '<p>Bi modu, helburu bera: euskarazko hitzak gero eta hobeto ezagutzea.</p></div>'+
+      '<div class="cx-mode-title"><p class="cx-overline">EGUNEKO BI GURUTZEGRAMA · '+escapeHtml(dateDisplay(dailyDate))+'</p>'+
+      '<h2 id="cxModeTitle">Gaurko hitzak, bi erronka.</h2>'+
+      '<p>'+escapeHtml(study.theme_eu)+'. Ikasteko eta Erronka moduetan hitz desberdinak izango dituzu. '+
+      'Bihar, 00:00etan (Euskadiko ordua), beste bi taula agertuko dira.</p></div>'+
       '<div class="cx-mode-cards">'+
       '<button type="button" class="cx-mode-card" data-action="start" data-mode="ikasi">'+
-      '<span class="cx-mode-icon" aria-hidden="true">✦</span><span class="cx-mode-card-tag">LASAI IKASI</span>'+
+      '<span class="cx-mode-icon" aria-hidden="true">✦</span><span class="cx-mode-card-tag">EGUNEKO IKASKETA · '+study.entries.length+' HITZ</span>'+
       '<strong>Ikasteko modua</strong>'+
-      '<span>Presarik gabe. Pistak, zuzenketa letraz letra eta azalpenak. Ez dago puntuazio-lehiarik.</span>'+
-      '<span class="cx-mode-cta">Ikasten hasi <b aria-hidden="true">↗</b></span></button>'+
+      '<span>Definizioak, pistak, azalpenak eta errepikapen librea. Ez dago denbora-presiorik edo zigorrik.</span>'+
+      '<span class="cx-mode-cta">'+progressFor(study)+' <b aria-hidden="true">↗</b></span></button>'+
       '<button type="button" class="cx-mode-card cx-mode-card-challenge" data-action="start" data-mode="erronka">'+
-      '<span class="cx-mode-icon" aria-hidden="true">♜</span><span class="cx-mode-card-tag">ZUHAITZAREN ERRONKA</span>'+
+      '<span class="cx-mode-icon" aria-hidden="true">♜</span><span class="cx-mode-card-tag">EGUNEKO ERRONKA · '+challenge.entries.length+' HITZ</span>'+
       '<strong>Erronka modua</strong>'+
-      '<span>Erlojuaren kontra. 100 puntu hitzeko; pistak −40, erantzun okerrak −15. Azkar eta zehatz!</span>'+
-      '<span class="cx-mode-cta">Erronka hasi <b aria-hidden="true">↗</b></span></button>'+
-      '</div>'+record+
-      '<p class="cx-mode-foot">Erronkan, denborak aurrera jarraitzen du orrialdetik ateratzen bazara ere. '+
-      'Marka pertsonala da; ez dago oraindik sailkapen publiko egiaztaturik.</p></section>';
+      '<span>Erlojuaren kontra: +100 puntu hitzeko, −40 pista bakoitzeko eta −15 erantzun oker berri bakoitzeko.</span>'+
+      '<span class="cx-mode-cta">'+progressFor(challenge)+' <b aria-hidden="true">↗</b></span></button>'+
+      '</div>'+
+      (dailyBest?'<div class="cx-record"><span class="cx-record-icon" aria-hidden="true">★</span>'+
+      '<div><strong>Gaurko marka pertsonala</strong><span>'+dailyBest.score+' puntu · '+fmtTime(dailyBest.seconds)+
+      ' · '+dailyBest.hints+' pista</span></div></div>':'')+
+      (lastDays.length?'<section class="cx-previous"><h3>Azken egunetako markak</h3><div class="cx-previous-grid">'+
+      lastDays.map(x=>'<div><span>'+escapeHtml(dateDisplay(x.date))+'</span><strong>'+
+        x.score+' puntu</strong><small>'+fmtTime(x.seconds)+'</small></div>').join('')+'</div></section>':'')+
+      '<p class="cx-mode-foot">Bi modalitateek taula ezberdinak dituzte; eguneko erronka bera da maila bereko '+
+      'ikasle guztientzat. Markak pertsonalak dira, ez sailkapen publiko egiaztatuak.</p></section>';
   }
   function render() {
     if(state.phase==='setup'){renderSetup();return;}
@@ -348,7 +378,7 @@
     if(completed){
       if(competitive){
         completion='<section class="cx-final" role="status" aria-labelledby="cxFinalTitle">'+
-          '<p class="cx-final-kicker">ERRONKA AMAITUTA</p><h2 id="cxFinalTitle">Zorionak! 12 hitzak osatu dituzu.</h2>'+
+          '<p class="cx-final-kicker">ERRONKA AMAITUTA</p><h2 id="cxFinalTitle">Zorionak! '+WORDS.length+' hitzak osatu dituzu.</h2>'+
           '<p class="cx-final-total">'+scores.total+' <small>puntu</small></p>'+
           '<div class="cx-final-breakdown"><div><span>Hitz zuzenak</span><b>+'+scores.base+'</b></div>'+
           '<div><span>Denbora-saria · '+fmtTime(scores.seconds)+'</span><b>+'+scores.bonus+'</b></div>'+
@@ -357,22 +387,22 @@
           (best?'<p class="cx-best-note">★ Zure marka onena: '+best.score+' puntu ('+fmtTime(best.seconds)+')</p>':'')+
           '<button class="cx-button secondary" type="button" data-action="reset">Beste partida bat →</button></section>';
       } else completion='<section class="cx-complete" role="status"><h2>✓ Zorionak! Gurutzegrama osatu duzu.</h2>'+
-        '<p>12 hitzak asmatu dituzu. Saiatu geroago definizioak laguntzarik gabe gogoratzen.</p>'+
+        '<p>'+WORDS.length+' hitzak asmatu dituzu. Saiatu geroago definizioak laguntzarik gabe gogoratzen.</p>'+
         '<button class="cx-button secondary" type="button" data-action="reset">Beste partida bat →</button></section>';
     }
     root.innerHTML =
       '<div class="cx-statusbar"><div class="cx-status-intro"><div class="cx-playing-label">'+
       '<span class="cx-game-mode">'+(competitive?'✦ ERRONKA MODUA':'✦ IKASTEKO MODUA')+'</span>'+
       '<span class="cx-game-count">'+done+' / '+WORDS.length+' hitz</span></div>'+
-      '<h2>Osasuna · 001. gurutzegrama</h2>'+
+      '<h2>'+escapeHtml(activePuzzle?.theme_eu||'Osasuna')+' · '+escapeHtml(dateDisplay(activePuzzle?.play_date||dailyDate))+'</h2>'+
       '<p>'+(competitive?'Azkar jokatu, baina ez asmatu itsu-itsuan. Pista bakoitzak kostua dauka.':
       'Hitzak osatu eta azalpenekin ikasi. Pistak libre dituzu.')+'</p></div>'+counters+'</div>'+
       '<div class="cx-layout"><section class="cx-board-card" aria-label="Gurutzegramaren taula">'+
-      '<div class="cx-board-top"><div><p class="cx-overline">001. ESPEDIENTEA · OSASUNA</p>'+
+      '<div class="cx-board-top"><div><p class="cx-overline">EGUNEKO TAULA · '+escapeHtml(state.mode.toUpperCase())+'</p>'+
       '<h2>Gurutzegrama</h2><p class="cx-board-note">Hautatu gelaxka edo eskuineko pista, eta idatzi hitza.</p></div>'+
       '<button type="button" class="cx-reset" data-action="reset">Beste partida bat</button></div>'+
       '<div class="cx-grid-scroll" tabindex="0" aria-label="Gurutzegramaren taula; mugitu horizontalean behar izanez gero">'+
-      '<div class="cx-grid" role="group" aria-label="12 errenkada, 13 zutabe">'+cells.join('')+'</div></div>'+
+      '<div class="cx-grid" role="group" aria-label="'+ROWS+' errenkada, '+COLS+' zutabe" style="--cx-rows:'+ROWS+';--cx-cols:'+COLS+'">'+cells.join('')+'</div></div>'+
       '<div class="cx-legend" aria-hidden="true"><span><i></i>Hautatua</span><span><i></i>Zuzena</span><span><i></i>Okerra</span></div>'+
       '<section class="cx-answer-card" aria-labelledby="cxAnswerLabel">'+
       '<div class="cx-answer-header"><span class="cx-answer-label" id="cxAnswerLabel">'+w.number+'. '+(w.dir==='H'?'HORIZONTALA':'BERTIKALA')+'</span>'+

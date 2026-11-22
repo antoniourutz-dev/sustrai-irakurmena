@@ -44,8 +44,10 @@
     return b;
   };
   const say = (message, isError = false) => {
-    $('pathNotice').textContent = message;
-    $('pathNotice').classList.toggle('is-error', isError);
+    const notice=$('pathNotice');
+    notice.hidden=!message;
+    notice.textContent=message||'';
+    notice.classList.toggle('is-error',isError);
   };
   const row = (root, ...children) => {
     const r = el('div', null, 'b2-actions');
@@ -506,7 +508,13 @@
     url.searchParams.set('gaia', code);
     if (url.href !== location.href) history.pushState(null, '', url);
     renderPath(); renderLesson();
-    if (scroll) $('pathLesson').scrollIntoView({behavior:'smooth',block:'start'});
+    if(scroll){
+      const reduce=window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
+      $('pathLesson').scrollIntoView({behavior:reduce?'auto':'smooth',block:'start'});
+      const heading=$('pathLessonTitle');
+      heading.tabIndex=-1;
+      heading.focus({preventScroll:true});
+    }
   }
   async function renderStudentFeedback(area) {
     if(!hasAccount())return;
@@ -629,6 +637,16 @@
     if(!group)return;
     const code=el('div',null,'b2-join-code');
     code.append(el('small','Ikasleen sarrera-kodea'),el('strong',group.code));
+    const copy=button('Kopiatu kodea',async()=>{
+      try{
+        if(!navigator.clipboard?.writeText)throw new Error('clipboard_not_available');
+        await navigator.clipboard.writeText(group.code);
+        say('Talde-kodea kopiatu da.');
+      }catch{
+        say('Kopiatzeko, hautatu kodea eta erabili Kopiatu aukera. Ez da aldaketarik egin.',true);
+      }
+    },'b2-link-button');
+    code.append(copy);
     slot.append(code);
     const form=el('form',null,'b2-teacher-form');
     const label1=el('label','Esleitu modulu edo gai bat');label1.htmlFor='pathAssignTarget';
@@ -829,7 +847,7 @@
       if(target && state.entries.has(target))openUnit(target,false);
       else openUnit(state.units[0].entry_code,false);
       const stat=$('pathGuidedCount');if(stat)stat.textContent=guidedCount()+' ikasgai gidatu';
-      say('B2ko ibilbidea kargatuta: '+state.modules.length+' modulu, '+state.units.length+' gai eta '+guidedCount()+' ikasgai gidatu.');
+      say('');
     }catch(err){
       console.warn('SUSTRAI B2 path startup',err?.code||err?.message||'network');
       say('Ezin izan da B2ko ibilbidea kargatu. Freskatu orria edo egiaztatu konexioa.',true);

@@ -10,42 +10,15 @@
     progress: new Map(), assigned: [], myGroups: [], teacherGroups: [], teacherAssignments: [],
     selected: null, step: 0, quizAnswers: new Map(), quizTries: new Map(), examplesCache: new Map()
   };
-  const QUESTIONS = {
-    subjektua_eta_aditza_oinarria: {
-      prompts: [
-        {q: '«Maddik liburua irakurri du» perpausean, zein da aditz multzoa?', a: ['irakurri du', 'liburua'], correct: 0, why: '«Irakurri du» aditz multzoa da; «liburua» osagarria da.'},
-        {q: '«Atea ireki da» perpausean, zein osagaik adierazten du gertakaria?', a: ['Atea', 'ireki da'], correct: 1, why: '«Ireki da» aditz multzoak adierazten du gertakaria.'}
-      ],
-      transfer: 'Idatzi zure egunerokoari buruzko bi perpaus. Azpimarratu edo izendatu bakoitzaren aditz multzoa, eta azaldu perpausak zer adierazten duen.'
-    },
-    subjektua_eta_predikatua: {
-      prompts: [
-        {q: '«Anek leihoa ireki du» perpausean, zein da predikatua?', a: ['Anek', 'leihoa ireki du'], correct: 1, why: '«Leihoa ireki du» predikatua da; «Anek» subjektuaren funtzioan dago.'},
-        {q: '«Haurrak jolasean ari dira» perpausean, zein da predikatua?', a: ['jolasean ari dira', 'Haurrak'], correct: 0, why: 'Predikatuak subjektuari buruz esaten dena biltzen du.'}
-      ],
-      transfer: 'Sortu bi perpaus eta idatzi bakoitzean zein den subjektua eta zein predikatua. Saiatu egitura desberdinak erabiltzen.'
-    },
-    b2_ergatiboa_eta_absolutiboa: {
-      prompts: [
-        {q: '«Ane__ liburua irakurri du» esaldian, zein da egokia?', a: ['Anek', 'Ane'], correct: 0, why: '«Irakurri du» egituran ekintzailea NORK kasuan dago: Anek.'},
-        {q: '«Ane__ etorri da» esaldian, zein da egokia?', a: ['Anek', 'Ane'], correct: 1, why: '«Etorri da» egituran subjektuak NOR kasua darama: Ane.'}
-      ],
-      transfer: 'Idatzi «Ane etorri da» eta «Anek atea ireki du» egituren antzeko bi esaldi berri. Azaldu zergatik daraman batek -k marka eta besteak ez.'
-    },
-    b2_nor_eta_nor_nork_komunztadura: {
-      prompts: [
-        {q: '«Mirenek bi liburu erosi ___» perpausean, zein laguntzaile?', a: ['ditu', 'du'], correct: 0, why: '«Bi liburu» osagai plurala da, eta «ditu» forma dagokio egitura honetan.'},
-        {q: '«Lagunak etorri ___» esaldian, zein laguntzaile?', a: ['ditu', 'dira'], correct: 1, why: '«Etorri» NOR egiturako aditza da; subjektu plurala «dira» formarekin doa.'}
-      ],
-      transfer: 'Idatzi NOR egiturako perpaus bat eta NOR-NORK egiturako beste bat. Azaldu bi laguntzaileen arteko aldea.'
-    },
-    b2_datiboa_eta_nori_komunztadura: {
-      prompts: [
-        {q: '«Nik Mireni liburu bat eman ___» perpausean, zein da egokia?', a: ['diot', 'dut'], correct: 0, why: '«Mireni» NORI osagaia da; «diot» laguntzaileak osagai hori jasotzen du.'},
-        {q: '«Guk lagunei gutun bana bidali ___» perpausean, zein da egokia?', a: ['dugu', 'diegu'], correct: 1, why: '«Lagunei» datibo plurala da eta «diegu» laguntzaileak NORI komunztadura jasotzen du.'}
-      ],
-      transfer: 'Idatzi norbaiti zerbait eman edo bidali diozula adierazten duen perpaus bat. Bereizi NOR, NORI eta NORK osagaiak eta azaldu laguntzailea.'
-    }
+  const QUESTIONS = Object.create(null);
+  const LESSONS = new Map();
+  const designFor = code => LESSONS.get(code)||null;
+  const day = d => new Date(d).toLocaleDateString('eu-ES',{year:'numeric',month:'short',day:'numeric'});
+  const listValues=(parent,items,className='b2-check-list')=>{
+    if(!Array.isArray(items)||!items.length)return;
+    const ul=el('ul',null,className);
+    items.forEach(v=>ul.append(el('li',v)));
+    parent.append(ul);
   };
   const STEPS = ['Ulertu', 'Kontrastatu', 'Praktikatu', 'Erabili'];
   const check = (res) => { if (res.error) throw res.error; return res.data || []; };
@@ -71,8 +44,10 @@
     return b;
   };
   const say = (message, isError = false) => {
-    $('pathNotice').textContent = message;
-    $('pathNotice').classList.toggle('is-error', isError);
+    const notice=$('pathNotice');
+    notice.hidden=!message;
+    notice.textContent=message||'';
+    notice.classList.toggle('is-error',isError);
   };
   const row = (root, ...children) => {
     const r = el('div', null, 'b2-actions');
@@ -102,18 +77,37 @@
   }
   function readiness(unit) {
     return unit.review_snapshot === 'approved'
-      ? '2026-11-22ko egoera: berrikuspen editoriala onartuta.'
-      : '2026-11-22ko egoera: berrikuspen akademikoaren zain. Irakurgarri egoteak ez du onarpena esan nahi.';
+      ? '2026-11-22ko egoera: jatorrizko fitxa onartua. Ikasgai gehigarria pilotuko materiala da.'
+      : '2026-11-22ko egoera: jatorrizko fitxa berrikusteko. Ikasgai gehigarria pilotuko zirriborroa da.';
   }
+  function guidedCount() { return state.units.filter(u=>u.pilot_active).length; }
   function completeCount() {
     return state.units.filter(u => !!own(u.entry_code).read_at).length;
   }
   function renderSummary() {
-    $('pathProgressText').textContent = hasAccount()
-      ? completeCount() + '/31 gai irakurrita · '
-        + state.units.filter(u => u.pilot_active && !!own(u.entry_code).transferred_at).length + '/5 pilotu-jarduera eginda'
-      : '31 gai antolatuta · 5 pilotu-jarduera. Saioa hastean gordeko da zure aurrerapena.';
-    $('pathProgressBar').style.width = (completeCount() / 31 * 100).toFixed(1) + '%';
+    const produced=state.units.filter(u=>u.pilot_active&&!!own(u.entry_code).transferred_at).length;
+    const reviewed=state.units.filter(u=>u.pilot_active&&!!own(u.entry_code).reviewed_again_at).length;
+    $('pathProgressText').textContent=hasAccount()
+      ? completeCount()+'/31 gai irakurrita · '+produced+'/'+guidedCount()+' ekoizpen gordeta · '+reviewed+'/'+guidedCount()+' gerora berrikusita'
+      : completeCount()+'/31 gai saio honetan · '+produced+'/'+guidedCount()+' jarduera probatuta · ez da hodeian gordetzen.';
+    $('pathProgressBar').style.width=(completeCount()/31*100).toFixed(1)+'%';
+    $('pathProgressTrack')?.setAttribute('aria-valuenow',String(completeCount()));
+    const next=state.units.find(u=>u.pilot_active&&own(u.entry_code).transferred_at
+        && !own(u.entry_code).reviewed_again_at
+        && Date.now()-new Date(own(u.entry_code).transferred_at).getTime()>=72*60*60*1000)
+      || state.units.find(u=>u.pilot_active&&!own(u.entry_code).transferred_at)
+      || state.units.find(u=>!own(u.entry_code).read_at)
+      || state.units[0];
+    if(next){
+      const topic=state.entries.get(next.entry_code);
+      $('pathNextTitle').textContent=topic?.title_eu||'Hurrengo ikasgaia';
+      const module=state.modules.find(m=>m.module_no===next.module_no);
+      const status=own(next.entry_code);
+      $('pathNextDetail').textContent=(module?.title_eu||'B2')
+        +' · '+(next.pilot_active?'4 urratseko ikasgaia':'Fitxa kontsultatu eta irakurketa landu')
+        +' · '+(status.transferred_at&&!status.reviewed_again_at?'Geroko berrikuspena':status.practiced_at?'Ekoizpena prestatu':status.contrasted_at?'Praktika egin':status.read_at?'Kontrastea landu':'Hasi ikasten');
+      $('pathContinueButton').onclick=()=>openUnit(next.entry_code);
+    }
   }
   function renderPath() {
     const list = $('pathModules');
@@ -137,8 +131,8 @@
         b.setAttribute('aria-current', state.selected === u.entry_code ? 'step' : 'false');
         const desc = el('span', null, 'b2-topic-meta');
         const status = own(u.entry_code);
-        desc.append(el('span', status.transferred_at ? 'Jarduera eginda' : status.read_at ? 'Irakurrita' : 'Hasteko'));
-        if (u.pilot_active) desc.append(el('span', '4 urratseko pilotua'));
+        desc.append(el('span',status.reviewed_again_at?'Gerora berrikusia':status.transferred_at?'Ekoizpena gordeta':status.practiced_at?'Praktikatua':status.read_at?'Irakurrita':'Hasteko'));
+        if (u.pilot_active) desc.append(el('span', '4 urratseko ikasgaia'));
         b.append(desc);
         li.append(b);
         ol.append(li);
@@ -149,12 +143,20 @@
     renderSummary();
   }
   async function saveProgress(code, fields) {
-    if (!requireAccount()) return false;
+    if(!hasAccount()){
+      const old=own(code);
+      state.progress.set(code,{...old,...fields,entry_code:code});
+      renderPath();
+      say('Gonbidatu modua: jarduera saio honetako memorian dago, ez hodeian.');
+      return true;
+    }
     const current = own(code);
     const next = {
       user_id: state.user.id, entry_code: code, read_at: current.read_at || null,
       contrasted_at: current.contrasted_at || null, practiced_at: current.practiced_at || null,
-      transferred_at: current.transferred_at || null, practice_attempts: current.practice_attempts || 0,
+      transferred_at: current.transferred_at || null, reviewed_again_at: current.reviewed_again_at || null,
+      review_reflection_eu: current.review_reflection_eu || null,
+      practice_attempts: current.practice_attempts || 0,
       reflection_eu: current.reflection_eu || null, updated_at: new Date().toISOString(),
       ...fields
     };
@@ -169,16 +171,58 @@
       return false;
     }
   }
+
+  async function saveWrittenWork(code,value,kind) {
+    if(!hasAccount()){
+      const old=own(code);
+      const fields=kind==='delayed'
+        ? {reviewed_again_at:new Date().toISOString(),review_reflection_eu:value}
+        : {transferred_at:new Date().toISOString(),reflection_eu:value,
+           reviewed_again_at:null,review_reflection_eu:null};
+      return saveProgress(code,fields);
+    }
+    try{
+      const result=check(await state.client.rpc('smx_b2_save_written_work',{
+        p_entry_code:code,p_body_eu:value,p_kind:kind
+      }));
+      if(!result||Array.isArray(result))throw new Error('Ezin izan da bertsioa erregistratu');
+      state.progress.set(code,result);
+      renderPath();
+      return true;
+    }catch(err){
+      say('Ekoizpena ez da gorde: '+(err.message||'konexio-errorea'),true);
+      return false;
+    }
+  }
+  async function renderWorkHistory(code,root){
+    if(!hasAccount())return;
+    try{
+      const rows=check(await state.client.from('smx_grammar_b2_work_versions')
+        .select('version_no,version_kind,body_eu,created_at')
+        .eq('user_id',state.user.id).eq('entry_code',code)
+        .order('version_no',{ascending:false}).limit(30));
+      if(state.selected!==code||!root.isConnected)return;
+      root.replaceChildren();
+      if(!rows.length){addP(root,'Oraindik ez dago gordetako bertsiorik.','b2-small');return;}
+      rows.forEach(row=>{
+        const item=el('article',null,'b2-feedback-note');
+        const label=({initial:'Lehen ekoizpena',revision:'Berridazketa',delayed:'Geroko transferentzia'})[row.version_kind]||'Bertsioa';
+        item.append(el('strong','v'+row.version_no+' · '+label),el('span',day(row.created_at),'b2-mini-label'));
+        addP(item,row.body_eu);
+        root.append(item);
+      });
+    }catch(err){addP(root,'Ezin izan da bertsioen historia irakurri.','b2-error');}
+  }
   async function markRead() {
     if (own(state.selected).read_at) { state.step = 1; renderLesson(); return; }
     if (await saveProgress(state.selected, {read_at: new Date().toISOString()})) {
-      state.step = 1; renderLesson(); say('Irakurketa gorde da.');
+      state.step = 1; renderLesson(); say(hasAccount()?'Irakurketa hodeian gordeta.':'Gonbidatu-saioa: irakurketa saio honetan soilik markatuta.');
     }
   }
   async function markContrast() {
     if (!own(state.selected).read_at) { say('Lehenik, irakurri azalpena.', true); return; }
     if (own(state.selected).contrasted_at || await saveProgress(state.selected, {contrasted_at: new Date().toISOString()})) {
-      state.step = 2; renderLesson(); say('Adibideen berrikuspena gorde da.');
+      state.step = 2; renderLesson(); say(hasAccount()?'Kontrastea hodeian gordeta.':'Kontrastea saio honetan soilik markatuta.');
     }
   }
   async function loadExamples(code) {
@@ -201,17 +245,27 @@
     $('pathLesson').hidden = false;
     $('pathLessonTitle').textContent = e.title_eu;
     $('pathLessonSubtitle').textContent = e.short_explanation_eu || '';
-    $('pathLessonMeta').textContent = readiness(u);
+    const design=designFor(u.entry_code);
+    const goal=$('pathLessonGoal');if(goal){goal.hidden=!design;goal.textContent=design?design.learning_goal_eu:'';}
+    const duration=$('pathLessonDuration');if(duration){duration.hidden=!design;duration.textContent=design?design.suggested_minutes+' min inguru · zure erritmora':'';}
+
+    $('pathLessonMeta').textContent=readiness(u);
+    const module=state.modules.find(m=>m.module_no===u.module_no);
+    const micro=$('pathCurrentModule');
+    if(micro)micro.textContent='Modulua '+u.module_no+'/7 · '+(module?.title_eu||'');
+
     $('pathLessonMeta').classList.toggle('needs-review', u.review_snapshot !== 'approved');
-    $('pathLessonStatus').textContent = own(u.entry_code).transferred_at ? 'Jarduera eginda'
-      : own(u.entry_code).read_at ? 'Ikasten' : 'Hasi gabe';
+    $('pathLessonStatus').textContent=own(u.entry_code).reviewed_again_at?'Gerora berrikusia'
+      :own(u.entry_code).transferred_at?'Ekoizpena gordeta'
+      :own(u.entry_code).practiced_at?'Praktikatua'
+      :own(u.entry_code).read_at?'Ikasten':'Hasi gabe';
     const tabs = $('pathSteps');
     const body = $('pathStepContent');
     tabs.replaceChildren();
     body.replaceChildren();
     if (!u.pilot_active) {
       tabs.hidden = true;
-      addP(body, 'Gai hau 31 unitateko ibilbidean dago. Lehen bertsioan lau urratseko jarduerak lehen bost gaientzat soilik aktibatuta daude.');
+      addP(body, 'Gai hau 31 unitateko ibilbidean dago. Une honetan '+guidedCount()+' gaik dituzte lau urratseko jarduera gidatuak.');
       const explanation = section(body, 'Gaia');
       addP(explanation, e.short_explanation_eu);
       row(body, aLink(grammarLink(u.entry_code), 'Ireki gramatika-fitxa osoa', 'b2-button is-secondary'),
@@ -233,20 +287,62 @@
     if (state.step === 3) renderTransfer(u.entry_code, body);
   }
   function renderUnderstanding(e, body) {
-    const intro = section(body, '1. Ulertu: azalpena');
+    const design=designFor(e.code);
+    if(design){
+      const intro=section(body,'Ikaskuntza-helburua eta egoera');
+      addP(intro,design.why_it_matters_eu,'b2-intro');
+      addP(intro,design.situation_eu,'b2-context');
+      listValues(intro,design.success_indicators_eu,'b2-outcomes');
+      const model=section(body,'Eredu landua · zergatik?');
+      const sample=el('div',null,'b2-model-card');
+      sample.append(el('span','SUSTRAIren adibide originala','b2-mini-label'));
+      addP(sample,design.anchor_example_eu,'b2-sample-phrase');
+      addP(sample,design.anchor_comment_eu,'b2-example-note');
+      model.append(sample);
+    }
+    const intro = section(body, 'Azalpen linguistikoa · bankuko fitxa');
     addP(intro, e.short_explanation_eu, 'b2-intro');
     addP(intro, e.explanation_eu);
     const extra = el('details', null, 'b2-read-more');
     extra.append(el('summary', 'Azalpen eta adibide gehiago'));
-    const link = aLink(grammarLink(e.code), 'Ikusi fitxa osoa gramatika-bankuan', 'b2-text-link');
+    const link=aLink(grammarLink(e.code),'Ikusi fitxa osoa gramatika-bankuan','b2-text-link');
     extra.append(link);
+    const sources=Array.isArray(e.metadata?.sources) ? e.metadata.sources : [];
+    if(sources.length){
+      const ul=el('ul',null,'b2-sources');
+      sources.slice(0,5).forEach(source=>{
+        try{
+          const u=new URL(source.url);
+          if(u.protocol!=='https:'||!['www.euskaltzaindia.eus','euskaltzaindia.eus','www.habe.euskadi.eus','habe.euskadi.eus'].includes(u.hostname))return;
+          const li=el('li');
+          const a=aLink(u.toString(),source.title||'Kontsultatu iturria');
+          a.target='_blank';a.rel='noopener noreferrer';
+          li.append(a,el('small',source.source_type==='DESKRIBAPENA'?'Gramatika deskribatzailea':source.source_type==='GAITASUN_MARKOA'?'Gaitasun-markoa':'Iturria'));
+          ul.append(li);
+        }catch{return;}
+      });
+      if(ul.children.length){extra.append(el('strong','Iturri nagusiak'),ul);}
+    }
     body.append(extra);
     addP(body, '«Irakurri dut» markak irakurketa erregistratzen du; ez du berez hizkuntza-gaitasuna egiaztatzen.', 'b2-footnote');
     row(body, button(own(e.code).read_at ? 'Hurrengo urratsa: kontrastatu' : 'Azalpena irakurri dut', markRead));
   }
   async function renderContrasts(code, body) {
     const title = section(body, '2. Kontrastatu: adibideak eta ñabardurak');
-    addP(title, 'Alderatu adibideak: zein da forma, zein funtzioa eta zer ñabardura du? Ez da aukera estilistiko oro arau-akatsa.');
+    addP(title, 'Alderatu erabilerak: zein da arauaren ondorioa, zein testuinguruk baldintzatzen duena eta zein estilo-aukera?');
+    const design=designFor(code);
+    if(design){
+      const sample=el('div',null,'b2-model-card is-contrast');
+      sample.append(el('span','Kontraste arrazoitua','b2-mini-label'));
+      addP(sample,design.contrast_example_eu,'b2-sample-phrase');
+      addP(sample,design.contrast_comment_eu,'b2-example-note');
+      title.append(sample);
+      addP(title,design.guided_task_eu,'b2-context');
+      const tips=el('details',null,'b2-read-more');
+      tips.append(el('summary','Ohiko nahasmenak eta ñabardurak'));
+      listValues(tips,design.misconceptions_eu);
+      title.append(tips);
+    }
     const slot = el('div', 'Adibideak kargatzen…', 'b2-examples');
     title.append(slot);
     try {
@@ -269,58 +365,78 @@
       button(own(code).contrasted_at ? 'Hurrengo urratsa: praktikatu' : 'Adibideak aztertu ditut', markContrast));
   }
   function renderPractice(code, body) {
-    const info = QUESTIONS[code];
-    if (!info) return;
-    const root = section(body, '3. Praktikatu: bi galdera labur');
-    addP(root, 'Bi erantzunak ondo bereizita aukeratu. Jarduera hau orientagarria da: ez da HABEren puntuazio edo egiaztapen ofiziala.');
-    if (!own(code).contrasted_at) {
-      addP(root, 'Lehenik, amaitu irakurketa eta kontrastea.', 'b2-footnote');
-      row(root, button('Itzuli kontrastera', () => {state.step = 1; renderLesson();}, 'b2-button is-secondary'));
+    const info=QUESTIONS[code];
+    const root=section(body,'Praktika · lau egoera komunikatibo');
+    addP(root,'SUSTRAIren ariketa sintetikoak dira. Erantzun, irakurri aukeraren azalpena eta, behar denean, saiatu berriro. Ez da azterketa ofiziala.','b2-context');
+    if(!info?.prompts?.length){addP(root,'Ariketa ez dago erabilgarri.','b2-footnote');return;}
+    if(!own(code).contrasted_at){
+      addP(root,'Lehenik, irakurri azalpena eta aztertu kontrasteak.','b2-footnote');
+      row(root,button('Kontrasteetara itzuli',()=>{state.step=1;renderLesson();},'b2-button is-secondary'));
       return;
     }
-    if (own(code).practiced_at) {
-      addP(root, 'Bi galderak zuzen erantzunda geratu dira praktika-saio batean. Beste egun batean berrikustea gomendatzen da.', 'b2-good-note');
-      row(root, button('Erabilera autonomora', () => {state.step = 3; renderLesson();}));
-      return;
+    if(own(code).practiced_at){
+      addP(root,'Lau galderak zuzen erantzun dituzu. Erantzunak hautatzea ez da, ordea, gaitasuna autonomiaz menderatzearen froga.','b2-good-note');
+      row(root,button('Hurrengoa: nire ekoizpena',()=>{state.step=3;renderLesson();}));return;
     }
-    const answers = state.quizAnswers.get(code) || {};
-    const tries = state.quizTries.get(code) || 0;
-    info.prompts.forEach((q, i) => {
-      const card = el('fieldset', null, 'b2-quiz-card');
-      card.append(el('legend', q.q));
-      const opts = el('div', null, 'b2-quiz-options');
-      q.a.forEach((option, index) => {
-        const b = button(option, () => {
-          const ans = state.quizAnswers.get(code) || {};
-          ans[i] = index;
-          state.quizAnswers.set(code, ans);
-          state.quizTries.set(code, (state.quizTries.get(code) || 0) + 1);
+    const answers=state.quizAnswers.get(code)||{};
+    const tries=state.quizTries.get(code)||0;
+    const correct=info.prompts.filter((q,index)=>answers[index]===q.correct).length;
+    root.append(el('div',correct+' / '+info.prompts.length+' aukera egoki','b2-practice-count'));
+    info.prompts.forEach((q,i)=>{
+      const card=el('fieldset',null,'b2-quiz-card');
+      card.append(el('legend',(i+1)+'. '+q.q));
+      const meta=el('div',null,'b2-question-meta');
+      meta.append(el('span',q.skill,'b2-skill-tag'),el('span',q.context));
+      card.append(meta);
+      const opts=el('div',null,'b2-quiz-options');
+      q.a.forEach((option,index)=>{
+        const b=button(option,()=>{
+          const next=state.quizAnswers.get(code)||{};
+          next[i]=index;
+          state.quizAnswers.set(code,next);
+          state.quizTries.set(code,(state.quizTries.get(code)||0)+1);
           renderLesson();
-        }, 'b2-option');
-        const selected = answers[i] === index;
-        if (selected) b.classList.add(index === q.correct ? 'is-correct' : 'is-incorrect');
-        b.setAttribute('aria-pressed', String(selected));
+          requestAnimationFrame(()=>{
+            const card=$('pathStepContent')?.querySelectorAll('.b2-quiz-card')?.[i];
+            card?.querySelectorAll('.b2-option')?.[index]?.focus();
+          });
+        },'b2-option');
+        if(answers[i]===index)b.classList.add(index===q.correct?'is-correct':'is-incorrect');
+        b.setAttribute('aria-pressed',String(answers[i]===index));
         opts.append(b);
       });
       card.append(opts);
-      if (answers[i] !== undefined) {
-        const right = answers[i] === q.correct;
-        addP(card, (right ? 'Zuzena. ' : 'Berrikusteko. ') + q.why, right ? 'b2-feedback is-correct' : 'b2-feedback is-incorrect');
+      if(answers[i]!==undefined){
+        const ok=answers[i]===q.correct;
+        const feedback=el('div',null,'b2-feedback '+(ok?'is-correct':'is-incorrect'));
+        feedback.setAttribute('role','status');
+        feedback.append(el('strong',ok?'Zuzena':'Berrikusteko'));
+        addP(feedback,q.feedback?.[answers[i]]||q.why,'b2-feedback-body');
+        if(ok)addP(feedback,q.why,'b2-feedback-body');
+        card.append(feedback);
       }
       root.append(card);
     });
-    if (info.prompts.every((q, i) => answers[i] === q.correct)) {
-      row(root, button('Bi galderak egin ditut · gorde', async () => {
-        const today = new Date().toISOString();
-        if (await saveProgress(code, {practiced_at: today, practice_attempts: (own(code).practice_attempts || 0) + Math.max(2, tries)})) {
-          state.step = 3; renderLesson(); say('Praktika orientagarria gorde da.');
-        }
+    if(correct===info.prompts.length){
+      addP(root,'Orain transferitu ikasitakoa egoera berri batera, laguntzarik gabe.','b2-good-note');
+      row(root,button('Praktika gorde eta jarraitu',async()=>{
+        if(await saveProgress(code,{
+          practiced_at:new Date().toISOString(),
+          practice_attempts:(own(code).practice_attempts||0)+Math.max(info.prompts.length,tries)
+        })){state.step=3;renderLesson();say(hasAccount()?'Praktika orientagarria hodeian gordeta.':'Praktika probatuta; ez da hodeian gordetzen.');}
       }));
-    } else addP(root, 'Galdera bakoitzari erantzun; okerreko aukerak zuzentzeko aukera duzu.', 'b2-footnote');
+    }else addP(root,'Aukera bakoitzak azalpen propioa du. Kontuan hartu arrazoiak, ez aukera-zenbakiak bakarrik.','b2-footnote');
   }
   function renderTransfer(code, body) {
     const root = section(body, '4. Erabili: zure adibide propioa');
-    addP(root, QUESTIONS[code].transfer, 'b2-intro');
+    const design=designFor(code);
+    addP(root,design?.transfer_task_eu || QUESTIONS[code].transfer,'b2-intro');
+    if(design){
+      const hints=el('details',null,'b2-read-more');
+      hints.append(el('summary','Neure burua berrikusteko zerrenda'));
+      listValues(hints,design.transfer_checklist_eu,'b2-check-list');
+      root.append(hints);
+    }
     addP(root, 'Idatzi zeure ekoizpena. Hemen gordetakoa zure irakasleak ikusi ahal izango du haren taldeko kidea bazara. Ez dago zuzenketa automatiko akademikorik.', 'b2-footnote');
     if (!own(code).practiced_at) {
       addP(root, 'Praktika orientagarria amaitu behar duzu lehenik.', 'b2-footnote');
@@ -337,12 +453,51 @@
     if (own(code).transferred_at) addP(root, 'Ekoizpena gordeta dago. Berridatzi eta berriro gorde dezakezu.', 'b2-good-note');
     row(root, button(own(code).transferred_at ? 'Ekoizpena eguneratu' : 'Ekoizpena gorde', async () => {
       const value = text.value.trim();
-      if (value.length < 30) { say('Idatzi gutxienez 30 karaktere zure azalpena garatzeko.', true); text.focus(); return; }
+      if(value.length<50){say('Adibidea eta arrazoibidea azaltzeko, idatzi gutxienez 50 karaktere.',true);text.focus();return;}
       const iso = new Date().toISOString();
-      if (await saveProgress(code, {transferred_at: iso,reflection_eu:value})) {
-        renderLesson(); say('Zure ekoizpena gorde da. Ez da zuzenketa automatikoa egin.');
+      if (await saveWrittenWork(code,value,'transfer')) {
+        renderLesson(); say(hasAccount()?'Ekoizpena hodeian gordeta. Ez da zuzenketa automatikoa egin.':'Ekoizpena saio honetako memorian dago; ez da hodeian gordetzen.');
       }
     }));
+    if(own(code).transferred_at){
+      const review=section(body,'Atzeratutako berrikuspena');
+      const due=new Date(new Date(own(code).transferred_at).getTime()+72*60*60*1000);
+      if(own(code).reviewed_again_at){
+        addP(review,'Beste egun bateko ekoizpena gordeta: '+day(own(code).reviewed_again_at)+'.','b2-good-note');
+        addP(review,own(code).review_reflection_eu,'b2-copy');
+      }else if(Date.now()<due.getTime()){
+        addP(review,'Itzuli '+day(due)+' egunetik aurrera. Aukeratu aurreko egoera ez bezalako beste bat, eta berreraiki azalpena laguntzarik gabe.');
+      }else{
+        addP(review,'Hiru egun igaro dira. Erabili gaur beste egoera batekin ikasitakoa; ez kopiatu aurreko ekoizpena.','b2-context');
+        const note=el('textarea');note.rows=4;note.maxLength=800;note.setAttribute('aria-label','Geroko ekoizpen autonomoa');
+        note.placeholder='Egoera berria, adibidea eta zergatik aukeratu dudan…';
+        review.append(note);
+        row(review,button('Geroko berrikuspena gorde',async()=>{
+          const answer=note.value.trim();
+          if(answer.length<45){say('Garatu geroko ekoizpena gutxienez 45 karakteretan.',true);note.focus();return;}
+          if(await saveWrittenWork(code,answer,'delayed')){
+            renderLesson();say(hasAccount()?'Atzeratutako berrikuspena hodeian gordeta.':'Geroko berrikuspena saio honetan soilik markatuta.');
+          }
+        }));
+      }
+    }
+    if(own(code).transferred_at&&hasAccount()){
+      const history=el('details',null,'b2-read-more b2-work-history');
+      const summary=el('summary','Nire idazkien bertsioen historia');
+      const slot=el('div','Bertsioak kargatzen…','b2-version-list');
+      history.append(summary,slot);
+      history.addEventListener('toggle',()=>{
+        if(history.open&&slot.dataset.loaded!=='yes'){
+          slot.dataset.loaded='yes';
+          void renderWorkHistory(code,slot);
+        }
+      });
+      body.append(history);
+    }
+    if(own(code).transferred_at){
+      const index=state.units.findIndex(u=>u.entry_code===code);
+      if(state.units[index+1])row(body,button('Hurrengo gaia',()=>openUnit(state.units[index+1].entry_code)));
+    }
   }
   function openUnit(code, scroll = true) {
     if (!state.entries.has(code)) {say('Gaia ezin izan da aurkitu.', true); return;}
@@ -353,9 +508,34 @@
     url.searchParams.set('gaia', code);
     if (url.href !== location.href) history.pushState(null, '', url);
     renderPath(); renderLesson();
-    if (scroll) $('pathLesson').scrollIntoView({behavior:'smooth',block:'start'});
+    if(scroll){
+      const reduce=window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
+      $('pathLesson').scrollIntoView({behavior:reduce?'auto':'smooth',block:'start'});
+      const heading=$('pathLessonTitle');
+      heading.tabIndex=-1;
+      heading.focus({preventScroll:true});
+    }
   }
-  async function loadStudent() {
+  async function renderStudentFeedback(area) {
+    if(!hasAccount())return;
+    const box=section(area,'Irakaslearen orientabideak');
+    try{
+      const feedback=check(await state.client.from('smx_grammar_b2_teacher_feedback')
+        .select('entry_code,feedback_eu,next_step_eu,created_at')
+        .eq('student_id',state.user.id).order('created_at',{ascending:false}).limit(30));
+      if(!box.isConnected)return;
+      if(!feedback.length){addP(box,'Oraindik ez dago irakasle-oharrik. Zure ekoizpenak modu autonomoan berrikus ditzakezu.','b2-small');return;}
+      feedback.forEach(fb=>{
+        const note=el('article',null,'b2-feedback-note');
+        note.append(el('span',day(fb.created_at),'b2-mini-label'));
+        note.append(el('strong',state.entries.get(fb.entry_code)?.title_eu||fb.entry_code));
+        addP(note,fb.feedback_eu);
+        if(fb.next_step_eu)addP(note,'Hurrengo urratsa: '+fb.next_step_eu,'b2-next-note');
+        box.append(note);
+      });
+    }catch(err){addP(box,'Irakaslearen oharrak ezin izan dira kargatu.','b2-error');}
+  }
+    async function loadStudent() {
     const area = $('pathStudentArea');
     area.replaceChildren();
     if (!hasAccount()) {
@@ -379,6 +559,7 @@
       } catch(err){say('Ezin izan zara taldean sartu: '+(err.message||''),true);}
     };
     join.append(form);
+    void renderStudentFeedback(area);
     try {
       const memberships = check(await state.client.rpc('sr_my_groups'));
       state.myGroups = Array.isArray(memberships) ? memberships : [];
@@ -456,6 +637,16 @@
     if(!group)return;
     const code=el('div',null,'b2-join-code');
     code.append(el('small','Ikasleen sarrera-kodea'),el('strong',group.code));
+    const copy=button('Kopiatu kodea',async()=>{
+      try{
+        if(!navigator.clipboard?.writeText)throw new Error('clipboard_not_available');
+        await navigator.clipboard.writeText(group.code);
+        say('Talde-kodea kopiatu da.');
+      }catch{
+        say('Kopiatzeko, hautatu kodea eta erabili Kopiatu aukera. Ez da aldaketarik egin.',true);
+      }
+    },'b2-link-button');
+    code.append(copy);
     slot.append(code);
     const form=el('form',null,'b2-teacher-form');
     const label1=el('label','Esleitu modulu edo gai bat');label1.htmlFor='pathAssignTarget';
@@ -519,26 +710,131 @@
         const started=ownRows.filter(d=>d.read_at).length;
         const transferred=ownRows.filter(d=>d.transferred_at).length;
         const item=el('div',null,'b2-student-row');
-        item.append(el('strong',s.name||'Ikaslea'),el('span',started+'/31 gai irakurrita · '+transferred+'/5 pilotu-jarduera eginda'));
+        item.append(el('strong',s.name||'Ikaslea'),el('span',started+'/31 gai irakurrita · '+transferred+'/'+guidedCount()+' ekoizpen gordeta'));
+        const inspect=button('Ikusi ekoizpenak eta eman orientabidea',()=>{
+          if(item.querySelector('.b2-teacher-student-detail')){
+            item.querySelector('.b2-teacher-student-detail').remove();return;
+          }
+          const slot=el('div','Ikaslearen lanak kargatzen…','b2-teacher-student-detail');
+          item.append(slot);
+          void renderStudentEvidence(s,slot);
+        },'b2-link-button');
+        item.append(inspect);
         pupils.append(item);
       });
     }catch(err){addP(pupils,'Aurrerapena ezin izan da irakurri.','b2-error');}
   }
-  async function start() {
+  async function renderStudentEvidence(student,slot) {
+    if(!hasAccount()||!state.profile?.teacher)return;
+    slot.replaceChildren();
+    const heading=el('h4','Ikaslearen ekoizpenak eta feedback hezigarria');slot.append(heading);
+    try{
+      const [progress,feedback,versions]=await Promise.all([
+        state.client.from('smx_grammar_b2_progress').select('entry_code,read_at,practiced_at,transferred_at,reflection_eu,reviewed_again_at,review_reflection_eu')
+          .eq('user_id',student.id).order('updated_at',{ascending:false}).limit(50).then(check),
+        state.client.from('smx_grammar_b2_teacher_feedback').select('entry_code,feedback_eu,next_step_eu,created_at')
+          .eq('student_id',student.id).order('created_at',{ascending:false}).limit(25).then(check),
+        state.client.from('smx_grammar_b2_work_versions').select('entry_code,version_no,version_kind,body_eu,created_at')
+          .eq('user_id',student.id).order('created_at',{ascending:false}).limit(60).then(check)
+      ]);
+      const works=progress.filter(x=>x.reflection_eu||x.review_reflection_eu);
+      if(!works.length)addP(slot,'Ikasleak ez du oraindik ekoizpen idatzirik gorde.','b2-small');
+      else works.forEach(work=>{
+        const unit=el('article',null,'b2-student-work');
+        unit.append(el('strong',state.entries.get(work.entry_code)?.title_eu||work.entry_code));
+        if(work.reflection_eu){unit.append(el('span','Lehen ekoizpena','b2-mini-label'));addP(unit,work.reflection_eu);}
+        if(work.review_reflection_eu){unit.append(el('span','Geroko berrikuspena','b2-mini-label'));addP(unit,work.review_reflection_eu);}
+        slot.append(unit);
+      });
+      if(versions.length){
+        const history=el('details',null,'b2-read-more b2-work-history');
+        history.append(el('summary','Jatorrizko ekoizpenen eta berridazketen historia ('+versions.length+')'));
+        const historyList=el('div',null,'b2-version-list');
+        versions.forEach(v=>{
+          const card=el('article',null,'b2-feedback-note');
+          const kind=({initial:'Lehen ekoizpena',revision:'Berridazketa',delayed:'Geroko transferentzia'})[v.version_kind]||'Bertsioa';
+          card.append(el('strong',state.entries.get(v.entry_code)?.title_eu||v.entry_code));
+          card.append(el('span','v'+v.version_no+' · '+kind+' · '+day(v.created_at),'b2-mini-label'));
+          addP(card,v.body_eu);
+          historyList.append(card);
+        });
+        history.append(historyList);slot.append(history);
+      }
+      if(feedback.length){
+        const notes=section(slot,'Emandako orientabideak');
+        feedback.forEach(fb=>{
+          const note=el('article',null,'b2-feedback-note');
+          note.append(el('span',day(fb.created_at)+' · '+(state.entries.get(fb.entry_code)?.title_eu||''),'b2-mini-label'));
+          addP(note,fb.feedback_eu);
+          if(fb.next_step_eu)addP(note,'Hurrengo urratsa: '+fb.next_step_eu,'b2-next-note');
+          notes.append(note);
+        });
+      }
+      const form=el('form',null,'b2-teacher-form');
+      const suffix=String(student.id).replaceAll('-','').slice(0,12);
+      const label=el('label','Ikasgaia');label.htmlFor='b2FeedbackUnit-'+suffix;
+      const choose=el('select');choose.id='b2FeedbackUnit-'+suffix;
+      state.units.filter(u=>u.pilot_active).forEach(u=>{
+        const option=el('option',state.entries.get(u.entry_code)?.title_eu||u.entry_code);
+        option.value=u.entry_code;choose.append(option);
+      });
+      if(works[0] && state.units.some(u=>u.entry_code===works[0].entry_code&&u.pilot_active))choose.value=works[0].entry_code;
+      const textLabel=el('label','Ikaslearen ekoizpenari buruzko orientabidea');textLabel.htmlFor='b2TeacherFeedback-'+suffix;
+      const area=el('textarea');area.id='b2TeacherFeedback-'+suffix;area.rows=4;area.required=true;area.minLength=12;area.maxLength=1500;
+      area.placeholder='Indargune frogatu bat eta hobetzeko aukera bat, ikaslearen testuan oinarrituta…';
+      const nextLabel=el('label','Hurrengo ekintza (aukerakoa)');nextLabel.htmlFor='b2TeacherNextStep-'+suffix;
+      const next=el('textarea');next.id='b2TeacherNextStep-'+suffix;next.rows=2;next.maxLength=500;
+      next.placeholder='Beste egoera bateko praktika edo berreraikuntza…';
+      const submit=el('button','Gorde feedbacka','b2-button');submit.type='submit';
+      form.append(label,choose,textLabel,area,nextLabel,next,submit);
+      form.onsubmit=async event=>{
+        event.preventDefault();
+        if(!area.value.trim()||area.value.trim().length<12){say('Feedbackak 12 karaktere behar ditu gutxienez.',true);return;}
+        submit.disabled=true;
+        try{
+          check(await state.client.from('smx_grammar_b2_teacher_feedback').insert({
+            student_id:student.id,teacher_id:state.user.id,entry_code:choose.value,
+            feedback_eu:area.value.trim(),next_step_eu:next.value.trim()||null
+          }).select('id').single());
+          say('Irakaslearen orientabidea gordeta. Ikasleak bere kontuan ikusi ahal izango du.');
+          await renderStudentEvidence(student,slot);
+        }catch(err){say('Feedbacka ezin izan da gorde: '+(err.message||''),true);}
+        finally{submit.disabled=false;}
+      };
+      slot.append(form);
+    }catch(err){addP(slot,'Ikaslearen ekoizpenak ezin izan dira kargatu: '+(err.message||''),'b2-error');}
+  }
+    async function start() {
     try{
       await cloud?.ready;
       state.client=cloud?.client?.()||null;
       state.profile=cloud?.profile?.()||null;
       state.user=cloud?.user?.()||null;
       if(!state.client)throw new Error('Supabase konexiorik ez');
-      const [mods,units,entries]=await Promise.all([
+      const [mods,units,entries,designs,items]=await Promise.all([
         state.client.from('smx_grammar_b2_modules').select('*').order('module_no').then(check),
         state.client.from('smx_grammar_b2_path_units').select('*').order('global_order').then(check),
         state.client.from('public_editorial_grammar_entries')
-          .select('id,code,title_eu,short_explanation_eu,explanation_eu,level').eq('level','B2').limit(100).then(check)
+          .select('id,code,title_eu,short_explanation_eu,explanation_eu,level,metadata').eq('level','B2').limit(100).then(check),
+        state.client.from('smx_grammar_b2_lesson_designs').select('*').limit(20).then(check),
+        state.client.from('smx_grammar_b2_practice_items').select('*').order('item_order').limit(100).then(check)
       ]);
       if(mods.length!==7 || units.length!==31)throw new Error('Ibilbidearen egitura osatu gabe dago');
-      state.modules=mods;state.units=units;state.entries=new Map(entries.map(e=>[e.code,e]));
+      state.modules=mods;state.units=units.map(u=>({...u,pilot_active:designs.some(d=>d.entry_code===u.entry_code)}));
+      state.entries=new Map(entries.map(e=>[e.code,e]));
+      const activeCount=state.units.filter(u=>u.pilot_active).length;
+      if(activeCount!==designs.length)throw new Error('Ikasgaien eta gramatika-ibilbidearen kodeak ez datoz bat.');
+      if(!designs.length||items.length<designs.length*4)throw new Error('Ikasgai eta praktiken datuak osatu gabe daude.');
+      designs.forEach(d=>LESSONS.set(d.entry_code,d));
+      for(const d of designs){
+        const selected=items.filter(it=>it.entry_code===d.entry_code).sort((a,b)=>a.item_order-b.item_order);
+        if(selected.length!==4)throw new Error('Lau galderak falta dira: '+d.entry_code);
+        QUESTIONS[d.entry_code]={prompts:selected.map(it=>({
+          q:it.question_eu,a:it.options_eu,correct:it.correct_index,why:it.explanation_eu,
+          feedback:it.feedback_eu,context:it.context_eu,
+          skill:({identifikatu:'Identifikatu',arrazoitu:'Arrazoitu',aplikatu:'Aplikatu',kontrastatu:'Kontrastatu'})[it.item_skill]||'Praktika'
+        })),transfer:d.transfer_task_eu};
+      }
       if(units.some(u=>!state.entries.has(u.entry_code)))throw new Error('Gramatika-fitxa bat ezin da irakurri');
       if(hasAccount()){
         const data=check(await state.client.from('smx_grammar_b2_progress')
@@ -550,7 +846,8 @@
       const target=new URLSearchParams(location.search).get('gaia');
       if(target && state.entries.has(target))openUnit(target,false);
       else openUnit(state.units[0].entry_code,false);
-      say('B2ko ibilbidea kargatuta: 7 modulu, 31 gai. Lehenengo 5 gaietan praktika gidatua dago.');
+      const stat=$('pathGuidedCount');if(stat)stat.textContent=guidedCount()+' ikasgai gidatu';
+      say('');
     }catch(err){
       console.warn('SUSTRAI B2 path startup',err?.code||err?.message||'network');
       say('Ezin izan da B2ko ibilbidea kargatu. Freskatu orria edo egiaztatu konexioa.',true);

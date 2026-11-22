@@ -86,8 +86,22 @@
     const reviewed=state.units.filter(u=>u.pilot_active&&!!own(u.entry_code).reviewed_again_at).length;
     $('pathProgressText').textContent=hasAccount()
       ? completeCount()+'/31 gai irakurrita · '+produced+'/5 ekoizpen gordeta · '+reviewed+'/5 gerora berrikusita'
-      : '31 gai · lehen 5 ikasgaietan praktika · hasi saioa aurrerapena gordetzeko.';
-    $('pathProgressBar').style.width = (completeCount() / 31 * 100).toFixed(1) + '%';
+      : completeCount()+'/31 gai saio honetan · '+produced+'/5 jarduera probatuta · ez da hodeian gordetzen.';
+    $('pathProgressBar').style.width=(completeCount()/31*100).toFixed(1)+'%';
+    $('pathProgressTrack')?.setAttribute('aria-valuenow',String(completeCount()));
+    const next=state.units.find(u=>u.pilot_active&&!own(u.entry_code).transferred_at)
+      || state.units.find(u=>!own(u.entry_code).read_at)
+      || state.units[0];
+    if(next){
+      const topic=state.entries.get(next.entry_code);
+      $('pathNextTitle').textContent=topic?.title_eu||'Hurrengo ikasgaia';
+      const module=state.modules.find(m=>m.module_no===next.module_no);
+      const status=own(next.entry_code);
+      $('pathNextDetail').textContent=(module?.title_eu||'B2')
+        +' · '+(next.pilot_active?'4 urratseko ikasgaia':'Fitxa kontsultatu eta irakurketa landu')
+        +' · '+(status.practiced_at?'Ekoizpena prestatu':status.contrasted_at?'Praktika egin':status.read_at?'Kontrastea landu':'Hasi ikasten');
+      $('pathContinueButton').onclick=()=>openUnit(next.entry_code);
+    }
   }
   function renderPath() {
     const list = $('pathModules');
@@ -123,7 +137,13 @@
     renderSummary();
   }
   async function saveProgress(code, fields) {
-    if (!requireAccount()) return false;
+    if(!hasAccount()){
+      const old=own(code);
+      state.progress.set(code,{...old,...fields,entry_code:code});
+      renderPath();
+      say('Gonbidatu modua: jarduera saio honetako memorian dago, ez hodeian.');
+      return true;
+    }
     const current = own(code);
     const next = {
       user_id: state.user.id, entry_code: code, read_at: current.read_at || null,
@@ -181,7 +201,11 @@
     const goal=$('pathLessonGoal');if(goal){goal.hidden=!design;goal.textContent=design?design.learning_goal_eu:'';}
     const duration=$('pathLessonDuration');if(duration){duration.hidden=!design;duration.textContent=design?design.suggested_minutes+' min inguru · zure erritmora':'';}
 
-    $('pathLessonMeta').textContent = readiness(u);
+    $('pathLessonMeta').textContent=readiness(u);
+    const module=state.modules.find(m=>m.module_no===u.module_no);
+    const micro=$('pathCurrentModule');
+    if(micro)micro.textContent='Modulua '+u.module_no+'/7 · '+(module?.title_eu||'');
+
     $('pathLessonMeta').classList.toggle('needs-review', u.review_snapshot !== 'approved');
     $('pathLessonStatus').textContent=own(u.entry_code).reviewed_again_at?'Gerora berrikusia'
       :own(u.entry_code).transferred_at?'Ekoizpena gordeta'

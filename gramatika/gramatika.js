@@ -249,6 +249,30 @@
     source.append(node('strong','Edukia: SUSTRAIren Supabaseko gramatika-banku editoriala'));
     source.append(node('span','Argitaratutako bertsioa · Barne-berrikuspena eginda. Ez da azterketa-erakunde baten material ofiziala.'));
     if(entry.source_guideline)source.append(node('span','Jatorrizko erreferentzia editoriala: '+entry.source_guideline));
+    // Source provenance is optional for older editorial entries; new material stores
+    // verified link targets and the kind of claim each source supports.
+    const references = Array.isArray(entry.metadata?.sources) ? entry.metadata.sources : [];
+    const list = node('ul', null, 'grammar-source-list');
+    for (const reference of references) {
+      if (!reference || typeof reference !== 'object' || typeof reference.url !== 'string') continue;
+      let parsed;
+      try { parsed = new URL(reference.url); }
+      catch { continue; }
+      if (parsed.protocol !== 'https:') continue;
+      const li = node('li');
+      const a = node('a', reference.title || parsed.hostname);
+      a.href = parsed.href;
+      a.target = '_blank';
+      a.rel = 'noopener noreferrer';
+      li.append(a);
+      const kind = reference.source_type === 'ARAUEMAILEA' ? 'Idazkera / arauemailea'
+        : reference.source_type === 'DESKRIBAPENA' ? 'Deskribapen linguistikoa'
+        : 'Iturri linguistikoa';
+      li.append(node('span',kind,'grammar-source-type'));
+      if (typeof reference.claim === 'string' && reference.claim.trim()) li.append(node('p',reference.claim,'grammar-source-claim'));
+      list.append(li);
+    }
+    if (list.childElementCount) source.append(list);
     root.append(source);
   }
   async function readDetails(entry) {
@@ -314,7 +338,7 @@
       state.client=cloud?.client?.()||null;
       if(!state.client)throw new Error('Supabase client unavailable');
       state.entries=check(await state.client.from(V.entries)
-        .select('id,code,title_eu,short_explanation_eu,explanation_eu,category_code,category_label_eu,level,use_when_eu,avoid_when_eu,warning_eu,source_guideline,version,sort_order')
+        .select('id,code,title_eu,short_explanation_eu,explanation_eu,category_code,category_label_eu,level,use_when_eu,avoid_when_eu,warning_eu,source_guideline,metadata,version,sort_order')
         .eq('level',state.level)
         .order('sort_order',{ascending:true})
         .limit(250));

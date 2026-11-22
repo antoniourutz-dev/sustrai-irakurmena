@@ -66,7 +66,7 @@ Probak: JS sintaxia, hitzen bakartasuna eta posizioa, 13 gurutzaketen letra-bate
 - **Taula:** public.smx_crossword_daily, Supabase Lexikoa.
 - **Migrazioa:** supabase/migrations/20261122200826_smx_crossword_daily_catalog_v1.sql.
 - **Gaurko datuak:** Europa/Madrid ordu-zonako 00:00tik. Play-date + level + mode konbinazio bakarra.
-- **Lehen sorta:** 2026-11-22tik 2026-12-05era, 14 egun, egunean 2 taula, guztira **28 taula**. Taula bakoitzak **10 hitz** ditu. 59 termino dokumentaturen bildumatik hautatu eta gurutzatu dira.
+- **Lehen sorta:** 2026-11-22tik 2026-12-21era, 30 egun, egunean 2 taula, guztira **60 taula**. Taula bakoitzak **10 hitz** ditu. 59 termino dokumentaturen bildumatik hautatu eta gurutzatu dira.
 - **Bi modalitateak:** egun berean ikasteko eta erronkako hitzak ez dira errepikatzen; gainerako egunetan errepikapen mailakatua onartzen da.
 - **Kalitatea:** hitz bakoitzak jatorrizko Oposik kodea, pista berridatzia eta bankuko definizio argigarria daramatza. Mekanismoak gurutzaketa bateragarriak eta sare konektatua egiaztatzen ditu. **Egiaztapen linguistiko independentea egin gabe dago:** egoera pilot, berrikuspena pending, eta maila C1 orientazio didaktiko gisa soilik.
 - **Gaia:** Osasun-hiztegia. Ez dira talde estuagoak iragartzen, batzuek ez dutelako hautatutako hamar hitzen gehiengoa osatzen.
@@ -75,17 +75,17 @@ Probak: JS sintaxia, hitzen bakartasuna eta posizioa, 13 gurutzaketen letra-bate
 - **Bezeroa:** data aukeratzen da Europe/Madrid erabiliz; bi taulak Supabasetik eskuratzen dira, eta gaurko cachea gordetzen da.
 - **Errepikapena:** egun bereko saioa eta marka pertsonala berreskuratzen dira. Amaitutako saio batetik menura itzultzean, amaierako emaitza ez da ezabatzen.
 - **Gauerdiko aldaketa:** partida ez badago martxan, eguna aldatzen denean berriz kargatzen da katalogoa; partida aktibo badago, aurrekoa amai daiteke eta hurrengo partida hastean egun berrikoa kargatzen da.
-- **Egunen amaiera:** 2026-12-05etik aurrera ez dago taula berririk programatuta; sistemak ez du edukirik asmatzen, argi azaltzen du falta den materiala. Egutegia berriz hornitu behar da.
+- **Egunen amaiera:** 2026-12-21etik aurrera ez dago taula berririk programatuta; sistemak ez du edukirik asmatzen, argi azaltzen du falta den materiala. Egutegia berriz hornitu behar da.
 
 ### Proba-egiaztapena
-- [x] 28 taula/14 egun; data eta modalitate bakoitzeko 10 hitz; 325 gurutzaketa, hitzak konektatuak.
+- [x] 60 taula/30 egun; data eta modalitate bakoitzeko 10 hitz; 688 gurutzaketa, hitzak konektatuak.
 - [x] Gaurko bi taulen hitzak bereiziak (ez dago hitz errepikaturik modu bien artean egun berean).
 - [x] Ez dago hitz osoa agerian uzten duen pistarik.
-- [x] Anon rolarekin 2026-11-22an bi taula soilik ikusgai, beste 26 etorkizunekoak ez.
+- [x] Anon rolarekin 2026-11-22an bi taula soilik ikusgai, beste 58 etorkizunekoak ez.
 - [x] Test sintetikoko bi modu, akatsen/pisten kostua, kronometroa, berriz sartzea, marka, egun-aldaketa eta data hutsaren kudeaketa.
 - [ ] Benetako nabigatzaileko E2E proba (Chrome/Firefox/Safari, desktop/mugikor, kontuarekin/anon).
 - [ ] Bigarren berrikusle akademiko baten izenpetutako onespena.
-- [ ] Programazioa luzatzea 2026-12-05etik haratago.
+- [ ] Programazioa luzatzea 2026-12-21etik haratago.
 
 **Emaitza lehiakorrak ez dira zerbitzarian egiaztatzen:** marka pertsonalak dira, ez ikasleen arteko sailkapen publikoko emaitzak.
 

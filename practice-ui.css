@@ -145,3 +145,18 @@
 .practice-page .practice-skeleton .practice-skeleton-button {width:100%;height:44px;margin-top:auto;border-radius:10px}
 @keyframes practice-loading {from{background-position:110% 0}to{background-position:-110% 0}}
 @media(prefers-reduced-motion:reduce){.practice-page .practice-skeleton span{animation:none}}
+
+/* Keep orientation and question navigation in reach while students work. */
+.practice-page .ad-work-toolbar{position:sticky;top:0;z-index:20;margin:18px 0 14px;padding:10px 0 12px;background:var(--s-bg);border-bottom:1px solid var(--s-line)}
+.practice-page .ad-work-toolbar .ad-work-progress{margin:0 0 8px;gap:12px}
+.practice-page .ad-work-toolbar #answerProgress{margin-left:auto;width:clamp(60px,14vw,140px);flex-shrink:1}
+.practice-page .ad-jump-end{min-height:40px;padding:6px 8px;border:0;background:transparent;color:var(--s-primary);font-size:14px;font-weight:650;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+.practice-page .ad-question-nav{display:flex;gap:8px;overflow-x:auto;overscroll-behavior-x:contain;padding:4px 4px 6px;scroll-padding:4px}
+.practice-page .ad-question-link{flex:0 0 44px;min-height:44px;border:1px solid var(--s-line-strong);border-radius:10px;background:var(--s-surface);color:var(--s-muted);font-size:15px;font-weight:650;cursor:pointer}
+.practice-page .ad-question-link.is-answered{background:var(--s-primary-soft);border-color:var(--s-primary);color:var(--s-primary)}
+.practice-page .ad-question-link[aria-current]{box-shadow:inset 0 -3px var(--s-primary);font-weight:800}
+.practice-page .ad-question-link:hover{border-color:var(--s-primary);color:var(--s-primary)}
+.practice-page .ad-item{scroll-margin-top:130px}
+.practice-page #activityActions{scroll-margin-top:130px}
+.practice-page #activityTitle:focus{outline:none}
+@media(max-width:420px){.practice-page .ad-work-toolbar .ad-work-progress{gap:8px}.practice-page .ad-question-nav{gap:6px}}

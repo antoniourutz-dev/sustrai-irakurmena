@@ -74,3 +74,59 @@ osoaren gordetzea eta beste gailuan berreskuratzea; irakaslearen talde-sorkuntza
 kodearekin bat egitea eta esleipenaren jarraipena, bi erabiltzaile desberdinekin;
 PWA cache zaharraren integrazio-proba eta berrikuspen akademiko independentea.
 Ez da halako proba egin dela asmatu.
+
+## 6. B2ko ikasketa-estudioaren hobekuntza · 2026-11-22
+
+### Eduki pedagogikoaren geruza berria
+
+Lehen bost gaietan, teoria bankutik berreskuratzen da, eta unitate
+bakoitzari helburu behagarria, erabilera-egoera, eredu landua,
+kontraste arrazoitua, irakaslearen oharra eta ekoizpen autonomoa gehitu zaizkio.
+
+- 5 unitate-diseinu (smx_grammar_b2_lesson_designs).
+- 20 ariketa original (smx_grammar_b2_practice_items), 4 unitateko.
+- Identifikatu, arrazoitu, kontrastatu eta aplikatu sekuentzia.
+- 3 arrakasta-adierazle eta 3 transferentzia-kontrol unitate bakoitzean.
+- Galdera bakoitzean aukera bakoitzarentzako azalpen bereizia.
+- Ez da gramatika-bankuko teoria berriro kopiatu.
+- Material berrien egoera: pilot_draft; auditoria akademiko independentea falta da.
+
+### Jarraipen hezigarria eta irakaslearen panela
+
+- Irakurketa, kontrastea, praktika eta ekoizpen autonomoa bereiziak.
+- 72 orduren ondoko berrikuspena (reviewed_again_at, review_reflection_eu).
+- Hurrengo urrats dinamikoa eta berrikuspen atzeratuaren lehentasuna.
+- Gonbidatuak saioan bertan probatu dezake; datuak ez dira gordetzen.
+- Irakasleak ikaslearen ekoizpen originala eta geroko berrikuspena irakurri,
+  eta orientazio arrazoitua gorde dezake.
+- smx_grammar_b2_teacher_feedback: idatzizko orientazioa, egilearen IDarekin,
+  ikasleari eta fitxari lotuta; ikasleak berea ikusten du.
+- RLS aktibatuta dago 7/7 B2ko tauletan. Rol anonimoak ezin ditu
+  ikasleen lanak edo irakasleen feedbackak irakurri.
+
+### Interfazearen berrantolaketa
+
+- Goiburu laburragoa, ikasteko hurrengo ekintza, irakurketa eta ekoizpena
+  bereizten dituen aurrerapenaren aurkezpena.
+- Argiago bereizitako eredu landuak, kontrasteak eta aukera-galderen feedbacka.
+- Hautu egokia/okerra hitzez eta berde/gorri bidez adierazita.
+- Mugikorrerako diseinua, ukipen-eremu handiagoak, teklatuaren fokua eta
+  mugimendu murriztuaren euskarriak.
+
+### Probak eta mugak
+
+SQL egiaztapena: 5 ikasgai, 20 galdera, 15 helburu-adierazle,
+15 transferentzia-kontrol eta datuen RLS babesak. Kodean JS sintaxia,
+HTMLko elementuen erreferentziak eta beharrezko datu-taulen izenak egiaztatuak.
+
+Honako hauek geratzen dira: nabigatzaileko UI/UX eta irisgarritasun-proba bisuala,
+benetako bi konturekin esleipen/feedback/sinkronizazio proba, akademia-auditoria
+independentea, erabilera errealaren ikerketa eta beste 26 B2ko gaiei praktika
+osoa eskaintzea. Ez esan horiek guztiak gainditu direnik.
+
+## 7. B2ko bigarren modulua — 2026-11-22
+
+Kokagunea/helmuga/jatorria; kantitatearen zehaztasuna eta nahikotasuna; konparazioaren maila/zenbatekoa/modua.
+3 ikasgai eta 12 ariketa original berri datu-basean, guztira 8 ikasgai eta 32 item.
+Orain frontendak ikasgai-diseinuak kontsultatuta aktibatzen ditu jarduera gidatuak, datu-baseko pilot_active argazki zaharra aldatzeko beharrik gabe.
+Gai berriak pilot_draft dira, eta irakasleak independente egiaztatu beharko ditu.

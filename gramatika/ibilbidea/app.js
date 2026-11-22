@@ -261,8 +261,24 @@
     addP(intro, e.explanation_eu);
     const extra = el('details', null, 'b2-read-more');
     extra.append(el('summary', 'Azalpen eta adibide gehiago'));
-    const link = aLink(grammarLink(e.code), 'Ikusi fitxa osoa gramatika-bankuan', 'b2-text-link');
+    const link=aLink(grammarLink(e.code),'Ikusi fitxa osoa gramatika-bankuan','b2-text-link');
     extra.append(link);
+    const sources=Array.isArray(e.metadata?.sources) ? e.metadata.sources : [];
+    if(sources.length){
+      const ul=el('ul',null,'b2-sources');
+      sources.slice(0,5).forEach(source=>{
+        try{
+          const u=new URL(source.url);
+          if(u.protocol!=='https:'||!['www.euskaltzaindia.eus','euskaltzaindia.eus','www.habe.euskadi.eus','habe.euskadi.eus'].includes(u.hostname))return;
+          const li=el('li');
+          const a=aLink(u.toString(),source.title||'Kontsultatu iturria');
+          a.target='_blank';a.rel='noopener noreferrer';
+          li.append(a,el('small',source.source_type==='DESKRIBAPENA'?'Gramatika deskribatzailea':source.source_type==='GAITASUN_MARKOA'?'Gaitasun-markoa':'Iturria'));
+          ul.append(li);
+        }catch{return;}
+      });
+      if(ul.children.length){extra.append(el('strong','Iturri nagusiak'),ul);}
+    }
     body.append(extra);
     addP(body, '«Irakurri dut» markak irakurketa erregistratzen du; ez du berez hizkuntza-gaitasuna egiaztatzen.', 'b2-footnote');
     row(body, button(own(e.code).read_at ? 'Hurrengo urratsa: kontrastatu' : 'Azalpena irakurri dut', markRead));
@@ -710,7 +726,7 @@
         state.client.from('smx_grammar_b2_modules').select('*').order('module_no').then(check),
         state.client.from('smx_grammar_b2_path_units').select('*').order('global_order').then(check),
         state.client.from('public_editorial_grammar_entries')
-          .select('id,code,title_eu,short_explanation_eu,explanation_eu,level').eq('level','B2').limit(100).then(check),
+          .select('id,code,title_eu,short_explanation_eu,explanation_eu,level,metadata').eq('level','B2').limit(100).then(check),
         state.client.from('smx_grammar_b2_lesson_designs').select('*').limit(20).then(check),
         state.client.from('smx_grammar_b2_practice_items').select('*').order('item_order').limit(100).then(check)
       ]);

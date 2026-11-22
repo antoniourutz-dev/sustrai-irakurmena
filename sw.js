@@ -1,5 +1,5 @@
 /* SUSTRAI PWA service worker */
-const CACHE_VERSION = 'sustrai-pwa-v47-zinok-six-levels';
+const CACHE_VERSION = 'sustrai-pwa-v48-gramatika-catalog';
 const SHELL = [
   '/',
   '/index.html',
@@ -68,6 +68,8 @@ const SHELL = [
   '/azterketak/index.html',
   '/gramatika/',
   '/gramatika/index.html',
+  '/gramatika/gramatika.css',
+  '/gramatika/gramatika.js',
   '/ariketak/',
   '/ariketak/index.html',
   '/ariketak/catalog.js',

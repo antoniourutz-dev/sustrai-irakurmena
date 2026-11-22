@@ -172,3 +172,9 @@
 .practice-page .ad-item-result--correct>strong{color:#125b38;font-size:18px}
 .practice-page .ad-item-result--incorrect>strong{color:#9b1c2a;font-size:18px}
 .practice-page .ad-student-answer{white-space:pre-wrap;overflow-wrap:anywhere}
+
+/* Match the selected option to the server verdict after correction. */
+.practice-page .ad-item--correct .ad-option:has(input:checked){background:#eef9f2;border-color:#167447;color:#125b38}
+.practice-page .ad-item--incorrect .ad-option:has(input:checked){background:#fff1f2;border-color:#b42332;color:#9b1c2a}
+.practice-page .ad-item--correct .ad-option input{accent-color:#167447}
+.practice-page .ad-item--incorrect .ad-option input{accent-color:#b42332}

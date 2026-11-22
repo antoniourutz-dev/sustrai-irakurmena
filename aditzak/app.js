@@ -194,7 +194,6 @@
     const badge = $('activityBadge');
     badge.textContent = 'Jarduera eskuragarri';
     badge.className = 'ad-badge';
-    $('adPilotWarning').hidden = !isPilot(a);
     const list = $('items');
     list.replaceChildren();
     for (const item of state.items.filter((i) => i.activity_version_id === a.id)) {
@@ -307,14 +306,10 @@
     const pilot=!!payload.pilot;
     area.append(node('h3','Ariketaren emaitza','ad-grade-heading'));
     area.append(node('p',
-      correct+' zuzen · '+incorrect+' oker'+(review?' · '+review+' berrikusteko':'')+
+      correct+' zuzen · '+incorrect+' oker'+
       ' ('+answered+' erantzun)',
       'ad-grade-count'));
-    area.append(node('p',pilot
-      ? 'Erantzun objektiboak ereduekin alderatu dira; emaitzak orientagarriak dira. '+
-        'Beste formulazio zuzen batzuk berrikusi behar izan daitezke.'
-      : 'Barne-praktikako emaitza orientagarria da, ez azterketa ofizialaren nota.',
-      'ad-grade-detail'));
+
     area.hidden=false;
 
     for(const result of payload.results) {
@@ -326,8 +321,8 @@
       const feedback=node('div',null,'ad-item-result ad-item-result--'+outcome);
       const mark=outcome==='correct'?'✓ ':outcome==='incorrect'?'✕ ':'';
       const label=outcomeText[outcome]||'Berrikusteko';
-      feedback.append(node('strong',mark+label));
-      if(result.feedback_eu)feedback.append(node('p',result.feedback_eu));
+      if(['correct','incorrect','partial'].includes(outcome)) feedback.append(node('strong',mark+label));
+      if(['correct','incorrect','partial'].includes(outcome) && result.feedback_eu) feedback.append(node('p',result.feedback_eu));
       const item=state.items.find(i=>
         i.activity_version_id===state.current.id && i.position===result.position);
       const raw=item&&state.answers.get(item.id);

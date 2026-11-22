@@ -361,29 +361,50 @@
       const solvedHere=cell.owners.some(id=>solved(byId.get(id)));
       button.querySelector('.cx-cell-letter').textContent=values.get(k)||'';
       button.classList.toggle('is-solved',solvedHere);
-      button.classList.toggle('is-right',idx>=0&&status==='wrong'&&!!typed&&typed===w.word[idx]);
-      button.classList.toggle('is-wrong',idx>=0&&status==='wrong'&&!!typed&&typed!==w.word[idx]);
+      button.classList.toggle('is-right',state.mode==='ikasi'&&idx>=0&&status==='wrong'&&!!typed&&typed===w.word[idx]);
+      button.classList.toggle('is-wrong',idx>=0&&status==='wrong'&&!!typed&&(state.mode==='erronka'||typed!==w.word[idx]));
     }
   }
   function check() {
+    if(state.phase!=='playing')return;
     const w=byId.get(state.active);
-    if (solved(w)) return;
+    if(solved(w))return;
     const typed=state.drafts[w.id]||'';
-    state.checked[w.id]=typed.length!==w.word.length?'incomplete':typed===w.word?'correct':'wrong';
+    state.feedback='';
+    if(typed.length!==w.word.length)state.checked[w.id]='incomplete';
+    else if(typed===w.word) {
+      state.checked[w.id]='correct';
+      finish();
+    } else {
+      state.checked[w.id]='wrong';
+      // Re-checking the SAME unchanged mistake must not charge again.
+      if(state.lastWrong[w.id]!==typed) {
+        state.lastWrong[w.id]=typed;
+        if(state.mode==='erronka')state.stats.wrong++;
+      }
+    }
     save();render();
-    if (state.checked[w.id]!=='correct') root.querySelector('#cxWordInput')?.focus();
+    if(state.checked[w.id]!=='correct')root.querySelector('#cxWordInput')?.focus();
   }
   function hint() {
+    if(state.phase!=='playing')return;
     const w=byId.get(state.active);
-    if (solved(w)) return;
+    if(solved(w))return;
     const typed=state.drafts[w.id]||'';
-    const i=[...w.word].findIndex((ch,i)=>typed[i]!==ch);
-    if (i<0) return;
+    const already=state.revealed[w.id]||[];
+    // Each paid hint reveals one previously unrevealed, currently missing letter.
+    const i=[...w.word].findIndex((ch,i)=>typed[i]!==ch&&!already.includes(i));
+    if(i<0){
+      state.feedback=typed===w.word?'Hitza osatuta dago; egiaztatu erantzuna.':'Ez dago beste pista berririk hitz honetan.';
+      render();return;
+    }
     const arr=typed.split('');
-    // A hint reveals exactly one position and never rewrites unrelated puzzle words.
     arr[i]=w.word[i];
     state.drafts[w.id]=arr.join('');
+    state.revealed[w.id]=[...already,i];
     state.hints[w.id]=(state.hints[w.id]||0)+1;
+    if(state.mode==='erronka')state.stats.hints++;
+    state.feedback=state.mode==='erronka'?'Letra bat argitu da: −'+COST_HINT+' puntu.':'Letra bat argitu da.';
     delete state.checked[w.id];
     touchWord(w.id);save();render();
     root.querySelector('#cxWordInput')?.focus();
@@ -396,40 +417,44 @@
   }
   root.addEventListener('click',event=>{
     const el=event.target.closest('[data-action],[data-word],[data-cell]');
-    if (!el || !root.contains(el)) return;
-    if (el.dataset.word) {setActive(el.dataset.word,true);return;}
-    if (el.dataset.cell) {
+    if(!el||!root.contains(el))return;
+    const action=el.dataset.action;
+    if(action==='start'){start(el.dataset.mode);return;}
+    if(action==='reset'){
+      if(state.phase==='playing'&&!window.confirm('Partida hau bertan behera utzi eta beste bat hasi?'))return;
+      state=fresh();save();render();return;
+    }
+    if(state.phase==='setup')return;
+    if(el.dataset.word){setActive(el.dataset.word,true);return;}
+    if(el.dataset.cell) {
       const cell=grid.get(el.dataset.cell);
-      if (!cell) return;
-      const id=cell.owners.includes(state.active)&&cell.owners.length>1 ?
-        cell.owners.find(x=>x!==state.active) : (cell.owners.includes(state.active)?state.active:cell.owners[0]);
+      if(!cell)return;
+      const id=cell.owners.includes(state.active)&&cell.owners.length>1?
+        cell.owners.find(x=>x!==state.active):(cell.owners.includes(state.active)?state.active:cell.owners[0]);
       setActive(id,true);return;
     }
-    const action=el.dataset.action;
-    if (action==='check') check();
-    else if (action==='hint') hint();
-    else if (action==='next') next();
-    else if (action==='reset') {
-      if (!window.confirm('Gurutzegrama berrabiarazi eta orain arteko erantzunak ezabatu?')) return;
-      state=fresh();save();render();root.querySelector('#cxWordInput')?.focus();
-    }
+    if(action==='check')check();
+    else if(action==='hint')hint();
+    else if(action==='next')next();
   });
   root.addEventListener('input',event=>{
-    if (event.target.id!=='cxWordInput') return;
+    if(event.target.id!=='cxWordInput'||state.phase!=='playing')return;
     const w=byId.get(state.active);
-    if (solved(w)) return;
+    if(solved(w))return;
     const value=event.target.value.toUpperCase().replace(/[^A-Z]/g,'').slice(0,w.word.length);
     event.target.value=value;
     state.drafts[w.id]=value;
-    delete state.checked[w.id];
+    delete state.checked[w.id];state.feedback='';
     touchWord(w.id);save();paintGrid();
     root.querySelector('#cxFeedback')?.remove();
+    root.querySelector('.cx-hint-note')?.remove();
   });
   root.addEventListener('keydown',event=>{
     if (event.key==='Enter'&&event.target.id==='cxWordInput') {event.preventDefault();check();}
   });
   (async()=>{
     try {cloud=window.SustraiCloud;await cloud?.ready;}catch { /* Guest mode does not need connectivity. */ }
-    readSaved();render();
+    readBest();readSaved();render();
   })();
+  if(typeof setInterval==='function')setInterval(tickClock,1000);
 })();

@@ -1,34 +1,43 @@
 /* node --test tests/jokoak-zinok.test.cjs */
-const {test}=require('node:test');const assert=require('node:assert/strict');
+const test=require('node:test'),assert=require('node:assert/strict');
 const z=require('../jokoak/zinok/core.js');
-const rows=Array.from({length:20},(_,i)=>({id:'id'+i,source_id:'1-'+i,hitza:'hitz'+i,sinonimoak:['pare'+i],level:1,part:1,active:true}));
-test('ZINOKren galderak errepikapen eta aukera bikoizturik gabe',()=>{
- const orig=JSON.stringify(rows);
- const questions=z.quiz(rows,10,()=>.37);
- assert.equal(questions.length,10);
- assert.equal(new Set(questions.map(q=>q.word)).size,10);
- questions.forEach(q=>{assert.equal(q.options.length,4);assert.equal(new Set(q.options).size,4);assert.equal(q.options[q.correctIndex],q.correctAnswer);});
- assert.equal(JSON.stringify(rows),orig);
+const levels=['B1','B2','C1','C2','EX','MA'];
+const groups=levels.flatMap((level,l)=>
+ Array.from({length:15},(_,i)=>({uid:level+'-'+i,sourceId:i,
+ level,words:['HITZA'+l+'_'+i,'ANTZEKOA'+l+'_'+i,'PAREKOA'+l+'_'+i]})));
+test('Sei maila originalak daude, eta hurrenkera zuzena da',()=>{
+ assert.deepEqual(z.LEVELS,levels);
 });
-test('Gakoa eta beste sinonimo batzuk ez dira distraktoreak',()=>{
- const [q]=z.quiz([
-  {id:'1',hitza:'Bultzatu',sinonimoak:['Sustatu','Akuilatu'],active:true},
-  {id:'2',hitza:'Sustatu',sinonimoak:['Bultzatu'],active:true},
-  ...Array.from({length:8},(_,i)=>({id:String(i+3),hitza:'beste'+i,sinonimoak:['pare'+i],active:true}))
- ],1,()=>.999999);
- assert.equal(q.word,'Bultzatu');
- assert.equal(q.options.filter(x=>['Sustatu','Akuilatu'].includes(x)).length,1);
- assert(!q.options.some(x=>x===q.word));
+test('Maila bakoitzak 10 galdera ematen ditu, errepikapenik gabe',()=>{
+ for(const level of levels){
+  const qs=z.quiz(groups,level,10,()=>.37);
+  assert.equal(qs.length,10,level);
+  assert.equal(new Set(qs.map(x=>x.id)).size,10);
+  for(const q of qs){
+   assert.equal(q.level,level);
+   assert.equal(q.options.length,4);
+   assert.equal(new Set(q.options).size,4);
+   assert.equal(q.options[q.correctIndex],q.correctAnswer);
+   assert(!q.options.some(x=>x===q.word));
+  }
+ }
 });
-test('Irakurketa eta datu-iragazkia',()=>{
- assert.equal(z.isEntry({hitza:'  ',sinonimoak:['x']}),false);
- assert.equal(z.isEntry({hitza:'x',sinonimoak:['x']}),false);
- assert.equal(z.isEntry({hitza:'x',sinonimoak:['y'],active:false}),false);
+test('Sinonimo bereko hitzak ez dira distraktore bezala agertzen',()=>{
+ const one=groups.find(g=>g.level==='B1');
+ const [q]=z.quiz(groups,'B1',1,()=>.999999);
+ assert.equal(q.level,'B1');
+ const matched=groups.find(g=>g.uid===q.id);
+ assert(matched.words.includes(q.word));
+ for(const option of q.options)if(option!==q.correctAnswer)assert(!matched.words.includes(option));
 });
-test('Puzzleak balioztatu eta multzokatu',()=>{
- const p={id:'1',esaldia:'Hitz berria bultzatu dugu.',targets:[{klabea:'bultzatu',zuzena:'sustatu',distraktoreak:['utzi','gorde','saldu']}]};
- assert.equal(z.isPuzzle(p),true);
- assert.equal(z.isPuzzle({...p,targets:[{...p.targets[0],klabea:'ez dago'}]}),false);
- assert.equal(z.puzzleGroups(Array.from({length:7},(_,i)=>({...p,id:String(i+1)}))).length,2);
+test('Bilatzaileak sei taldeak bereizten ditu',()=>{
+ const result=z.search(groups,'ANTZEKOA',99);
+ assert.equal(result.length,90);
+ assert.equal(z.search(groups,'x').length,0);
 });
-test('Puntuazioa ez da nota ofiziala',()=>assert.deepEqual(z.score([{correct:true},{correct:false}]),{correct:1,total:2,wrong:1}));
+test('Jatorrizko taldeen datuak ez dira aldatzen',()=>{
+ const before=JSON.stringify(groups);
+ z.quiz(groups,'MA',10,()=>.15);
+ assert.equal(JSON.stringify(groups),before);
+});
+test('Lortutako emaitza didaktikoa da',()=>assert.deepEqual(z.score([{correct:true},{correct:false}]),{correct:1,total:2,wrong:1}));

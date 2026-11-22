@@ -1,4 +1,4 @@
-/* ZINOK · SUSTRAI jokoaren logika. Jatorria: antoniourutz-dev/zinok. */
+/* ZINOK · Original six-group synonym game, integrated into SUSTRAI. */
 (function(root,factory){
   'use strict';
   const api=factory();
@@ -6,7 +6,8 @@
   if(root)root.ZinokCore=api;
 })(typeof window!=='undefined'?window:(typeof globalThis!=='undefined'?globalThis:null),function(){
   'use strict';
-  const normalize=value=>String(value||'').trim().toLocaleLowerCase('eu');
+  const LEVELS=Object.freeze(['B1','B2','C1','C2','EX','MA']);
+  const normalize=value=>String(value??'').trim().toLocaleLowerCase('eu');
   function shuffle(items,random=Math.random){
     const result=[...items];
     for(let i=result.length-1;i>0;i--){
@@ -15,60 +16,58 @@
     }
     return result;
   }
-  function isEntry(row){
-    if(!row||typeof row.hitza!=='string'||!normalize(row.hitza)||!Array.isArray(row.sinonimoak))return false;
-    if(row.active===false)return false;
-    return row.sinonimoak.some(word=>typeof word==='string'&&normalize(word)&&normalize(word)!==normalize(row.hitza));
+  function isGroup(g){
+    return g&&LEVELS.includes(g.level)&&Array.isArray(g.words)&&
+      g.words.length>=2&&g.words.every(w=>typeof w==='string'&&!!normalize(w))&&
+      new Set(g.words.map(normalize)).size>=2;
   }
-  function quiz(entries,count=10,random=Math.random){
-    const valid=entries.filter(isEntry);
-    const chosen=[];const usedWords=new Set();
-    for(const row of shuffle(valid,random)){
-      const base=normalize(row.hitza);
-      if(usedWords.has(base))continue;
-      const related=[...new Set(row.sinonimoak.filter(s=>typeof s==='string').map(s=>s.trim()).filter(s=>normalize(s)&&normalize(s)!==base))];
-      if(!related.length)continue;
-      const targetAnswer=shuffle(related,random)[0];
-      const blocked=new Set([base,...related.map(normalize)]);
-      const pool=valid.filter(other=>{
-        const key=normalize(other.hitza);
-        if(blocked.has(key))return false;
-        // Do not label a clearly reciprocal lexical relation as a distractor.
-        return !other.sinonimoak.some(s=>normalize(s)===base||normalize(s)===normalize(targetAnswer));
-      }).map(other=>other.hitza.trim());
-      const distractors=[];
-      for(const item of shuffle(pool,random)){
-        if(blocked.has(normalize(item))||distractors.some(x=>normalize(x)===normalize(item)))continue;
-        distractors.push(item);
-        if(distractors.length===3)break;
+  function quiz(data,level,count=10,random=Math.random){
+    if(!LEVELS.includes(level))throw new RangeError('ZINOK maila ezezaguna');
+    const groups=data.filter(isGroup);
+    const selected=shuffle(groups.filter(g=>g.level===level),random);
+    const result=[],seen=new Set();
+    for(const g of selected){
+      const alternatives=[...new Set(g.words.map(w=>w.trim()))];
+      const word=shuffle(alternatives,random)[0],base=normalize(word);
+      if(seen.has(base))continue;
+      const synonyms=alternatives.filter(w=>normalize(w)!==base);
+      if(!synonyms.length)continue;
+      const answer=shuffle(synonyms,random)[0];
+      // Prevent a directly documented relation from being used as a distractor.
+      const blocked=new Set(alternatives.map(normalize));
+      for(const other of groups)if(other.words.some(w=>normalize(w)===base||normalize(w)===normalize(answer))){
+        other.words.forEach(w=>blocked.add(normalize(w)));
       }
-      if(distractors.length<3)continue;
-      const options=shuffle([targetAnswer,...distractors],random);
-      chosen.push({
-        sourceId:String(row.source_id||row.id||''),level:Number(row.level)||null,
-        part:Number(row.part)||null,word:row.hitza.trim(),correctAnswer:targetAnswer,
-        options,correctIndex:options.findIndex(x=>x===targetAnswer),
-        knownAlternatives:related
-      });
-      usedWords.add(base);
-      if(chosen.length===count)break;
+      const distractors=[];
+      const others=shuffle(groups.filter(row=>row!==g),random);
+      for(const other of others){
+        const options=shuffle(other.words,random);
+        for(const option of options){
+          if(blocked.has(normalize(option))||distractors.some(w=>normalize(w)===normalize(option)))continue;
+          distractors.push(option.trim());blocked.add(normalize(option));break;
+        }
+        if(distractors.length>=3)break;
+      }
+      if(distractors.length!==3)continue;
+      const options=shuffle([answer,...distractors],random);
+      result.push({id:g.uid||level+':'+g.sourceId,sourceId:g.sourceId,level,
+        word,correctAnswer:answer,knownAlternatives:synonyms,
+        options,correctIndex:options.findIndex(x=>x===answer)});
+      seen.add(base);
+      if(result.length>=count)break;
     }
-    return chosen;
+    return result;
   }
-  function isPuzzle(value){
-    if(!value||typeof value.id!=='string'||!value.esaldia||!Array.isArray(value.targets)||!value.targets.length)return false;
-    return value.targets.every(t=>t&&typeof t.klabea==='string'&&normalize(t.klabea)&&
-      normalize(value.esaldia).includes(normalize(t.klabea))&&typeof t.zuzena==='string'&&normalize(t.zuzena)&&
-      Array.isArray(t.distraktoreak)&&t.distraktoreak.length===3&&
-      new Set([t.zuzena,...t.distraktoreak].map(normalize)).size===4);
+  function search(data,query,limit=30){
+    const key=normalize(query);
+    if(key.length<2)return[];
+    return data.filter(isGroup).filter(g=>g.words.some(w=>normalize(w).includes(key)))
+      .slice(0,Math.max(0,limit)).map(g=>({id:g.uid||String(g.sourceId),
+        level:g.level,words:[...g.words]}));
   }
-  function puzzleGroups(items,perGroup=5){
-    const safe=items.filter(isPuzzle);
-    const groups=[];
-    for(let i=0;i<safe.length;i+=perGroup)
-      groups.push({id:String(groups.length+1),label:(groups.length+1)+'. sorta',puzzles:safe.slice(i,i+perGroup)});
-    return groups;
+  function score(results){
+    return {correct:results.filter(r=>r.correct===true).length,total:results.length,
+      wrong:results.filter(r=>r.correct!==true).length};
   }
-  function score(results){return {correct:results.filter(r=>r.correct===true).length,total:results.length,wrong:results.filter(r=>r.correct!==true).length};}
-  return Object.freeze({normalize,shuffle,isEntry,quiz,isPuzzle,puzzleGroups,score});
+  return Object.freeze({LEVELS,normalize,shuffle,isGroup,quiz,search,score});
 });

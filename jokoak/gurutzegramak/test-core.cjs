@@ -1,7 +1,6 @@
-/* Run: node jokoak/gurutzegramak/test-core.cjs
- * Dependency-free regression suite: topology, two modes, penalties, hints, clock,
- * re-entry, result, personal best, legacy isolation and reset.
- * Browser visual/accessibility checks are separate, and still required.
+/* HitzBira daily crossword regression suite
+ * Run: node jokoak/gurutzegramak/test-core.cjs
+ * No network access or credentials. Tests deterministic synthetic, non-future fixtures.
  */
 'use strict';
 const assert=require('node:assert/strict');
@@ -9,108 +8,125 @@ const fs=require('node:fs');
 const path=require('node:path');
 const vm=require('node:vm');
 const source=fs.readFileSync(path.join(__dirname,'crossword.js'),'utf8');
+const authoring=require('./authoring-generator.cjs');
 new vm.Script(source,{filename:'crossword.js'});
-const rx=/\{\s*id:'([^']+)',word:'([^']+)',r:(\d+),c:(\d+),dir:'([HV])',source:'([^']+)'/g;
-const words=Array.from(source.matchAll(rx),m=>({id:m[1],word:m[2],r:+m[3],c:+m[4],dir:m[5],source:m[6]}));
-assert.equal(words.length,12);
-assert.equal(new Set(words.map(w=>w.id)).size,12);
-assert.equal(new Set(words.map(w=>w.source)).size,12);
-const cells=new Map(),adjacent=new Map(words.map(w=>[w.id,new Set()]));
-let crossings=0;
-for(const w of words){
-  assert.match(w.word,/^[A-Z]+$/);
-  for(let i=0;i<w.word.length;i++){
-    const r=w.r+(w.dir==='V'?i:0),c=w.c+(w.dir==='H'?i:0),k=r+','+c;
-    assert.ok(r>=0&&r<12&&c>=0&&c<13,'Out of bounds: '+w.id);
-    if(cells.has(k)){
-      const prev=cells.get(k);
-      assert.equal(prev.letter,w.word[i],'Conflicting cross: '+k);
-      assert.notEqual(prev.dir,w.dir,'Parallel overlap: '+k);
-      adjacent.get(w.id).add(prev.id);adjacent.get(prev.id).add(w.id);crossings++;
-    }else cells.set(k,{letter:w.word[i],id:w.id,dir:w.dir});
-  }
+const GROUPS=[
+ ['EKOGRAFIA','HITZORDU','INFEKZIO','SENDAGAI','ONGIZATE','ARTERIA','ORBAIN','TXERTO','SUKAR','ZAURI','EZTUL','NEKE'],
+ ['GLUKOSA','DIABETES','TRIAJE','BARAURIK','HEMATOMA','ZORABIO','FERRITINA','KONORTE','HEMORRAGIA','LARRIALDI','POTASIO','ZAINKETA']
+];
+function fixture(date,mode,index) {
+  const entries=GROUPS[index].map((word,i)=>({
+    id:'OS-TEST-'+index+'-'+i,word,source:'OS-TEST-'+index+'-'+i,
+    clue:'Froga sintetikoko pista '+i,explanation:'Froga sintetikoko azalpena '+i
+  }));
+  const puzzle=authoring.generate(entries,121231+index*2021,10);
+  const quality=authoring.validate(puzzle);
+  assert.equal(puzzle.entries.length,10);
+  assert.ok(quality.crossings>=9);
+  return {id:date+'-C1-'+mode,play_date:date,mode,level:'C1',status:'pilot',
+    title_eu:'Eguneko gurutzegrama',theme_eu:'Osasun-hiztegia',...puzzle};
 }
-assert.equal(crossings,13);
-const queue=[words[0].id],visited=new Set();
-while(queue.length){
-  const id=queue.shift();if(visited.has(id))continue;
-  visited.add(id);queue.push(...adjacent.get(id));
-}
-assert.equal(visited.size,words.length,'All entries must connect');
-const SAVE='sustrai-crossword-osasuna-001-v2';
-const BEST='sustrai-crossword-osasuna-001-best-v2';
-const LEGACY='sustrai-crossword-osasuna-001-v1';
-let now=1000000;
-class Clock extends Date{
-  constructor(value){super(value===undefined?now:value);}
+const firstDay=[fixture('2026-11-22','ikasi',0),fixture('2026-11-22','erronka',1)];
+const nextDay=[fixture('2026-11-23','ikasi',1),fixture('2026-11-23','erronka',0)];
+assert.equal(firstDay.length,2);
+assert.ok(!firstDay[1].entries.some(w=>firstDay[0].entries.some(x=>x.word===w.word)));
+
+const db=[...firstDay,...nextDay];
+const data=new Map();
+const SAVE=id=>'sustrai-crossword-daily-'+id+'-progress-v1';
+const BEST=id=>'sustrai-crossword-daily-'+id+'-best-v1';
+let now=Date.parse('2026-11-22T12:00:00Z');
+class FakeDate extends Date{
+  constructor(...args){super(...(args.length?args:[now]));}
   static now(){return now;}
 }
-const data=new Map();
-function spawn(storage=data){
-  const events={};
-  const root={innerHTML:'',addEventListener:(name,fn)=>events[name]=fn,
-    contains:()=>true,querySelector:()=>null,querySelectorAll:()=>[]};
-  const browser={localStorage:{getItem:key=>storage.get(key)||null,setItem:(key,value)=>storage.set(key,value)},confirm:()=>true};
-  vm.runInNewContext(source,{document:{getElementById:()=>root},window:browser,Date:Clock,console},{filename:'crossword.js'});
-  return {root,events,storage,
-    click:(dataset)=>events.click({target:{closest:()=>({dataset})}}),
-    write:(value)=>events.input({target:{id:'cxWordInput',value}}),
-    saved:()=>JSON.parse(storage.get(SAVE)||'null')};
+function client(){
+  return {from(table){
+    assert.equal(table,'smx_crossword_daily');
+    const filters=[];
+    return {select(){return this;},eq(key,v){filters.push([key,'eq',v]);return this;},
+      in(key,v){filters.push([key,'in',v]);return this;},
+      then(resolve){
+        const rows=db.filter(row=>filters.every(([key,op,value])=>
+          op==='eq'?row[key]===value:value.includes(row[key])));
+        return Promise.resolve({data:rows,error:null}).then(resolve);
+      }};
+  }};
 }
-const flush=async()=>{await Promise.resolve();await Promise.resolve();};
+function spawn(){
+  const events={};
+  const root={innerHTML:'',addEventListener:(n,f)=>{events[n]=f;},
+    querySelector:()=>null,querySelectorAll:()=>[],contains:()=>true};
+  let pulse=()=>{};
+  const browser={SustraiCloud:{ready:Promise.resolve(),client,
+    storage:{getItem:key=>data.get(key)||null,setItem:(key,value)=>data.set(key,value)}},
+    localStorage:{getItem:key=>data.get(key)||null,setItem:(key,value)=>data.set(key,value)},
+    confirm:()=>true};
+  vm.runInNewContext(source,{
+    window:browser,document:{getElementById:()=>root},Date:FakeDate,
+    setInterval:fn=>{pulse=fn;return 1;},console
+  },{filename:'crossword.js'});
+  return {root,pulse:()=>pulse(),
+    click:dataset=>events.click({target:{closest:()=>({dataset})}}),
+    write:value=>events.input({target:{id:'cxWordInput',value}})};
+}
+const read=id=>JSON.parse(data.get(SAVE(id))||'null');
+const flush=async()=>{for(let i=0;i<12;i++)await Promise.resolve();};
 (async()=>{
   let app=spawn();await flush();
-  assert.match(app.root.innerHTML,/Nola jokatu nahi duzu/);
+  assert.match(app.root.innerHTML,/Gaurko hitzak, bi erronka/);
+  assert.match(app.root.innerHTML,/Ikasteko modua/);
+  assert.match(app.root.innerHTML,/Erronka modua/);
+  const study=firstDay[0],challenge=firstDay[1];
+  app.click({action:'start',mode:'ikasi'});
+  assert.match(app.root.innerHTML,new RegExp('--cx-rows:'+study.grid_rows+';--cx-cols:'+study.grid_cols));
+  assert.equal(read(study.id).mode,'ikasi');
+  for(const w of study.entries){
+    app.click({word:w.id});app.write(w.word);app.click({action:'check'});
+    assert.equal(read(study.id).checked[w.id],'correct');
+  }
+  assert.equal(read(study.id).phase,'finished');
+  app.click({action:'reset'});
+  assert.match(app.root.innerHTML,/Gaurko hitzak, bi erronka/);
   app.click({action:'start',mode:'erronka'});
-  assert.equal(app.saved().phase,'playing');
-  assert.equal(app.saved().mode,'erronka');
-  app.click({word:'ekografia'});app.write('EKOGRAFIG');app.click({action:'check'});
+  assert.equal(read(challenge.id).mode,'erronka');
+  app.click({word:challenge.entries[0].id});
+  app.write('X'.repeat(challenge.entries[0].word.length));app.click({action:'check'});
   assert.match(app.root.innerHTML,/Ez da letraz letrako zuzenketarik ematen/);
   assert.doesNotMatch(app.root.innerHTML,/class="cx-cell[^"]*is-right/);
-  assert.equal(app.saved().stats.wrong,1);
+  assert.equal(read(challenge.id).stats.wrong,1);
   app.click({action:'check'});
-  assert.equal(app.saved().stats.wrong,1,'Same answer is not charged twice');
+  assert.equal(read(challenge.id).stats.wrong,1,'Repeating a mistake cannot charge twice');
   app.click({action:'hint'});
-  assert.equal(app.saved().stats.hints,1);
-  assert.equal(app.saved().drafts.ekografia,'EKOGRAFIA');
-  assert.deepEqual(Array.from(app.saved().revealed.ekografia),[8]);
-  app.click({action:'check'});
-  assert.equal(app.saved().checked.ekografia,'correct');
-  now+=125000; // Time runs while the user is away; it is anchored to the start.
+  assert.equal(read(challenge.id).stats.hints,1);
+  const savedAt=read(challenge.id).startedAt;
+  now+=123000;
   app=spawn();await flush();
-  assert.equal(app.saved().startedAt,1000000);
-  assert.match(app.root.innerHTML,/02:05/);
-  for(const w of words.filter(w=>w.id!=='ekografia')){
+  assert.equal(read(challenge.id).startedAt,savedAt);
+  app.click({action:'start',mode:'erronka'});
+  assert.match(app.root.innerHTML,/02:03/);
+  for(const w of challenge.entries){
     app.click({word:w.id});app.write(w.word);app.click({action:'check'});
-    assert.equal(app.saved().checked[w.id],'correct','Cannot grade '+w.id);
+    assert.equal(read(challenge.id).checked[w.id],'correct');
   }
-  assert.equal(app.saved().phase,'finished');
-  const record=JSON.parse(data.get(BEST));
-  assert.equal(record.mode,'erronka');
-  assert.equal(record.seconds,125);
-  assert.equal(record.hints,1);
-  assert.equal(record.wrong,1);
-  assert.equal(record.score,1200+Math.round(300-125/2)-40-15);
+  assert.equal(read(challenge.id).phase,'finished');
   assert.match(app.root.innerHTML,/ERRONKA AMAITUTA/);
+  const record=JSON.parse(data.get(BEST(challenge.id)));
+  assert.equal(record.mode,'erronka');
+  assert.equal(record.seconds,123);
+  assert.equal(record.score,1000+Math.round(300-123/2)-40-15);
   app.click({action:'reset'});
-  assert.equal(app.saved().phase,'setup');
-  assert.equal(app.saved().drafts.ekografia,undefined);
-  assert.equal(JSON.parse(data.get(BEST)).score,record.score,'Best survives restart');
+  assert.equal(read(challenge.id).phase,'setup');
+  assert.match(app.root.innerHTML,/Gaurko marka pertsonala/);
+  now=Date.parse('2026-11-23T00:20:00Z');
+  app.pulse();await flush();
+  assert.match(app.root.innerHTML,/Gaurko hitzak, bi erronka/);
+  assert.equal(JSON.parse(data.get('sustrai-crossword-daily-cache-2026-11-23-v1')).length,2);
   app.click({action:'start',mode:'ikasi'});
-  app.click({word:'ekografia'});app.write('EKOGRAFIG');app.click({action:'check'});
-  assert.match(app.root.innerHTML,/class="cx-cell[^"]*is-right/);
-  assert.equal(app.saved().stats.wrong,0,'Study mode never charges errors');
-  app.click({action:'hint'});
-  assert.equal(app.saved().stats.hints,0,'Study mode never charges hints');
-  app.click({action:'check'}); // EKOGRAFIA is now solved; it crosses HITZORDU at its second letter.
-  app.click({word:'hitzordu'});app.write('H');app.click({action:'hint'});
-  assert.equal(app.saved().drafts.hitzordu,'HIT','Earned crossing must fill skipped input position');
-  assert.deepEqual(Array.from(app.saved().revealed.hitzordu),[2],
-    'A paid hint must reveal one genuinely new letter, not the existing crossing');
-
-  const old=new Map([[LEGACY,JSON.stringify({schema:1,active:'sukar',drafts:{sukar:'SUKAR'},checked:{sukar:'correct'}})]]);
-  const migrated=spawn(old);await flush();
-  assert.equal(migrated.saved().mode,'ikasi','Legacy must never score as competition');
-  assert.equal(migrated.saved().checked.sukar,'correct');
-  console.log('OK: '+words.length+' words, '+crossings+' intersections, competition timer, penalties, restore, final score, personal record, practice and migration.');
+  assert.equal(read(nextDay[0].id).mode,'ikasi');
+  assert.equal(read(study.id).phase,'finished','Yesterday remains intact');
+  now=Date.parse('2026-12-06T12:00:00Z');
+  app.click({action:'reset'});await flush();
+  assert.match(app.root.innerHTML,/Ezin izan dugu jokoa ireki/,'Unavailable days show a truthful error');
+  console.log('OK: two distinct daily modes, 10-word generated boards, timed penalties, resume, best, midnight roll-over and unavailable-day handling.');
 })().catch(err=>{console.error(err);process.exitCode=1;});

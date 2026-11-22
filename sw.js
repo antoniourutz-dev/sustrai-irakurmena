@@ -1,5 +1,5 @@
 /* SUSTRAI PWA service worker */
-const CACHE_VERSION = 'sustrai-pwa-v55-daily-crosswords';
+const CACHE_VERSION = 'sustrai-pwa-v56-b2-guided-lessons';
 const SHELL = [
   '/',
   '/index.html',
@@ -172,6 +172,7 @@ self.addEventListener('fetch', (event) => {
           if (url.pathname.startsWith('/habe/')) return caches.match('/habe/index.html');
           if (url.pathname.startsWith('/jokoak/gurutzegramak/')) return caches.match('/jokoak/gurutzegramak/index.html');
           if (url.pathname.startsWith('/azterketak/')) return caches.match('/azterketak/index.html');
+          if (url.pathname.startsWith('/gramatika/ibilbidea/')) return caches.match('/gramatika/ibilbidea/index.html');
           if (url.pathname.startsWith('/gramatika/')) return caches.match('/gramatika/index.html');
           if (url.pathname.startsWith('/ariketak/')) return caches.match('/ariketak/index.html');
           if (url.pathname.startsWith('/aditzak/')) return caches.match('/aditzak/index.html');

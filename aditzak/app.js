@@ -2,7 +2,7 @@
    Answer keys stay in the private schema; only post-submission reference answers are returned. */
 (() => {
   'use strict';
-  const prefix = /^(?:DRAFT-)?ADI-/i;
+  const prefix = /^(?:DRAFT-)?(?:ADI|SIN)-/i;
   const cloud = window.SustraiCloud;
   const $ = (id) => document.getElementById(id);
   const state = { client: null, activities: [], items: [], current: null, answers: new Map(), attemptId: null, saving: false, progress: new Map(), pilotVersions: new Set() };
@@ -71,7 +71,7 @@
       // Gate 1: Only ADITZAK codes. Gate 2: RLS returns only approved / admin draft versions.
       const activities = check(await state.client.from('smx_activities')
         .select('id,code,kind')
-        .or('code.ilike.ADI-%,code.ilike.DRAFT-ADI-%')
+        .or('code.ilike.ADI-%,code.ilike.DRAFT-ADI-%,code.ilike.SIN-%,code.ilike.DRAFT-SIN-%')
         .order('code')
         .limit(500))
         .filter((a) => prefix.test(a.code));
@@ -82,7 +82,7 @@
       }
       // Server RLS restricts releases to appointed testers and administrators.
       const releaseRows = check(await state.client.from('smx_aditzak_pilot_releases')
-        .select('activity_version_id').eq('active', true).limit(100));
+        .select('activity_version_id').eq('active', true).limit(1000));
       state.pilotVersions = new Set(releaseRows.map(x=>x.activity_version_id));
       const ids = activities.map((a) => a.id);
       const versions = check(await state.client.from('smx_activity_versions')
@@ -90,9 +90,14 @@
         .in('activity_id', ids)
         .order('revision', { ascending: false })
         .limit(1000));
+      const available = new Map();
+      for (const v of versions) {
+        if (v.status !== 'approved' && !state.pilotVersions.has(v.id)) continue;
+        if (!available.has(v.activity_id)) available.set(v.activity_id,v);
+      }
       const visible = [];
       for (const a of activities) {
-        const version = versions.find((v) => v.activity_id === a.id);
+        const version = available.get(a.id);
         if (!version) continue;
         visible.push({ ...a, ...version, activity_id: a.id });
       }
@@ -145,17 +150,12 @@
     const all = state.activities.filter((a) => level === 'all' || languageLevel(a) === level);
     const approved = all.filter((a) => !isDraft(a));
     const pilot = all.filter(isPilot);
-    const draft = all.filter(a => isDraft(a) && !isPilot(a));
-    status(all.length
-      ? approved.length+' jarduera egiaztatu · '+pilot.length+' jarduera erabilgarri'
-        +(draft.length?' · '+draft.length+' barne-zirriborro':'')
-      : 'Ez duzu argitaratutako edo baimendutako jarduerarik.');
+    status(all.length ? all.length+' jarduera eskuragarri' : 'Ez duzu jarduera eskuragarririk.');
     for (const a of all) {
       const items = state.items.filter((i) => i.activity_version_id === a.id);
       const button = node('button', null, 'ad-card');
       button.type = 'button';
-      const badge = node('span', isPilot(a)?'Jarduera eskuragarri':isDraft(a)?'Berrikusteko':'Argitaratua',
-        'ad-badge' + (isDraft(a) && !isPilot(a) ? ' draft' : ''));
+      const badge = node('span','Jarduera eskuragarri','ad-badge');
       const n = state.progress.get(a.id) || 0;
       const tail = n ? ' · ' + n + ' saiakera' : '';
       button.append(badge, node('strong', titleOf(a)),
@@ -185,16 +185,15 @@
     $('activityTitle').textContent = titleOf(a);
     $('activityInstruction').textContent = a.prompt_json?.instruction_eu || '';
     const activityItems = state.items.filter(i => i.activity_version_id === a.id);
-    $('activityMeta').textContent = languageLevel(a) + ' · Aditzak · ' + activityItems.length + ' galdera';
+    $('activityMeta').textContent = languageLevel(a) + ' · ' + (/^(?:DRAFT-)?SIN-/i.test(a.code) ? 'Sintaxia' : 'Aditzak') + ' · ' + activityItems.length + ' galdera';
     // E09 cloze tasks need the full text in addition to the four atomic prompts.
     const fullContext = typeof a.prompt_json?.context_eu === 'string'
       ? a.prompt_json.context_eu.trim() : '';
     $('activityContextText').textContent = fullContext;
     $('activityContext').hidden = !fullContext;
     const badge = $('activityBadge');
-    badge.textContent = isPilot(a) ? 'Jarduera eskuragarri'
-      : isDraft(a) ? 'Barne-aurrebista' : 'Argitaratua';
-    badge.className = 'ad-badge' + (isDraft(a) && !isPilot(a) ? ' draft' : '');
+    badge.textContent = 'Jarduera eskuragarri';
+    badge.className = 'ad-badge';
     $('adPilotWarning').hidden = !isPilot(a);
     const list = $('items');
     list.replaceChildren();
@@ -258,8 +257,6 @@
     save.textContent=isPilot(a)?'Erantzunak gorde eta berrikusi':'Erantzunak gorde eta zuzendu';
     saveNotice(isPilot(a)
       ? 'Erantzunak gordeko dira. Ondoren, erantzun-ereduak eta azalpenak ikusiko dituzu, notarik gabe. Nahi baduzu, egin iradokizunak galderaz galdera.'
-      : isDraft(a)
-      ? 'Barne-aurrebista: ezin da erantzunik gorde.'
       : 'Jatorrizko erantzunak gordeko dira; soilik egiaztatutako gakoak zuzenduko dira.');
     renderQuestionNav();
     updateAnswerProgress();

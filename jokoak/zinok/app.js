@@ -80,8 +80,8 @@
          '<span class="zinok-letter">'+String.fromCharCode(65+i)+'</span>'+
          '<span>'+esc(option)+esc(verdict)+'</span></button>';
      }).join('')+'</div>'+
-     (answered?'<p class="zinok-quick-status'+(choice===q.correctIndex?'':' is-wrong')+
-       '" role="status" aria-live="polite">'+(choice===q.correctIndex?'✓ Zuzena':'✕ Okerra')+'</p>':'')+
+     (answered?'<span class="sr-only" role="status" aria-live="polite">'+
+       (choice===q.correctIndex?'Zuzena':'Okerra')+'</span>':'')+
      '</div>';
  }
  function start(level){

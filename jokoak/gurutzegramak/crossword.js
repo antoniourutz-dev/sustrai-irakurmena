@@ -226,7 +226,7 @@
     if (selected) classes.push('is-active');
     if (selected && idx === 0) classes.push('is-focus');
     if (otherSolved) classes.push('is-solved');
-    if (selected && currentStatus === 'wrong' && typed) classes.push(typed===current.word[idx]?'is-right':'is-wrong');
+    if (selected && currentStatus === 'wrong' && typed) classes.push(state.mode==='erronka'?'is-wrong':(typed===current.word[idx]?'is-right':'is-wrong'));
     if (selected && currentStatus === 'correct') classes.push('is-solved');
     const label = (cell.number ? cell.number + '. ' : '') +
       'Gelaxka: ' + (values.get(key(r,c)) || 'hutsik') + '. Sakatu hitz bat aukeratzeko.';
@@ -255,25 +255,74 @@
       '<span class="cx-feedback-icon" aria-hidden="true">i</span><div><strong>Hitz osoa idatzi.</strong>'+
       'Hitz honek '+w.word.length+' letra ditu. Begiratu gurutzaketak eta saiatu berriro.</div></div>';
     return '<div class="cx-feedback" id="cxFeedback" role="status"><span class="cx-feedback-icon" aria-hidden="true">×</span>'+
-      '<div><strong>Berrikusi erantzuna.</strong>Gorriz ageri dira hautatutako hitzean bat ez datozen letrak; berdez, bat datozenak. Ez da hitz osoa agerian utziko.</div></div>';
+      '<div><strong>Erantzuna ez da zuzena.</strong>'+
+      (state.mode==='erronka'?'Saiakera okerra: −'+COST_WRONG+' puntu. Ez da letraz letrako zuzenketarik ematen.':
+      'Gorriz ageri dira bat ez datozen letrak; berdez, bat datozenak.')+'</div></div>';
+  }
+  function renderSetup() {
+    const record=best?'<div class="cx-record"><span class="cx-record-icon" aria-hidden="true">★</span><div><strong>Zure marka onena</strong><span>'+best.score+' puntu · '+fmtTime(best.seconds)+' · '+best.hints+' pista</span></div></div>':'';
+    root.innerHTML='<section class="cx-mode-intro" aria-labelledby="cxModeTitle">'+
+      '<div class="cx-mode-title"><p class="cx-overline">ZURE PARTIDA, ZURE AUKERA</p>'+
+      '<h2 id="cxModeTitle">Nola jokatu nahi duzu?</h2>'+
+      '<p>Bi modu, helburu bera: euskarazko hitzak gero eta hobeto ezagutzea.</p></div>'+
+      '<div class="cx-mode-cards">'+
+      '<button type="button" class="cx-mode-card" data-action="start" data-mode="ikasi">'+
+      '<span class="cx-mode-icon" aria-hidden="true">✦</span><span class="cx-mode-card-tag">LASAI IKASI</span>'+
+      '<strong>Ikasteko modua</strong>'+
+      '<span>Presarik gabe. Pistak, zuzenketa letraz letra eta azalpenak. Ez dago puntuazio-lehiarik.</span>'+
+      '<span class="cx-mode-cta">Ikasten hasi <b aria-hidden="true">↗</b></span></button>'+
+      '<button type="button" class="cx-mode-card cx-mode-card-challenge" data-action="start" data-mode="erronka">'+
+      '<span class="cx-mode-icon" aria-hidden="true">♜</span><span class="cx-mode-card-tag">ZUHAITZAREN ERRONKA</span>'+
+      '<strong>Erronka modua</strong>'+
+      '<span>Erlojuaren kontra. 100 puntu hitzeko; pistak −40, erantzun okerrak −15. Azkar eta zehatz!</span>'+
+      '<span class="cx-mode-cta">Erronka hasi <b aria-hidden="true">↗</b></span></button>'+
+      '</div>'+record+
+      '<p class="cx-mode-foot">Erronkan, denborak aurrera jarraitzen du orrialdetik ateratzen bazara ere. '+
+      'Marka pertsonala da; ez dago oraindik sailkapen publiko egiaztaturik.</p></section>';
   }
   function render() {
+    if(state.phase==='setup'){renderSetup();return;}
     const w=byId.get(state.active),done=solvedCount(),progress=Math.round(done/WORDS.length*100);
-    const values=displayLetters();
-    const cells=[];
+    const competitive=state.mode==='erronka',scores=scoreBreakdown(),completed=state.phase==='finished';
+    const values=displayLetters(),cells=[];
     for (let r=0;r<ROWS;r++) for (let c=0;c<COLS;c++) cells.push(cellMarkup(r,c,values));
-    const completed=done===WORDS.length;
-    root.innerHTML =
-      '<div class="cx-statusbar"><div><h2>Osasuna · 001. gurutzegrama</h2>'+
-      '<p>Hitzak osatu, eta azalpenekin ikasi. Pista bat behar baduzu, eska ezazu.</p></div>'+
-      '<div class="cx-progress-right"><div class="cx-progress-num" aria-label="'+done+' hitz, guztira '+WORDS.length+'">'+
+    const counters=competitive?
+      '<div class="cx-metrics" aria-label="Erronkaren emaitzak">'+
+      '<div class="cx-metric"><span>DENBORA</span><strong id="cxClock">'+fmtTime(scores.seconds)+'</strong></div>'+
+      '<div class="cx-metric cx-metric-score"><span>PUNTUAK</span><strong id="cxPoints">'+scores.total+'</strong></div>'+
+      '<div class="cx-metric"><span>PISTAK</span><strong>'+state.stats.hints+' <small>· −'+scores.hints+'</small></strong></div>'+
+      '<div class="cx-metric"><span>HUTSEGITEAK</span><strong>'+state.stats.wrong+' <small>· −'+scores.wrong+'</small></strong></div></div>'
+      :'<div class="cx-progress-right"><div class="cx-progress-num" aria-label="'+done+' hitz, guztira '+WORDS.length+'">'+
       done+' <small>/ '+WORDS.length+'</small></div>'+
       '<div class="cx-progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="'+WORDS.length+
-      '" aria-valuenow="'+done+'" aria-label="Hitz osatuak"><div class="cx-progress-fill" style="width:'+progress+'%"></div></div></div></div>'+
+      '" aria-valuenow="'+done+'" aria-label="Hitz osatuak"><div class="cx-progress-fill" style="width:'+progress+'%"></div></div></div>';
+    let completion='';
+    if(completed){
+      if(competitive){
+        completion='<section class="cx-final" role="status" aria-labelledby="cxFinalTitle">'+
+          '<p class="cx-final-kicker">ERRONKA AMAITUTA</p><h2 id="cxFinalTitle">Zorionak! 12 hitzak osatu dituzu.</h2>'+
+          '<p class="cx-final-total">'+scores.total+' <small>puntu</small></p>'+
+          '<div class="cx-final-breakdown"><div><span>Hitz zuzenak</span><b>+'+scores.base+'</b></div>'+
+          '<div><span>Denbora-saria · '+fmtTime(scores.seconds)+'</span><b>+'+scores.bonus+'</b></div>'+
+          '<div><span>Pistak · '+state.stats.hints+'</span><b>−'+scores.hints+'</b></div>'+
+          '<div><span>Erantzun okerrak · '+state.stats.wrong+'</span><b>−'+scores.wrong+'</b></div></div>'+
+          (best?'<p class="cx-best-note">★ Zure marka onena: '+best.score+' puntu ('+fmtTime(best.seconds)+')</p>':'')+
+          '<button class="cx-button secondary" type="button" data-action="reset">Beste partida bat →</button></section>';
+      } else completion='<section class="cx-complete" role="status"><h2>✓ Zorionak! Gurutzegrama osatu duzu.</h2>'+
+        '<p>12 hitzak asmatu dituzu. Saiatu geroago definizioak laguntzarik gabe gogoratzen.</p>'+
+        '<button class="cx-button secondary" type="button" data-action="reset">Beste partida bat →</button></section>';
+    }
+    root.innerHTML =
+      '<div class="cx-statusbar"><div class="cx-status-intro"><div class="cx-playing-label">'+
+      '<span class="cx-game-mode">'+(competitive?'✦ ERRONKA MODUA':'✦ IKASTEKO MODUA')+'</span>'+
+      '<span class="cx-game-count">'+done+' / '+WORDS.length+' hitz</span></div>'+
+      '<h2>Osasuna · 001. gurutzegrama</h2>'+
+      '<p>'+(competitive?'Azkar jokatu, baina ez asmatu itsu-itsuan. Pista bakoitzak kostua dauka.':
+      'Hitzak osatu eta azalpenekin ikasi. Pistak libre dituzu.')+'</p></div>'+counters+'</div>'+
       '<div class="cx-layout"><section class="cx-board-card" aria-label="Gurutzegramaren taula">'+
       '<div class="cx-board-top"><div><p class="cx-overline">001. ESPEDIENTEA · OSASUNA</p>'+
       '<h2>Gurutzegrama</h2><p class="cx-board-note">Hautatu gelaxka edo eskuineko pista, eta idatzi hitza.</p></div>'+
-      '<button type="button" class="cx-reset" data-action="reset">Berrabiarazi</button></div>'+
+      '<button type="button" class="cx-reset" data-action="reset">Beste partida bat</button></div>'+
       '<div class="cx-grid-scroll" tabindex="0" aria-label="Gurutzegramaren taula; mugitu horizontalean behar izanez gero">'+
       '<div class="cx-grid" role="group" aria-label="12 errenkada, 13 zutabe">'+cells.join('')+'</div></div>'+
       '<div class="cx-legend" aria-hidden="true"><span><i></i>Hautatua</span><span><i></i>Zuzena</span><span><i></i>Okerra</span></div>'+
@@ -285,17 +334,23 @@
       '<div class="cx-input-row"><input id="cxWordInput" class="cx-word-input" type="text" inputmode="text" spellcheck="false" '+
       'autocomplete="off" autocapitalize="characters" maxlength="'+w.word.length+'" value="'+
       escapeHtml(state.drafts[w.id] || '')+'" placeholder="Idatzi hitza…" '+
-      (solved(w)?'disabled aria-label="Hitz zuzena"':'')+'>'+
-      '<button class="cx-button primary" type="button" data-action="check"'+(solved(w)?' disabled':'')+'>Egiaztatu ✓</button></div>'+
-      '<div class="cx-button-row"><button class="cx-button secondary" type="button" data-action="hint"'+(solved(w)?' disabled':'')+
-      '>💡 Pista bat</button><button class="cx-button secondary" type="button" data-action="next">Hurrengo hitza →</button></div>'+
-      feedbackHtml(w)+'</section>'+
-      (completed?'<div class="cx-complete" role="status"><h2>✓ Zorionak! Kasua osatu duzu.</h2>'+
-       '<p>12 hitzak asmatu dituzu. Saiatu beste egun batean berriz, definizioak laguntzarik gabe gogoratzeko.</p>'+
-       '<button class="cx-button secondary" type="button" data-action="reset">Berriz jokatu</button></div>':'')+
+      (solved(w)||completed?'disabled aria-label="Hitz zuzena"':'')+'>'+
+      '<button class="cx-button primary" type="button" data-action="check"'+(solved(w)||completed?' disabled':'')+'>Egiaztatu ✓</button></div>'+
+      '<div class="cx-button-row"><button class="cx-button secondary" type="button" data-action="hint"'+(solved(w)||completed?' disabled':'')+
+      '>💡 Pista bat'+(competitive?' <span class="cx-cost">−'+COST_HINT+' puntu</span>':'')+'</button>'+
+      '<button class="cx-button secondary" type="button" data-action="next">Hurrengo hitza →</button></div>'+
+      feedbackHtml(w)+
+      (state.feedback?'<p class="cx-hint-note" role="status">'+escapeHtml(state.feedback)+'</p>':'')+
+      '</section>'+completion+
       '</section><aside class="cx-sidebar" aria-label="Pista guztiak"><div class="cx-side-head"><p class="cx-overline">HITZEN GIDA</p>'+
       '<h2 class="cx-side-title">Pistak</h2><p>Hautatu pista bat; zuzen osatutako hitzak ✓ ikurrarekin agertuko dira.</p></div>'+
       groupHtml('H','Horizontalak','→')+groupHtml('V','Bertikalak','↓')+'</aside></div>';
+  }
+  function tickClock() {
+    if(state.phase!=='playing'||state.mode!=='erronka')return;
+    const clock=root.querySelector('#cxClock'),points=root.querySelector('#cxPoints');
+    if(clock)clock.textContent=fmtTime(elapsedSeconds());
+    if(points)points.textContent=String(scoreBreakdown().total);
   }
   function paintGrid() {
     const values=displayLetters(),w=byId.get(state.active),status=state.checked[w.id];

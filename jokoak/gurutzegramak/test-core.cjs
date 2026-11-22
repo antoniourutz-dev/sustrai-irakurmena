@@ -116,7 +116,7 @@ const flush=async()=>{for(let i=0;i<12;i++)await Promise.resolve();};
   assert.equal(record.seconds,123);
   assert.equal(record.score,1000+Math.round(300-123/2)-40-15);
   app.click({action:'reset'});
-  assert.equal(read(challenge.id).phase,'setup');
+  assert.equal(read(challenge.id).phase,'finished','Completed challenge is retained in history');
   assert.match(app.root.innerHTML,/Gaurko marka pertsonala/);
   now=Date.parse('2026-11-23T00:20:00Z');
   app.pulse();await flush();

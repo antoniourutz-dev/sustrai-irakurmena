@@ -136,7 +136,7 @@
   function storeResult() {
     const summary = core.score(state.questions, state.responses);
     const record = {
-      id: crypto?.randomUUID?.() || String(Date.now()), game: 'teusk',
+      id: window.crypto?.randomUUID?.() || String(Date.now()), game: 'teusk',
       label: state.selectedLevel === 0 ? 'Pertsonalizatua' : state.selectedLevel + '. sorta',
       completedAt: new Date().toISOString(), seconds: state.elapsedSeconds,
       correct: summary.correct, total: summary.total,

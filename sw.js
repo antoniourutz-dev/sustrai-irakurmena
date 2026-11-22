@@ -1,8 +1,15 @@
 /* SUSTRAI PWA service worker */
-const CACHE_VERSION = 'sustrai-pwa-v44-choice-feedback';
+const CACHE_VERSION = 'sustrai-pwa-v45-jokoak-teusk';
 const SHELL = [
   '/',
   '/index.html',
+  '/jokoak/',
+  '/jokoak/index.html',
+  '/jokoak/jokoak.css',
+  '/jokoak/teusk/',
+  '/jokoak/teusk/index.html',
+  '/jokoak/teusk/core.js',
+  '/jokoak/teusk/app.js',
   '/manifest.webmanifest',
   '/theme.css',
   '/hitzbira.css',

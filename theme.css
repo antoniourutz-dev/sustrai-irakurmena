@@ -139,3 +139,13 @@ body.focus-mode .site-nav{display:none}
 .site-header .sustrai-account-trigger{border-color:var(--s-night-3);background:var(--s-night-2);color:#fff}
 .site-header .sustrai-account-trigger:hover{background:var(--s-night-3)}
 .site-header .sustrai-account-avatar{border-radius:12px;background:var(--s-lilac);color:var(--s-night);font-weight:800}
+
+/* Seigarren atalaren nabigazioa: Jokoak. Beheko barra doitua pantaila txikietarako. */
+@media(min-width:761px) and (max-width:1110px){
+ .site-nav a{padding:0 8px;font-size:12px}
+}
+@media(max-width:760px){
+ .tabbar a{font-size:10px}
+ .tabbar-icon{width:38px}
+}
+@media(max-width:370px){.tabbar a{font-size:9px}.tabbar-icon{width:33px}}

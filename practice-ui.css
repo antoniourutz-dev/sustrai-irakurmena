@@ -160,3 +160,12 @@
 .practice-page #activityActions{scroll-margin-top:130px}
 .practice-page #activityTitle:focus{outline:none}
 @media(max-width:420px){.practice-page .ad-work-toolbar .ad-work-progress{gap:8px}.practice-page .ad-question-nav{gap:6px}}
+
+/* Explicit grading states use text, symbols and color together. */
+.practice-page .ad-item--correct{border:2px solid #167447}
+.practice-page .ad-item--incorrect{border:2px solid #b42332}
+.practice-page .ad-item-result--correct{border-color:#167447;background:#eef9f2}
+.practice-page .ad-item-result--incorrect{border-color:#b42332;background:#fff1f2}
+.practice-page .ad-item-result--correct>strong{color:#125b38;font-size:18px}
+.practice-page .ad-item-result--incorrect>strong{color:#9b1c2a;font-size:18px}
+.practice-page .ad-student-answer{white-space:pre-wrap;overflow-wrap:anywhere}

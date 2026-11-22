@@ -289,7 +289,7 @@
     $('adStatus').scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
-  const outcomeText = { correct:'Zuzena', incorrect:'Berrikusteko', needs_review:'Irakaslearen berrikuspenaren zain', not_scored:'Ebaluatu gabe',partial:'Partziala' };
+  const outcomeText = { correct:'Zuzena', incorrect:'Okerra', needs_review:'Ereduarekin alderatu', not_scored:'Ereduarekin alderatu',partial:'Partziala' };
   function renderFeedback(payload) {
     const area=$('gradeSummary');
     area.replaceChildren();
@@ -299,13 +299,11 @@
     const s=payload.summary;
     const n=(s.correct || 0)+(s.incorrect || 0);
     area.append(node('h3',payload.pilot?'Ariketaren berrikuspena':'Ariketaren emaitza','ad-grade-heading'));
-    const title=payload.pilot
-      ? s.answered+' erantzun gordeta · eredu orientagarriak eskura'
-      : n ? s.correct+' / '+n+' erantzun objektibo zuzen'
-      : 'Erantzunak jasota, baina zuzenketa automatiko baliozkorik ez';
+    const title=n
+      ? s.correct+' zuzen · '+s.incorrect+' oker'+(s.needs_review?' · '+s.needs_review+' ereduarekin alderatzeko':'')
+      : s.answered+' erantzun gordeta · ereduak eta azalpenak';
     area.append(node('p',title,'ad-grade-count'));
-    if(s.needs_review && !payload.pilot)
-      area.append(node('p',s.needs_review + ' erantzun irakaslearen berrikuspenaren zain.','ad-grade-detail'));
+
     area.append(node('p',payload.pilot
       ? 'Erantzun-ereduak orientagarriak dira, eta aldaera onargarriak egon daitezke. Ez dira azterketa ofizialaren notak.'
       : 'Barne-praktikako emaitza orientagarria da, ez azterketa ofizialaren nota.','ad-grade-detail'));
@@ -315,15 +313,22 @@
       if(!card)continue;
       card.querySelector('.ad-item-result')?.remove();
       const feedback=node('div',null,'ad-item-result ad-item-result--'+(outcomeText[result.outcome] ? result.outcome:'needs_review'));
-      const title=node('strong',outcomeText[result.outcome] || 'Berrikuspenaren zain');
-      const msg=node('p',result.feedback_eu || 'Erantzuna gordeta.');
-      feedback.append(title,msg);
+      const title=node('strong',(result.outcome==='correct'?'✓ ':result.outcome==='incorrect'?'✕ ':'')+(outcomeText[result.outcome] || 'Ereduarekin alderatu'));
+      feedback.append(title);
+      if (['correct','incorrect','partial'].includes(result.outcome) && result.feedback_eu) {
+        feedback.append(node('p',result.feedback_eu));
+      }
+      const item=state.items.find(i=>i.activity_version_id===state.current.id && i.position===result.position);
+      const raw=item && state.answers.get(item.id);
+      if (raw) feedback.append(node('p','Zure erantzuna: '+(raw.option || raw.text || ''),'ad-student-answer'));
+      card.classList.remove('ad-item--correct','ad-item--incorrect');
+      if (['correct','incorrect'].includes(result.outcome)) card.classList.add('ad-item--'+result.outcome);
       const details=result.details || {};
       if(payload.pilot && details.pilot_reference_answer_eu) {
         feedback.append(node('p','Erantzun-eredua: '+details.pilot_reference_answer_eu,'ad-item-solution'));
       }
-      if(result.outcome==='incorrect' && details.accepted_answer_eu) {
-        feedback.append(node('p','Gako egiaztatuko aukera: '+details.accepted_answer_eu,'ad-item-solution'));
+      if(['correct','incorrect'].includes(result.outcome) && details.accepted_answer_eu) {
+        feedback.append(node('p','Erantzun zuzena: '+details.accepted_answer_eu,'ad-item-solution'));
       }
       if(details.explanation_eu)feedback.append(node('p',details.explanation_eu,'ad-item-explanation'));
       card.append(feedback);

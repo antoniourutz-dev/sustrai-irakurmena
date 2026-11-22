@@ -14,7 +14,7 @@
  <link rel="stylesheet" href="/auth.css?v=20261117-ezabatu">
  <link rel="stylesheet" href="/hitzbira.css?v=20261117-ezabatu">
  <link rel="stylesheet" href="/gramatika/gramatika.css?v=20261122-supabase1">
- <link rel="stylesheet" href="/gramatika/ibilbidea/style.css?v=20261122-b2pilot1">
+ <link rel="stylesheet" href="/gramatika/ibilbidea/style.css?v=20261122-b2-professional1">
 </head>
 <body class="has-tabbar">
  <a class="skip" href="#pageTitle">Joan edukira</a>
@@ -24,8 +24,17 @@
  <section class="areas-hero b2-hero" aria-labelledby="pageTitle">
   <nav class="areas-breadcrumb" aria-label="Ogi-apurrak"><a href="/">Hasiera</a><span aria-hidden="true">›</span><a href="/gramatika/">Gramatika</a><span aria-hidden="true">›</span><span aria-current="page">B2ko ibilbidea</span></nav>
   <span class="areas-eyebrow">GRAMATIKA · IKASKETA-IBILBIDEA</span>
-  <h1 id="pageTitle">B2 ikasi, pausoz pauso</h1>
-  <p>31 gramatika-gai, zazpi modulutan antolatuta. Lehen bost gaietan azalpenak, kontrasteak, praktika laburra eta zeure ekoizpena landuko dituzu. Gai guztiak Supabaseko gramatika-banku berera lotuta daude.</p>
+  <div class="b2-hero-grid">
+   <div class="b2-hero-copy">
+    <h1 id="pageTitle">Euskara B2, zentzuz eta pausoz pauso</h1>
+    <p>Gramatika ez da arau-zerrenda bat: egoera errealetan ulertzeko, bereizteko eta erabiltzeko tresna da. Jarraitu zeure ibilbidea edo irakasleak esleitutakoa.</p>
+    <div class="b2-hero-statline"><span>7 modulu</span><span>31 gai</span><span>5 ikasgai gidatu</span></div>
+   </div>
+   <div class="b2-hero-visual" aria-hidden="true">
+    <div class="b2-hero-symbol">B2</div>
+    <div class="b2-hero-steps"><span>Ulertu</span><span>Kontrastatu</span><span>Praktikatu</span><span>Erabili</span></div>
+   </div>
+  </div>
   <nav class="b2-path-views" aria-label="Gramatikako bi ikuspegiak">
    <a href="/gramatika/?maila=B2">Gramatika-bankua</a>
    <a href="/gramatika/ibilbidea/" aria-current="page">Ibilbide gidatua</a>
@@ -34,7 +43,16 @@
  <div id="pathNotice" class="b2-notice" role="status" aria-live="polite">Ibilbidea eta zure aurrerapena kargatzen…</div>
  <section class="b2-progress" aria-labelledby="pathProgressTitle">
   <div class="b2-progress-top"><h2 id="pathProgressTitle">Zure aurrerapena</h2><p id="pathProgressText">Kargatzen…</p></div>
-  <div class="b2-progress-track" aria-hidden="true"><div class="b2-progress-fill" id="pathProgressBar"></div></div>
+  <div class="b2-progress-track" id="pathProgressTrack" role="progressbar" aria-label="Irakurritako gaien aurrerapena" aria-valuemin="0" aria-valuemax="31" aria-valuenow="0"><div class="b2-progress-fill" id="pathProgressBar"></div></div>
+  <p class="b2-progress-note">Irakurketa eta jarduerak erakusten dira, ez gaitasunaren kalifikazio automatikoa.</p>
+ </section>
+ <section class="b2-next-card" aria-labelledby="pathNextTitle">
+  <div>
+   <span class="b2-mini-label">ZURE HURRENGO URRATSA</span>
+   <h2 id="pathNextTitle">Ikasketa-ibilbidea prestatzen…</h2>
+   <p id="pathNextDetail">Zure egoeraren araberako gomendioa agertuko da hemen.</p>
+  </div>
+  <button type="button" class="b2-button b2-continue" id="pathContinueButton">Jarraitu ikasten</button>
  </section>
  <div class="b2-layout">
   <aside class="b2-sidebar" aria-labelledby="pathModulesTitle">
@@ -46,7 +64,9 @@
     <span class="b2-overline" id="pathLessonStatus">Hasi gabe</span>
     <h2 id="pathLessonTitle"></h2>
     <p id="pathLessonSubtitle"></p>
+    <div class="b2-lesson-micro"><span id="pathLessonDuration" hidden></span><span id="pathCurrentModule"></span></div>
     <p id="pathLessonMeta" class="b2-reader-meta"></p>
+    <div class="b2-lesson-goal" id="pathLessonGoal" hidden></div>
    </header>
    <nav id="pathSteps" class="b2-steps" aria-label="Ikasteko lau urratsak"></nav>
    <div id="pathStepContent" class="b2-learning-block" aria-live="polite"></div>
@@ -63,6 +83,6 @@
  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.0" defer></script>
  <script src="/auth.js?v=20261117-ezabatu" defer></script>
  <script src="/pwa.js?v=20261117-ezabatu" defer></script>
- <script defer src="/gramatika/ibilbidea/app.js?v=20261122-b2pilot1"></script>
+ <script defer src="/gramatika/ibilbidea/app.js?v=20261122-b2-professional1"></script>
 </body>
 </html>

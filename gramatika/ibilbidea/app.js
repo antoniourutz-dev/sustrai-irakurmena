@@ -372,8 +372,9 @@
     form.onsubmit = async event => {
       event.preventDefault();
       try {
-        const answer = check(await state.client.rpc('sr_join_group',{p_code:input.value}));
-        if (!answer) throw new Error('Ez da talde hori aurkitu.');
+        const response = await state.client.rpc('sr_join_group',{p_code:input.value});
+        if (response.error) throw response.error;
+        if (!response.data) throw new Error('Ez da talde hori aurkitu.');
         input.value='';say('Taldearekin lotura egin da.');await loadStudent();
       } catch(err){say('Ezin izan zara taldean sartu: '+(err.message||''),true);}
     };

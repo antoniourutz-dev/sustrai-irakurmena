@@ -47,3 +47,50 @@
 .grammar-return{display:inline-flex;align-items:center;color:var(--s-primary);font-size:14px;font-weight:750;text-decoration:none}
 .grammar-disclaimer{color:var(--s-muted);font-size:13px}
 @media(max-width:680px){.grammar-index,.grammar-example-grid{grid-template-columns:1fr}.grammar-index a{min-height:140px}.grammar-level-link{flex:1;min-width:0}.grammar-article{gap:18px}.grammar-article .grammar-lead{font-size:16px}.grammar-comparison{font-size:14px}}
+
+
+/* Liburutegi osoa Supabasetik: iragazkiak, sarrera-xehetasuna eta eduki teorikoak. */
+.grammar-filters{display:grid;grid-template-columns:minmax(0,2fr) minmax(180px,1fr);gap:12px}
+.grammar-field{display:grid;gap:7px}
+.grammar-field label{font-size:13px;font-weight:750;color:var(--s-ink-3)}
+.grammar-field input,.grammar-field select{width:100%;min-height:48px;padding:10px 14px;border-radius:12px;border:1px solid var(--s-line-strong);background:var(--s-surface);color:var(--s-ink);font:inherit;font-size:15px}
+.grammar-index-card{min-height:185px}
+.grammar-index-desc{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;line-clamp:3;overflow:hidden}
+#grammarStatus.is-error,.grammar-load-error{color:var(--s-bad)}
+.grammar-empty{border:1px solid var(--s-line);border-radius:14px;padding:20px;background:var(--s-surface);color:var(--s-muted)}
+.grammar-reading{display:grid;gap:14px;scroll-margin-top:20px}
+.grammar-reading-top{display:flex;justify-content:space-between;align-items:center;gap:18px}
+.grammar-detail{display:grid;gap:24px}
+.grammar-content-section{display:grid;gap:12px}
+.grammar-content-section>h3{margin:0;font:750 clamp(20px,2.5vw,25px)/1.2 var(--s-font-display)}
+.grammar-body{margin:0;white-space:pre-line;line-height:1.75;overflow-wrap:anywhere}
+.grammar-meta-row{display:grid;gap:3px}
+.grammar-meta-row>strong{font-size:13px;color:var(--s-muted)}
+.grammar-meta-row>p{margin:0;line-height:1.7;white-space:pre-line;overflow-wrap:anywhere}
+.grammar-section-block{display:grid;gap:8px;padding:18px 20px;border:1px solid var(--s-line);border-radius:14px;background:var(--s-paper)}
+.grammar-section-block h4,.grammar-form-body h4,.grammar-comparison-card h4{margin:0;font:700 17px/1.3 var(--s-font-display)}
+.grammar-section-block.grammar-warning{border-left:4px solid var(--s-accent)}
+.grammar-form{border:1px solid var(--s-line);border-radius:14px;background:var(--s-surface);overflow:hidden}
+.grammar-form summary{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:17px 19px;cursor:pointer;font-weight:750;font-size:16px;color:var(--s-primary)}
+.grammar-form summary:hover{background:var(--s-primary-soft)}
+.grammar-form summary::marker{color:var(--s-primary)}
+.grammar-form[open]>summary{background:var(--s-primary-soft)}
+.grammar-form-name{flex:1}
+.grammar-form-group{font-size:12px;font-weight:650;color:var(--s-muted)}
+.grammar-form-body{padding:20px;display:grid;gap:14px;border-top:1px solid var(--s-line)}
+.grammar-example-grid{align-items:stretch}
+.grammar-example{gap:5px}
+.grammar-example .grammar-sentence{font-style:normal}
+.grammar-example-good{border-left:4px solid var(--s-ok)}
+.grammar-example-bad{border-left:4px solid var(--s-bad);background:var(--s-bad-soft)}
+.grammar-example-better{border-left:4px solid var(--s-ok);background:var(--s-ok-soft)}
+.grammar-example-contrast{border-left:4px solid var(--s-primary)}
+.grammar-example-bad .grammar-caption{color:var(--s-bad)}
+.grammar-example-better .grammar-caption,.grammar-example-good .grammar-caption{color:var(--s-ok)}
+.grammar-comparison-card{padding:20px;border:1px solid var(--s-line);border-radius:14px;display:grid;gap:12px}
+.grammar-error-list{display:grid;gap:16px}
+.grammar-error-item{padding:16px;border:1px solid var(--s-line);border-radius:14px;display:grid;gap:12px}
+.grammar-table-card .grammar-comparison{min-width:680px}
+.grammar-table-card .grammar-table-wrap{width:100%}
+.grammar-table-card td,.grammar-table-card th{min-width:120px}
+@media(max-width:680px){.grammar-filters{grid-template-columns:1fr}.grammar-reading-top{align-items:flex-start}.grammar-form-body{padding:16px}.grammar-form summary{padding:14px 16px}.grammar-example-grid{grid-template-columns:1fr}.grammar-index-card{min-height:150px}}

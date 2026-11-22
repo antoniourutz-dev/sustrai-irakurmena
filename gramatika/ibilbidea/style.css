@@ -240,3 +240,9 @@
 @media(prefers-reduced-motion:reduce){
  .b2-progress-fill,.b2-module{transition:none}
 }
+
+/* Hide the empty second column for learners without teacher access. */
+.b2-side-panels:has(>#pathTeacherArea[hidden]){grid-template-columns:minmax(0,1fr)}
+.b2-feedback-note>strong{overflow-wrap:anywhere}
+.b2-practice-count{font-variant-numeric:tabular-nums}
+@media(hover:none){.b2-option:hover{background:var(--s-surface);border-color:var(--s-line)}}

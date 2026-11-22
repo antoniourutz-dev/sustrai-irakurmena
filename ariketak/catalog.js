@@ -5,7 +5,7 @@
   'use strict';
   const $ = (id) => document.getElementById(id);
   const cloud = window.SustraiCloud;
-  const LEVELS = ['B2', 'C1', 'C2'];
+  const LEVELS = ['B2', 'C1'];
   const state = { client: null, blocks: [], sections: [], level:'B2', block:null, section:null, token:0,pilotVersions:new Set() };
   const make = (tag, value, cls) => {
     const el = document.createElement(tag);

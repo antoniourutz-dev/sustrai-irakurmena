@@ -90,11 +90,11 @@ La portada presenta exactamente tres vías de aprendizaje: **Azterketak** (/azte
 
 - Catálogo relacional: `smx_exercise_blocks` (6 bloques), `smx_exercise_sections` (93 apartados) y `smx_exercise_activity_links` (6 relaciones de la primera unidad B2).
 - Clasificación temática derivada del inventario de referencias de seis cuadernos. **No se copian enunciados ni respuestas de libros comerciales.**
-- Navegación `/ariketak/`: B2/C1/C2 → bloque → apartado → ejercicios, con URL persistente (`?maila=B2&blokea=B2-ADI&atala=B2-ADI-01`), botones de regreso, búsqueda local de apartados y estados vacíos.
+- Navegación `/ariketak/`: B2/C1 → bloque → apartado → ejercicios, con URL persistente (`?maila=B2&blokea=B2-ADI&atala=B2-ADI-01`), botones de regreso, búsqueda local de apartados y estados vacíos.
 - Las tablas de bloques y apartados contienen solo metadatos de catálogo; se pueden consultar sin sesión. Los vínculos a actividades, sus versiones y preguntas respetan RLS.
 - El alumno no ve borradores. El administrador autorizado puede navegar a los seis borradores y sus 28 ítems para revisión, sin claves de corrección.
 - El catálogo abre `/aditzak/?activity=<uuid>&from=<ruta>`, validando el ID contra lo que devuelve RLS. El ejecutor ADITZAK **no corrige ni publica**.
-- C2 está reservado sin inventar bloques o actividades. La mención `planned` significa contenido pendiente, no publicación.
+- Solo B2 y C1 son seleccionables; el resto del catálogo conserva sus estados editoriales independientes.
 - Pruebas obligatorias: anon (taxonomía pública, sin ejercicios), alumno autenticado (sin borradores), admin (6), menú móvil, enlaces directos, navegación atrás, accesibilidad y actualización PWA.
 
 

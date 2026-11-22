@@ -52,3 +52,19 @@
 @media(min-width:700px){.zinok-grid--levels{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media(max-width:560px){.zinok-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.zinok-grid--levels .zinok-card{padding:12px;min-height:80px}.zinok-card{min-height:80px}.zinok-panel{padding:18px}.zinok-question{margin-top:14px!important}.zinok-actions>.zinok-button{flex:1 1 auto}}
 @media(prefers-reduced-motion:reduce){.zinok-progress>span{transition:none}}
+
+/* Partida: goiburuko azalpen luzea ezkutatu, eduki nagusia lehenetsi. */
+.zinok-main .areas-hero[hidden]{display:none!important}
+.zinok-panel--quiz .zinok-question{margin:20px 0 12px!important}
+.zinok-panel--quiz .zinok-muted{margin:0 0 16px}
+.zinok-panel--quiz .zinok-options{margin:0}
+.zinok-review-disclosure{margin:20px 0;border:1px solid var(--s-line);border-radius:14px;overflow:hidden}
+.zinok-review-disclosure summary{padding:14px 18px;cursor:pointer;font-weight:800;background:var(--s-bg);color:var(--s-primary)}
+.zinok-review-disclosure summary:hover{background:var(--s-primary-soft)}
+.zinok-review-disclosure[open] summary{border-bottom:1px solid var(--s-line)}
+.zinok-review-disclosure .zinok-review{padding:16px;gap:12px}
+.zinok-review-disclosure .zinok-review li{background:var(--s-paper)}
+.zinok-mark{font-weight:750}
+.zinok-mark--wrong{color:var(--s-bad)}
+.zinok-mark--correct{color:var(--s-ok)}
+.zinok-success{color:var(--s-ok);font-weight:750}

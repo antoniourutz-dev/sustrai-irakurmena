@@ -1,5 +1,5 @@
 /* SUSTRAI PWA service worker */
-const CACHE_VERSION = 'sustrai-pwa-v49-mintzakats-clean-feedback';
+const CACHE_VERSION = 'sustrai-pwa-v50-zinok-fast-game';
 const SHELL = [
   '/',
   '/index.html',

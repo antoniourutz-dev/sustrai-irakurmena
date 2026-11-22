@@ -169,6 +169,48 @@
       return false;
     }
   }
+
+  async function saveWrittenWork(code,value,kind) {
+    if(!hasAccount()){
+      const old=own(code);
+      const fields=kind==='delayed'
+        ? {reviewed_again_at:new Date().toISOString(),review_reflection_eu:value}
+        : {transferred_at:new Date().toISOString(),reflection_eu:value,
+           reviewed_again_at:null,review_reflection_eu:null};
+      return saveProgress(code,fields);
+    }
+    try{
+      const result=check(await state.client.rpc('smx_b2_save_written_work',{
+        p_entry_code:code,p_body_eu:value,p_kind:kind
+      }));
+      if(!result||Array.isArray(result))throw new Error('Ezin izan da bertsioa erregistratu');
+      state.progress.set(code,result);
+      renderPath();
+      return true;
+    }catch(err){
+      say('Ekoizpena ez da gorde: '+(err.message||'konexio-errorea'),true);
+      return false;
+    }
+  }
+  async function renderWorkHistory(code,root){
+    if(!hasAccount())return;
+    try{
+      const rows=check(await state.client.from('smx_grammar_b2_work_versions')
+        .select('version_no,version_kind,body_eu,created_at')
+        .eq('user_id',state.user.id).eq('entry_code',code)
+        .order('version_no',{ascending:false}).limit(30));
+      if(state.selected!==code||!root.isConnected)return;
+      root.replaceChildren();
+      if(!rows.length){addP(root,'Oraindik ez dago gordetako bertsiorik.','b2-small');return;}
+      rows.forEach(row=>{
+        const item=el('article',null,'b2-feedback-note');
+        const label=({initial:'Lehen ekoizpena',revision:'Berridazketa',delayed:'Geroko transferentzia'})[row.version_kind]||'Bertsioa';
+        item.append(el('strong','v'+row.version_no+' · '+label),el('span',day(row.created_at),'b2-mini-label'));
+        addP(item,row.body_eu);
+        root.append(item);
+      });
+    }catch(err){addP(root,'Ezin izan da bertsioen historia irakurri.','b2-error');}
+  }
   async function markRead() {
     if (own(state.selected).read_at) { state.step = 1; renderLesson(); return; }
     if (await saveProgress(state.selected, {read_at: new Date().toISOString()})) {
@@ -411,7 +453,7 @@
       const value = text.value.trim();
       if(value.length<50){say('Adibidea eta arrazoibidea azaltzeko, idatzi gutxienez 50 karaktere.',true);text.focus();return;}
       const iso = new Date().toISOString();
-      if (await saveProgress(code, {transferred_at:own(code).transferred_at||iso,reflection_eu:value})) {
+      if (await saveWrittenWork(code,value,'transfer')) {
         renderLesson(); say(hasAccount()?'Ekoizpena hodeian gordeta. Ez da zuzenketa automatikoa egin.':'Ekoizpena saio honetako memorian dago; ez da hodeian gordetzen.');
       }
     }));
@@ -431,11 +473,24 @@
         row(review,button('Geroko berrikuspena gorde',async()=>{
           const answer=note.value.trim();
           if(answer.length<45){say('Garatu geroko ekoizpena gutxienez 45 karakteretan.',true);note.focus();return;}
-          if(await saveProgress(code,{reviewed_again_at:new Date().toISOString(),review_reflection_eu:answer})){
+          if(await saveWrittenWork(code,answer,'delayed')){
             renderLesson();say(hasAccount()?'Atzeratutako berrikuspena hodeian gordeta.':'Geroko berrikuspena saio honetan soilik markatuta.');
           }
         }));
       }
+    }
+    if(own(code).transferred_at&&hasAccount()){
+      const history=el('details',null,'b2-read-more b2-work-history');
+      const summary=el('summary','Nire idazkien bertsioen historia');
+      const slot=el('div','Bertsioak kargatzen…','b2-version-list');
+      history.append(summary,slot);
+      history.addEventListener('toggle',()=>{
+        if(history.open&&slot.dataset.loaded!=='yes'){
+          slot.dataset.loaded='yes';
+          void renderWorkHistory(code,slot);
+        }
+      });
+      body.append(history);
     }
     if(own(code).transferred_at){
       const index=state.units.findIndex(u=>u.entry_code===code);
@@ -656,11 +711,13 @@
     slot.replaceChildren();
     const heading=el('h4','Ikaslearen ekoizpenak eta feedback hezigarria');slot.append(heading);
     try{
-      const [progress,feedback]=await Promise.all([
+      const [progress,feedback,versions]=await Promise.all([
         state.client.from('smx_grammar_b2_progress').select('entry_code,read_at,practiced_at,transferred_at,reflection_eu,reviewed_again_at,review_reflection_eu')
           .eq('user_id',student.id).order('updated_at',{ascending:false}).limit(50).then(check),
         state.client.from('smx_grammar_b2_teacher_feedback').select('entry_code,feedback_eu,next_step_eu,created_at')
-          .eq('student_id',student.id).order('created_at',{ascending:false}).limit(25).then(check)
+          .eq('student_id',student.id).order('created_at',{ascending:false}).limit(25).then(check),
+        state.client.from('smx_grammar_b2_work_versions').select('entry_code,version_no,version_kind,body_eu,created_at')
+          .eq('user_id',student.id).order('created_at',{ascending:false}).limit(60).then(check)
       ]);
       const works=progress.filter(x=>x.reflection_eu||x.review_reflection_eu);
       if(!works.length)addP(slot,'Ikasleak ez du oraindik ekoizpen idatzirik gorde.','b2-small');
@@ -671,6 +728,20 @@
         if(work.review_reflection_eu){unit.append(el('span','Geroko berrikuspena','b2-mini-label'));addP(unit,work.review_reflection_eu);}
         slot.append(unit);
       });
+      if(versions.length){
+        const history=el('details',null,'b2-read-more b2-work-history');
+        history.append(el('summary','Jatorrizko ekoizpenen eta berridazketen historia ('+versions.length+')'));
+        const historyList=el('div',null,'b2-version-list');
+        versions.forEach(v=>{
+          const card=el('article',null,'b2-feedback-note');
+          const kind=({initial:'Lehen ekoizpena',revision:'Berridazketa',delayed:'Geroko transferentzia'})[v.version_kind]||'Bertsioa';
+          card.append(el('strong',state.entries.get(v.entry_code)?.title_eu||v.entry_code));
+          card.append(el('span','v'+v.version_no+' · '+kind+' · '+day(v.created_at),'b2-mini-label'));
+          addP(card,v.body_eu);
+          historyList.append(card);
+        });
+        history.append(historyList);slot.append(history);
+      }
       if(feedback.length){
         const notes=section(slot,'Emandako orientabideak');
         feedback.forEach(fb=>{

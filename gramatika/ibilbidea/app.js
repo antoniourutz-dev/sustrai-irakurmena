@@ -89,7 +89,10 @@
       : completeCount()+'/31 gai saio honetan · '+produced+'/5 jarduera probatuta · ez da hodeian gordetzen.';
     $('pathProgressBar').style.width=(completeCount()/31*100).toFixed(1)+'%';
     $('pathProgressTrack')?.setAttribute('aria-valuenow',String(completeCount()));
-    const next=state.units.find(u=>u.pilot_active&&!own(u.entry_code).transferred_at)
+    const next=state.units.find(u=>u.pilot_active&&own(u.entry_code).transferred_at
+        && !own(u.entry_code).reviewed_again_at
+        && Date.now()-new Date(own(u.entry_code).transferred_at).getTime()>=72*60*60*1000)
+      || state.units.find(u=>u.pilot_active&&!own(u.entry_code).transferred_at)
       || state.units.find(u=>!own(u.entry_code).read_at)
       || state.units[0];
     if(next){
@@ -99,7 +102,7 @@
       const status=own(next.entry_code);
       $('pathNextDetail').textContent=(module?.title_eu||'B2')
         +' · '+(next.pilot_active?'4 urratseko ikasgaia':'Fitxa kontsultatu eta irakurketa landu')
-        +' · '+(status.practiced_at?'Ekoizpena prestatu':status.contrasted_at?'Praktika egin':status.read_at?'Kontrastea landu':'Hasi ikasten');
+        +' · '+(status.transferred_at&&!status.reviewed_again_at?'Geroko berrikuspena':status.practiced_at?'Ekoizpena prestatu':status.contrasted_at?'Praktika egin':status.read_at?'Kontrastea landu':'Hasi ikasten');
       $('pathContinueButton').onclick=()=>openUnit(next.entry_code);
     }
   }
@@ -168,13 +171,13 @@
   async function markRead() {
     if (own(state.selected).read_at) { state.step = 1; renderLesson(); return; }
     if (await saveProgress(state.selected, {read_at: new Date().toISOString()})) {
-      state.step = 1; renderLesson(); say('Irakurketa gorde da.');
+      state.step = 1; renderLesson(); say(hasAccount()?'Irakurketa hodeian gordeta.':'Gonbidatu-saioa: irakurketa saio honetan soilik markatuta.');
     }
   }
   async function markContrast() {
     if (!own(state.selected).read_at) { say('Lehenik, irakurri azalpena.', true); return; }
     if (own(state.selected).contrasted_at || await saveProgress(state.selected, {contrasted_at: new Date().toISOString()})) {
-      state.step = 2; renderLesson(); say('Adibideen berrikuspena gorde da.');
+      state.step = 2; renderLesson(); say(hasAccount()?'Kontrastea hodeian gordeta.':'Kontrastea saio honetan soilik markatuta.');
     }
   }
   async function loadExamples(code) {
@@ -355,7 +358,7 @@
         if(await saveProgress(code,{
           practiced_at:new Date().toISOString(),
           practice_attempts:(own(code).practice_attempts||0)+Math.max(info.prompts.length,tries)
-        })){state.step=3;renderLesson();say('Praktika orientagarria gorde da.');}
+        })){state.step=3;renderLesson();say(hasAccount()?'Praktika orientagarria hodeian gordeta.':'Praktika probatuta; ez da hodeian gordetzen.');}
       }));
     }else addP(root,'Aukera bakoitzak azalpen propioa du. Kontuan hartu arrazoiak, ez aukera-zenbakiak bakarrik.','b2-footnote');
   }
@@ -388,7 +391,7 @@
       if(value.length<50){say('Adibidea eta arrazoibidea azaltzeko, idatzi gutxienez 50 karaktere.',true);text.focus();return;}
       const iso = new Date().toISOString();
       if (await saveProgress(code, {transferred_at:own(code).transferred_at||iso,reflection_eu:value})) {
-        renderLesson(); say('Zure ekoizpena gorde da. Ez da zuzenketa automatikoa egin.');
+        renderLesson(); say(hasAccount()?'Ekoizpena hodeian gordeta. Ez da zuzenketa automatikoa egin.':'Ekoizpena saio honetako memorian dago; ez da hodeian gordetzen.');
       }
     }));
     if(own(code).transferred_at){
@@ -408,7 +411,7 @@
           const answer=note.value.trim();
           if(answer.length<45){say('Garatu geroko ekoizpena gutxienez 45 karakteretan.',true);note.focus();return;}
           if(await saveProgress(code,{reviewed_again_at:new Date().toISOString(),review_reflection_eu:answer})){
-            renderLesson();say('Atzeratutako berrikuspena gorde da. Ez da kalifikazio ofiziala.');
+            renderLesson();say(hasAccount()?'Atzeratutako berrikuspena hodeian gordeta.':'Geroko berrikuspena saio honetan soilik markatuta.');
           }
         }));
       }
@@ -658,18 +661,19 @@
         });
       }
       const form=el('form',null,'b2-teacher-form');
-      const label=el('label','Ikasgaia');label.htmlFor='b2FeedbackUnit';
-      const choose=el('select');choose.id='b2FeedbackUnit';
+      const suffix=String(student.id).replaceAll('-','').slice(0,12);
+      const label=el('label','Ikasgaia');label.htmlFor='b2FeedbackUnit-'+suffix;
+      const choose=el('select');choose.id='b2FeedbackUnit-'+suffix;
       state.units.filter(u=>u.pilot_active).forEach(u=>{
         const option=el('option',state.entries.get(u.entry_code)?.title_eu||u.entry_code);
         option.value=u.entry_code;choose.append(option);
       });
-      if(works[0] && state.units.some(u=>u.entry_code===works[0].entry_code))choose.value=works[0].entry_code;
-      const textLabel=el('label','Ikaslearen ekoizpenari buruzko orientabidea');textLabel.htmlFor='b2TeacherFeedback';
-      const area=el('textarea');area.id='b2TeacherFeedback';area.rows=4;area.required=true;area.minLength=12;area.maxLength=1500;
+      if(works[0] && state.units.some(u=>u.entry_code===works[0].entry_code&&u.pilot_active))choose.value=works[0].entry_code;
+      const textLabel=el('label','Ikaslearen ekoizpenari buruzko orientabidea');textLabel.htmlFor='b2TeacherFeedback-'+suffix;
+      const area=el('textarea');area.id='b2TeacherFeedback-'+suffix;area.rows=4;area.required=true;area.minLength=12;area.maxLength=1500;
       area.placeholder='Indargune frogatu bat eta hobetzeko aukera bat, ikaslearen testuan oinarrituta…';
-      const nextLabel=el('label','Hurrengo ekintza (aukerakoa)');nextLabel.htmlFor='b2TeacherNextStep';
-      const next=el('textarea');next.id='b2TeacherNextStep';next.rows=2;next.maxLength=500;
+      const nextLabel=el('label','Hurrengo ekintza (aukerakoa)');nextLabel.htmlFor='b2TeacherNextStep-'+suffix;
+      const next=el('textarea');next.id='b2TeacherNextStep-'+suffix;next.rows=2;next.maxLength=500;
       next.placeholder='Beste egoera bateko praktika edo berreraikuntza…';
       const submit=el('button','Gorde feedbacka','b2-button');submit.type='submit';
       form.append(label,choose,textLabel,area,nextLabel,next,submit);

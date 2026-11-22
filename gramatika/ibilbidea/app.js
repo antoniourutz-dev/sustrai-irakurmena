@@ -8,7 +8,7 @@
   const state = {
     client: null, user: null, profile: null, modules: [], units: [], entries: new Map(),
     progress: new Map(), assigned: [], myGroups: [], teacherGroups: [], teacherAssignments: [],
-    selected: null, step: 0, quizAnswers: new Map(), quizTries: new Map(), examplesCache: new Map()
+    selected: null, step: 0, quizAnswers: new Map(), quizTries: new Map(), examplesCache: new Map(), readerSize: 18, readerFocus: false
   };
   const QUESTIONS = Object.create(null);
   const LESSONS = new Map();
@@ -264,14 +264,8 @@
     tabs.replaceChildren();
     body.replaceChildren();
     if (!u.pilot_active) {
-      tabs.hidden = true;
-      addP(body, 'Gai hau 31 unitateko ibilbidean dago. Une honetan '+guidedCount()+' gaik dituzte lau urratseko jarduera gidatuak.');
-      const explanation = section(body, 'Gaia');
-      addP(explanation, e.short_explanation_eu);
-      row(body, aLink(grammarLink(u.entry_code), 'Ireki gramatika-fitxa osoa', 'b2-button is-secondary'),
-        button(own(u.entry_code).read_at ? 'Irakurrita dago' : 'Irakurrita markatu', async () => {
-          if (await saveProgress(u.entry_code, {read_at: own(u.entry_code).read_at || new Date().toISOString()})) renderLesson();
-        }));
+      tabs.hidden=true;
+      renderUnderstanding(e,body);
       return;
     }
     tabs.hidden = false;
@@ -286,7 +280,66 @@
     if (state.step === 2) renderPractice(u.entry_code, body);
     if (state.step === 3) renderTransfer(u.entry_code, body);
   }
-  function renderUnderstanding(e, body) {
+  function setupReadingControls(){
+    const root=$('pathRoot'), reader=$('pathLesson'),focus=$('pathReaderFocus');
+    const scale=delta=>{
+      state.readerSize=Math.max(15,Math.min(23,state.readerSize+delta));
+      reader.style.setProperty('--gr-document-size',state.readerSize+'px');
+      $('pathSmallerText').disabled=state.readerSize<=15;
+      $('pathLargerText').disabled=state.readerSize>=23;
+    };
+    const setFocus=enabled=>{
+      state.readerFocus=!!enabled;
+      root.classList.toggle('is-grammar-reading',state.readerFocus);
+      document.body.classList.toggle('is-grammar-reading',state.readerFocus);
+      focus.setAttribute('aria-pressed',String(state.readerFocus));
+      focus.textContent=state.readerFocus?'Irakurketa-modutik irten':'Irakurketa-modua';
+      if(state.readerFocus)reader.scrollIntoView({behavior:'auto',block:'start'});
+    };
+    $('pathSmallerText').addEventListener('click',()=>scale(-1));
+    $('pathLargerText').addEventListener('click',()=>scale(1));
+    focus.addEventListener('click',()=>setFocus(!state.readerFocus));
+    window.addEventListener('keydown',event=>{
+      if(event.key==='Escape'&&state.readerFocus){setFocus(false);focus.focus()}
+    });
+    scale(0);
+  }
+  function renderDocumentOutline(host,headings){
+    if(headings.length<2)return;
+    const menu=el('details',null,'gr-doc-outline');
+    menu.append(el('summary','Dokumentuaren aurkibidea · '+headings.length+' atal'));
+    const nav=el('nav',null,'gr-doc-outline-links');
+    nav.setAttribute('aria-label','Dokumentuaren atalak');
+    headings.forEach(heading=>{
+      const link=aLink('#'+heading.id,heading.title);
+      link.addEventListener('click',event=>{
+        const section=host.querySelector('#'+heading.id);
+        if(!section)return;
+        event.preventDefault();
+        const reduce=window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
+        section.scrollIntoView({behavior:reduce?'auto':'smooth',block:'start'});
+      });
+      nav.append(link);
+    });
+    menu.append(nav);host.prepend(menu);
+  }
+  async function renderWholeGrammarEntry(entry,host){
+    host.setAttribute('aria-busy','true');
+    host.replaceChildren(el('p','Eduki osoa Supabasetik kargatzen…','gr-doc-loading'));
+    try{
+      const reader=window.SustraiGrammarReader;
+      if(!reader)throw Error('reader_missing');
+      const full=await reader.load(entry,state.client);
+      if(!host.isConnected||state.selected!==entry.code)return;
+      renderDocumentOutline(host,reader.render(host,entry,full));
+    }catch(error){
+      if(!host.isConnected||state.selected!==entry.code)return;
+      host.replaceChildren(el('p','Ezin izan da gaiaren eduki osoa kargatu. Saiatu berriro.','b2-error'));
+      host.append(button('Berriro kargatu',()=>void renderWholeGrammarEntry(entry,host),'b2-button is-secondary'));
+      console.warn('SUSTRAI grammar reader',error?.code||error?.message||'load_failed');
+    }finally{if(host.isConnected)host.setAttribute('aria-busy','false')}
+  }
+  function renderUnderstanding(e,body){
     const design=designFor(e.code);
     if(design){
       const intro=section(body,'Ikaskuntza-helburua eta egoera');
@@ -297,36 +350,21 @@
       const sample=el('div',null,'b2-model-card');
       sample.append(el('span','SUSTRAIren adibide originala','b2-mini-label'));
       addP(sample,design.anchor_example_eu,'b2-sample-phrase');
-      addP(sample,design.anchor_comment_eu,'b2-example-note');
-      model.append(sample);
+      addP(sample,design.anchor_comment_eu,'b2-example-note');model.append(sample);
     }
-    const intro = section(body, 'Azalpen linguistikoa · bankuko fitxa');
-    addP(intro, e.short_explanation_eu, 'b2-intro');
-    addP(intro, e.explanation_eu);
-    const extra = el('details', null, 'b2-read-more');
-    extra.append(el('summary', 'Azalpen eta adibide gehiago'));
-    const link=aLink(grammarLink(e.code),'Ikusi fitxa osoa gramatika-bankuan','b2-text-link');
-    extra.append(link);
-    const sources=Array.isArray(e.metadata?.sources) ? e.metadata.sources : [];
-    if(sources.length){
-      const ul=el('ul',null,'b2-sources');
-      sources.slice(0,5).forEach(source=>{
-        try{
-          const u=new URL(source.url);
-          if(u.protocol!=='https:'||!['www.euskaltzaindia.eus','euskaltzaindia.eus','www.habe.euskadi.eus','habe.euskadi.eus'].includes(u.hostname))return;
-          const li=el('li');
-          const a=aLink(u.toString(),source.title||'Kontsultatu iturria');
-          a.target='_blank';a.rel='noopener noreferrer';
-          li.append(a,el('small',source.source_type==='DESKRIBAPENA'?'Gramatika deskribatzailea':source.source_type==='GAITASUN_MARKOA'?'Gaitasun-markoa':'Iturria'));
-          ul.append(li);
-        }catch{return;}
-      });
-      if(ul.children.length){extra.append(el('strong','Iturri nagusiak'),ul);}
-    }
-    body.append(extra);
-    addP(body, '«Irakurri dut» markak irakurketa erregistratzen du; ez du berez hizkuntza-gaitasuna egiaztatzen.', 'b2-footnote');
-    row(body, button(own(e.code).read_at ? 'Hurrengo urratsa: kontrastatu' : 'Azalpena irakurri dut', markRead));
+    const chapter=section(body,'Gramatika · eduki osoa');
+    addP(chapter,'Azalpenak, egiturak, adibideak, laburpen-taulak eta iturriak hemen bertan dituzu.','gr-doc-section-intro');
+    const host=el('div',null,'gr-document-host');chapter.append(host);
+    void renderWholeGrammarEntry(e,host);
+    addP(body,'Irakurketa markatzea ez da egitura menderatzen dela egiaztatzea.','b2-footnote');
+    row(body,button(own(e.code).read_at?(design?'Hurrengoa: kontrastatu':'Irakurketa berrikusi'):'Azalpena irakurri dut',async()=>{
+      if(design){await markRead();return;}
+      if(await saveProgress(e.code,{read_at:own(e.code).read_at||new Date().toISOString()})){
+        renderLesson();say(hasAccount()?'Irakurketa hodeian gordeta.':'Gonbidatu moduan, irakurketa ez da hodeian gordetzen.');
+      }
+    }));
   }
+
   async function renderContrasts(code, body) {
     const title = section(body, '2. Kontrastatu: adibideak eta ñabardurak');
     addP(title, 'Alderatu erabilerak: zein da arauaren ondorioa, zein testuinguruk baldintzatzen duena eta zein estilo-aukera?');
@@ -349,7 +387,7 @@
       const data = await loadExamples(code);
       if (state.selected !== code || state.step !== 1) return;
       slot.replaceChildren();
-      if (!data.length) addP(slot, 'Bankuko adibideak ez dira eskuragarri. Kontsultatu fitxa osoa.');
+      if (!data.length) addP(slot, 'Adibide gehigarriak ez dira eskuragarri; teoria osoa lehen urratsean dago.');
       for (const example of data) {
         const card = el('div', null, 'b2-example');
         const labels = {good:'Erabilera egokia',bad:'Arazotsua',better:'Beste aukera egokia',contrast:'Kontrastea'};
@@ -359,10 +397,10 @@
         slot.append(card);
       }
     } catch (err) {
-      slot.textContent = 'Ezin izan dira adibideak kargatu. Ikusi gramatika-fitxa.';
+      slot.textContent = 'Ezin izan dira adibide gehigarriak kargatu; kontsultatu lehen urratseko teoria.';
     }
-    row(body, aLink(grammarLink(code), 'Fitxa osoa', 'b2-button is-secondary'),
-      button(own(code).contrasted_at ? 'Hurrengo urratsa: praktikatu' : 'Adibideak aztertu ditut', markContrast));
+    row(body,button('Teoria osoa ikusi',()=>{state.step=0;renderLesson();},'b2-button is-secondary'),
+      button(own(code).contrasted_at?'Hurrengoa: praktikatu':'Adibideak aztertu ditut',markContrast));
   }
   function renderPractice(code, body) {
     const info=QUESTIONS[code];
@@ -815,7 +853,7 @@
         state.client.from('smx_grammar_b2_modules').select('*').order('module_no').then(check),
         state.client.from('smx_grammar_b2_path_units').select('*').order('global_order').then(check),
         state.client.from('public_editorial_grammar_entries')
-          .select('id,code,title_eu,short_explanation_eu,explanation_eu,level,metadata').eq('level','B2').limit(100).then(check),
+          .select('id,code,title_eu,short_explanation_eu,explanation_eu,level,metadata,use_when_eu,avoid_when_eu,warning_eu,source_guideline,version').eq('level','B2').limit(100).then(check),
         state.client.from('smx_grammar_b2_lesson_designs').select('*').limit(20).then(check),
         state.client.from('smx_grammar_b2_practice_items').select('*').order('item_order').limit(100).then(check)
       ]);
@@ -857,5 +895,6 @@
     const target=new URLSearchParams(location.search).get('gaia');
     if(target&&state.entries.has(target))openUnit(target,false);
   });
+  setupReadingControls();
   void start();
 })();

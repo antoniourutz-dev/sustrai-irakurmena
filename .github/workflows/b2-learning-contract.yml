@@ -6,6 +6,7 @@ on:
       - 'gramatika/ibilbidea/**'
       - 'sw.js'
       - 'tests/b2-learning-studio.test.mjs'
+      - 'tests/b2-grammar-reader.test.mjs'
       - '.github/workflows/b2-learning-contract.yml'
   push:
     branches: [main]
@@ -31,4 +32,4 @@ jobs:
         with:
           node-version: '22'
       - name: Check learning studio contract
-        run: node --test tests/b2-learning-studio.test.mjs
+        run: node --test tests/b2-learning-studio.test.mjs tests/b2-grammar-reader.test.mjs

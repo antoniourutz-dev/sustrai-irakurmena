@@ -1,5 +1,5 @@
 /* SUSTRAI PWA service worker */
-const CACHE_VERSION = 'sustrai-pwa-v56-b2-guided-lessons';
+const CACHE_VERSION = 'sustrai-pwa-v57-inline-grammar-reader';
 const SHELL = [
   '/',
   '/index.html',
@@ -81,6 +81,8 @@ const SHELL = [
   '/gramatika/ibilbidea/index.html',
   '/gramatika/ibilbidea/style.css',
   '/gramatika/ibilbidea/app.js',
+  '/gramatika/ibilbidea/reader.js',
+  '/gramatika/ibilbidea/reader.css',
   '/gramatika/gramatika.css',
   '/gramatika/gramatika.js',
   '/ariketak/',

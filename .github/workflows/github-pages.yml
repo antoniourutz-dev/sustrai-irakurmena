@@ -37,7 +37,7 @@ jobs:
         with:
           node-version: '22'
       - name: Verify B2 static learning studio
-        run: node --test tests/b2-learning-studio.test.mjs
+        run: node --test tests/b2-learning-studio.test.mjs tests/b2-grammar-reader.test.mjs
       - name: Build root-corrected static Pages site
         run: node scripts/build-github-pages.mjs
       - name: Upload static site

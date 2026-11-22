@@ -81,7 +81,7 @@ Revisar antes de fusionar: carga con sesión administradora, ocultación para al
 La portada presenta exactamente tres vías de aprendizaje: **Azterketak** (/azterketak/), **Gramatika** (/gramatika/) y **Ariketak** (/ariketak/).
 
 - **Azterketak** agrupa sin alterar rutas ni datos de /irakurmena/, /idazlanak/ y /ahozkoa/.
-- **Gramatika** es una entrada editorial futura: no muestra unidades sin publicar.
+- **Gramatika** (/gramatika/?maila=B2 y /gramatika/?maila=C1) tiene una biblioteca **exclusivamente teórica**: dos temas B2 y dos C1, con explicaciones, ejemplos originales, matices de uso, contrastes e hipervínculos a fuentes de Euskaltzaindia. No contiene ejercicios, corrección ni puntuaciones. La selección por nivel usa /gramatika/gramatika.js y los estilos /gramatika/gramatika.css.
 - **Ariketak** organiza cuadernos por nivel y bloque. /aditzak/ es un bloque de Ariketak y mantiene la previsualización solo para administradores.
 - La cabecera y la barra inferior móvil comparten los mismos cinco enlaces (incluido inicio y espacio personal) en todas las páginas principales. Las rutas de examen siguen funcionando.
 - No se modifica el esquema ni se aprueban las actividades en esta fase. Revisar en preview escritorio, móvil, navegación de teclado, sesión administradora y alumnado, caché PWA y enlaces existentes antes de fusionar.
@@ -137,3 +137,14 @@ The six B2 `Indikatiboa lehenaldian` activity revisions **2** have been released
 - Available to authorized learner accounts via `smx_aditzak_pilot_releases` without upgrading academic editorial state. No automatic exam grading.
 - Student UI shows ordinary educational copy, not intrusive test banners. Answer models are explicitly advisory and user-submitted responses are stored.
 - Admin-only audit labels and membership controls continue unchanged.
+
+
+## Gramatika B2 / C1 · primera fase (2026-11-22)
+
+- B2: completivas `-(e)la` / `-(e)nik`, y condiciones abiertas/hipotéticas.
+- C1: concesión (`nahiz eta`, `-arren`, `hala ere`) y relaciones causales/explicativas (`-(e)lako`, `-(e)nez`, `izan ere`).
+- La división de niveles es **didáctica**, no un listado cerrado de los exámenes HABE, IVAP o EOI.
+- Fuente primaria de contraste: **Euskararen Gramatika** (Euskaltzaindia), secciones 30, 34, 38, 39 y 42; cada ficha enlaza sus referencias. HEOC orienta el enfoque comunicativo.
+- Los ejemplos son sintéticos y propios; la revisión documental no equivale a auditoría lingüística independiente. No asignar estado de ficha canónica `egiaztatua` o `argitaratua` en el banco SUSTRAI sin su proceso de validación ni inventar IDs.
+- No hay grabación de progreso ni persistencia de notas en esta biblioteca teórica. Las actividades siguen en `/ariketak/`.
+- Próximo control académico: revisión experta de ejemplos, variación dialectal, nivel de profundidad y contraste con materiales B2/C1; posteriormente completar el índice, sin añadir ejercicios al área de Gramatika.

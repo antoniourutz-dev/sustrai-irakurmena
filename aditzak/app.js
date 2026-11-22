@@ -168,57 +168,6 @@
 
   // Findings are authored by the tester; they do not constitute a signed
   // editorial review or an official academic approval.
-  function appendFindingForm(card, a, item) {
-    const details=node('details',null,'ad-finding');
-    details.append(node('summary','Iradokizuna egin'));
-    const form=node('form',null,'ad-finding-form');
-    const categories=[
-      ['arau_akatsa','Arau-akatsa'],['aldaera_onargarria','Aldaera onargarria'],
-      ['erantzun_proposatua','Beste erantzun bat'],['azalpena','Azalpena'],
-      ['zailtasuna','Zailtasuna'],['erabilgarritasuna','Erabilgarritasuna'],
-      ['teknikoa','Arazo teknikoa'],['bestelakoa','Bestelakoa']
-    ];
-    const category=node('select');category.required=true;
-    category.setAttribute('aria-label',item.position+'. galderako oharraren mota');
-    for(const [value,label] of categories){const option=node('option',label);option.value=value;category.append(option);}
-    const priority=node('select');priority.setAttribute('aria-label','Larritasuna');
-    for(const [value,label] of [['normal','Arrunta'],['high','Garrantzitsua'],['blocking','Larria'],['low','Arina']]){
-      const option=node('option',label);option.value=value;priority.append(option);
-    }
-    const suggestion=node('textarea',null,'ad-finding-input');
-    suggestion.maxLength=2000;suggestion.rows=2;
-    suggestion.placeholder='Nahi baduzu, proposatu formulazio edo erantzun egokiago bat…';
-    suggestion.setAttribute('aria-label','Proposatutako zuzenketa (aukerakoa)');
-    const comment=node('textarea',null,'ad-finding-input');
-    comment.required=true;comment.maxLength=3000;comment.minLength=5;comment.rows=3;
-    comment.placeholder='Zein da arazoa? Nola konponduko zenuke?';
-    comment.setAttribute('aria-label','Auditoretzako oharra');
-    const send=node('button','Oharra bidali','ad-button');
-    send.type='submit';
-    const message=node('p',null,'ad-finding-status');message.setAttribute('role','status');
-    form.append(category,priority,comment,suggestion,send,message);
-    form.addEventListener('submit',async(event)=>{
-      event.preventDefault();
-      if(!form.reportValidity())return;
-      send.disabled=true;message.textContent='Oharra gordetzen…';
-      try{
-        const {error}=await state.client.from('smx_aditzak_pilot_findings').insert({
-          activity_version_id:a.id,item_id:item.id,
-          attempt_id:state.attemptId||null,
-          category:category.value,priority:priority.value,comment_eu:comment.value.trim(),
-          suggested_text:suggestion.value.trim()||null
-        });
-        if(error)throw error;
-        message.textContent='Jasota: zure oharra auditoretzarako gorde da.';
-        comment.value='';suggestion.value='';
-      }catch(err){
-        console.warn('Pilot finding error',err?.code||'network');
-        message.textContent='Ez da oharra gorde. Saiatu berriro.';
-      }finally{send.disabled=false;}
-    });
-    details.append(form);card.append(details);
-  }
-
   function showActivity(a) {
     state.current = a;
     state.answers = new Map();
@@ -293,7 +242,6 @@
         });
         card.append(input);
       }
-      if(isPilot(a)) appendFindingForm(card,a,item);
       list.append(card);
     }
     const save = $('saveResponses');

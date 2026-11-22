@@ -81,17 +81,8 @@ button,select,textarea{font:inherit}
 .ad-context-text{margin:0;color:var(--s-ink);font-size:15px;line-height:1.7;white-space:pre-wrap;overflow-wrap:anywhere}
 
 .ad-pilot-warning{padding:16px 19px;border:1px solid var(--s-accent);border-radius:12px;background:var(--s-accent-soft);color:var(--s-ink);font-size:14px;line-height:1.55}
-.ad-finding{margin-top:18px;padding-top:12px;border-top:1px dashed var(--s-line-strong)}
-.ad-finding summary{cursor:pointer;color:var(--s-primary);font-size:14px;font-weight:750}
-.ad-finding-form{display:grid;gap:10px;margin-top:12px}
-.ad-finding-form select,.ad-finding-input{width:100%;min-height:43px;padding:9px 11px;border:1px solid var(--s-line-strong);border-radius:10px;background:var(--s-surface);color:var(--s-ink);font:inherit}
-.ad-finding-input{min-height:95px;resize:vertical}
-.ad-finding-form button{justify-self:start}
-.ad-finding-status{margin:0;color:var(--s-muted);font-size:13px}
-.ad-finding-form select:focus-visible,.ad-finding-form textarea:focus-visible{outline:3px solid var(--s-primary);outline-offset:2px}
 
 .ad-item:focus{outline:2px solid var(--s-primary);outline-offset:3px;scroll-margin-top:100px}
-.ad-finding-input{font-size:14px}
 
 /* Student learning copy: neutral guidance without conspicuous beta warning styling. */
 .ad-pilot-warning{border-color:var(--s-line)!important;background:var(--s-paper)!important;color:var(--s-muted)!important;font-weight:400}

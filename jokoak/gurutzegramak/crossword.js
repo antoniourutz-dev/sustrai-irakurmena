@@ -508,9 +508,11 @@
     const el=event.target.closest('[data-action],[data-word],[data-cell]');
     if(!el||!root.contains(el))return;
     const action=el.dataset.action;
+    if(action==='retry-daily'){loadDaily();return;}
     if(action==='start'){start(el.dataset.mode);return;}
     if(action==='reset'){
       if(state.phase==='playing'&&!window.confirm('Partida hau bertan behera utzi eta beste bat hasi?'))return;
+      if(madridDate()!==dailyDate){state=fresh();loadDaily();return;}
       state=fresh();save();render();return;
     }
     if(state.phase==='setup')return;
@@ -551,7 +553,23 @@
   });
   (async()=>{
     try {cloud=window.SustraiCloud;await cloud?.ready;}catch { /* Guest mode does not need connectivity. */ }
-    readBest();readSaved();render();
+    await loadDaily();
   })();
-  if(typeof setInterval==='function')setInterval(tickClock,1000);
+  let lastDateRefresh=null;
+  if(typeof setInterval==='function')setInterval(()=>{
+    tickClock();
+    if(!dailyDate||loading)return;
+    const date=madridDate();
+    if(date===dailyDate)return;
+    if(state.phase==='playing') {
+      if(!dailyNotice){
+        dailyNotice='Biharko gurutzegramak prest daude! Amaitu partida hau edo hasi beste bat.';
+        const host=root.querySelector('.cx-statusbar');
+        if(host)host.insertAdjacentHTML('afterend','<p class="cx-new-day" role="status">'+
+          escapeHtml(dailyNotice)+'</p>');
+      }
+    }else if(lastDateRefresh!==date) {
+      lastDateRefresh=date;loadDaily();
+    }
+  },1000);
 })();

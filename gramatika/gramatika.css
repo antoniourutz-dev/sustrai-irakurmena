@@ -1,0 +1,104 @@
+
+/* HitzBira · Gramatika: liburutegi teorikoa, B2 / C1. */
+.grammar-main{gap:22px}
+.grammar-hero{padding:clamp(24px,4vw,42px)}
+.grammar-levels{display:flex;gap:10px;flex-wrap:wrap}
+.grammar-level-link{display:inline-flex;align-items:center;justify-content:center;min-width:152px;padding:12px 22px;border:1px solid var(--s-line-strong);border-radius:14px;background:var(--s-surface);color:var(--s-ink);font-weight:750;text-decoration:none;transition:border-color .15s,background .15s}
+.grammar-level-link:hover{border-color:var(--s-primary)}
+.grammar-level-link[aria-current="page"]{border-color:var(--s-primary);background:var(--s-primary);color:#fff}
+.grammar-level-link:focus-visible{outline:3px solid var(--s-primary);outline-offset:3px}
+.grammar-level-block{display:grid;gap:22px}
+.grammar-block-heading{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.grammar-block-heading h2{margin:0;font:750 clamp(23px,3vw,30px)/1.2 var(--s-font-display)}
+.grammar-count{color:var(--s-muted);font-size:14px}
+.grammar-intro{margin:0;color:var(--s-muted);max-width:75ch}
+.grammar-index{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.grammar-index a{display:flex;flex-direction:column;gap:9px;min-height:168px;padding:23px;background:var(--s-surface);border:1px solid var(--s-line);border-radius:var(--s-r-lg);text-decoration:none;color:var(--s-ink)}
+.grammar-index a:hover{border-color:var(--s-primary);box-shadow:0 6px 20px rgb(17 19 43 / .06)}
+.grammar-index strong{font:750 20px/1.24 var(--s-font-display)}
+.grammar-index .grammar-index-number{font-size:12px;font-weight:750;letter-spacing:.08em;color:var(--s-primary);text-transform:uppercase}
+.grammar-index .grammar-index-desc{color:var(--s-muted);font-size:14px}
+.grammar-index .grammar-index-more{color:var(--s-primary);font-size:14px;font-weight:750;margin-top:auto}
+.grammar-article{padding:clamp(20px,4vw,40px);background:var(--s-surface);border:1px solid var(--s-line);border-radius:var(--s-r-xl);scroll-margin-top:24px;display:grid;gap:20px}
+.grammar-article header{display:grid;gap:9px}
+.grammar-article .grammar-topic{font-size:12px;color:var(--s-primary);font-weight:800;letter-spacing:.08em;text-transform:uppercase}
+.grammar-article h3{margin:0;font:760 clamp(24px,3.2vw,33px)/1.16 var(--s-font-display)}
+.grammar-article h4{margin:0 0 8px;font:750 18px/1.25 var(--s-font-display)}
+.grammar-article p{margin:0;max-width:82ch;line-height:1.72}
+.grammar-article .grammar-lead{font-size:17px;color:var(--s-ink-3)}
+.grammar-article section{display:grid;gap:12px}
+.grammar-pattern{background:var(--s-primary-soft);border-left:4px solid var(--s-primary);border-radius:12px;padding:16px 20px}
+.grammar-pattern strong{font-size:14px;color:var(--s-primary)}
+.grammar-pattern p{margin-top:5px;font-weight:750;font-size:17px}
+.grammar-example-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.grammar-example{display:grid;gap:8px;padding:18px 20px;background:var(--s-paper);border:1px solid var(--s-paper-line);border-radius:14px}
+.grammar-example .grammar-caption{color:var(--s-muted);font-size:12px;font-weight:750;letter-spacing:.03em}
+.grammar-example .grammar-sentence{font:550 19px/1.5 var(--s-font-reading)}
+.grammar-example .grammar-explain{font-size:14px;color:var(--s-muted);line-height:1.55}
+.grammar-note{padding:17px 20px;border-radius:14px;border:1px solid var(--s-line);background:#F8F9FE}
+.grammar-note strong{font-size:14px;color:var(--s-primary)}
+.grammar-note p{margin-top:7px;font-size:15px}
+.grammar-comparison{width:100%;border-collapse:collapse;font-size:15px}
+.grammar-comparison th{text-align:left;background:var(--s-bg);font-weight:750}
+.grammar-comparison th,.grammar-comparison td{border:1px solid var(--s-line);padding:12px 14px;vertical-align:top}
+.grammar-table-wrap{overflow-x:auto}
+.grammar-source{border-top:1px solid var(--s-line);padding-top:16px;display:grid;gap:5px;font-size:13px;color:var(--s-muted)}
+.grammar-source a{color:var(--s-primary);text-underline-offset:3px;overflow-wrap:anywhere}
+.grammar-return{display:inline-flex;align-items:center;color:var(--s-primary);font-size:14px;font-weight:750;text-decoration:none}
+.grammar-disclaimer{color:var(--s-muted);font-size:13px}
+@media(max-width:680px){.grammar-index,.grammar-example-grid{grid-template-columns:1fr}.grammar-index a{min-height:140px}.grammar-level-link{flex:1;min-width:0}.grammar-article{gap:18px}.grammar-article .grammar-lead{font-size:16px}.grammar-comparison{font-size:14px}}
+
+
+/* Liburutegi osoa Supabasetik: iragazkiak, sarrera-xehetasuna eta eduki teorikoak. */
+.grammar-filters{display:grid;grid-template-columns:minmax(0,2fr) minmax(180px,1fr);gap:12px}
+.grammar-field{display:grid;gap:7px}
+.grammar-field label{font-size:13px;font-weight:750;color:var(--s-ink-3)}
+.grammar-field input,.grammar-field select{width:100%;min-height:48px;padding:10px 14px;border-radius:12px;border:1px solid var(--s-line-strong);background:var(--s-surface);color:var(--s-ink);font:inherit;font-size:15px}
+.grammar-index-card{min-height:185px}
+.grammar-index-desc{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;line-clamp:3;overflow:hidden}
+#grammarStatus.is-error,.grammar-load-error{color:var(--s-bad)}
+.grammar-empty{border:1px solid var(--s-line);border-radius:14px;padding:20px;background:var(--s-surface);color:var(--s-muted)}
+.grammar-reading{display:grid;gap:14px;scroll-margin-top:20px}
+.grammar-reading-top{display:flex;justify-content:space-between;align-items:center;gap:18px}
+.grammar-detail{display:grid;gap:24px}
+.grammar-content-section{display:grid;gap:12px}
+.grammar-content-section>h3{margin:0;font:750 clamp(20px,2.5vw,25px)/1.2 var(--s-font-display)}
+.grammar-body{margin:0;white-space:pre-line;line-height:1.75;overflow-wrap:anywhere}
+.grammar-meta-row{display:grid;gap:3px}
+.grammar-meta-row>strong{font-size:13px;color:var(--s-muted)}
+.grammar-meta-row>p{margin:0;line-height:1.7;white-space:pre-line;overflow-wrap:anywhere}
+.grammar-section-block{display:grid;gap:8px;padding:18px 20px;border:1px solid var(--s-line);border-radius:14px;background:var(--s-paper)}
+.grammar-section-block h4,.grammar-form-body h4,.grammar-comparison-card h4{margin:0;font:700 17px/1.3 var(--s-font-display)}
+.grammar-section-block.grammar-warning{border-left:4px solid var(--s-accent)}
+.grammar-form{border:1px solid var(--s-line);border-radius:14px;background:var(--s-surface);overflow:hidden}
+.grammar-form summary{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:17px 19px;cursor:pointer;font-weight:750;font-size:16px;color:var(--s-primary)}
+.grammar-form summary:hover{background:var(--s-primary-soft)}
+.grammar-form summary::marker{color:var(--s-primary)}
+.grammar-form[open]>summary{background:var(--s-primary-soft)}
+.grammar-form-name{flex:1}
+.grammar-form-group{font-size:12px;font-weight:650;color:var(--s-muted)}
+.grammar-form-body{padding:20px;display:grid;gap:14px;border-top:1px solid var(--s-line)}
+.grammar-example-grid{align-items:stretch}
+.grammar-example{gap:5px}
+.grammar-example .grammar-sentence{font-style:normal}
+.grammar-example-good{border-left:4px solid var(--s-ok)}
+.grammar-example-bad{border-left:4px solid var(--s-bad);background:var(--s-bad-soft)}
+.grammar-example-better{border-left:4px solid var(--s-ok);background:var(--s-ok-soft)}
+.grammar-example-contrast{border-left:4px solid var(--s-primary)}
+.grammar-example-bad .grammar-caption{color:var(--s-bad)}
+.grammar-example-better .grammar-caption,.grammar-example-good .grammar-caption{color:var(--s-ok)}
+.grammar-comparison-card{padding:20px;border:1px solid var(--s-line);border-radius:14px;display:grid;gap:12px}
+.grammar-error-list{display:grid;gap:16px}
+.grammar-error-item{padding:16px;border:1px solid var(--s-line);border-radius:14px;display:grid;gap:12px}
+.grammar-table-card .grammar-comparison{min-width:680px}
+.grammar-table-card .grammar-table-wrap{width:100%}
+.grammar-table-card td,.grammar-table-card th{min-width:120px}
+@media(max-width:680px){.grammar-filters{grid-template-columns:1fr}.grammar-reading-top{align-items:flex-start}.grammar-form-body{padding:16px}.grammar-form summary{padding:14px 16px}.grammar-example-grid{grid-template-columns:1fr}.grammar-index-card{min-height:150px}}
+
+
+/* Source attribution: distinguish normative orthography from descriptive grammar. */
+.grammar-source-list{list-style:none;margin:8px 0 0;padding:0;display:grid;gap:12px}
+.grammar-source-list li{padding:12px 14px;border:1px solid var(--s-line);border-radius:12px;display:grid;gap:4px;min-width:0}
+.grammar-source-list li a{font-weight:750;text-underline-offset:3px;overflow-wrap:anywhere}
+.grammar-source-type{font-size:12px;font-weight:700;color:var(--s-muted)}
+.grammar-source-claim{margin:0;font-size:13px;line-height:1.55;color:var(--s-muted)}

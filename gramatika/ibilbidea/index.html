@@ -14,7 +14,7 @@
  <link rel="stylesheet" href="/auth.css?v=20261117-ezabatu">
  <link rel="stylesheet" href="/hitzbira.css?v=20261117-ezabatu">
  <link rel="stylesheet" href="/gramatika/gramatika.css?v=20261122-supabase1">
- <link rel="stylesheet" href="/gramatika/ibilbidea/style.css?v=20261122-b2-professional3">
+ <link rel="stylesheet" href="/gramatika/ibilbidea/style.css?v=20261123-inline-reader1">
 </head>
 <body class="has-tabbar">
  <a class="skip" href="#pageTitle">Joan edukira</a>
@@ -60,6 +60,14 @@
    <div id="pathModules" class="b2-module-list" aria-label="Ikasketa-ibilbidearen gaiak"></div>
   </aside>
   <section class="b2-reader" id="pathLesson" aria-labelledby="pathLessonTitle" hidden>
+   <div class="b2-reader-toolbar" role="group" aria-label="Irakurtzeko aukerak">
+    <span class="b2-reader-toolbar-label">IRAKURGAILUA</span>
+    <div class="b2-reader-tool-actions">
+     <button id="pathSmallerText" type="button" class="b2-reader-tool" aria-label="Txikitu letra">A−</button>
+     <button id="pathLargerText" type="button" class="b2-reader-tool" aria-label="Handitu letra">A+</button>
+     <button id="pathReaderFocus" type="button" class="b2-reader-tool b2-reader-focus" aria-pressed="false">Irakurketa-modua</button>
+    </div>
+   </div>
    <header class="b2-reader-head">
     <span class="b2-overline" id="pathLessonStatus">Hasi gabe</span>
     <h2 id="pathLessonTitle"></h2>
@@ -83,6 +91,7 @@
  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.0" defer></script>
  <script src="/auth.js?v=20261117-ezabatu" defer></script>
  <script src="/pwa.js?v=20261117-ezabatu" defer></script>
- <script defer src="/gramatika/ibilbidea/app.js?v=20261122-b2-professional3"></script>
+ <script defer src="/gramatika/ibilbidea/reader.js?v=20261123-inline-reader1"></script>
+ <script defer src="/gramatika/ibilbidea/app.js?v=20261123-inline-reader1"></script>
 </body>
 </html>

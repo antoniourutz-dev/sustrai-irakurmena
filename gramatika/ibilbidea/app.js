@@ -335,6 +335,10 @@
           state.quizAnswers.set(code,next);
           state.quizTries.set(code,(state.quizTries.get(code)||0)+1);
           renderLesson();
+          requestAnimationFrame(()=>{
+            const card=$('pathStepContent')?.querySelectorAll('.b2-quiz-card')?.[i];
+            card?.querySelectorAll('.b2-option')?.[index]?.focus();
+          });
         },'b2-option');
         if(answers[i]===index)b.classList.add(index===q.correct?'is-correct':'is-incorrect');
         b.setAttribute('aria-pressed',String(answers[i]===index));

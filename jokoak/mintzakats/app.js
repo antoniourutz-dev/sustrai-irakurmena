@@ -31,13 +31,12 @@
  function readRecords(){
    try{return safeRecords(cloud.storage.getItem(STORE_KEY))}catch{return[]}
  }
- function saveRecords(){
+ function saveRecords(immediate=false){
    state.records.sort((a,b)=>b.date.localeCompare(a.date));
    state.records=state.records.slice(0,70);
    try{
      cloud.storage.setItem(STORE_KEY,JSON.stringify({version:1,records:state.records}));
-     const flushed=cloud.flush?.();
-     flushed?.catch?.(()=>{});
+     if(immediate){const flushed=cloud.flush?.();flushed?.catch?.(()=>{});}
    }catch(error){console.warn('MINTZAKATS datuak ezin dira gorde',error)}
  }
  function dayQuestions(){
@@ -255,7 +254,7 @@
    const r=state.record;
    r.completed=true;r.completedAt=new Date().toISOString();r.currentIndex=20;
    r.score=core.scoreGame(r.answers);
-   saveRecords();renderSummary();
+   saveRecords(true);renderSummary();
  }
  function mistakesForToday(){
    return state.record?state.todayQuestions

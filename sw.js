@@ -1,5 +1,5 @@
 /* SUSTRAI PWA service worker */
-const CACHE_VERSION = 'sustrai-pwa-v48-mintzakats-pilot';
+const CACHE_VERSION = 'sustrai-pwa-v49-mintzakats-clean-feedback';
 const SHELL = [
   '/',
   '/index.html',

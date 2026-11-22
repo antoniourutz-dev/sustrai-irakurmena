@@ -98,3 +98,15 @@ test('Two SUSTRAI accounts do not share the private cloud key in client state',a
  const other=await boot(new Map(),true);
  assert.match(other.root.html,/Hasi 20 galderen erronka/);
 });
+
+test('Answer feedback uses plain labels, without the gameplay qualifier',async()=>{
+ const s=await boot();
+ s.click('start');
+ s.click('answer',{index:'0'});
+ assert.doesNotMatch(s.root.html,/\\(jokoan\\)/);
+ assert.match(s.root.html,/· Zuzena|· Okerra/);
+});
+test('Mintzakats page has no redundant training disclaimer',()=>{
+ const html=fs.readFileSync(path.join(__dirname,'../jokoak/mintzakats/index.html'),'utf8');
+ assert.doesNotMatch(html,/mint-disclaimer|Entrenamendu didaktikoa\\./);
+});

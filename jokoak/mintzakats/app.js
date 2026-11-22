@@ -217,7 +217,7 @@
      '<h2 class="mint-prompt">'+esc(q.question)+'</h2>'+
      '<div class="mint-options">'+q.candidates.map((option,i)=>{
        const cls=!done?'':i===q.answer?' is-correct':i===response.selected?' is-wrong':' is-muted';
-       const verdict=!done?'':i===q.answer?' · Zuzena (jokoan)':i===response.selected?' · Okerra (jokoan)':'';
+       const verdict=!done?'':i===q.answer?' · Zuzena':i===response.selected?' · Okerra':'';
        return '<button type="button" class="mint-option'+cls+'" data-action="answer" data-index="'+i+'"'+(done?' disabled':'')+'>'+
          '<span class="mint-letter">'+String.fromCharCode(65+i)+'</span><span>'+esc(option)+esc(verdict)+'</span></button>';
      }).join('')+'</div>'+

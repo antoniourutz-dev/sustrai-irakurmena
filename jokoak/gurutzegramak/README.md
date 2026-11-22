@@ -57,3 +57,42 @@ Probak: JS sintaxia, hitzen bakartasuna eta posizioa, 13 gurutzaketen letra-bate
 - [x] Gurutzaketa agerikoaren letra ez kobratu berriz eta testuaren posizioa mantendu.
 - [ ] Benetako mahaigain/mugikor nabigatzaileko zuzenketa, fokua, pantaila-irakurgailua eta kontrastea.
 - [ ] Hitz bakoitzaren pista eta azalpenaren bigarren berrikuspen akademikoa.
+
+## 2.0 · Eguneko gurutzegramak (2026-11-22)
+
+**Ezarrita:** bi modalitate bereizi eta data-mapa partekatua, HitzBira aplikazioaren barruan.
+
+### Datuen kontratua
+- **Taula:** public.smx_crossword_daily, Supabase Lexikoa.
+- **Migrazioa:** supabase/migrations/20261122200826_smx_crossword_daily_catalog_v1.sql.
+- **Gaurko datuak:** Europa/Madrid ordu-zonako 00:00tik. Play-date + level + mode konbinazio bakarra.
+- **Lehen sorta:** 2026-11-22tik 2026-12-05era, 14 egun, egunean 2 taula, guztira **28 taula**. Taula bakoitzak **10 hitz** ditu. 59 termino dokumentaturen bildumatik hautatu eta gurutzatu dira.
+- **Bi modalitateak:** egun berean ikasteko eta erronkako hitzak ez dira errepikatzen; gainerako egunetan errepikapen mailakatua onartzen da.
+- **Kalitatea:** hitz bakoitzak jatorrizko Oposik kodea, pista berridatzia eta bankuko definizio argigarria daramatza. Mekanismoak gurutzaketa bateragarriak eta sare konektatua egiaztatzen ditu. **Egiaztapen linguistiko independentea egin gabe dago:** egoera pilot, berrikuspena pending, eta maila C1 orientazio didaktiko gisa soilik.
+- **Gaia:** Osasun-hiztegia. Ez dira talde estuagoak iragartzen, batzuek ez dutelako hautatutako hamar hitzen gehiengoa osatzen.
+- **Datu publikoak:** RLS bidez argitaratu edo pilotuan dagoen eta dagoeneko iritsi den eguneko taula soilik kontsulta daiteke; etorkizuneko soluzioak ezin dira anon/autentifikatu rolarekin irakurri. Datuak ez dira GitHubeko JSON fitxategi publikoan argitaratzen.
+- **Egile-eredua:** authoring-generator.cjs; edukien iturria katalogo editorial kontrolatua, ez ikasleari IAz sortutako erantzun inprobisatuak.
+- **Bezeroa:** data aukeratzen da Europe/Madrid erabiliz; bi taulak Supabasetik eskuratzen dira, eta gaurko cachea gordetzen da.
+- **Errepikapena:** egun bereko saioa eta marka pertsonala berreskuratzen dira. Amaitutako saio batetik menura itzultzean, amaierako emaitza ez da ezabatzen.
+- **Gauerdiko aldaketa:** partida ez badago martxan, eguna aldatzen denean berriz kargatzen da katalogoa; partida aktibo badago, aurrekoa amai daiteke eta hurrengo partida hastean egun berrikoa kargatzen da.
+- **Egunen amaiera:** 2026-12-05etik aurrera ez dago taula berririk programatuta; sistemak ez du edukirik asmatzen, argi azaltzen du falta den materiala. Egutegia berriz hornitu behar da.
+
+### Proba-egiaztapena
+- [x] 28 taula/14 egun; data eta modalitate bakoitzeko 10 hitz; 325 gurutzaketa, hitzak konektatuak.
+- [x] Gaurko bi taulen hitzak bereiziak (ez dago hitz errepikaturik modu bien artean egun berean).
+- [x] Ez dago hitz osoa agerian uzten duen pistarik.
+- [x] Anon rolarekin 2026-11-22an bi taula soilik ikusgai, beste 26 etorkizunekoak ez.
+- [x] Test sintetikoko bi modu, akatsen/pisten kostua, kronometroa, berriz sartzea, marka, egun-aldaketa eta data hutsaren kudeaketa.
+- [ ] Benetako nabigatzaileko E2E proba (Chrome/Firefox/Safari, desktop/mugikor, kontuarekin/anon).
+- [ ] Bigarren berrikusle akademiko baten izenpetutako onespena.
+- [ ] Programazioa luzatzea 2026-12-05etik haratago.
+
+**Emaitza lehiakorrak ez dira zerbitzarian egiaztatzen:** marka pertsonalak dira, ez ikasleen arteko sailkapen publikoko emaitzak.
+
+### Etorkizuneko edizioa
+Egun gehiagorako taulak sortu/argitaratu aurretik:
+1. Jatorrizko osasun_entries eta haien editorial_state egiaztatu.
+2. Pista eta azalpen propioak berrikusi, definizioaren unibokotasuna egiaztatu, onargarriak diren aldaerak zerrendatu.
+3. authoring-generator.cjs bidez taula sortu eta validate exekutatu.
+4. Inportatu taula berria draft egoerara, egiaztatu data, maila eta modalitatearen bereizketa; berrikuspenaren erregistroa gorde.
+5. Bakarrik behar den egunean eta baimenarekin jarri pilot edo, onespen independentea eginda, published.

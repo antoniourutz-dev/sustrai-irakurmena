@@ -1,5 +1,5 @@
 /* SUSTRAI PWA service worker */
-const CACHE_VERSION = 'sustrai-pwa-v45-grammar-theory';
+const CACHE_VERSION = 'sustrai-pwa-v46-grammar-supabase';
 const SHELL = [
   '/',
   '/index.html',

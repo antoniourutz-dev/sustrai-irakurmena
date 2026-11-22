@@ -215,7 +215,20 @@
     if (state.step === 3) renderTransfer(u.entry_code, body);
   }
   function renderUnderstanding(e, body) {
-    const intro = section(body, '1. Ulertu: azalpena');
+    const design=designFor(e.code);
+    if(design){
+      const intro=section(body,'Ikaskuntza-helburua eta egoera');
+      addP(intro,design.why_it_matters_eu,'b2-intro');
+      addP(intro,design.situation_eu,'b2-context');
+      listValues(intro,design.success_indicators_eu,'b2-outcomes');
+      const model=section(body,'Eredu landua · zergatik?');
+      const sample=el('div',null,'b2-model-card');
+      sample.append(el('span','SUSTRAIren adibide originala','b2-mini-label'));
+      addP(sample,design.anchor_example_eu,'b2-sample-phrase');
+      addP(sample,design.anchor_comment_eu,'b2-example-note');
+      model.append(sample);
+    }
+    const intro = section(body, 'Azalpen linguistikoa · bankuko fitxa');
     addP(intro, e.short_explanation_eu, 'b2-intro');
     addP(intro, e.explanation_eu);
     const extra = el('details', null, 'b2-read-more');
@@ -228,7 +241,20 @@
   }
   async function renderContrasts(code, body) {
     const title = section(body, '2. Kontrastatu: adibideak eta ñabardurak');
-    addP(title, 'Alderatu adibideak: zein da forma, zein funtzioa eta zer ñabardura du? Ez da aukera estilistiko oro arau-akatsa.');
+    addP(title, 'Alderatu erabilerak: zein da arauaren ondorioa, zein testuinguruk baldintzatzen duena eta zein estilo-aukera?');
+    const design=designFor(code);
+    if(design){
+      const sample=el('div',null,'b2-model-card is-contrast');
+      sample.append(el('span','Kontraste arrazoitua','b2-mini-label'));
+      addP(sample,design.contrast_example_eu,'b2-sample-phrase');
+      addP(sample,design.contrast_comment_eu,'b2-example-note');
+      title.append(sample);
+      addP(title,design.guided_task_eu,'b2-context');
+      const tips=el('details',null,'b2-read-more');
+      tips.append(el('summary','Ohiko nahasmenak eta ñabardurak'));
+      listValues(tips,design.misconceptions_eu);
+      title.append(tips);
+    }
     const slot = el('div', 'Adibideak kargatzen…', 'b2-examples');
     title.append(slot);
     try {
@@ -251,58 +277,74 @@
       button(own(code).contrasted_at ? 'Hurrengo urratsa: praktikatu' : 'Adibideak aztertu ditut', markContrast));
   }
   function renderPractice(code, body) {
-    const info = QUESTIONS[code];
-    if (!info) return;
-    const root = section(body, '3. Praktikatu: bi galdera labur');
-    addP(root, 'Bi erantzunak ondo bereizita aukeratu. Jarduera hau orientagarria da: ez da HABEren puntuazio edo egiaztapen ofiziala.');
-    if (!own(code).contrasted_at) {
-      addP(root, 'Lehenik, amaitu irakurketa eta kontrastea.', 'b2-footnote');
-      row(root, button('Itzuli kontrastera', () => {state.step = 1; renderLesson();}, 'b2-button is-secondary'));
+    const info=QUESTIONS[code];
+    const root=section(body,'Praktika · lau egoera komunikatibo');
+    addP(root,'SUSTRAIren ariketa sintetikoak dira. Erantzun, irakurri aukeraren azalpena eta, behar denean, saiatu berriro. Ez da azterketa ofiziala.','b2-context');
+    if(!info?.prompts?.length){addP(root,'Ariketa ez dago erabilgarri.','b2-footnote');return;}
+    if(!own(code).contrasted_at){
+      addP(root,'Lehenik, irakurri azalpena eta aztertu kontrasteak.','b2-footnote');
+      row(root,button('Kontrasteetara itzuli',()=>{state.step=1;renderLesson();},'b2-button is-secondary'));
       return;
     }
-    if (own(code).practiced_at) {
-      addP(root, 'Bi galderak zuzen erantzunda geratu dira praktika-saio batean. Beste egun batean berrikustea gomendatzen da.', 'b2-good-note');
-      row(root, button('Erabilera autonomora', () => {state.step = 3; renderLesson();}));
-      return;
+    if(own(code).practiced_at){
+      addP(root,'Lau galderak zuzen erantzun dituzu. Erantzunak hautatzea ez da, ordea, gaitasuna autonomiaz menderatzearen froga.','b2-good-note');
+      row(root,button('Hurrengoa: nire ekoizpena',()=>{state.step=3;renderLesson();}));return;
     }
-    const answers = state.quizAnswers.get(code) || {};
-    const tries = state.quizTries.get(code) || 0;
-    info.prompts.forEach((q, i) => {
-      const card = el('fieldset', null, 'b2-quiz-card');
-      card.append(el('legend', q.q));
-      const opts = el('div', null, 'b2-quiz-options');
-      q.a.forEach((option, index) => {
-        const b = button(option, () => {
-          const ans = state.quizAnswers.get(code) || {};
-          ans[i] = index;
-          state.quizAnswers.set(code, ans);
-          state.quizTries.set(code, (state.quizTries.get(code) || 0) + 1);
+    const answers=state.quizAnswers.get(code)||{};
+    const tries=state.quizTries.get(code)||0;
+    const correct=info.prompts.filter((q,index)=>answers[index]===q.correct).length;
+    root.append(el('div',correct+' / '+info.prompts.length+' aukera egoki','b2-practice-count'));
+    info.prompts.forEach((q,i)=>{
+      const card=el('fieldset',null,'b2-quiz-card');
+      card.append(el('legend',(i+1)+'. '+q.q));
+      const meta=el('div',null,'b2-question-meta');
+      meta.append(el('span',q.skill,'b2-skill-tag'),el('span',q.context));
+      card.append(meta);
+      const opts=el('div',null,'b2-quiz-options');
+      q.a.forEach((option,index)=>{
+        const b=button(option,()=>{
+          const next=state.quizAnswers.get(code)||{};
+          next[i]=index;
+          state.quizAnswers.set(code,next);
+          state.quizTries.set(code,(state.quizTries.get(code)||0)+1);
           renderLesson();
-        }, 'b2-option');
-        const selected = answers[i] === index;
-        if (selected) b.classList.add(index === q.correct ? 'is-correct' : 'is-incorrect');
-        b.setAttribute('aria-pressed', String(selected));
+        },'b2-option');
+        if(answers[i]===index)b.classList.add(index===q.correct?'is-correct':'is-incorrect');
+        b.setAttribute('aria-pressed',String(answers[i]===index));
         opts.append(b);
       });
       card.append(opts);
-      if (answers[i] !== undefined) {
-        const right = answers[i] === q.correct;
-        addP(card, (right ? 'Zuzena. ' : 'Berrikusteko. ') + q.why, right ? 'b2-feedback is-correct' : 'b2-feedback is-incorrect');
+      if(answers[i]!==undefined){
+        const ok=answers[i]===q.correct;
+        const feedback=el('div',null,'b2-feedback '+(ok?'is-correct':'is-incorrect'));
+        feedback.setAttribute('role','status');
+        feedback.append(el('strong',ok?'Zuzena':'Berrikusteko'));
+        addP(feedback,q.feedback?.[answers[i]]||q.why,'b2-feedback-body');
+        if(ok)addP(feedback,q.why,'b2-feedback-body');
+        card.append(feedback);
       }
       root.append(card);
     });
-    if (info.prompts.every((q, i) => answers[i] === q.correct)) {
-      row(root, button('Bi galderak egin ditut · gorde', async () => {
-        const today = new Date().toISOString();
-        if (await saveProgress(code, {practiced_at: today, practice_attempts: (own(code).practice_attempts || 0) + Math.max(2, tries)})) {
-          state.step = 3; renderLesson(); say('Praktika orientagarria gorde da.');
-        }
+    if(correct===info.prompts.length){
+      addP(root,'Orain transferitu ikasitakoa egoera berri batera, laguntzarik gabe.','b2-good-note');
+      row(root,button('Praktika gorde eta jarraitu',async()=>{
+        if(await saveProgress(code,{
+          practiced_at:new Date().toISOString(),
+          practice_attempts:(own(code).practice_attempts||0)+Math.max(info.prompts.length,tries)
+        })){state.step=3;renderLesson();say('Praktika orientagarria gorde da.');}
       }));
-    } else addP(root, 'Galdera bakoitzari erantzun; okerreko aukerak zuzentzeko aukera duzu.', 'b2-footnote');
+    }else addP(root,'Aukera bakoitzak azalpen propioa du. Kontuan hartu arrazoiak, ez aukera-zenbakiak bakarrik.','b2-footnote');
   }
   function renderTransfer(code, body) {
     const root = section(body, '4. Erabili: zure adibide propioa');
-    addP(root, QUESTIONS[code].transfer, 'b2-intro');
+    const design=designFor(code);
+    addP(root,design?.transfer_task_eu || QUESTIONS[code].transfer,'b2-intro');
+    if(design){
+      const hints=el('details',null,'b2-read-more');
+      hints.append(el('summary','Neure burua berrikusteko zerrenda'));
+      listValues(hints,design.transfer_checklist_eu,'b2-check-list');
+      root.append(hints);
+    }
     addP(root, 'Idatzi zeure ekoizpena. Hemen gordetakoa zure irakasleak ikusi ahal izango du haren taldeko kidea bazara. Ez dago zuzenketa automatiko akademikorik.', 'b2-footnote');
     if (!own(code).practiced_at) {
       addP(root, 'Praktika orientagarria amaitu behar duzu lehenik.', 'b2-footnote');
@@ -319,12 +361,38 @@
     if (own(code).transferred_at) addP(root, 'Ekoizpena gordeta dago. Berridatzi eta berriro gorde dezakezu.', 'b2-good-note');
     row(root, button(own(code).transferred_at ? 'Ekoizpena eguneratu' : 'Ekoizpena gorde', async () => {
       const value = text.value.trim();
-      if (value.length < 30) { say('Idatzi gutxienez 30 karaktere zure azalpena garatzeko.', true); text.focus(); return; }
+      if(value.length<50){say('Adibidea eta arrazoibidea azaltzeko, idatzi gutxienez 50 karaktere.',true);text.focus();return;}
       const iso = new Date().toISOString();
-      if (await saveProgress(code, {transferred_at: iso,reflection_eu:value})) {
+      if (await saveProgress(code, {transferred_at:own(code).transferred_at||iso,reflection_eu:value})) {
         renderLesson(); say('Zure ekoizpena gorde da. Ez da zuzenketa automatikoa egin.');
       }
     }));
+    if(own(code).transferred_at){
+      const review=section(body,'Atzeratutako berrikuspena');
+      const due=new Date(new Date(own(code).transferred_at).getTime()+72*60*60*1000);
+      if(own(code).reviewed_again_at){
+        addP(review,'Beste egun bateko ekoizpena gordeta: '+day(own(code).reviewed_again_at)+'.','b2-good-note');
+        addP(review,own(code).review_reflection_eu,'b2-copy');
+      }else if(Date.now()<due.getTime()){
+        addP(review,'Itzuli '+day(due)+' egunetik aurrera. Aukeratu aurreko egoera ez bezalako beste bat, eta berreraiki azalpena laguntzarik gabe.');
+      }else{
+        addP(review,'Hiru egun igaro dira. Erabili gaur beste egoera batekin ikasitakoa; ez kopiatu aurreko ekoizpena.','b2-context');
+        const note=el('textarea');note.rows=4;note.maxLength=800;note.setAttribute('aria-label','Geroko ekoizpen autonomoa');
+        note.placeholder='Egoera berria, adibidea eta zergatik aukeratu dudan…';
+        review.append(note);
+        row(review,button('Geroko berrikuspena gorde',async()=>{
+          const answer=note.value.trim();
+          if(answer.length<45){say('Garatu geroko ekoizpena gutxienez 45 karakteretan.',true);note.focus();return;}
+          if(await saveProgress(code,{reviewed_again_at:new Date().toISOString(),review_reflection_eu:answer})){
+            renderLesson();say('Atzeratutako berrikuspena gorde da. Ez da kalifikazio ofiziala.');
+          }
+        }));
+      }
+    }
+    if(own(code).transferred_at){
+      const index=state.units.findIndex(u=>u.entry_code===code);
+      if(state.units[index+1])row(body,button('Hurrengo gaia',()=>openUnit(state.units[index+1].entry_code)));
+    }
   }
   function openUnit(code, scroll = true) {
     if (!state.entries.has(code)) {say('Gaia ezin izan da aurkitu.', true); return;}

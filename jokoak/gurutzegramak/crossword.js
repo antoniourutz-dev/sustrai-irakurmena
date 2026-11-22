@@ -103,7 +103,7 @@
     return {correct,seconds,base,bonus,hints,wrong,total:Math.max(0,base+bonus-hints-wrong)};
   }
   function getStorage(key) {
-    try {return cloud?.storage?.getItem(key) ?? window.localStorage.getItem(key);} catch {return null;}
+    try {return cloud?.storage ? cloud.storage.getItem(key) : window.localStorage.getItem(key);} catch {return null;}
   }
   function setStorage(key,value) {
     try {

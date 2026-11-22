@@ -1,10 +1,14 @@
 /* SUSTRAI PWA service worker */
-const CACHE_VERSION = 'sustrai-pwa-v54-home-refresh';
+const CACHE_VERSION = 'sustrai-pwa-v55-daily-crosswords';
 const SHELL = [
   '/',
   '/index.html',
   '/jokoak/',
   '/jokoak/index.html',
+  '/jokoak/gurutzegramak/',
+  '/jokoak/gurutzegramak/index.html',
+  '/jokoak/gurutzegramak/crossword.css',
+  '/jokoak/gurutzegramak/crossword.js',
   '/jokoak/jokoak.css',
   '/jokoak/teusk/',
   '/jokoak/teusk/index.html',
@@ -166,6 +170,7 @@ self.addEventListener('fetch', (event) => {
           if (cached) return cached;
           if (url.pathname.startsWith('/ivap/')) return caches.match('/ivap/index.html');
           if (url.pathname.startsWith('/habe/')) return caches.match('/habe/index.html');
+          if (url.pathname.startsWith('/jokoak/gurutzegramak/')) return caches.match('/jokoak/gurutzegramak/index.html');
           if (url.pathname.startsWith('/azterketak/')) return caches.match('/azterketak/index.html');
           if (url.pathname.startsWith('/gramatika/')) return caches.match('/gramatika/index.html');
           if (url.pathname.startsWith('/ariketak/')) return caches.match('/ariketak/index.html');

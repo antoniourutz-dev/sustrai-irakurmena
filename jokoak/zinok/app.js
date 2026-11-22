@@ -6,20 +6,12 @@
  const z=window.ZinokCore, data=window.ZinokSynonyms;
  if(!root||!z||!Array.isArray(data))return;
  const KEY='sustrai-jokoak-zinok-v1';
- const FEEDBACK_MS=850;
- let feedbackTimer=null;
- let pendingKeyboard=false;
- function clearFeedback(){
-   if(feedbackTimer!==null){window.clearTimeout(feedbackTimer);feedbackTimer=null;}
-   pendingKeyboard=false;
- }
  const descriptions={B1:'1. MAILA · B1',B2:'2. MAILA · B2',C1:'3. MAILA · C1',C2:'4. MAILA · C2',EX:'5. MAILA · EXPERT',MA:'6. MAILA · MAISU'};
  const state={screen:'menu',level:'B2',questions:[],index:0,answers:[],startedAt:0,searchTerm:'',searchResults:null};
  const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
  const button=(action,label,light=false)=>'<button type="button" class="zinok-button'+(light?' zinok-button--light':'')+'" data-action="'+action+'">'+label+'</button>';
  const hero=document.querySelector?.('.zinok-main .areas-hero');
  function setScreen(name){
-   if(name!=='quiz')clearFeedback();
    state.screen=name;
    if(hero)hero.hidden=name==='quiz'||name==='summary';
  }
@@ -81,12 +73,12 @@
          '<span>'+esc(option)+esc(verdict)+'</span></button>';
      }).join('')+'</div>'+
      (answered?'<span class="sr-only" role="status" aria-live="polite">'+
-       (choice===q.correctIndex?'Zuzena':'Okerra')+'</span>':'')+
+       (choice===q.correctIndex?'Zuzena':'Okerra')+'</span>'+
+       '<div class="zinok-actions">'+button('next',state.index+1<state.questions.length?'Hurrengoa':'Ikusi emaitza')+'</div>':'')+
      '</div>';
  }
  function start(level){
    if(!z.LEVELS.includes(level))return;
-   clearFeedback();
    state.level=level;state.questions=z.quiz(data,level,10);
    state.answers=[];state.index=0;state.startedAt=Date.now();
    if(state.questions.length!==10){
@@ -102,22 +94,17 @@
    const q=state.questions[state.index];
    if(!Number.isInteger(index)||index<0||index>=q.options.length)return;
    state.answers[state.index]=index;
-   pendingKeyboard=keyboardActivation;
-   // Show both selected verdict and correct choice, as in the original game;
-   // keep explanations and the mistakes list for the final summary only.
+   // Keep the red/green result on screen until the learner presses Hurrengoa.
    renderQuiz();
-   const answeredQuestion=state.index;
-   feedbackTimer=window.setTimeout(()=>{
-     feedbackTimer=null;
-     if(state.screen!=='quiz'||state.index!==answeredQuestion)return;
-     const moveKeyboardFocus=pendingKeyboard;
-     pendingKeyboard=false;
-     if(state.index+1<state.questions.length){
-       state.index++;
-       renderQuiz();
-       if(moveKeyboardFocus)root.querySelector?.('.zinok-option')?.focus?.({preventScroll:true});
-     }else finish();
-   },FEEDBACK_MS);
+   if(keyboardActivation)root.querySelector?.('[data-action="next"]')?.focus?.({preventScroll:true});
+ }
+ function next(keyboardActivation=false){
+   if(state.screen!=='quiz'||!Number.isInteger(state.answers[state.index]))return;
+   if(state.index+1<state.questions.length){
+     state.index++;
+     renderQuiz();
+     if(keyboardActivation)root.querySelector?.('.zinok-option')?.focus?.({preventScroll:true});
+   }else finish();
  }
  function finish(){
    if(state.screen!=='quiz'||state.answers.length!==state.questions.length)return;
@@ -174,6 +161,7 @@
    if(action==='home'){renderMenu();return}
    if(action==='quiz'){start(btn.dataset.level);return}
    if(action==='answer'){answer(Number(btn.dataset.index),event.detail===0);return}
+   if(action==='next'){next(event.detail===0);return}
    if(action==='again'){start(state.level);return}
    if(action==='search'){state.searchResults=null;state.searchTerm='';renderSearch();root.querySelector?.('#zinokTerm')?.focus?.()}
  });

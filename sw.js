@@ -1,5 +1,5 @@
 /* SUSTRAI PWA service worker */
-const CACHE_VERSION = 'sustrai-pwa-v38-syntax-live';
+const CACHE_VERSION = 'sustrai-pwa-v41-question-nav';
 const SHELL = [
   '/',
   '/index.html',
@@ -59,6 +59,7 @@ const SHELL = [
   '/ariketak/index.html',
   '/ariketak/catalog.js',
   '/ariketak/catalog.css',
+  '/practice-ui.css',
   '/aditzak/',
   '/aditzak/index.html',
   '/aditzak/app.js',

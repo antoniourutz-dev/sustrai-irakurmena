@@ -130,3 +130,68 @@ Kokagunea/helmuga/jatorria; kantitatearen zehaztasuna eta nahikotasuna; konparaz
 3 ikasgai eta 12 ariketa original berri datu-basean, guztira 8 ikasgai eta 32 item.
 Orain frontendak ikasgai-diseinuak kontsultatuta aktibatzen ditu jarduera gidatuak, datu-baseko pilot_active argazki zaharra aldatzeko beharrik gabe.
 Gai berriak pilot_draft dira, eta irakasleak independente egiaztatu beharko ditu.
+
+## 8. Idazkien bertsioen historia eta argitaratze-atea
+
+### Bertsioen kontratua
+
+smx_grammar_b2_work_versions taulak ikaslearen ekoizpen bakoitza gorde du
+aldagaitz: initial (lehen saiakera), revision (berridazketa) eta delayed
+(72 orduren ondorengo beste egoera bateko ekoizpena). Jatorrizkoak eta
+berridazketak ez dira isilean elkarren ordez idazten.
+
+smx_b2_save_written_work RPC funtzioak transakzio bakarrean eguneratzen ditu
+ikaslearen aurrerapena eta bertsioen historia. Authenticated rolak
+funtzioa exekutatu dezake; ez du bertsioen taulan INSERT zuzena
+egiteko baimenik. Ikasleak bere historia eta taldeko irakasle
+baimenduak ikaslearena irakur ditzakete. Guest moduan egindako lana
+saioan bakarrik dago eta ez da hodeira sinkronizatzen.
+
+Berrikuspen atzeratua ezin da datu-basean 72 ordu baino lehen gorde;
+berridazketa berri bat eginez gero geroko berrikuspena berriz egin behar
+da. Zaharrak historian gordetzen dira.
+
+### 2026-11-22ko datu-proba objektiboak
+
+- 8 unitate gidatu, 32 ariketa, lau trebetasun-mota unitate bakoitzean.
+- 0 eduki-egitura abisu SQL kontrolarekin; 8/8 ikasgai pilot_draft.
+- 31 gaiko ibilbidea mantenduta.
+- 8/8 B2 taula RLSrekin.
+- Anon ezin du bertsioen historia irakurri.
+- Authenticated rolak ezin du bertsio faltsurik INSERT zuzenaz sortu.
+- Authenticated rolak RPC gordetzeko baimena du.
+- GitHub Actionsen 8 proba estatiko gainditu dira, baina ez dute
+  nabigatzaileko edo kontu errealeko E2E proba ordezkatzen.
+
+### Argitaratzeko ezinbesteko probak (ez dira egin)
+
+1. Saioa hasi gabeko erabiltzaileak ikasgaiak eta ariketak osatu
+   eta datuak hodeian gorde direla ez adieraztea.
+2. Ikaslearekin, praktika + lehen testua gorde eta beste gailutik
+   berreskuratzea; bertsio bat soilik sortzen dela egiaztatzea.
+3. Testu berdina berriz gordetzeak bertsio bikoizturik ez sortzea.
+4. Berridazketa berriak jatorrizkoa historian mantentzea.
+5. 72 ordu baino lehen geroko ekoizpena gordetzeko saioa baztertzea.
+6. Epea igarotakoan geroko ekoizpena baimentzea eta historia eguneratzea.
+7. Talde bereko irakasleak feedbacka ematea eta ikasleak irakurtzea.
+8. Beste talde bateko irakasleak ekoizpen hori ez irakurtzea.
+9. Talde-kode baliogabearekin lotura ez sortzea.
+10. Mugikorreko ekintza nagusiak, teklatuaren fokua eta
+    eskalatutako testuaren irakurgarritasuna.
+11. Service worker-aren aurreko bertsioa eguneratu ondoren,
+    gramatikako ibilbidearen estekak modu egokian irekitzea.
+12. Euskaltzaindiaren iturriak eta 32 ariketen distraktoreak
+    bigarren irakurle independente batek berrikustea.
+
+Protokoloek eskatzen duten auditore independentea eta transferentzia
+errealaren ebidentzia falta dira. Ez erabili 'gaitasuna menderatua'
+etiketa irakurketa edo aukera-galdera hutsengatik.
+
+### Aurreko bertsioarekiko bateragarritasuna
+
+Ekoizpeneko JS zaharrak lehen bost gaiak soilik erabiltzen ditu.
+Horregatik, bigarren moduluko 3 unitate berriak datu-basean prestatuak
+daude, baina path_units.pilot_active flag historikoa ez da
+ekoizpenean aldatzen web-bertsio berriaren hedapena egiaztatu arte.
+Bertsio berriak lesson_designs eta practice_items taulen bidez
+dinamikoki aurkitzen ditu aktibo dauden zortzi ikasgaiak.

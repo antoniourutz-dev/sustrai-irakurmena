@@ -10,8 +10,11 @@
  const state={screen:'menu',level:'B2',questions:[],index:0,answers:[],startedAt:0,searchTerm:'',searchResults:null};
  const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
  const button=(action,label,light=false)=>'<button type="button" class="zinok-button'+(light?' zinok-button--light':'')+'" data-action="'+action+'">'+label+'</button>';
- const focus=action=>root.querySelector?.('[data-action="'+action+'"]')?.focus?.();
- const notice='<p class="zinok-notice">Sinonimoek ez dute zertan testuinguru guztietan esanahi bera izan. Erantzunak ZINOKen jatorrizko bankuaren araberako proposamenak dira; egiaztapen akademikoa egiteko dago.</p>';
+ const hero=document.querySelector?.('.zinok-main .areas-hero');
+ function setScreen(name){
+   state.screen=name;
+   if(hero)hero.hidden=name==='quiz'||name==='summary';
+ }
  function getHistory(){
    try{const value=cloud?.storage?.getItem(KEY);const list=JSON.parse(value||'[]');return Array.isArray(list)?list:[]}
    catch{return []}
@@ -34,7 +37,7 @@
    catch(e){console.warn('ZINOK historia:',e)}
  }
  function renderMenu(){
-   state.screen='menu';
+   setScreen('menu');
    root.innerHTML='<div class="zinok-panel"><span class="zinok-overline">ZINOK · SEI MAILA</span>'+
      '<h2>Sinonimoen erronka</h2>'+
      '<p class="zinok-muted">Aukeratu maila bat. Hamar galderatan sinonimoak ezagutu eta erantzunak berrikusi ahal izango dituzu.</p>'+
@@ -46,31 +49,22 @@
          '<strong>'+number+'. MAILA</strong><small>'+title+' · '+n+' sinonimo-talde</small></button>';
      }).join('')+'</div>'+
      '<div class="zinok-actions">'+button('search','⌕ Hitz bilatzailea',true)+'</div>'+
-     notice+renderHistory()+'</div>';
+     renderHistory()+'</div>';
  }
  function renderQuiz(){
    const q=state.questions[state.index];
    if(!q){renderMenu();return}
-   const choice=state.answers[state.index],answered=Number.isInteger(choice);
    const pct=Math.round(state.index/state.questions.length*100);
-   root.innerHTML='<div class="zinok-panel"><div class="zinok-top"><span class="zinok-overline">'+
-     esc(descriptions[state.level])+'</span><span class="zinok-info">Galdera '+(state.index+1)+' / '+state.questions.length+'</span></div>'+
-     '<div class="zinok-progress" role="progressbar" aria-label="Aurrerapena" aria-valuemin="0" aria-valuemax="'+
+   root.innerHTML='<div class="zinok-panel zinok-panel--quiz">'+
+     '<div class="zinok-top"><span class="zinok-overline">'+esc(descriptions[state.level])+
+     '</span><span class="zinok-info">Galdera '+(state.index+1)+' / '+state.questions.length+'</span></div>'+
+     '<div class="zinok-progress" role="progressbar" aria-label="Galderen aurrerapena" aria-valuemin="0" aria-valuemax="'+
      state.questions.length+'" aria-valuenow="'+state.index+'"><span style="width:'+pct+'%"></span></div>'+
-     '<p class="zinok-muted">Hautatu hitz honen sinonimoa.</p><h2 class="zinok-question">'+esc(q.word)+'</h2>'+
-     '<div class="zinok-options">'+q.options.map((option,i)=>{
-       const cl=!answered?'':i===q.correctIndex?' is-correct':i===choice?' is-wrong':' is-muted';
-       const verdict=!answered?'':i===q.correctIndex?' · Zuzena':i===choice?' · Okerra':'';
-       return '<button class="zinok-option'+cl+'" type="button" data-action="answer" data-index="'+i+'"'+(answered?' disabled':'')+'>'+
-         '<span class="zinok-letter">'+String.fromCharCode(65+i)+'</span><span>'+esc(option)+esc(verdict)+'</span></button>';
-     }).join('')+'</div>'+
-     (answered?'<div class="zinok-feedback'+(choice===q.correctIndex?'':' is-wrong')+'" role="status">'+
-       '<strong>'+(choice===q.correctIndex?'✓ Zuzena':'✕ Okerra')+'</strong>'+
-       'Jokoaren gakoa: <strong>'+esc(q.correctAnswer)+'</strong>'+
-       (q.knownAlternatives.length>1?'<p>Jatorrizko taldeko beste sinonimoak: '+
-         esc(q.knownAlternatives.filter(x=>x!==q.correctAnswer).join(', '))+'</p>':'')+
-       '</div><div class="zinok-actions">'+button('next',state.index+1<state.questions.length?'Hurrengo galdera':'Ikusi emaitza')+
-       '</div>':'')+'</div>';
+     '<h2 id="zinokPrompt" class="zinok-question">'+esc(q.word)+'</h2>'+
+     '<p class="zinok-muted">Hautatu sinonimoa.</p><div class="zinok-options" role="group" aria-labelledby="zinokPrompt">'+
+     q.options.map((option,i)=>'<button class="zinok-option" type="button" data-action="answer" data-index="'+i+'">'+
+       '<span class="zinok-letter">'+String.fromCharCode(65+i)+'</span><span>'+esc(option)+'</span></button>'
+     ).join('')+'</div></div>';
  }
  function start(level){
    if(!z.LEVELS.includes(level))return;
@@ -81,37 +75,49 @@
        '<p role="alert" class="zinok-error">Ez dago nahikoa galdera bereizi maila honetan.</p>'+
        '<div class="zinok-actions">'+button('home','Hasierara')+'</div></div>';return;
    }
-   state.screen='quiz';renderQuiz();
+   setScreen('quiz');renderQuiz();
+   window.scrollTo?.({top:0,behavior:'auto'});
  }
- function answer(index){
+ function answer(index,keyboardActivation=false){
    if(state.screen!=='quiz'||state.answers[state.index]!==undefined)return;
    const q=state.questions[state.index];
    if(!Number.isInteger(index)||index<0||index>=q.options.length)return;
-   state.answers[state.index]=index;renderQuiz();focus('next');
+   state.answers[state.index]=index;
+   if(state.index+1<state.questions.length){
+     state.index++;
+     renderQuiz();
+     // Keyboard-only focus: stay on the next answer, never scroll to feedback.
+     if(keyboardActivation)root.querySelector?.('.zinok-option')?.focus?.({preventScroll:true});
+   }else finish();
  }
- function next(){
-   if(state.screen!=='quiz'||state.answers[state.index]===undefined)return;
-   if(state.index+1<state.questions.length){state.index++;renderQuiz();focus('answer');return}
+ function finish(){
+   if(state.screen!=='quiz'||state.answers.length!==state.questions.length)return;
    const rows=state.questions.map((q,i)=>({
      id:q.id,word:q.word,selected:q.options[state.answers[i]],correctAnswer:q.correctAnswer,
      correct:q.correctIndex===state.answers[i]
    }));
    const seconds=Math.max(0,Math.round((Date.now()-state.startedAt)/1000));
-   const s=z.score(rows);saveResult(rows,seconds);
-   state.screen='summary';
+   const result=z.score(rows);
+   saveResult(rows,seconds);
+   setScreen('summary');
    const wrong=rows.filter(r=>!r.correct);
-   root.innerHTML='<div class="zinok-panel"><span class="zinok-overline">ENTRENAMENDUA AMAITU DA</span>'+
-     '<h2>'+esc(descriptions[state.level])+'</h2><div class="zinok-score">'+s.correct+' / '+s.total+'</div>'+
-     '<p>Zuzenak: <strong>'+s.correct+'</strong> · Oker: <strong>'+s.wrong+'</strong> · Iraupena: '+
+   const details=wrong.length?
+     '<details class="zinok-review-disclosure"><summary>Ikusi '+wrong.length+' hutsegiteak</summary>'+
+     '<ul class="zinok-review">'+wrong.map(r=>
+       '<li><strong>'+esc(r.word)+'</strong>'+
+       '<p>Zure aukera: <span class="zinok-mark zinok-mark--wrong">'+esc(r.selected)+'</span></p>'+
+       '<p>Erantzun-gakoa: <span class="zinok-mark zinok-mark--correct">'+esc(r.correctAnswer)+'</span></p></li>'
+     ).join('')+'</ul></details>':
+     '<p class="zinok-success">✓ Galdera guztiak asmatu dituzu!</p>';
+   root.innerHTML='<div class="zinok-panel"><span class="zinok-overline">SAIOA AMAITUTA</span>'+
+     '<h2>'+esc(descriptions[state.level])+'</h2><div class="zinok-score">'+result.correct+' / '+result.total+'</div>'+
+     '<p>Zuzenak: <strong>'+result.correct+'</strong> · Oker: <strong>'+result.wrong+'</strong> · Iraupena: '+
      Math.floor(seconds/60)+' min '+seconds%60+' s</p>'+
-     (wrong.length?'<h3>Berrikusi zure erantzunak</h3><ul class="zinok-review">'+wrong.map(r=>
-       '<li><strong>'+esc(r.word)+'</strong><p>Zure aukera: '+esc(r.selected)+'</p><p>Jokoaren gakoa: <strong>'+
-         esc(r.correctAnswer)+'</strong></p></li>').join('')+'</ul>':'<p>Jokoaren gako guztiak asmatu dituzu!</p>')+
-     '<p class="zinok-muted">Praktika: aukeratu landutako bi sinonimo eta idatzi testuinguru egokiko esaldi bana.</p>'+
-     notice+'<div class="zinok-actions">'+button('again','Berriro jokatu')+button('home','Beste maila bat',true)+'</div></div>';
+     details+'<div class="zinok-actions">'+button('again','Berriro jokatu')+
+       button('home','Beste maila bat',true)+'</div></div>';
  }
  function renderSearch(){
-   state.screen='search';
+   setScreen('search');
    const result=state.searchResults;
    root.innerHTML='<div class="zinok-panel"><span class="zinok-overline">ZINOK · HIZTEGI KONTSULTA</span>'+
      '<h2>Hitz bilatzailea</h2><p class="zinok-muted">Bilatu hitzak sei mailetako 607 sinonimo-taldeetan.</p>'+
@@ -121,7 +127,7 @@
      (result!==null?'<p class="zinok-info" role="status">'+result.length+' emaitza erakutsi dira (gehienez 30).</p>'+
        '<ul class="zinok-lookup-results">'+result.map(g=>'<li><strong>'+esc(g.words.join(' · '))+
          '</strong><p class="zinok-small">'+esc(g.level)+' · jatorrizko ZINOK taldea</p></li>').join('')+'</ul>':'')+
-     notice+'<div class="zinok-actions">'+button('home','← Sei mailetara itzuli',true)+'</div></div>';
+     '<div class="zinok-actions">'+button('home','← Sei mailetara itzuli',true)+'</div></div>';
  }
  function lookup(value){
    state.searchTerm=String(value||'').trim().slice(0,70);
@@ -138,8 +144,7 @@
    const action=btn.dataset.action;
    if(action==='home'){renderMenu();return}
    if(action==='quiz'){start(btn.dataset.level);return}
-   if(action==='answer'){answer(Number(btn.dataset.index));return}
-   if(action==='next'){next();return}
+   if(action==='answer'){answer(Number(btn.dataset.index),event.detail===0);return}
    if(action==='again'){start(state.level);return}
    if(action==='search'){state.searchResults=null;state.searchTerm='';renderSearch();root.querySelector?.('#zinokTerm')?.focus?.()}
  });

@@ -148,11 +148,13 @@ The six B2 `Indikatiboa lehenaldian` activity revisions **2** have been released
 - Ikus `docs/pilotoak/20261122_JOKOAK_TEUSK_INTEGRAZIOA.md` argitaratu aurreko probetarako.
 
 
-## ZINOK · Sinonimoen pilotua (2026-11-22)
 
-- `/jokoak/zinok/` — lau barne-sorta, 10 galderako sinonimo-jokoa, Mezu Zuzentzailea eta hitz-bilatzailea.
-- Sinonimoen erronkan eta bilatzailean **`public.synonimoak_2`** taula erabiltzen da, autentifikatutako SUSTRAI erabiltzaileek soilik irakurrita (oraingo GRANT/RLS baimenak ez dira aldatu).
-- Jatorrizko `zinok/src/services/puzzleService.ts` kodeko 35 ariketa hautatu dira piloturako; 66–100 behin-behineko errepikapenak eta hautu zalantzazkoak kanpo daude.
-- Azken saioen laburpena `SustraiCloud` bidez gordetzen da `sustrai-jokoak-zinok-v1` gakoarekin (erabiltzaile-kontua: `sr_app_state`; gonbidatua: nabigatzailean).
-- Arau-akatsak, onargarriak izan litezkeen aldaerak eta bestelako estilo-aukerak ez dira nahasten: pilotuko gakoa ez da egiaztapen ofiziala.
-- Ikusi `docs/pilotoak/20261122_JOKOAK_ZINOK_INTEGRAZIOA.md`; ZINOK jatorrizko React aplikazioa ez da ukitu.
+## ZINOK · Sei mailako sinonimoen integrazioa (2026-11-22)
+
+- `/jokoak/zinok/`: ZINOKen **sei maila originalak** (B1, B2, C1, C2, Expert eta Maisu), 10 galderako partida bakoitzean eta hitz-bilatzailea.
+- Jatorria: `antoniourutz-dev/zinok/src/data/synonyms.ts`, **607 talde**; maila eta hitz multzo berak. Jatorrizko ID bikoiztuak `uid` bereiziarekin identifikatu dira.
+- **Mezu Zuzentzailea** aukera kenduta. Ez da lehengo `synonimoak_2` taulako 4 multzoko sailkapen desegokia erabiltzen.
+- Datuak fitxategi estatikoan, ez dago Supabaseko taularen kontsultarik edo SQL aldaketarik; gonbidatuek ere jolastu ahal dute.
+- Aurreko saioen laburpenak `SustraiCloud` bidez gordetzen dira, `sustrai-jokoak-zinok-v1` gakoan.
+- Materialaren hizkuntza-egiaztapena egiteko dago, eta ez da ebaluazio ofiziala.
+- Ikusi `docs/pilotoak/20261122_JOKOAK_ZINOK_INTEGRAZIOA.md`.

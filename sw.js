@@ -1,5 +1,5 @@
 /* SUSTRAI PWA service worker */
-const CACHE_VERSION = 'sustrai-pwa-v46-zinok-pilot';
+const CACHE_VERSION = 'sustrai-pwa-v47-zinok-six-levels';
 const SHELL = [
   '/',
   '/index.html',
@@ -14,7 +14,7 @@ const SHELL = [
   '/jokoak/zinok/index.html',
   '/jokoak/zinok/zinok.css',
   '/jokoak/zinok/core.js',
-  '/jokoak/zinok/puzzles.js',
+  '/jokoak/zinok/data.js',
   '/jokoak/zinok/app.js',
   '/manifest.webmanifest',
   '/theme.css',

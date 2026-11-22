@@ -99,12 +99,13 @@
   }
   function card(top,title,meta,action,handler,tag=null) {
     const btn=make('button',null,'practice-card');
+    if (meta === 'Ariketak prestatzen') btn.classList.add('is-pending');
     btn.type='button';
     btn.append(make('span',top,'practice-card-number'));
     if(tag) btn.append(make('span',tag,'practice-tag'+(tag==='Berrikusteko'?' practice-tag--draft':'')));
     btn.append(make('strong',title,'practice-card-title'),make('span',meta,'practice-card-meta'));
     const foot=make('span',null,'practice-card-foot');
-    foot.append(make('span',action),make('span','→'));
+    foot.append(make('span',action));
     btn.append(foot);
     btn.addEventListener('click',handler);
     return btn;
@@ -130,7 +131,7 @@
     status(topics.length+' atal · '+shown.length+' ikusgai. Aukeratu atala ariketak ikusteko.');
     shown.forEach((s)=>{
       const tag=s.editorial_state==='draft'?'Jarduerak':null;
-      $('practiceGrid').append(card(String(s.position).padStart(2,'0'),s.title_eu,tag?'Jarduerak eskuragarri, baimenaren arabera':'Ariketak prestatzen', 'Ariketak ikusi',()=>go(state.level,b.code,s.code),tag));
+      $('practiceGrid').append(card(String(s.position).padStart(2,'0'),s.title_eu,tag?'Jarduerak eskuragarri, baimenaren arabera':'Ariketak prestatzen', tag ? 'Ariketak ikusi' : 'Atalaren xehetasunak',()=>go(state.level,b.code,s.code),tag));
     });
     if(!shown.length)empty('Ez da bat datorren atalik aurkitu. Probatu beste bilaketa bat.');
   }
@@ -155,7 +156,7 @@
     }
     for(const a of list){
       const article=make('article',null,'practice-card practice-card--exercise');
-      article.append(make('span',String(a.position).padStart(2,'0')+' · '+(a.prompt_json?.mechanism_code||a.kind||'Ariketa'),'practice-card-number'));
+      article.append(make('span','Ariketa','practice-card-number'));
       const pilot=state.pilotVersions.has(a.id);
       const badge=make('span',pilot?'Jarduera erabilgarri':a.status==='approved'?'Argitaratua':'Barne-aurrebista',
         'practice-tag'+(a.status==='approved'||pilot?'':' practice-tag--draft'));
@@ -168,7 +169,7 @@
         const aLink=make('a',pilot?'Hasi ariketa':a.status==='approved'?'Hasi ariketa':'Berrikusi ariketa');
         const from=location.pathname+location.search;
         aLink.href='/aditzak/?activity='+encodeURIComponent(a.id)+'&from='+encodeURIComponent(from);
-        foot.append(aLink,make('span','→'));
+        foot.append(aLink);
       } else foot.append(make('span','Ariketa-motorra prestatzen'));
       article.append(foot);
       $('practiceGrid').append(article);

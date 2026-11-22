@@ -60,7 +60,7 @@
      '<p class="zinok-muted">Hautatu hitz honen sinonimoa.</p><h2 class="zinok-question">'+esc(q.word)+'</h2>'+
      '<div class="zinok-options">'+q.options.map((option,i)=>{
        const cl=!answered?'':i===q.correctIndex?' is-correct':i===choice?' is-wrong':' is-muted';
-       const verdict=!answered?'':i===q.correctIndex?' · Zuzena (jokoaren arabera)':i===choice?' · Okerra (jokoaren arabera)':'';
+       const verdict=!answered?'':i===q.correctIndex?' · Zuzena':i===choice?' · Okerra':'';
        return '<button class="zinok-option'+cl+'" type="button" data-action="answer" data-index="'+i+'"'+(answered?' disabled':'')+'>'+
          '<span class="zinok-letter">'+String.fromCharCode(65+i)+'</span><span>'+esc(option)+esc(verdict)+'</span></button>';
      }).join('')+'</div>'+

@@ -41,3 +41,14 @@ test('Jatorrizko taldeen datuak ez dira aldatzen',()=>{
  assert.equal(JSON.stringify(groups),before);
 });
 test('Lortutako emaitza didaktikoa da',()=>assert.deepEqual(z.score([{correct:true},{correct:false}]),{correct:1,total:2,wrong:1}));
+
+test('ZINOK erantzun-markak laburrak dira, gehigarririk gabe',()=>{
+ const fs=require('node:fs');
+ const path=require('node:path');
+ const app=fs.readFileSync(path.join(__dirname,'../jokoak/zinok/app.js'),'utf8');
+ const page=fs.readFileSync(path.join(__dirname,'../jokoak/zinok/index.html'),'utf8');
+ assert.equal(app.includes('(jokoaren arabera)'),false);
+ assert.equal(app.includes(' · Zuzena'),true);
+ assert.equal(app.includes(' · Okerra'),true);
+ assert.equal(page.includes('zinok/app.js?v=20261122-zinok3'),true);
+});

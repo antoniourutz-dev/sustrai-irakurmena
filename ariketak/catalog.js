@@ -113,7 +113,7 @@
     const blocks=state.blocks.filter(b => b.level === state.level).sort(sorted);
     $('catalogTitle').textContent = state.level+' · Aukeratu blokea';
     status(blocks.length ? blocks.length + ' bloke · hautatu bat atalak ikusteko.' : 'Ez dago blokerik maila honetan.');
-    if(!blocks.length) {empty('C2ko ariketa-blokeak prestatzen ari gara. Oraingoz ez dago argitaratzeko eduki antolaturik.');return;}
+    if(!blocks.length) {empty('Oraingoz ez dago maila honetako ariketa-blokerik.');return;}
     blocks.forEach((b,i)=>{
       const count=state.sections.filter(s=>s.block_code===b.code).length;
       const label=count+' atal · edukien sailkapena';
@@ -143,11 +143,9 @@
   function renderExercises(list, token) {
     if(token!==state.token || !state.section) return;
     clear();
-    const approved=list.filter(x=>x.status==='approved').length;
+    const approved=list.filter(x=>x.status==='approved'&&!state.pilotVersions.has(x.id)).length;
     const pilot=list.filter(x=>state.pilotVersions.has(x.id)).length;
-    const drafts=list.filter(x=>x.status!=='approved'&&!state.pilotVersions.has(x.id)).length;
-    status(approved+' ariketa egiaztatu · '+pilot+' jarduera erabilgarri'
-      +(drafts?' · '+drafts+' barne-zirriborro':''));
+    status((approved+pilot)+' jarduera eskuragarri');
     if(!list.length){
       if(!cloud?.user())empty('Ariketak ikusteko, hasi saioa. Katalogoaren atalak konturik gabe kontsulta daitezke.',true);
       else empty('Atal honetan oraindik ez dago zure kontuarentzat eskuragarri dagoen ariketarik.');
@@ -157,19 +155,17 @@
       const article=make('article',null,'practice-card practice-card--exercise');
       article.append(make('span',String(a.position).padStart(2,'0')+' · '+(a.prompt_json?.mechanism_code||a.kind||'Ariketa'),'practice-card-number'));
       const pilot=state.pilotVersions.has(a.id);
-      const badge=make('span',pilot?'Jarduera erabilgarri':a.status==='approved'?'Argitaratua':'Barne-aurrebista',
-        'practice-tag'+(a.status==='approved'||pilot?'':' practice-tag--draft'));
+      const badge=make('span','Jarduera eskuragarri','practice-tag');
       article.append(badge,make('h3',a.prompt_json?.title_eu || 'Jarduera','practice-card-title'));
       article.append(make('p',(a.itemCount??0)+' galdera · '
-        +(pilot?'Erantzunak eta iradokizunak gordetzeko aukera.':a.status==='approved'
-          ?'Ikaslearentzako jarduera':'Barne-aurrebista, ez argitaratua.'),'practice-card-meta'));
+        +'Erantzunak gordetzeko aukera.','practice-card-meta'));
       const foot=make('div',null,'practice-card-foot');
-      if(state.block.endsWith('-ADI')){
-        const aLink=make('a',pilot?'Hasi ariketa':a.status==='approved'?'Hasi ariketa':'Berrikusi ariketa');
+      {
+        const aLink=make('a','Hasi ariketa');
         const from=location.pathname+location.search;
         aLink.href='/aditzak/?activity='+encodeURIComponent(a.id)+'&from='+encodeURIComponent(from);
         foot.append(aLink,make('span','→'));
-      } else foot.append(make('span','Ariketa-motorra prestatzen'));
+      }
       article.append(foot);
       $('practiceGrid').append(article);
     }
@@ -188,13 +184,16 @@
       const acts=check(await state.client.from('smx_activities')
         .select('id,kind,code').in('id',ids).limit(300));
       const pilotRows=check(await state.client.from('smx_aditzak_pilot_releases')
-        .select('activity_version_id').eq('active',true).limit(100));
+        .select('activity_version_id').eq('active',true).limit(1000));
       state.pilotVersions=new Set(pilotRows.map(x=>x.activity_version_id));
       const versions=check(await state.client.from('smx_activity_versions')
         .select('id,activity_id,revision,prompt_json,status').in('activity_id',ids).order('revision',{ascending:false}).limit(500));
       if(token!==state.token) return;
       const byAct=new Map();
-      versions.forEach(v=>{if(!byAct.has(v.activity_id))byAct.set(v.activity_id,v)});
+      versions.forEach(v=>{
+        if(v.status!=='approved' && !state.pilotVersions.has(v.id)) return;
+        if(!byAct.has(v.activity_id))byAct.set(v.activity_id,v);
+      });
       const actById=new Map(acts.map(a=>[a.id,a]));
       const visible=links.flatMap(l=>{
         const a=actById.get(l.activity_id),v=byAct.get(l.activity_id);

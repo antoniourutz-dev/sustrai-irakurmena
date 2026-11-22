@@ -1,5 +1,5 @@
 /* SUSTRAI PWA service worker */
-const CACHE_VERSION = 'sustrai-pwa-v49-mintzakats-clean-feedback';
+const CACHE_VERSION = 'sustrai-pwa-v50-b2-guided-path';
 const SHELL = [
   '/',
   '/index.html',
@@ -73,6 +73,10 @@ const SHELL = [
   '/azterketak/index.html',
   '/gramatika/',
   '/gramatika/index.html',
+  '/gramatika/ibilbidea/',
+  '/gramatika/ibilbidea/index.html',
+  '/gramatika/ibilbidea/style.css',
+  '/gramatika/ibilbidea/app.js',
   '/gramatika/gramatika.css',
   '/gramatika/gramatika.js',
   '/ariketak/',

@@ -15,6 +15,7 @@
  const esc=text=>String(text??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
  const btn=(action,label,extra='')=>'<button type="button" class="zinok-button'+(extra?' zinok-button--light':'')+'" data-action="'+action+'">'+label+'</button>';
  const back=()=>'<div class="zinok-actions">'+btn('home','← Hasierara',true)+'</div>';
+ const focusAction=action=>root.querySelector?.('[data-action="'+action+'"]')?.focus?.();
  const notice=()=>'<p class="zinok-notice">Sinonimia adieraren eta testuinguruaren araberakoa da. Jokoaren gakoak <strong>proposamen didaktikoak</strong> dira; materiala berrikusteko dago.</p>';
  function history(){
    try{const records=JSON.parse(cloud.storage.getItem(STORE_KEY)||'[]');return Array.isArray(records)?records:[];}catch{return [];}
@@ -116,11 +117,11 @@
    if(state.screen!=='quiz'||state.answers[state.qIndex]!==undefined)return;
    const q=state.questions[state.qIndex];
    if(!Number.isInteger(index)||index<0||index>=q.options.length)return;
-   state.answers[state.qIndex]=index;renderQuiz();
+   state.answers[state.qIndex]=index;renderQuiz();focusAction('next-quiz');
  }
  function nextQuiz(){
    if(state.answers[state.qIndex]===undefined)return;
-   if(state.qIndex<state.questions.length-1){state.qIndex++;renderQuiz();}
+   if(state.qIndex<state.questions.length-1){state.qIndex++;renderQuiz();focusAction('answer');}
    else{
      const answers=state.questions.map((q,i)=>({id:q.sourceId,word:q.word,selected:q.options[state.answers[i]],
        key:q.correctAnswer,correct:q.correctIndex===state.answers[i]}));
@@ -192,7 +193,7 @@
    state.activeTarget=index;
    const t=p.targets[index];
    state.puzzleOptions=z.shuffle([t.zuzena,...t.distraktoreak]);
-   state.puzzleAnswer=null;renderPuzzle();
+   state.puzzleAnswer=null;renderPuzzle();focusAction('puzzle-answer');
  }
  function choosePuzzleAnswer(index){
    if(state.screen!=='puzzle'||state.activeTarget===null||state.puzzleAnswer!==null)return;
@@ -202,14 +203,14 @@
    const selected=state.puzzleOptions[index];
    state.puzzleResults.push({id:p.id+':'+state.activeTarget,word:t.klabea,selected,key:t.zuzena,
      correct:z.normalize(selected)===z.normalize(t.zuzena)});
-   renderPuzzle();
+   renderPuzzle();focusAction('next-puzzle');
  }
  function nextPuzzle(){
    if(state.puzzleAnswer===null)return;
    const p=puzzle();
    state.activeTarget=null;state.puzzleAnswer=null;state.puzzleOptions=[];
-   if(solvedForCurrent().length<p.targets.length){renderPuzzle();return;}
-   if(state.puzzleIndex+1<groups[state.group].puzzles.length){state.puzzleIndex++;renderPuzzle();return;}
+   if(solvedForCurrent().length<p.targets.length){renderPuzzle();focusAction('target');return;}
+   if(state.puzzleIndex+1<groups[state.group].puzzles.length){state.puzzleIndex++;renderPuzzle();focusAction('target');return;}
    finish('puzzle','Mezu Zuzentzailea · '+groups[state.group].label,state.puzzleResults,
     Math.max(0,Math.round((Date.now()-state.puzzleStarted)/1000)));
  }
@@ -277,7 +278,7 @@
    if(action==='target'){chooseTarget(Number(button.dataset.target));return;}
    if(action==='puzzle-answer'){choosePuzzleAnswer(Number(button.dataset.index));return;}
    if(action==='next-puzzle'){nextPuzzle();return;}
-   if(action==='search'){state.notice='';renderSearch();return;}
+   if(action==='search'){state.notice='';renderSearch();root.querySelector?.('#zinokTerm')?.focus?.();return;}
    if(action==='retry-search'){lookup(state.lookupTerm);return;}
  });
  (async()=>{try{await cloud.ready;}catch{/* allow puzzle while auth is unavailable */}renderMenu();})();

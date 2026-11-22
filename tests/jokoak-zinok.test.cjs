@@ -15,7 +15,9 @@ test('Gakoa eta beste sinonimo batzuk ez dira distraktoreak',()=>{
   {id:'1',hitza:'Bultzatu',sinonimoak:['Sustatu','Akuilatu'],active:true},
   {id:'2',hitza:'Sustatu',sinonimoak:['Bultzatu'],active:true},
   ...Array.from({length:8},(_,i)=>({id:String(i+3),hitza:'beste'+i,sinonimoak:['pare'+i],active:true}))
- ],1,()=>0.1);
+ ],1,()=>.999999);
+ assert.equal(q.word,'Bultzatu');
+ assert.equal(q.options.filter(x=>['Sustatu','Akuilatu'].includes(x)).length,1);
  assert(!q.options.some(x=>x===q.word));
 });
 test('Irakurketa eta datu-iragazkia',()=>{

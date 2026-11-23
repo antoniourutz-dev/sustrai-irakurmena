@@ -64,7 +64,7 @@ test('student and teacher native Word documents contain HitzBira and only teache
   const studentBuffer=await docx.Packer.toBuffer(exportModule.buildWord(base,docx,fonts));
   const teacherBuffer=await docx.Packer.toBuffer(exportModule.buildWord({...base,teacher:true},docx,fonts));
   if(process.env.HB_EXPORT_FIXTURES==='1'){
-    const path=require('node:path').join(__dirname,'.artifacts');
+    const path=require('node:path').join(__dirname,'export-fixtures');
     fs.mkdirSync(path,{recursive:true});
     fs.writeFileSync(require('node:path').join(path,'HitzBira-gurutzegrama-ikaslea.docx'),studentBuffer);
     fs.writeFileSync(require('node:path').join(path,'HitzBira-gurutzegrama-irakaslea.docx'),teacherBuffer);

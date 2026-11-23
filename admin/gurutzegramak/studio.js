@@ -300,6 +300,8 @@
     if(!s.puzzle)return;
     try{assertReviewed();}catch(error){notify(error.message,true);return;}
     const cells=cellMap();
+    const numbers=cellNumberMap();
+    for(const [key,cell] of cells)cell.number=numbers.get(key)||null;
     const root=$('studioWorkspace');
     const teacher=action.endsWith('teacher');
     const options={root,teacher,puzzle:{...s.puzzle,theme_eu:currentTitle(),is_authoring:true},

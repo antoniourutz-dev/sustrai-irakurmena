@@ -32,14 +32,14 @@ function xmlEntries(buffer){
   }
   return parts;
 }
-function puzzleOptions(teacher){
+function puzzleOptions(teacher,count=10){
   const words=['bihotz','odol','birika','arnas','arteria','zain','hezur','azal','ehun',
     'zauri','sabel','nerbio','sukarra','garun','infekzio','gorputz','sudur','orratz',
     'sendatu','arnasketa','odoljario','ebakuntza','hezurdura','giltzurrun','zelula',
     'arteriola','osasun','gaixotasun'].map((lemma_eu,i)=>({
       code:'FIXTURE-'+i,lemma_eu,definition_eu:'Kontzeptu honen azalpen didaktiko orokorra '+i+'.'
     }));
-  const puzzle=engine.generate(words,10,{size:21,seed:'hitzbira-document-test',title:'Osasun-hiztegia'});
+  const puzzle=engine.generate(words,count,{size:21,seed:'hitzbira-document-test-'+count,title:'Osasun-hiztegia'});
   puzzle.play_date='2026-11-23';
   const cells=engine.validate(puzzle);
   for(const w of puzzle.entries)cells.get(w.r+','+w.c).number=w.number;
@@ -90,4 +90,26 @@ test('student and teacher native Word documents contain HitzBira and only teache
   const solved=base.words[0].word;
   assert.ok(!stu['word/document.xml'].includes('·  '+solved));
   assert.ok(tchr['word/document.xml'].includes('·  '+solved));
+});
+
+test('15-word student and teacher Word worksheets keep every clue and answer',async()=>{
+  for(const teacher of [false,true]){
+    const sample=puzzleOptions(teacher,15);
+    const bytes=await docx.Packer.toBuffer(exportModule.buildWord(sample,docx,[]));
+    const parts=xmlEntries(bytes);
+    const xml=parts['word/document.xml'];
+    assert.match(xml,/Horizontalak/);
+    assert.match(xml,/Bertikalak/);
+    for(const word of sample.words){
+      // Source clues are copied faithfully; no selected term is silently dropped.
+      assert.ok(xml.includes(word.clue),'Missing clue '+word.id);
+      if(teacher)assert.ok(xml.includes('·  '+word.word),'Missing teacher solution '+word.id);
+    }
+    if(process.env.HB_EXPORT_FIXTURES==='1'){
+      const path=require('node:path').join(__dirname,'export-fixtures');
+      fs.mkdirSync(path,{recursive:true});
+      fs.writeFileSync(require('node:path').join(path,
+        'HitzBira-15-hitz-'+(teacher?'irakaslea':'ikaslea')+'.docx'),bytes);
+    }
+  }
 });

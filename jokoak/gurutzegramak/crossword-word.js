@@ -5,7 +5,7 @@
     if(!puzzle.is_authoring)return 'HitzBira-'+puzzle.play_date+'-'+puzzle.mode;
     const slug=String(puzzle.theme_eu||'osasuna').normalize('NFD').replace(/\p{M}/gu,'')
       .toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,42)||'osasuna';
-    return 'SUSTRAI-Gurutzegrama-'+puzzle.play_date+'-'+slug;
+    return 'HitzBira-Gurutzegrama-'+puzzle.play_date+'-'+slug;
   }
   let library,busy=false;
   function ready(){
@@ -78,12 +78,12 @@
         board,small('')]),containerCell(gutter,[small('')]),containerCell(rightWidth,clueParagraphs)]})]});
     const date=new Intl.DateTimeFormat('eu-ES',{year:'numeric',month:'long',day:'numeric',timeZone:'UTC'})
       .format(new Date(puzzle.play_date+'T12:00:00Z'));
-    return new Document({creator:'SUSTRAI',title:'Gurutzegrama '+puzzle.play_date,fonts:embeddedFonts,
+    return new Document({creator:'HitzBira',title:'Gurutzegrama '+puzzle.play_date,fonts:embeddedFonts,
       description:teacher?'Irakaslearen Worda':'Ikaslearen Worda',
       styles:{default:{document:{run:{font:'HitzBiraSans',size:16,color:colors.ink},paragraph:{spacing:{after:100}}}}},
       sections:[{properties:{page:{size:{width:11906,height:16838},margin:{top:567,bottom:567,left:567,right:567}}},
-        children:[para('HitzBira SUSTRAI '+(teacher?'Irakaslearen Worda':'Ikaslearen Worda'),{
-          children:[run('HitzBira · SUSTRAI · '+(teacher?'Irakaslearen Worda':'Ikaslearen Worda'),{size:15,bold:true,color:colors.primary})]}),
+        children:[para('HitzBira '+(teacher?'Irakaslearen Worda':'Ikaslearen Worda'),{
+          children:[run('HitzBira · '+(teacher?'Irakaslearen Worda':'Ikaslearen Worda'),{size:15,bold:true,color:colors.primary})]}),
           para(puzzle.theme_eu||'Gurutzegrama',{heading:HeadingLevel.TITLE,
             children:[run(puzzle.theme_eu||'Gurutzegrama',{font:'HitzBiraDisplay',size:28,bold:true})],spacing:{before:100,after:100}}),
           para(date+' · '+(puzzle.mode==='erronka'?'Erronka modua':'Ikasteko modua'),{spacing:{after:240}}),layout]}]});

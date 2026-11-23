@@ -103,10 +103,15 @@
       :pool.length<requested
         ? '<span class="warning">Ez dago nahikoa hitz; gehitu beste gai-multzo bat edo murriztu hitz kopurua.</span>'
         : 'Gurutzegrama sortzeko hautagaiak prest.';
+    const differentSelection=!!s.puzzle&&s.puzzleTopicCode!==groups.serialize(chosen);
+    const previewNote=differentSelection
+      ? ' <span class="warning">Hautaketa aldatu duzu: aurreko taula mantentzen da, berria sortu arte.</span>'
+      : '';
     $('studioInventory').innerHTML='<strong>'+pool.length+' hitz erabilgarri</strong> · '+
-      chosen.length+' gai-multzo · '+pending+' sarreratan berrikusteko oharrak. '+warning+
+      chosen.length+' gai-multzo · '+pending+' sarreratan berrikusteko oharrak. '+warning+previewNote+
       '<br><small>Multzoetako hitzak batzen dira, errepikapenik gabe. Espezialitate txikiak antzeko gaiekin bateratuta daude. Sailkapenak proposatuak dira; Oposikeko sarrera argitaratuak soilik.</small>';
     $('studioGenerate').disabled=!chosen.length||pool.length<requested;
+    $('studioRegenerate').disabled=!s.puzzle||!chosen.length||pool.length<requested;
   }
   function makePuzzle() {
     if(s.loading)return;

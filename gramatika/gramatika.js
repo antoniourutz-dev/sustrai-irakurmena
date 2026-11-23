@@ -107,6 +107,7 @@
   }
   function detailView(enabled) {
     $('grammarTop').classList.toggle('is-detail', enabled);
+    document.querySelector('.skip')?.setAttribute('href',enabled?'#grammarDetailTitle':'#pageTitle');
     if (!enabled) {
       document.body.classList.remove('is-grammar-reading');
       $('grammarFocus').setAttribute('aria-pressed', 'false');

@@ -133,7 +133,7 @@
 .path-main.has-lesson .b2-next-card{display:none}
 .path-main.is-grammar-reading .b2-reader{max-width:1050px}
 body.is-grammar-reading .grammar-main{max-width:1050px;margin-inline:auto}
-@container (min-width:650px){.gr-doc-example-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@container (min-width:650px){.gr-doc-example-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.gr-doc-example-grid>.gr-doc-example:last-child:nth-child(odd){grid-column:1/-1}}
 @media(max-width:1050px){.b2-layout{grid-template-columns:240px minmax(0,1fr)}.grammar-index{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:980px){.b2-layout{grid-template-columns:1fr}.b2-sidebar{position:static}.b2-module-list{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:680px){

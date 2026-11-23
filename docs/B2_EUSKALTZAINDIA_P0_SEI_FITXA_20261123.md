@@ -7,7 +7,7 @@
 
 ## Xedea eta egindako aldaketak
 
-Lehendik zeuden 40 B2 gaiei sei gai berri gehitu zaizkie. Jatorrizko PDFetan oinarritutako azalpen eta ariketa **originalak** dira; ez da liburuen orrialderik edo taula luzeen berrargitalpenik egin. Sei fitxek guztira **42 teoria-atal, 24 forma, 42 adibide nagusi, 24 forma-adibide baino gehiago** dituzte (egungo datu-baseko zenbaketa egiaztatu behar da fitxa zabaldu ondoren). Datuak `editorial_grammar_entries`, `editorial_grammar_entry_sections`, `editorial_grammar_forms`, `editorial_grammar_entry_examples` eta `editorial_grammar_form_examples` tauletan daude.
+Lehendik zeuden 40 B2 gaiei sei gai berri gehitu zaizkie. Jatorrizko PDFetan oinarritutako azalpen eta ariketa **originalak** dira; ez da liburuen orrialderik edo taula luzeen berrargitalpenik egin. Sei fitxek guztira **42 teoria-atal, 25 forma, 42 adibide nagusi, 24 forma-adibide baino gehiago** dituzte (egungo datu-baseko zenbaketa egiaztatu behar da fitxa zabaldu ondoren). Datuak `editorial_grammar_entries`, `editorial_grammar_entry_sections`, `editorial_grammar_forms`, `editorial_grammar_entry_examples` eta `editorial_grammar_form_examples` tauletan daude.
 
 | B2 kodea | Arloa | Egiaztatu den iturria | Ñabardura nagusia |
 |---|---|---|---|

@@ -44,14 +44,6 @@
       .catch(err=>{libWord=null;throw err;});
     return libWord;
   }
-  async function embeddedFonts(){
-    return Promise.all(['sans','display'].map(async kind=>{
-      const response=await fetch('/fonts/hitzbira-word-'+kind+'.ttf.b64');
-      if(!response.ok)throw Error('Ezin izan dira HitzBiraren letra-tipoak kargatu.');
-      const bytes=Uint8Array.from(atob((await response.text()).trim()),x=>x.charCodeAt(0));
-      return {name:kind==='sans'?'HitzBiraSans':'HitzBiraDisplay',data:bytes};
-    }));
-  }
   function buildWord(options,d,fonts=[]){
     const meta=context(options),p=options.puzzle;
     const {Paragraph,TextRun,Table,TableRow,TableCell,WidthType,BorderStyle,
@@ -60,7 +52,7 @@
     const border={style:BorderStyle.SINGLE,size:5,color:'C8DFE6'};
     const four=b=>({top:b,bottom:b,left:b,right:b});
     const none={...four(no),insideHorizontal:no,insideVertical:no};
-    const run=(v,props={})=>new TextRun({text:safe(v),font:'HitzBiraSans',size:19,color:INK,...props});
+    const run=(v,props={})=>new TextRun({text:safe(v),font:'Arial',size:19,color:INK,...props});
     const paragraph=(children,props={})=>new Paragraph({children:Array.isArray(children)?children:[run(children)],
       spacing:{before:0,after:130},...props});
     const centered=(v,size,bold=false,color=INK)=>paragraph([run(v,{size,bold,color})],{
@@ -73,7 +65,7 @@
     const header=new Header({children:[new Table({width:{size:cw,type:WidthType.DXA},
       columnWidths:[brandLeft,brandRight],layout:TableLayoutType.FIXED,borders:none,
       rows:[new TableRow({children:[
-        headerCell(brandLeft,[paragraph([run('HitzBira',{font:'HitzBiraDisplay',size:32,bold:true,color:'FFFFFF'})],
+        headerCell(brandLeft,[paragraph([run('HitzBira',{font:'Arial',size:32,bold:true,color:'FFFFFF'})],
           {spacing:{after:5}}),
           paragraph([run('EUSKARA IKASTEKO PLATAFORMA',{size:10,bold:true,color:'FFFFFF'})],
             {spacing:{after:0}})],AQUA),
@@ -87,13 +79,13 @@
       ]})]})]});
     const footer=new Footer({children:[paragraph([
       run('HitzBira',{size:12,color:MUTED}),run('  ·  ',{size:12,color:MUTED}),
-      new TextRun({children:[PageNumber.CURRENT],font:'HitzBiraSans',size:12,color:MUTED})
+      new TextRun({children:[PageNumber.CURRENT],font:'Arial',size:12,color:MUTED})
     ],{alignment:AlignmentType.RIGHT,spacing:{after:0}})]});
     const size=Math.max(330,Math.min(445,Math.floor((cw-800)/p.grid_cols),
       Math.floor(9000/p.grid_rows)));
     const numberLine=(n)=>paragraph([run(n?String(n):'',{size:10,bold:true,color:MUTED})],{
       spacing:{before:0,after:0,line:120,lineRule:LineRuleType.EXACT}});
-    const letterLine=(ch)=>paragraph([run(ch,{font:'HitzBiraDisplay',size:18,bold:true,color:GREEN})],{
+    const letterLine=(ch)=>paragraph([run(ch,{font:'Arial',size:18,bold:true,color:GREEN})],{
       alignment:AlignmentType.CENTER,spacing:{before:0,after:0,line:205,lineRule:LineRuleType.EXACT}});
     const rows=Array.from({length:p.grid_rows},(_,r)=>new TableRow({
       cantSplit:true,height:{value:size,rule:HeightRule.ATLEAST},
@@ -122,7 +114,7 @@
       board,
       paragraph([run('HORIZONTALAK  →     BERTIKALAK  ↓',{size:12,bold:true,color:MUTED})],{
         alignment:AlignmentType.CENTER,spacing:{before:230,after:0}}),
-      paragraph([run('PISTAK',{font:'HitzBiraDisplay',size:28,bold:true,color:AQUA})],{
+      paragraph([run('PISTAK',{font:'Arial',size:28,bold:true,color:AQUA})],{
         spacing:{before:280,after:120},keepNext:true}),
       paragraph([run(meta.subject,{size:16,bold:true,color:INK})],{
         spacing:{before:0,after:260},keepNext:true})
@@ -160,8 +152,8 @@
       {size:12,color:MUTED})],{spacing:{before:220,after:0}}));
     return new d.Document({
       creator:'HitzBira',title:'HitzBira · '+meta.subject,subject:meta.subject,
-      description:meta.type,fonts,
-      styles:{default:{document:{run:{font:'HitzBiraSans',size:17,color:INK},
+      description:meta.type,fonts:[],
+      styles:{default:{document:{run:{font:'Arial',size:17,color:INK},
         paragraph:{spacing:{after:100}}}}},
       sections:[{properties:{page:{size:{width:11906,height:16838},
         margin:{top:1750,bottom:950,left:685,right:685,header:340,footer:470}}},
@@ -328,8 +320,8 @@
     }finally{iframe.remove();}
   }
   async function downloadWord(options,meta){
-    const [d,fonts]=await Promise.all([wordReady().then(()=>window.docx),embeddedFonts()]);
-    const blob=await d.Packer.toBlob(buildWord(options,d,fonts));
+    const d=await wordReady().then(()=>window.docx);
+    const blob=await d.Packer.toBlob(buildWord(options,d,[]));
     const url=URL.createObjectURL(blob),anchor=document.createElement('a');
     anchor.href=url;anchor.download=meta.file+'.docx';
     document.body.append(anchor);anchor.click();anchor.remove();

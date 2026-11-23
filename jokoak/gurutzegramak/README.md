@@ -114,6 +114,26 @@ Supabaseko benetako bankua GitHubera kopiatu gabe.
 Benetako eguneko bi taulen lau PDFak 2026-11-23an sortu eta A4an bisualki berrikusi
 dira Edge/Chromiumen. Safari/iOS eta Firefoxeko egiaztapena egiteke dago.
 
+## Word editagarria · 2026-11-23
+
+**Ikaslearen Worda** eta **Irakaslearen Worda** aukerek `.docx` fitxategia deskargatzen dute.
+Taula natiboa da: gelaxka bakoitzeko zenbakia eta letra bi paragrafo bereizitan daude;
+pistak ere testu editagarria dira. Ez dago irudirik edo edizio-babesik. Datu eta zenbaki
+berak erabiltzen dira; PDFaren motorra bere horretan mantentzen da.
+
+Aplikazioko letra-tipoen instantzia estatikoak barruan txertatzen dira, OFL lizentziekin.
+Wordek gelaxka angeluzuzenak erabiltzen ditu (ez CSSko ertz biribilak), eta edizioek edo
+beste testu-prozesadore batek diseinuaren doikuntzak eragin ditzakete. PDFa da pantailako
+CSS itxura zehatzaren aukera; Wordek taula eta testua benetan editatzeko aukera ematen du.
+
+Gaurko lau Wordak Microsoft Worden ireki, A4ko orri bakarrean errendatu eta bisualki
+berrikusi dira. 1440/320 px deskargak eta XMLko taula, letra hutsak/zuzenak, pista guztiak,
+letra-tipo txertatuak eta aurrerapenaren isolamendua probatu dira.
+`tests/crossword-pdf.browser.cjs` suiteak PDFa eta Worda egiaztatzen ditu.
+
+Driveko gordailua une honetako lau fitxategien kopia da, erabiltzaileak eskatu bezala.
+Ez dago nabigatzailetik Drivera automatikoki igotzeko OAuth integrazio berririk.
+
 ### Etorkizuneko edizioa
 Egun gehiagorako taulak sortu/argitaratu aurretik:
 1. Jatorrizko osasun_entries eta haien editorial_state egiaztatu.

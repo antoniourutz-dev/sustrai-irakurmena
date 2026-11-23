@@ -4,6 +4,7 @@
  */
 const fs=require('node:fs'),path=require('node:path'),http=require('node:http');
 const assert=require('node:assert/strict');
+const zlib=require('node:zlib');
 const {chromium}=require('playwright');
 const authoring=require('../jokoak/gurutzegramak/authoring-generator.cjs');
 const repo=path.resolve(__dirname,'..');
@@ -14,6 +15,22 @@ const records=[['ikasi',['EKOGRAFIA','HITZORDU','INFEKZIO','SENDAGAI','ONGIZATE'
   ...authoring.generate(words.map((word,i)=>({id:'TEST-'+index+'-'+i,word,source:'TEST',
     clue:'Pista sintetikoko definizioa '+i,explanation:'Azalpen sintetikoa.'})),121231+index*2021,10)}));
 const types={'.html':'text/html','.js':'text/javascript','.css':'text/css','.woff':'font/woff','.woff2':'font/woff2'};
+function zipParts(bytes){
+ const parts=new Map();let end=bytes.length-22;
+ while(end>=0&&bytes.readUInt32LE(end)!==0x06054b50)end--;
+ assert.ok(end>=0,'DOCX must be a ZIP archive');
+ let at=bytes.readUInt32LE(end+16);
+ for(let i=0;i<bytes.readUInt16LE(end+10);i++){
+  assert.equal(bytes.readUInt32LE(at),0x02014b50);
+  const method=bytes.readUInt16LE(at+10),size=bytes.readUInt32LE(at+20),offset=bytes.readUInt32LE(at+42);
+  const name=bytes.subarray(at+46,at+46+bytes.readUInt16LE(at+28)).toString();
+  const start=offset+30+bytes.readUInt16LE(offset+26)+bytes.readUInt16LE(offset+28);
+  const compressed=bytes.subarray(start,start+size);
+  parts.set(name,method===8?zlib.inflateRawSync(compressed):compressed);
+  at+=46+bytes.readUInt16LE(at+28)+bytes.readUInt16LE(at+30)+bytes.readUInt16LE(at+32);
+ }
+ return parts;
+}
 const server=http.createServer((req,res)=>{
  let file=path.resolve(repo,'.'+new URL(req.url,'http://localhost').pathname);
  if(!file.startsWith(repo+path.sep)){res.writeHead(403).end();return;}
@@ -77,10 +94,29 @@ const server=http.createServer((req,res)=>{
     assert.equal(await page.locator('[data-action="pdf-student"]').isEnabled(),true);
     await page.addScriptTag({url:'/jokoak/gurutzegramak/vendor/html2canvas-1.4.1.min.js'});
     const retry=page.waitForEvent('download');await page.locator('[data-action="pdf-student"]').click();await retry;
+    for(const teacher of [false,true]){
+     const pending=page.waitForEvent('download');
+     await page.locator('[data-action="word-'+(teacher?'teacher':'student')+'"]').click();
+     const download=await pending,parts=zipParts(fs.readFileSync(await download.path()));
+     const xml=parts.get('word/document.xml').toString();
+     assert.ok(xml.includes('<w:tbl>'),'Editable native tables');
+     assert.ok(!xml.includes('<w:drawing'),'No screenshot in Word');
+     assert.ok(!parts.get('word/settings.xml').toString().includes('documentProtection'));
+     assert.ok(parts.has('word/fonts/HitzBiraSans.odttf')&&parts.has('word/fonts/HitzBiraDisplay.odttf'));
+     assert.ok(!parts.get('word/_rels/fontTable.xml.rels').toString().includes('fonts/HitzBira '),'Font targets must be valid package URIs');
+     const letters=[...xml.matchAll(/<w:t(?: [^>]*)?>([A-Z])<\/w:t>/g)].map(m=>m[1]);
+     const cells=new Map();
+     for(const w of record.entries)for(let i=0;i<w.word.length;i++)cells.set(
+       (w.r+(w.dir==='V'?i:0))+','+(w.c+(w.dir==='H'?i:0)),w.word[i]);
+     const expected=[...cells].sort(([a],[b])=>{const [ar,ac]=a.split(',').map(Number),[br,bc]=b.split(',').map(Number);return ar-br||ac-bc;}).map(([,letter])=>letter);
+     assert.deepEqual(letters,teacher?expected:[],'Correct letters only in teacher Word');
+     for(const w of record.entries)assert.ok(xml.includes(w.clue),'All clues remain editable text');
+     assert.equal(await page.evaluate(()=>JSON.stringify(localStorage)),before);
+    }
     page.once('dialog',d=>d.accept());await page.locator('.cx-reset').click();
    }
    assert.deepEqual(errors,[]);await page.close();
   }
-  console.log('OK: both PDF variants and modes, desktop/320px, partial progress isolation, A4 single page, failure cleanup and retry.');
+  console.log('OK: PDF and editable Word, both modes, desktop/320px, partial progress isolation, PDF A4, failure cleanup, native table/text and embedded Word fonts.');
  }finally{await browser.close();server.close();}
 })().catch(error=>{console.error(error);server.close();process.exitCode=1;});

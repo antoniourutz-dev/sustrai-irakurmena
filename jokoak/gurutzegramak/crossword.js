@@ -399,7 +399,10 @@
       'Hitzak osatu eta azalpenekin ikasi. Pistak libre dituzu.')+'</p></div>'+counters+'</div>'+
       '<div class="cx-pdf-actions"><button class="cx-button secondary" type="button" data-action="pdf-student">Ikaslearen PDFa</button>'+
       '<button class="cx-button secondary" type="button" data-action="pdf-teacher">Irakaslearen PDFa</button>'+
-      '<span class="cx-pdf-status" role="status" aria-live="polite"></span></div>'+
+      '<span class="cx-pdf-status" role="status" aria-live="polite"></span>'+
+      '<button class="cx-button secondary" type="button" data-action="word-student">Ikaslearen Worda</button>'+
+      '<button class="cx-button secondary" type="button" data-action="word-teacher">Irakaslearen Worda</button>'+
+      '<span class="cx-word-status" role="status" aria-live="polite"></span></div>'+
       '<div class="cx-layout"><section class="cx-board-card" aria-label="Gurutzegramaren taula">'+
       '<div class="cx-board-top"><div><p class="cx-overline">EGUNEKO TAULA · '+escapeHtml(state.mode.toUpperCase())+'</p>'+
       '<h2>Gurutzegrama</h2><p class="cx-board-note">Hautatu gelaxka edo eskuineko pista, eta idatzi hitza.</p></div>'+
@@ -524,6 +527,12 @@
       render();return;
     }
     if(state.phase==='setup')return;
+    if(action==='word-student'||action==='word-teacher'){
+      window.CrosswordWord?.download({root,teacher:action==='word-teacher',
+        puzzle:{...activePuzzle},cells:new Map([...grid].map(([k,v])=>[k,{letter:v.letter,number:v.number}])),
+        words:WORDS.map(w=>({...w}))});
+      return;
+    }
     if(action==='pdf-student'||action==='pdf-teacher'){
       window.CrosswordPDF?.download({root,teacher:action==='pdf-teacher',
         puzzle:activePuzzle,cells:new Map(grid),words:WORDS.map(w=>({...w}))});

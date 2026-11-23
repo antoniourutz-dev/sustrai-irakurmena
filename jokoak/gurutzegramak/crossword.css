@@ -148,7 +148,7 @@
 
 /* Dated crossword selector and compact personal-history board */
 .cx-pdf-actions{display:flex;align-items:center;flex-wrap:wrap;gap:10px;margin:0 0 18px}
-.cx-pdf-status{font-size:13px;color:var(--s-muted)}
+.cx-pdf-status,.cx-word-status{font-size:13px;color:var(--s-muted)}
 /* Only the paper margin/viewport changes; the component keeps its own visual rules. */
 .cx-pdf-body{margin:0;padding:0;background:white}
 .cx-pdf-sheet{padding:20px;width:100%;box-sizing:border-box;background:white;print-color-adjust:exact;-webkit-print-color-adjust:exact}

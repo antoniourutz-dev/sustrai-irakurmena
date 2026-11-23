@@ -1,5 +1,5 @@
 /* SUSTRAI PWA service worker */
-const CACHE_VERSION = 'sustrai-pwa-v66-crossword-pdf';
+const CACHE_VERSION = 'sustrai-pwa-v67-crossword-word';
 const SHELL = [
   '/',
   '/index.html',
@@ -10,6 +10,10 @@ const SHELL = [
   '/jokoak/gurutzegramak/crossword.css',
   '/jokoak/gurutzegramak/crossword.js',
   '/jokoak/gurutzegramak/crossword-pdf.js',
+  '/jokoak/gurutzegramak/crossword-word.js',
+  '/jokoak/gurutzegramak/vendor/docx-9.6.1.js',
+  '/fonts/hitzbira-word-sans.ttf.b64',
+  '/fonts/hitzbira-word-display.ttf.b64',
   '/jokoak/gurutzegramak/vendor/html2canvas-1.4.1.min.js',
   '/jokoak/gurutzegramak/vendor/jspdf-4.2.1.umd.min.js',
   '/jokoak/jokoak.css',

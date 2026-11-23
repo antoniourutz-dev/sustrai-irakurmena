@@ -69,20 +69,22 @@
           {spacing:{after:5}}),
           paragraph([run('EUSKARA IKASTEKO PLATAFORMA',{size:10,bold:true,color:'FFFFFF'})],
             {spacing:{after:0}})],AQUA),
-        headerCell(brandRight,[paragraph([run('GURUTZEGRAMA',{size:19,bold:true,color:'FFFFFF'})],
+        headerCell(brandRight,[paragraph([run(meta.type,{size:17,bold:true,color:'FFFFFF'})],
           {alignment:AlignmentType.RIGHT,spacing:{after:0}})],AQUA)
       ]}),
       new TableRow({children:[
         headerCell(brandLeft,[paragraph([run(meta.code,{size:10,color:MUTED})],{spacing:{after:0}})]),
-        headerCell(brandRight,[paragraph([run(meta.type,{size:10,bold:true,color:AQUA})],
+        headerCell(brandRight,[paragraph([run('',{size:10})],
           {alignment:AlignmentType.RIGHT,spacing:{after:0}})])
       ]})]})]});
     const footer=new Footer({children:[paragraph([
       run('HitzBira',{size:12,color:MUTED}),run('  ·  ',{size:12,color:MUTED}),
       new TextRun({children:[PageNumber.CURRENT],font:'Arial',size:12,color:MUTED})
     ],{alignment:AlignmentType.RIGHT,spacing:{after:0}})]});
-    const size=Math.max(330,Math.min(445,Math.floor((cw-800)/p.grid_cols),
-      Math.floor(9000/p.grid_rows)));
+    // Preserve an editable table but size its cells to the *left* half of A4.
+    const leftWidth=6260,gutter=190,rightWidth=cw-leftWidth-gutter;
+    const size=Math.max(235,Math.min(380,Math.floor((leftWidth-150)/p.grid_cols),
+      Math.floor(9550/p.grid_rows)));
     const numberLine=(n)=>paragraph([run(n?String(n):'',{size:10,bold:true,color:MUTED})],{
       spacing:{before:0,after:0,line:120,lineRule:LineRuleType.EXACT}});
     const letterLine=(ch)=>paragraph([run(ch,{font:'Arial',size:18,bold:true,color:GREEN})],{
@@ -102,61 +104,48 @@
     const board=new Table({width:{size:size*p.grid_cols,type:WidthType.DXA},
       columnWidths:Array(p.grid_cols).fill(size),alignment:AlignmentType.CENTER,
       layout:TableLayoutType.FIXED,borders:none,rows});
-    const body=[
-      centered('GURUTZEGRAMA · OSASUN-HIZTEGIA',15,true,AQUA),
-      centered(meta.subject,27,true,INK),
-      centered(meta.title===meta.subject?'Gurutzegrama':meta.title,17,false,MUTED),
-      centered(meta.count+' hitz  ·  '+(meta.teacher?'Erantzunak barne':'Osatu taula definizioen laguntzaz'),15,false,MUTED),
-      paragraph([run('Osatu gurutzegrama, eta erabili jarraian ageri diren pistak.',
-        {size:16,color:INK})],{
-        shading:{fill:PALE},indent:{left:180,right:180},
-        spacing:{before:130,after:230},alignment:AlignmentType.CENTER}),
-      board,
-      paragraph([run('HORIZONTALAK  →     BERTIKALAK  ↓',{size:12,bold:true,color:MUTED})],{
-        alignment:AlignmentType.CENTER,spacing:{before:230,after:0}}),
-      paragraph([run('PISTAK',{font:'Arial',size:28,bold:true,color:AQUA})],{
-        spacing:{before:280,after:120},keepNext:true}),
-      paragraph([run(meta.subject,{size:16,bold:true,color:INK})],{
-        spacing:{before:0,after:260},keepNext:true})
-    ];
-    const clueColumns=[];
-    for(const [direction,heading] of [['H','HORIZONTALAK'],['V','BERTIKALAK']]){
-      const column=[paragraph([run(heading,{size:19,bold:true,color:AQUA})],{
-        spacing:{before:90,after:170},keepNext:true})];
-      const arr=(options.words||[]).filter(x=>x.dir===direction)
+    const right=[];
+    for(const [direction,heading] of [['H','Horizontalak'],['V','Bertikalak']]){
+      right.push(paragraph([run(heading,{size:18,bold:true,color:AQUA})],{
+        spacing:{before:direction==='H'?0:120,after:100},keepNext:true}));
+      const arr=(options.words||[]).filter(w=>w.dir===direction)
         .sort((a,b)=>a.number-b.number);
-      if(!arr.length)column.push(paragraph([run('—',{size:16,color:MUTED})]));
       for(const w of arr){
-        column.push(paragraph([
-          run(String(w.number)+'.  ',{size:17,bold:true,color:AQUA}),
-          run(w.clue,{size:17,color:INK}),
-          run('  ('+w.word.length+')',{size:14,color:MUTED})
-        ],{spacing:{before:0,after:meta.teacher?30:130},keepLines:true}));
-        if(meta.teacher)column.push(paragraph([
-          run('ERANTZUNA:  ',{size:12,bold:true,color:GREEN}),
-          run(w.word,{size:16,bold:true,color:GREEN})
-        ],{indent:{left:160},spacing:{after:150},keepLines:true}));
+        right.push(paragraph([
+          run(w.number+'. ',{size:16,bold:true,color:AQUA}),
+          run(w.clue,{size:16,color:INK}),
+          run(' ('+w.word.length+')',{size:13,color:MUTED}),
+          ...(meta.teacher?[run('  ·  '+w.word,{size:15,bold:true,color:GREEN})]:[])
+        ],{spacing:{before:0,after:95,line:220},keepLines:true}));
       }
-      clueColumns.push(column);
     }
-    const sideWidth=Math.floor(cw/2);
-    body.push(new Table({width:{size:cw,type:WidthType.DXA},
-      columnWidths:[sideWidth,cw-sideWidth],layout:TableLayoutType.FIXED,borders:none,
+    const wideCell=(width,children)=>new TableCell({
+      width:{size:width,type:WidthType.DXA},borders:four(no),
+      margins:{top:0,bottom:0,left:0,right:0},
+      verticalAlign:VerticalAlign.TOP,children
+    });
+    const layout=new Table({width:{size:cw,type:WidthType.DXA},
+      columnWidths:[leftWidth,gutter,rightWidth],
+      layout:TableLayoutType.FIXED,borders:none,
       rows:[new TableRow({children:[
-        new TableCell({width:{size:sideWidth,type:WidthType.DXA},borders:four(no),
-          margins:{top:0,bottom:0,left:0,right:225},children:clueColumns[0]}),
-        new TableCell({width:{size:cw-sideWidth,type:WidthType.DXA},borders:four(no),
-          margins:{top:0,bottom:0,left:225,right:0},children:clueColumns[1]})
-      ]})]}));
-    if(meta.teacher)body.push(paragraph([run('Irakaslearen erabilerarako: pistak eta erantzunak berrikusi banatu aurretik.',
-      {size:12,color:MUTED})],{spacing:{before:220,after:0}}));
+        wideCell(leftWidth,[board,paragraph([],{spacing:{after:0}})]),
+        wideCell(gutter,[paragraph([],{spacing:{after:0}})]),
+        wideCell(rightWidth,right)
+      ]})]});
+    const body=[
+      paragraph([run(meta.subject,{size:29,bold:true,font:'Arial',color:INK})],{
+        alignment:AlignmentType.CENTER,
+        spacing:{before:0,after:195},keepNext:true}),
+      layout
+    ];
+
     return new d.Document({
       creator:'HitzBira',title:'HitzBira · '+meta.subject,subject:meta.subject,
       description:meta.type,fonts:[],
       styles:{default:{document:{run:{font:'Arial',size:17,color:INK},
         paragraph:{spacing:{after:100}}}}},
       sections:[{properties:{page:{size:{width:11906,height:16838},
-        margin:{top:1750,bottom:950,left:685,right:685,header:340,footer:470}}},
+        margin:{top:1200,bottom:780,left:685,right:685,header:280,footer:430}}},
         headers:{default:header},footers:{default:footer},children:body}]
     });
   }

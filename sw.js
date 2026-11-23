@@ -1,5 +1,5 @@
 /* SUSTRAI PWA service worker */
-const CACHE_VERSION = 'sustrai-pwa-v64-b2-nine-modules';
+const CACHE_VERSION = 'sustrai-pwa-v65-exercises-alive';
 const SHELL = [
   '/',
   '/index.html',
@@ -91,6 +91,7 @@ const SHELL = [
   '/ariketak/index.html',
   '/ariketak/catalog.js',
   '/ariketak/catalog.css',
+  '/ariketak/alive.css',
   '/practice-ui.css',
   '/aditzak/',
   '/aditzak/index.html',

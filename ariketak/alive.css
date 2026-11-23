@@ -1,0 +1,136 @@
+/* Exercises share grammar's visual language; grading and learner data stay in app.js. */
+.practice-page {
+  --ex-night:#25223e; --ex-mint:#d2f2df; --ex-coral:#fab59e;
+  --ex-purple:#e8def2; --ex-ink:#332b43; --ex-muted:#6d6279;
+}
+.practice-page :is(.areas-hero,.ad-hero) {
+  padding:clamp(25px,4vw,46px); border:0; border-radius:28px;
+  background:var(--ex-night); color:#fff; overflow:hidden;
+}
+.practice-page .areas-breadcrumb {color:#c9c2d9}
+.practice-page .areas-breadcrumb a {color:#e6dcf9}
+.practice-page .practice-hero-live {display:grid;grid-template-columns:1.4fr 1fr;align-items:center;gap:32px}
+.practice-page .areas-breadcrumb+.practice-hero-live {margin-top:12px}
+.practice-page :is(.areas-eyebrow,.ad-kicker) {display:block;color:#d2f2df;font-size:11px;font-weight:750;letter-spacing:.12em;margin-bottom:18px}
+.practice-page :is(.areas-hero h1,.ad-hero h1) {font:750 clamp(46px,6vw,76px)/1 var(--s-font-display);letter-spacing:-.055em;margin:0}
+.practice-page :is(.areas-hero h1,.ad-hero h1) em {font-style:normal;color:var(--ex-coral)}
+.practice-page :is(.areas-hero p,.ad-hero p) {color:#e5e0f1;font-size:17px;line-height:1.75;max-width:44ch;margin:22px 0 15px}
+.practice-page .practice-invitation {color:#bfe9d1;font-size:13px}
+.practice-word-art {position:relative;display:grid;place-items:center;min-height:260px;isolation:isolate;background:radial-gradient(#ffffff1a 1px,transparent 1px);background-size:18px 18px;border-radius:30px}
+.practice-art-main {position:relative;display:block;background:#d2f2df;color:#25223e;border-radius:48% 45% 45% 8%;padding:17px 32px 29px;font:800 82px/1 var(--s-font-display);letter-spacing:-.08em;transform:rotate(-7deg);box-shadow:9px 10px 0 #100e242e}
+.practice-art-small {position:absolute;top:4px;left:12px;z-index:1;transform:rotate(-9deg);background:#b6a2d6;color:#25223e;padding:9px 17px;border-radius:30px;font:650 17px/1.3 var(--s-font-display)}
+.practice-art-hand {position:absolute;bottom:8px;right:5px;z-index:2;transform:rotate(6deg);background:#fab59e;color:#312439;padding:13px 20px;border-radius:9px 24px 24px 24px;font:700 24px/1.2 var(--s-font-display);letter-spacing:-.03em}
+.practice-art-dot {position:absolute;right:7px;top:20px;width:32px;height:32px;border-radius:10px;background:#f1d78c;transform:rotate(20deg)}
+.practice-route {display:grid;grid-template-columns:repeat(3,1fr);gap:20px;list-style:none;margin:0;padding:6px 4px}
+.practice-route li {display:flex;align-items:center;gap:13px;min-width:0}
+.practice-route li>span {display:grid;place-items:center;flex:0 0 40px;height:40px;border-radius:14px;background:#e8def2;color:#57426f;font:700 13px var(--s-font-ui)}
+.practice-route li:nth-child(2)>span {background:#d2f2df;color:#2a5c46}
+.practice-route li:nth-child(3)>span {background:#fbe0d4;color:#754737}
+.practice-route strong {display:block;font:700 16px/1.4 var(--s-font-display);color:var(--ex-ink)}
+.practice-route small {display:block;font-size:12px;line-height:1.5;color:var(--ex-muted);margin-top:3px}
+.practice-page .practice-catalog {border-radius:24px;border-color:#e5deec;padding:clamp(20px,3vw,30px);background:#fff}
+.practice-page .practice-header h2 {color:var(--ex-ink)}
+.practice-page .practice-levels {background:#f1edf6;border:1px solid #e2dae9;border-radius:999px}
+.practice-page .practice-levels button {border-radius:999px}
+.practice-page .practice-levels button[aria-pressed=true] {background:var(--ex-night);border-color:var(--ex-night);color:#fff}
+.practice-page .practice-filter input {background:#fdfbff;border-color:#dcd2e8}
+.practice-page :is(.practice-card,.ad-card) {
+  --tile-ink:#594373;--tile-tint:#e8def2;--tile-bg:#fdfbff;
+  color:var(--ex-ink);border:1px solid #e5deec;border-top:0;border-radius:22px;
+  padding:24px;gap:14px;background:var(--tile-bg);box-shadow:0 5px 15px #25223e06;
+  overflow:hidden;transition:transform .18s,border-color .18s,box-shadow .18s;
+}
+.practice-page :is(.practice-card,.ad-card):nth-child(3n+2) {--tile-ink:#35674f;--tile-tint:#d2f2df;--tile-bg:#f8fcf9}
+.practice-page :is(.practice-card,.ad-card):nth-child(3n) {--tile-ink:#81523e;--tile-tint:#f9ddce;--tile-bg:#fffbf8}
+.practice-page :is(.practice-card,.ad-card)::before {content:"";display:block;align-self:stretch;height:7px;flex-shrink:0;background:var(--tile-tint);border-radius:0 0 8px 8px;margin:-24px -24px 6px}
+.practice-page :is(.practice-card,.ad-card):hover {border-color:var(--tile-ink);box-shadow:0 9px 24px #25223e0d;transform:translateY(-3px)}
+.practice-page .practice-card-number {display:inline-flex;align-self:start;width:fit-content;background:var(--tile-tint);color:var(--tile-ink);border-radius:10px;padding:7px 10px;font-size:12px;font-weight:750}
+.practice-page :is(.practice-card-title,.ad-card strong) {font:700 21px/1.3 var(--s-font-display);letter-spacing:-.025em;color:var(--ex-ink);overflow-wrap:anywhere}
+.practice-page :is(.practice-card-meta,.ad-card small) {font-size:13px;line-height:1.65;color:var(--ex-muted)}
+.practice-page .practice-card-foot {border-top:1px solid #25223e14;color:var(--tile-ink);font-weight:700}
+.practice-page .practice-tag {color:var(--tile-ink);background:var(--tile-tint);border:0}
+.practice-page .practice-card.is-pending {background:#faf9fb;border:1px dashed #d7cfdf;box-shadow:none}
+.practice-page .practice-card.is-pending::before {background:#e9e5ed}
+.practice-page .practice-card.is-pending .practice-card-number {background:#eeeaf2;color:#70667a}
+.practice-page .practice-card--exercise .practice-card-number {display:none}
+.practice-page .practice-card--exercise .practice-card-foot a {background:var(--ex-night);border-radius:999px;font-weight:700}
+.practice-page .ad-card {min-height:190px}
+.practice-page .ad-card .ad-badge {background:var(--tile-tint);color:var(--tile-ink)}
+.practice-page .ad-card small {margin-top:auto}
+.practice-page .ad-content {border-radius:24px;border-color:#e5deec}
+.practice-page .ad-lesson-intro {position:relative;padding:clamp(24px,4vw,36px);border:1px solid #e4daed;border-radius:24px;background:linear-gradient(115deg,#f1eafa,#fcf9ff);margin:8px 0 24px;overflow:hidden}
+.practice-page .ad-lesson-kicker {display:block;margin-bottom:20px;color:#6b5288;font:750 10px/1.5 var(--s-font-ui);letter-spacing:.12em}
+.practice-page .ad-activity-meta {color:#766383;font-size:12px;font-weight:650;line-height:1.6;margin-bottom:8px}
+.practice-page .ad-lesson-intro h2 {max-width:25ch;font-size:clamp(30px,4vw,42px);line-height:1.12;color:var(--ex-night);margin-bottom:18px}
+.practice-page .ad-lesson-intro .ad-instruction {max-width:62ch;font-size:17px;line-height:1.75;color:#544660;margin:0}
+.practice-page .ad-context {background:#fffdf7;border:1px solid #e8dfca;border-radius:22px;padding:clamp(20px,3vw,30px);margin-bottom:24px}
+.practice-page .ad-context h3 {font-size:12px;color:#807044;letter-spacing:.08em;text-transform:uppercase;margin-bottom:16px}
+.practice-page .ad-context-text {font:400 18px/1.9 var(--s-font-ui);max-width:72ch}
+.practice-page .ad-work-toolbar {border:1px solid #e2dbe9;border-radius:18px;background:#faf8fd;padding:14px 16px 8px;margin:0 0 22px;box-shadow:0 5px 15px #25223e06}
+.practice-page .ad-work-progress label {color:#655571;font-size:13px;font-weight:650}
+.practice-page .ad-work-toolbar #answerProgress {height:7px}
+.practice-page .ad-question-link {border-radius:12px;border-color:#dcd3e6;color:#756782}
+.practice-page .ad-question-link.is-answered {background:#e3f4ea;border-color:#80b69a;color:#285b42}
+.practice-page .ad-question-link[aria-current] {box-shadow:inset 0 -3px #695080}
+.practice-page .ad-items {gap:22px}
+.practice-page .ad-item {position:relative;padding:28px;border:1px solid #e5deec;border-radius:22px;background:#fff;box-shadow:0 6px 20px #25223e04;scroll-margin-top:154px}
+.practice-page .ad-item-number {display:inline-flex;align-items:center;width:fit-content;min-height:30px;padding:5px 11px;border-radius:9px;background:#eee6f7;color:#6e4d8c;font-size:11px;font-weight:750;margin-bottom:16px}
+.practice-page .ad-item:nth-child(3n+2) .ad-item-number {background:#dff2e7;color:#386e52}
+.practice-page .ad-item:nth-child(3n) .ad-item-number {background:#fce4d8;color:#85503e}
+.practice-page .ad-item>label {font:650 19px/1.7 var(--s-font-ui);letter-spacing:-.015em;color:var(--ex-ink)}
+.practice-page .ad-options {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:22px}
+.practice-page .ad-option {display:flex;min-width:0;min-height:60px;padding:15px 16px;border:1px solid #ded7e7;border-radius:14px;background:#fcfbfe;font-size:17px;line-height:1.5;overflow-wrap:anywhere}
+.practice-page .ad-option:hover {border-color:#9b83b6;background:#f6f1fc}
+.practice-page .ad-option:has(input:checked) {background:#eee5f9;border:2px solid #80639b;padding:14px 15px;color:#4b3262}
+.practice-page .ad-option input {width:19px;height:19px;accent-color:#72528e}
+.practice-page .ad-answer {background:#fcfbfe;border-color:#d8cde3;border-radius:14px;padding:15px 17px;margin-top:20px;line-height:1.7}
+.practice-page .ad-answer:focus {background:#fff}
+.practice-page .ad-actions {padding:24px;border:1px solid #dcd3e6;background:#f3eef8;border-radius:22px;gap:12px;margin-top:26px}
+.practice-page .ad-actions-invitation {flex-basis:100%;margin:0 0 4px;font:700 21px/1.3 var(--s-font-display);color:var(--ex-ink)}
+.practice-page .ad-button {border-radius:999px;padding:12px 23px;min-height:48px}
+.practice-page .ad-button.primary {background:var(--ex-night);border-color:var(--ex-night)}
+.practice-page .ad-save-msg {line-height:1.7}
+.practice-page .ad-grade-summary {border-radius:22px;padding:26px}
+.practice-page .ad-item-result {border-radius:14px;padding:20px;line-height:1.75}
+.practice-page .ad-item-result p {margin-top:12px}
+.practice-page .ad-item--correct {border:2px solid #167447}
+.practice-page .ad-item--incorrect {border:2px solid #b42332}
+.practice-page .ad-item--needs_review {border:2px solid #7b8494}
+.practice-page .ad-item--correct .ad-option:has(input:checked) {background:#eef9f2;border-color:#167447;color:#125b38}
+.practice-page .ad-item--incorrect .ad-option:has(input:checked) {background:#fff1f2;border-color:#b42332;color:#9b1c2a}
+.practice-page .ad-item--correct .ad-option input {accent-color:#167447}
+.practice-page .ad-item--incorrect .ad-option input {accent-color:#b42332}
+.practice-page.is-practicing .ad-hero {display:none}
+@media(max-width:800px) {
+  .practice-page .practice-hero-live {grid-template-columns:1fr 230px;gap:18px}
+  .practice-art-main {font-size:68px;padding:17px 24px 25px}
+  .practice-art-hand {font-size:20px}
+  .practice-page .ad-options {grid-template-columns:1fr}
+}
+@media(max-width:600px) {
+  .practice-page :is(.areas-hero,.ad-hero) {padding:25px;border-radius:24px}
+  .practice-page .practice-hero-live {grid-template-columns:1fr}
+  .practice-word-art {min-height:180px;max-width:280px;width:100%;margin:2px auto 0}
+  .practice-art-main {font-size:66px}
+  .practice-art-small {top:0;font-size:14px}
+  .practice-art-hand {bottom:0;font-size:19px}
+  .practice-art-dot {width:24px;height:24px;top:4px}
+  .practice-page :is(.areas-hero h1,.ad-hero h1) {font-size:50px}
+  .practice-page :is(.areas-hero p,.ad-hero p) {font-size:15px;margin-top:18px}
+  .practice-route {grid-template-columns:1fr;gap:13px;padding:0 4px}
+  .practice-route li>span {flex-basis:34px;height:34px;border-radius:11px}
+  .practice-route small {margin:0}
+  .practice-page .practice-catalog {padding:20px 16px}
+  .practice-page .ad-lesson-intro {padding:24px 21px}
+  .practice-page .ad-item {padding:22px 19px}
+  .practice-page .ad-item>label {font-size:17px}
+  .practice-page .ad-context-text {font-size:16px;line-height:1.85}
+  .practice-page .ad-work-toolbar {padding:12px 10px 7px}
+  .practice-page .ad-work-toolbar .ad-work-progress {display:grid;grid-template-columns:1fr auto;gap:7px 12px}
+  .practice-page .ad-work-toolbar #answerProgress {grid-column:1;grid-row:2;width:100%;margin:0}
+  .practice-page .ad-jump-end {grid-column:2;grid-row:1 / 3}
+  .practice-page .ad-actions {padding:22px 18px}
+}
+@media(prefers-reduced-motion:reduce) {
+  .practice-page :is(.practice-card,.ad-card) {transition:none;transform:none}
+}

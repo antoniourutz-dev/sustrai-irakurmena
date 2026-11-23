@@ -14,6 +14,7 @@
   <link rel="stylesheet" href="/aditzak/style.css?v=20261122-no-feedback">
   <link rel="stylesheet" href="/hitzbira.css?v=20261121-aditzak">
   <link rel="stylesheet" href="/practice-ui.css?v=20261122-choice3">
+  <link rel="stylesheet" href="/ariketak/alive.css?v=20261123-live1">
 </head>
 <body class="has-tabbar practice-page">
 <a class="skip" href="#pageTitle">Joan edukira</a>
@@ -24,9 +25,10 @@
 <main class="ad-page">
   <nav aria-label="Ogi-apurrak" class="ad-breadcrumb"><a href="/ariketak/">Ariketak</a><span aria-hidden="true">›</span><span aria-current="page">Hizkuntza-ariketak</span></nav>
   <section class="ad-hero">
-    <div class="ad-kicker">PRAKTIKATU ZURE ERRITMOAN</div>
-    <h1 id="pageTitle">Hizkuntza-ariketak</h1>
-    <p>Aukeratu jarduera bat eta landu aditzak eta sintaxia testuinguruan.</p>
+    <div class="practice-hero-live"><div><div class="ad-kicker">HIZKUNTZA-ARIKETAK</div>
+    <h1 id="pageTitle">Egin.<br><em>Eta ikasi.</em></h1>
+    <p>Aditzak eta sintaxia, testuinguruan. Aukeratu jarduera bat eta eman ikasitakoari beste buelta bat.</p>
+    <span class="practice-invitation">Galdera bakoitza, urrats bat.</span></div><div class="practice-word-art" aria-hidden="true"><span class="practice-art-small">hitzak</span><span class="practice-art-main">egin!</span><span class="practice-art-hand">Zure txanda.</span><span class="practice-art-dot"></span></div></div>
     
   </section>
   <section id="authRequired" class="ad-notice" hidden>
@@ -44,8 +46,9 @@
     <div id="catalog" class="ad-catalog" aria-label="Jardueren katalogoa"></div>
     <section id="activityPanel" class="ad-activity" aria-labelledby="activityTitle" hidden>
       <div class="ad-activity-head"><button type="button" id="backToCatalog" class="ad-back">← Jardueretara itzuli</button><span id="activityBadge" class="ad-badge"></span></div>
+      <div class="ad-lesson-intro"><span class="ad-lesson-kicker">PENTSATU · ERANTZUN · BERRIKUSI</span>
       <p id="activityMeta" class="ad-activity-meta"></p>
-      <h2 id="activityTitle"></h2><p id="activityInstruction" class="ad-instruction"></p>
+      <h2 id="activityTitle"></h2><p id="activityInstruction" class="ad-instruction"></p></div>
       <section id="activityContext" class="ad-context" aria-label="Testu osoa" hidden>
         <h3>Testua</h3>
         <p id="activityContextText" class="ad-context-text"></p>
@@ -55,7 +58,7 @@
         <nav id="questionNav" class="ad-question-nav" aria-label="Ariketako galderak"></nav>
       </div>
       <div id="items" class="ad-items"></div>
-      <div class="ad-actions" id="activityActions" tabindex="-1"><button type="button" id="saveResponses" class="ad-button primary">Erantzunak gorde eta zuzendu</button><button type="button" id="gradeAgain" class="ad-button" hidden>Emaitzak berriro eskuratu</button><button type="button" id="newAttempt" class="ad-button" hidden>Ariketa berriro egin</button><p id="saveMessage" class="ad-save-msg" role="status" aria-live="polite"></p></div>
+      <div class="ad-actions" id="activityActions" tabindex="-1"><p class="ad-actions-invitation">Zure erantzunak prest?</p><button type="button" id="saveResponses" class="ad-button primary">Erantzunak gorde eta zuzendu</button><button type="button" id="gradeAgain" class="ad-button" hidden>Emaitzak berriro eskuratu</button><button type="button" id="newAttempt" class="ad-button" hidden>Ariketa berriro egin</button><p id="saveMessage" class="ad-save-msg" role="status" aria-live="polite"></p></div>
       <section id="gradeSummary" class="ad-grade-summary" aria-label="Ariketaren emaitza" aria-live="polite" hidden></section>
       <details class="ad-footnote ad-help"><summary>Erantzunak eta berrikuspena</summary><p>Zure erantzunak eta borondatez bidalitako iradokizunak gordetzen dira. Erantzun-ereduak orientagarriak dira; ez da egiaztapen ofizialik ematen. E02 eta E03 jardueretako gakoak akademikoki egiaztatuta daudenean soilik kalkulatzen dira emaitza objektiboak; gainerakoak berrikusteko geratzen dira. Emaitzak ez dira egiaztapen ofizialak.</p></details>
     </section>

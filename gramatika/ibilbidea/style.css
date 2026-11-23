@@ -246,3 +246,14 @@
 .b2-feedback-note>strong{overflow-wrap:anywhere}
 .b2-practice-count{font-variant-numeric:tabular-nums}
 @media(hover:none){.b2-option:hover{background:var(--s-surface);border-color:var(--s-line)}}
+
+/* 2026-11-23 · Hasierako diagnostiko independentea, pilotuko sei unitateetan. */
+.b2-steps.has-diagnostic{grid-template-columns:repeat(5,minmax(0,1fr))}
+.b2-diag-situation{padding:14px 16px;border-left:3px solid var(--s-primary);border-radius:10px;background:var(--s-primary-soft);font-weight:600;line-height:1.65;white-space:pre-line}
+.b2-diagnostic-question{background:var(--s-surface);display:grid;gap:13px}
+.b2-diagnostic-question .b2-option{min-height:54px;text-align:left;padding:12px 14px;white-space:normal;line-height:1.55}
+.b2-diagnostic-question .b2-option[disabled]{cursor:default;opacity:1}
+.b2-diagnostic-question .b2-option.is-correct,.b2-diagnostic-question .b2-option.is-correct:hover{background:var(--s-ok-soft);border-color:var(--s-ok)}
+.b2-diagnostic-question .b2-option.is-incorrect,.b2-diagnostic-question .b2-option.is-incorrect:hover{background:var(--s-bad-soft);border-color:var(--s-bad)}
+@media(max-width:850px){.b2-steps.has-diagnostic{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:600px){.b2-steps.has-diagnostic{grid-template-columns:repeat(2,minmax(0,1fr))}.b2-diag-options{grid-template-columns:1fr}}

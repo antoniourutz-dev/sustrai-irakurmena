@@ -1,5 +1,5 @@
 /* SUSTRAI PWA service worker */
-const CACHE_VERSION = 'sustrai-pwa-v61-grammar-alive';
+const CACHE_VERSION = 'sustrai-pwa-v62-b2-six-diagnostics';
 const SHELL = [
   '/',
   '/index.html',

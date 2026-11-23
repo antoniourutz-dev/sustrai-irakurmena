@@ -8,7 +8,7 @@
   const state = {
     client: null, user: null, profile: null, modules: [], units: [], entries: new Map(),
     progress: new Map(), assigned: [], myGroups: [], teacherGroups: [], teacherAssignments: [],
-    selected: null, step: 0, quizAnswers: new Map(), quizTries: new Map(), examplesCache: new Map(), readerSize: 18, readerFocus: false
+    selected: null, step: 0, quizAnswers: new Map(), quizTries: new Map(), examplesCache: new Map(), diagnostics: new Map(), diagnosticAttempts: new Map(), readerSize: 18, readerFocus: false
   };
   const QUESTIONS = Object.create(null);
   const LESSONS = new Map();
@@ -77,10 +77,11 @@
   }
   function readiness(unit) {
     return unit.review_snapshot === 'approved'
-      ? '2026-11-22ko egoera: jatorrizko fitxa onartua. Ikasgai gehigarria pilotuko materiala da.'
-      : '2026-11-22ko egoera: jatorrizko fitxa berrikusteko. Ikasgai gehigarria pilotuko zirriborroa da.';
+      ? 'Jatorrizko fitxa ibilbidea sortzean onartuta zegoen; ikasgai gidatuaren osagarriak pilotuko materiala dira.'
+      : 'Jatorrizko fitxa berrikuspen akademiko independentea egin gabe dago. Ikasgai gidatua pilotuko materiala da.';
   }
   function guidedCount() { return state.units.filter(u=>u.pilot_active).length; }
+  function diagnosticCount() { return [...state.diagnosticAttempts.values()].filter(a=>state.diagnostics.has(a.entry_code)).length; }
   function completeCount() {
     return state.units.filter(u => !!own(u.entry_code).read_at).length;
   }
@@ -88,8 +89,8 @@
     const produced=state.units.filter(u=>u.pilot_active&&!!own(u.entry_code).transferred_at).length;
     const reviewed=state.units.filter(u=>u.pilot_active&&!!own(u.entry_code).reviewed_again_at).length;
     $('pathProgressText').textContent=hasAccount()
-      ? completeCount()+'/'+state.units.length+' gai irakurrita · '+produced+'/'+guidedCount()+' ekoizpen gordeta · '+reviewed+'/'+guidedCount()+' gerora berrikusita'
-      : completeCount()+'/'+state.units.length+' gai saio honetan · '+produced+'/'+guidedCount()+' jarduera probatuta · ez da hodeian gordetzen.';
+      ? completeCount()+'/'+state.units.length+' gai irakurrita · '+produced+'/'+guidedCount()+' ekoizpen gordeta · '+reviewed+'/'+guidedCount()+' gerora berrikusita · '+diagnosticCount()+'/'+state.diagnostics.size+' diagnostiko'
+      : completeCount()+'/'+state.units.length+' gai saio honetan · '+produced+'/'+guidedCount()+' jarduera probatuta · '+diagnosticCount()+'/'+state.diagnostics.size+' diagnostiko · ez da hodeian gordetzen.';
     $('pathProgressBar').style.width=(completeCount()/Math.max(1,state.units.length)*100).toFixed(1)+'%';
     $('pathProgressTrack')?.setAttribute('aria-valuenow',String(completeCount()));
     $('pathProgressTrack')?.setAttribute('aria-valuemax',String(state.units.length));
@@ -133,7 +134,7 @@
         const desc = el('span', null, 'b2-topic-meta');
         const status = own(u.entry_code);
         desc.append(el('span',status.reviewed_again_at?'Gerora berrikusia':status.transferred_at?'Ekoizpena gordeta':status.practiced_at?'Praktikatua':status.read_at?'Irakurrita':'Hasteko'));
-        if (u.pilot_active) desc.append(el('span', '4 urratseko ikasgaia'));
+        if (u.pilot_active) desc.append(el('span', state.diagnostics.has(u.entry_code) ? (state.diagnosticAttempts.has(u.entry_code)?'Diagnostikoa eginda · ikasgai gidatua':'Diagnostikoa · ikasgai gidatua') : '4 urratseko ikasgaia'));
         b.append(desc);
         li.append(b);
         ol.append(li);
@@ -271,16 +272,96 @@
       return;
     }
     tabs.hidden = false;
+    const withDiagnostic=state.diagnostics.has(u.entry_code);
+    tabs.classList.toggle('has-diagnostic',withDiagnostic);
+    if(withDiagnostic){
+      const buttonDiag=button('0. Diagnostikoa',()=>{state.step=-1;renderLesson();},'b2-step-tab');
+      buttonDiag.classList.toggle('is-active',state.step===-1);
+      buttonDiag.setAttribute('aria-current',state.step===-1?'step':'false');
+      tabs.append(buttonDiag);
+    }
     STEPS.forEach((name, i) => {
       const b = button((i + 1) + '. ' + name, () => {state.step = i; renderLesson();}, 'b2-step-tab');
       b.classList.toggle('is-active', i === state.step);
       b.setAttribute('aria-current', i === state.step ? 'step' : 'false');
       tabs.append(b);
     });
+    if(state.step===-1 && withDiagnostic){renderDiagnostic(u.entry_code,body);return;}
     if (state.step === 0) renderUnderstanding(e, body);
     if (state.step === 1) void renderContrasts(u.entry_code, body);
     if (state.step === 2) renderPractice(u.entry_code, body);
     if (state.step === 3) renderTransfer(u.entry_code, body);
+  }
+  // Hasierako diagnostikoa: ikasle bakoitzaren lehen hautua baino ez da gordetzen;
+  // ez da gaitasunaren nota. Saio anonimoan memorian geratzen da.
+  async function chooseDiagnostic(code,index){
+    const prompt=state.diagnostics.get(code);
+    if(!prompt || state.diagnosticAttempts.has(code) || !Number.isInteger(index)) return;
+    if(index<0||index>2) return;
+    if(hasAccount()){
+      try {
+        const result=check(await state.client.from('smx_grammar_b2_diagnostic_attempts')
+          .insert({user_id:state.user.id,entry_code:code,choice_index:index,prompt_version:prompt.prompt_version})
+          .select('user_id,entry_code,choice_index,prompt_version,attempted_at').single());
+        state.diagnosticAttempts.set(code,result);
+        say('Hasierako hautua hodeian gorde da. Diagnostikoa orientagarria da.');
+      }catch(err){
+        if(err?.code==='23505'){
+          try{
+            const existing=check(await state.client.from('smx_grammar_b2_diagnostic_attempts')
+              .select('user_id,entry_code,choice_index,prompt_version,attempted_at').eq('user_id',state.user.id)
+              .eq('entry_code',code).single());
+            state.diagnosticAttempts.set(code,existing);
+            say('Aurretik gordetako diagnostikoa berreskuratu da.');
+          }catch(readErr){say('Diagnostikoa ezin izan da berreskuratu; ez da emaitza berririk gordetutzat hartu.',true);return;}
+        }else{say('Diagnostikoa ez da gorde: '+(err?.message||'konexio-errorea'),true);return;}
+      }
+    }else{
+      state.diagnosticAttempts.set(code,{entry_code:code,choice_index:index,prompt_version:prompt.prompt_version,attempted_at:new Date().toISOString()});
+      say('Gonbidatu moduan: diagnostikoa saio honetako memorian dago, ez hodeian.');
+    }
+    renderPath();
+    if(state.selected===code&&state.step===-1)renderLesson();
+  }
+  function renderDiagnostic(code,body){
+    const prompt=state.diagnostics.get(code);
+    if(!prompt)return;
+    const root=section(body,'0. Hasierako diagnostikoa · azalpena irakurri aurretik');
+    addP(root,'Egoera labur bat aztertuko duzu. Hautatu erantzun bakarra, eta azalpena ikusiko duzu. Ez da azterketako nota edo gaitasun iraunkorraren diagnostiko bat.','b2-context');
+    addP(root,prompt.context_eu,'b2-diag-situation');
+    const first=state.diagnosticAttempts.get(code);
+    if(!first && own(code).read_at){
+      addP(root,'Gai honen teoria aurretik irakurri duzu; oraingo erantzuna ez litzateke aurretiko diagnostiko independentea izango. Nahi baduzu, autoegiaztapen gisa egin dezakezu.','b2-footnote');
+    }
+    const card=el('fieldset',null,'b2-quiz-card b2-diagnostic-question');
+    card.append(el('legend',prompt.question_eu));
+    const choices=el('div',null,'b2-quiz-options b2-diag-options');
+    const choice=first?.choice_index;
+    prompt.options_eu.forEach((option,index)=>{
+      const b=button(option,()=>void chooseDiagnostic(code,index),'b2-option');
+      b.disabled=Boolean(first);
+      b.setAttribute('aria-pressed',String(choice===index));
+      if(first){
+        if(index===prompt.correct_index)b.classList.add('is-correct');
+        else if(choice===index)b.classList.add('is-incorrect');
+      }
+      choices.append(b);
+    });
+    card.append(choices);
+    if(first){
+      const matched=choice===prompt.correct_index;
+      const feedback=el('div',null,'b2-feedback '+(matched?'is-correct':'is-incorrect'));
+      feedback.setAttribute('role','status');
+      feedback.append(el('strong',matched?'Erantzuna bat dator':'Hautua berrikusteko'));
+      addP(feedback,prompt.feedback_eu?.[choice]||prompt.explanation_eu,'b2-feedback-body');
+      addP(feedback,prompt.explanation_eu,'b2-feedback-body');
+      card.append(feedback);
+      addP(root,'Hautu hau lehen saiakeraren argazkia da. Ez da automatikoki gaitasun-etiketarik esleitzen.','b2-footnote');
+    }else addP(root,'Aukera zuzena eta azalpenak erantzun ondoren azalduko dira.','b2-footnote');
+    root.append(card);
+    row(root,button(first?'Jarraitu ikasten':'Teoriara joan diagnostikoa bete gabe',()=>{
+      state.step=0;renderLesson();
+    },first?'b2-button':'b2-button is-secondary'));
   }
   function setupReadingControls(){
     const root=$('pathRoot'), reader=$('pathLesson'),focus=$('pathReaderFocus');
@@ -526,7 +607,7 @@
     if (!state.entries.has(code)) {say('Gaia ezin izan da aurkitu.', true); return;}
     state.selected = code;
     const progress = own(code);
-    state.step = !progress.read_at ? 0 : !progress.contrasted_at ? 1 : !progress.practiced_at ? 2 : 3;
+    state.step = state.diagnostics.has(code) && !state.diagnosticAttempts.has(code) && !progress.read_at ? -1 : !progress.read_at ? 0 : !progress.contrasted_at ? 1 : !progress.practiced_at ? 2 : 3;
     const url = new URL(location.href);
     url.searchParams.set('gaia', code);
     if (url.href !== location.href) history.pushState(null, '', url);
@@ -725,15 +806,21 @@
     const students=Array.isArray(group.students)?group.students.filter(s=>s.active):[];
     if(!students.length){addP(pupils,'Taldean ez dago oraindik ikaslerik. Partekatu sarrera-kodea.');return;}
     try{
-      const data=check(await state.client.from('smx_grammar_b2_progress')
-        .select('user_id,entry_code,read_at,transferred_at')
-        .in('user_id',students.map(s=>s.id)).limit(1500));
+      const [data,diagAttempts]=await Promise.all([
+        state.client.from('smx_grammar_b2_progress')
+          .select('user_id,entry_code,read_at,transferred_at')
+          .in('user_id',students.map(s=>s.id)).limit(1500).then(check),
+        state.client.from('smx_grammar_b2_diagnostic_attempts')
+          .select('user_id,entry_code,choice_index,prompt_version')
+          .in('user_id',students.map(s=>s.id)).limit(1000).then(check)
+      ]);
       students.forEach(s=>{
         const ownRows=data.filter(d=>d.user_id===s.id);
         const started=ownRows.filter(d=>d.read_at).length;
         const transferred=ownRows.filter(d=>d.transferred_at).length;
         const item=el('div',null,'b2-student-row');
-        item.append(el('strong',s.name||'Ikaslea'),el('span',started+'/'+state.units.length+' gai irakurrita · '+transferred+'/'+guidedCount()+' ekoizpen gordeta'));
+        const counted=diagAttempts.filter(a=>a.user_id===s.id&&state.diagnostics.has(a.entry_code)).length;
+        item.append(el('strong',s.name||'Ikaslea'),el('span',started+'/'+state.units.length+' gai irakurrita · '+transferred+'/'+guidedCount()+' ekoizpen gordeta · '+counted+'/'+state.diagnostics.size+' diagnostiko'));
         const inspect=button('Ikusi ekoizpenak eta eman orientabidea',()=>{
           if(item.querySelector('.b2-teacher-student-detail')){
             item.querySelector('.b2-teacher-student-detail').remove();return;
@@ -752,14 +839,34 @@
     slot.replaceChildren();
     const heading=el('h4','Ikaslearen ekoizpenak eta feedback hezigarria');slot.append(heading);
     try{
-      const [progress,feedback,versions]=await Promise.all([
+      const [progress,feedback,versions,diagnosticRecords]=await Promise.all([
         state.client.from('smx_grammar_b2_progress').select('entry_code,read_at,practiced_at,transferred_at,reflection_eu,reviewed_again_at,review_reflection_eu')
           .eq('user_id',student.id).order('updated_at',{ascending:false}).limit(50).then(check),
         state.client.from('smx_grammar_b2_teacher_feedback').select('entry_code,feedback_eu,next_step_eu,created_at')
           .eq('student_id',student.id).order('created_at',{ascending:false}).limit(25).then(check),
         state.client.from('smx_grammar_b2_work_versions').select('entry_code,version_no,version_kind,body_eu,created_at')
-          .eq('user_id',student.id).order('created_at',{ascending:false}).limit(60).then(check)
+          .eq('user_id',student.id).order('created_at',{ascending:false}).limit(60).then(check),
+        state.client.from('smx_grammar_b2_diagnostic_attempts')
+          .select('entry_code,choice_index,prompt_version,attempted_at').eq('user_id',student.id)
+          .order('attempted_at',{ascending:false}).limit(100).then(check)
       ]);
+      if(diagnosticRecords.length){
+        const first=section(slot,'Hasierako diagnostikoaren ebidentzia');
+        addP(first,'Aukera bakarreko lehen saiakerak dira. Ez da gaitasun iraunkorraren nota; erabili galdera osagarriak prestatzeko.','b2-footnote');
+        diagnosticRecords.forEach(attempt=>{
+          const prompt=state.diagnostics.get(attempt.entry_code);
+          if(!prompt)return;
+          const item=el('article',null,'b2-feedback-note');
+          item.append(el('strong',state.entries.get(attempt.entry_code)?.title_eu||attempt.entry_code));
+          const matchesVersion=prompt.prompt_version===attempt.prompt_version;
+          const matchesAnswer=matchesVersion&&attempt.choice_index===prompt.correct_index;
+          item.append(el('span',(matchesVersion?(matchesAnswer?'Hautua bat dator':'Berrikusteko aukera'):'Aurreko bertsio bateko hautua')
+            +' · '+day(attempt.attempted_at),'b2-mini-label'));
+          addP(item,'Aukeratua: '+(matchesVersion?(prompt.options_eu?.[attempt.choice_index]||'Ezin da irakurri'):'Gaurko ereduarekin ezin da zuzenean alderatu.'),'b2-small');
+          if(matchesVersion)addP(item,prompt.feedback_eu?.[attempt.choice_index]||'','b2-example-note');
+          first.append(item);
+        });
+      }
       const works=progress.filter(x=>x.reflection_eu||x.review_reflection_eu);
       if(!works.length)addP(slot,'Ikasleak ez du oraindik ekoizpen idatzirik gorde.','b2-small');
       else works.forEach(work=>{
@@ -834,20 +941,23 @@
       state.profile=cloud?.profile?.()||null;
       state.user=cloud?.user?.()||null;
       if(!state.client)throw new Error('Supabase konexiorik ez');
-      const [mods,units,entries,designs,items]=await Promise.all([
+      const [mods,units,entries,designs,items,diagnostics]=await Promise.all([
         state.client.from('smx_grammar_b2_modules').select('*').order('module_no').then(check),
         state.client.from('smx_grammar_b2_path_units').select('*').order('global_order').then(check),
         state.client.from('public_editorial_grammar_entries')
           .select('id,code,title_eu,short_explanation_eu,explanation_eu,level,metadata,use_when_eu,avoid_when_eu,warning_eu,source_guideline,version').eq('level','B2').limit(100).then(check),
-        state.client.from('smx_grammar_b2_lesson_designs').select('*').limit(20).then(check),
-        state.client.from('smx_grammar_b2_practice_items').select('*').order('item_order').limit(100).then(check)
+        state.client.from('smx_grammar_b2_lesson_designs').select('*').limit(120).then(check),
+        state.client.from('smx_grammar_b2_practice_items').select('*').order('item_order').limit(500).then(check),
+        state.client.from('smx_grammar_b2_diagnostic_prompts').select('*').limit(120).then(check)
       ]);
       if(mods.length!==7 || units.length<31 || units.length>100)throw new Error('Ibilbidearen egitura osatu gabe dago');
       state.modules=mods;state.units=units.map(u=>({...u,pilot_active:designs.some(d=>d.entry_code===u.entry_code)}));
+      state.diagnostics=new Map(diagnostics.map(d=>[d.entry_code,d]));
       state.entries=new Map(entries.map(e=>[e.code,e]));
       const activeCount=state.units.filter(u=>u.pilot_active).length;
       if(activeCount!==designs.length)throw new Error('Ikasgaien eta gramatika-ibilbidearen kodeak ez datoz bat.');
-      if(!designs.length||items.length<designs.length*4)throw new Error('Ikasgai eta praktiken datuak osatu gabe daude.');
+      if(!designs.length||items.length!==designs.length*4)throw new Error('Ikasgai eta praktiken kopuruak ez datoz bat.');
+      if(diagnostics.some(d=>!designs.some(l=>l.entry_code===d.entry_code)))throw new Error('Diagnostikoa ikasgaiarekin lotu gabe dago.');
       designs.forEach(d=>LESSONS.set(d.entry_code,d));
       for(const d of designs){
         const selected=items.filter(it=>it.entry_code===d.entry_code).sort((a,b)=>a.item_order-b.item_order);
@@ -863,6 +973,9 @@
         const data=check(await state.client.from('smx_grammar_b2_progress')
           .select('*').eq('user_id',state.user.id).limit(100));
         state.progress=new Map(data.map(d=>[d.entry_code,d]));
+        const attempts=check(await state.client.from('smx_grammar_b2_diagnostic_attempts')
+          .select('entry_code,choice_index,prompt_version,attempted_at').eq('user_id',state.user.id).limit(120));
+        state.diagnosticAttempts=new Map(attempts.map(a=>[a.entry_code,a]));
       }
       renderPath();
       await Promise.all([loadStudent(),loadTeacher()]);

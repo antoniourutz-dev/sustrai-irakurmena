@@ -315,10 +315,14 @@
     for(const [key,cell] of cells)cell.number=numbers.get(key)||null;
     const root=$('studioWorkspace');
     const teacher=action.endsWith('teacher');
+    const groupIds=groups.deserialize(s.puzzleTopicCode);
+    const topics=groupIds.length===groups.GROUPS.length
+      ? ['Osasun-hiztegi orokorra']
+      : groupIds.map(id=>groups.GROUPS.find(g=>g.id===id)?.label||id);
     const options={root,teacher,puzzle:{...s.puzzle,theme_eu:currentTitle(),is_authoring:true},
-      words:s.puzzle.entries.map(w=>({...w})),cells};
-    if(action.startsWith('pdf-'))window.CrosswordPDF?.download(options);
-    else window.CrosswordWord?.download(options);
+      words:s.puzzle.entries.map(w=>({...w})),cells,topics};
+    if(!window.HitzBiraStudioExport){notify('HitzBira esportazio-modulua ezin izan da kargatu.',true);return;}
+    window.HitzBiraStudioExport.download(action,options);
   }
   function bind(){
     $('studioLogin').addEventListener('click',()=>s.cloud?.openLogin?.());

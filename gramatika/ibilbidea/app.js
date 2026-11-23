@@ -12,6 +12,8 @@
   };
   const QUESTIONS = Object.create(null);
   const LESSONS = new Map();
+  const MAX_PATH_UNITS = 100;
+  const ITEMS_PER_LESSON = 4;
   const designFor = code => LESSONS.get(code)||null;
   const day = d => new Date(d).toLocaleDateString('eu-ES',{year:'numeric',month:'short',day:'numeric'});
   const listValues=(parent,items,className='b2-check-list')=>{
@@ -935,6 +937,8 @@
     }catch(err){addP(slot,'Ikaslearen ekoizpenak ezin izan dira kargatu: '+(err.message||''),'b2-error');}
   }
     async function start() {
+    $('pathContinueButton').disabled=true;
+    $('pathContinueButton').textContent='Jarraitu ikasten';
     try{
       await cloud?.ready;
       state.client=cloud?.client?.()||null;
@@ -945,23 +949,23 @@
         state.client.from('smx_grammar_b2_modules').select('*').order('module_no').then(check),
         state.client.from('smx_grammar_b2_path_units').select('*').order('global_order').then(check),
         state.client.from('public_editorial_grammar_entries')
-          .select('id,code,title_eu,short_explanation_eu,explanation_eu,level,metadata,use_when_eu,avoid_when_eu,warning_eu,source_guideline,version').eq('level','B2').limit(100).then(check),
-        state.client.from('smx_grammar_b2_lesson_designs').select('*').limit(120).then(check),
-        state.client.from('smx_grammar_b2_practice_items').select('*').order('item_order').limit(500).then(check),
+          .select('id,code,title_eu,short_explanation_eu,explanation_eu,level,metadata,use_when_eu,avoid_when_eu,warning_eu,source_guideline,version').eq('level','B2').limit(MAX_PATH_UNITS).then(check),
+        state.client.from('smx_grammar_b2_lesson_designs').select('*').order('entry_code').limit(MAX_PATH_UNITS).then(check),
+        state.client.from('smx_grammar_b2_practice_items').select('*').order('entry_code').order('item_order').limit(MAX_PATH_UNITS*ITEMS_PER_LESSON).then(check),
         state.client.from('smx_grammar_b2_diagnostic_prompts').select('*').limit(120).then(check)
       ]);
-      if(mods.length!==7 || units.length<31 || units.length>100)throw new Error('Ibilbidearen egitura osatu gabe dago');
+      if(mods.length!==7 || units.length<31 || units.length>MAX_PATH_UNITS)throw new Error('Ibilbidearen egitura osatu gabe dago');
       state.modules=mods;state.units=units.map(u=>({...u,pilot_active:designs.some(d=>d.entry_code===u.entry_code)}));
       state.diagnostics=new Map(diagnostics.map(d=>[d.entry_code,d]));
       state.entries=new Map(entries.map(e=>[e.code,e]));
       const activeCount=state.units.filter(u=>u.pilot_active).length;
       if(activeCount!==designs.length)throw new Error('Ikasgaien eta gramatika-ibilbidearen kodeak ez datoz bat.');
-      if(!designs.length||items.length!==designs.length*4)throw new Error('Ikasgai eta praktiken kopuruak ez datoz bat.');
+      if(!designs.length||items.length!==designs.length*ITEMS_PER_LESSON)throw new Error('Ikasgai eta praktiken kopuruak ez datoz bat.');
       if(diagnostics.some(d=>!designs.some(l=>l.entry_code===d.entry_code)))throw new Error('Diagnostikoa ikasgaiarekin lotu gabe dago.');
       designs.forEach(d=>LESSONS.set(d.entry_code,d));
       for(const d of designs){
         const selected=items.filter(it=>it.entry_code===d.entry_code).sort((a,b)=>a.item_order-b.item_order);
-        if(selected.length!==4)throw new Error('Lau galderak falta dira: '+d.entry_code);
+        if(selected.length!==ITEMS_PER_LESSON)throw new Error('Praktikaren galdera-kopurua ez dator bat: '+d.entry_code);
         QUESTIONS[d.entry_code]={prompts:selected.map(it=>({
           q:it.question_eu,a:it.options_eu,correct:it.correct_index,why:it.explanation_eu,
           feedback:it.feedback_eu,context:it.context_eu,
@@ -987,7 +991,14 @@
       say('');
     }catch(err){
       console.warn('SUSTRAI B2 path startup',err?.code||err?.message||'network');
-      say('Ezin izan da B2ko ibilbidea kargatu. Freskatu orria edo egiaztatu konexioa.',true);
+      say('Ezin izan da B2ko ibilbidea kargatu. Saiatu berriro beheko botoiarekin.',true);
+      $('pathProgressText').textContent='Kargatu gabe';
+      $('pathNextTitle').textContent='Ibilbidea berriro kargatu';
+      $('pathNextDetail').textContent='Sakatu botoia berriro saiatzeko.';
+      $('pathContinueButton').textContent='Berriro saiatu';
+      $('pathContinueButton').onclick=()=>void start();
+    }finally{
+      $('pathContinueButton').disabled=false;
     }
   }
   window.addEventListener('popstate',()=>{

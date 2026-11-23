@@ -1,5 +1,5 @@
 /* SUSTRAI PWA service worker */
-const CACHE_VERSION = 'sustrai-pwa-v59-gramatika-b2-37-gai';
+const CACHE_VERSION = 'sustrai-pwa-v60-grammar-learning-layout';
 const SHELL = [
   '/',
   '/index.html',
@@ -84,6 +84,7 @@ const SHELL = [
   '/gramatika/ibilbidea/reader.js',
   '/gramatika/ibilbidea/reader.css',
   '/gramatika/gramatika.css',
+  '/gramatika/learning.css',
   '/gramatika/gramatika.js',
   '/ariketak/',
   '/ariketak/index.html',
@@ -221,3 +222,4 @@ self.addEventListener('fetch', (event) => {
     })
   );
 });
+

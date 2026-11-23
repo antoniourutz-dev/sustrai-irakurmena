@@ -244,6 +244,7 @@
     const e = u && state.entries.get(u.entry_code);
     if (!u || !e) return;
     $('pathLesson').hidden = false;
+    $('pathRoot').classList.add('has-lesson');
     $('pathLessonTitle').textContent = e.title_eu;
     $('pathLessonSubtitle').textContent = e.short_explanation_eu || '';
     const design=designFor(u.entry_code);
@@ -305,25 +306,6 @@
     });
     scale(0);
   }
-  function renderDocumentOutline(host,headings){
-    if(headings.length<2)return;
-    const menu=el('details',null,'gr-doc-outline');
-    menu.append(el('summary','Dokumentuaren aurkibidea · '+headings.length+' atal'));
-    const nav=el('nav',null,'gr-doc-outline-links');
-    nav.setAttribute('aria-label','Dokumentuaren atalak');
-    headings.forEach(heading=>{
-      const link=aLink('#'+heading.id,heading.title);
-      link.addEventListener('click',event=>{
-        const section=host.querySelector('#'+heading.id);
-        if(!section)return;
-        event.preventDefault();
-        const reduce=window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
-        section.scrollIntoView({behavior:reduce?'auto':'smooth',block:'start'});
-      });
-      nav.append(link);
-    });
-    menu.append(nav);host.prepend(menu);
-  }
   async function renderWholeGrammarEntry(entry,host){
     host.setAttribute('aria-busy','true');
     host.replaceChildren(el('p','Eduki osoa Supabasetik kargatzen…','gr-doc-loading'));
@@ -332,7 +314,7 @@
       if(!reader)throw Error('reader_missing');
       const full=await reader.load(entry,state.client);
       if(!host.isConnected||state.selected!==entry.code)return;
-      renderDocumentOutline(host,reader.render(host,entry,full));
+      reader.outline(host,reader.render(host,entry,full));
     }catch(error){
       if(!host.isConnected||state.selected!==entry.code)return;
       host.replaceChildren(el('p','Ezin izan da gaiaren eduki osoa kargatu. Saiatu berriro.','b2-error'));

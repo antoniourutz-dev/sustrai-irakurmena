@@ -56,9 +56,12 @@
     parent.append(root);
   }
   function section(root,title,headings) {
-    const s=el('section',null,'gr-doc-section');
+    const kinds={'Azalpena':'explain','Erabilera eta mugak':'usage','Sakontzeko azalpenak':'depth','Egiturak eta erabilera zehatzak':'forms','Adibideak testuinguruan':'examples','Egituren arteko aldeak':'contrast','Laburpen-taulak':'tables','Ohiko nahasketak':'review','Bankuko praktika osagarria':'practice','Iturriak eta egoera editoriala':'sources'};
+    const s=el('section',null,'gr-doc-section gr-doc-section-'+(kinds[title]||'explain'));
     s.id='gr-section-'+(headings.length+1);
-    s.append(el('h3',title));root.append(s);
+    const heading=el('h3');
+    heading.append(el('span',String(headings.length+1).padStart(2,'0'),'gr-doc-section-number'),el('span',title));
+    s.append(heading);root.append(s);
     headings.push({id:s.id,title});
     return s;
   }
@@ -69,7 +72,8 @@
   }
   function fact(root,label,value){
     if(!value)return;
-    const d=el('div',null,'gr-doc-fact');
+    const pattern=['Eraikuntza','Baiezkoa','Ezezkoa','Egitura jokatua','Egitura jokatugabea'].includes(label);
+    const d=el('div',null,'gr-doc-fact'+(pattern?' gr-doc-fact-pattern':''));
     d.append(el('dt',label));
     const dd=el('dd');prose(dd,value,'gr-doc-fact-copy');d.append(dd);root.append(d);
   }
@@ -100,7 +104,8 @@
     const related=examples.filter(e=>e.form_id===item.id);
     if(related.length){
       group.append(el('h5','Adibideak'));
-      related.forEach(e=>example(group,e));
+      const grid=el('div',null,'gr-doc-example-grid');
+      related.forEach(e=>example(grid,e));group.append(grid);
     }
     root.append(group);
   }
@@ -171,6 +176,9 @@
   function render(container,entry,data) {
     container.replaceChildren();
     const root=el('article',null,'gr-doc');const headings=[];
+    if(entry.metadata?.pilot_public_visibility==='pending_independent_review'){
+      root.append(el('p',entry.metadata.pilot_review_notice_eu||'Ikasmaterial pilotua: berrikuspen akademiko independentea egin gabe.','grammar-pilot-notice'));
+    }
     if(entry.explanation_eu)prose(section(root,'Azalpena',headings),entry.explanation_eu,'gr-doc-lead-prose');
     if(entry.use_when_eu||entry.avoid_when_eu||entry.warning_eu){
       const area=section(root,'Erabilera eta mugak',headings);
@@ -193,7 +201,8 @@
     }
     if(data.examples.length){
       const area=section(root,'Adibideak testuinguruan',headings);
-      data.examples.forEach(e=>example(area,e));
+      const grid=el('div',null,'gr-doc-example-grid');
+      data.examples.forEach(e=>example(grid,e));area.append(grid);
     }
     if(data.contrasts.length){
       const area=section(root,'Egituren arteko aldeak',headings);
@@ -229,9 +238,34 @@
         details.append(el('summary',s.title_eu));prose(details,s.body_eu);area.append(details);
       });
     }
+    const reflection=el('details',null,'gr-doc-recall');
+    reflection.append(el('summary','Gelditu une batez · zer ulertu duzu?'));
+    prose(reflection,'Azaldu ideia nagusia zeure hitzekin. Ondoren, sortu adibide bat beste egoera baterako eta arrazoitu aukeratu duzun egitura. Zalantzarik baduzu, itzuli dagokion azalpen edo adibidera.');
+    root.append(reflection);
     sources(root,entry,headings);
     container.append(root);
     return headings;
   }
-  window.SustraiGrammarReader=Object.freeze({load,render});
+  function outline(host,headings){
+    if(headings.length<2)return;
+    const menu=el('details',null,'gr-doc-outline');
+    menu.open=true;
+    menu.append(el('summary','Gai honetan · '+headings.length+' atal'));
+    const nav=el('nav',null,'gr-doc-outline-links');
+    nav.setAttribute('aria-label','Gaiaren atalak');
+    headings.forEach((heading,index)=>{
+      const a=el('a');a.href='#'+heading.id;
+      a.append(el('span',String(index+1).padStart(2,'0'),'gr-outline-number'),el('span',heading.title));
+      a.addEventListener('click',event=>{
+        const target=host.querySelector('#'+heading.id);if(!target)return;
+        event.preventDefault();
+        const reduce=window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
+        target.scrollIntoView({behavior:reduce?'auto':'smooth',block:'start'});
+        target.setAttribute('tabindex','-1');target.focus({preventScroll:true});
+      });
+      nav.append(a);
+    });
+    menu.append(nav);host.prepend(menu);
+  }
+  window.SustraiGrammarReader=Object.freeze({load,render,outline});
 })();

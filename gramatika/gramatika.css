@@ -106,3 +106,4 @@
 /* B2ko sorta berriak: pilotuaren egoera argi agertzen da, onarpen akademikoa asmatu gabe. */
 .grammar-index .grammar-pilot-tag{display:inline-flex;align-self:flex-start;max-width:100%;padding:5px 9px;border-radius:8px;background:var(--s-primary-soft);color:var(--s-primary);font-size:11px;line-height:1.35;font-weight:750}
 .grammar-pilot-notice{padding:12px 14px;border-left:3px solid var(--s-primary);border-radius:8px;background:var(--s-primary-soft);color:var(--s-ink-3);font-size:14px;line-height:1.65}
+

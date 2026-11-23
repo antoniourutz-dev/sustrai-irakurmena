@@ -22,28 +22,6 @@
     if (className) el.className = className;
     return el;
   };
-  function addText(parent, text, className) {
-    if (!text) return;
-    parent.append(node('p', text, className || 'grammar-body'));
-  }
-  function section(parent, title, className = '') {
-    const el = node('section', null, 'grammar-content-section' + (className ? ' ' + className : ''));
-    el.append(node('h3', title));
-    parent.append(el);
-    return el;
-  }
-  function note(parent, label, value) {
-    if (!value) return;
-    const el = node('div', null, 'grammar-note');
-    el.append(node('strong', label), node('p', value));
-    parent.append(el);
-  }
-  function detail(parent, title, value) {
-    if (!value) return;
-    const row = node('div', null, 'grammar-meta-row');
-    row.append(node('strong', title), node('p', value));
-    parent.append(row);
-  }
   const check = (response) => {
     if (response.error) throw response.error;
     return response.data || [];
@@ -111,206 +89,63 @@
     grid.setAttribute('aria-busy', 'false');
     $('grammarCount').textContent = String(rows.length) + ' gai';
     $('grammarEmpty').hidden = rows.length > 0;
-    status(rows.length ? 'Supabaseko gramatika-gaiak' : 'Ez da gairik aurkitu.');
-  }
-  function renderExample(parent, item) {
-    const type = item.example_type || 'note';
-    const label = {good:'Erabilera egokia',bad:'Hobetu beharreko erabilera',better:'Hobetutako aukera',contrast:'Kontrastea',note:'Erabilera-oharra'}[type] || 'Adibidea';
-    const box = node('div', null, 'grammar-example grammar-example-' + (['good','bad','better','contrast'].includes(type) ? type : 'note'));
-    box.append(node('span', label, 'grammar-caption'), node('p', item.text_eu, 'grammar-sentence'));
-    addText(box, item.explanation_eu, 'grammar-explain');
-    parent.append(box);
-  }
-  function renderForm(parent, form, examples) {
-    const card = node('details', null, 'grammar-form');
-    const summary = node('summary');
-    summary.append(node('span', form.display_eu || form.code, 'grammar-form-name'));
-    if (form.form_group) summary.append(node('span', form.form_group, 'grammar-form-group'));
-    card.append(summary);
-    const body = node('div', null, 'grammar-form-body');
-    detail(body,'Funtzioa',form.function_eu);
-    detail(body,'Esanahia',form.meaning_eu);
-    detail(body,'Eraikuntza',form.formation_eu);
-    detail(body,'Baiezkoa',form.positive_pattern_eu);
-    detail(body,'Ezezkoa',form.negative_pattern_eu);
-    detail(body,'Egitura jokatua',form.finite_pattern_eu);
-    detail(body,'Egitura jokatugabea',form.non_finite_pattern_eu);
-    detail(body,'Erabilera',form.use_when_eu);
-    detail(body,'Erregistroa',form.register_label);
-    detail(body,'Hizkera-aldaerak',form.dialect_note_eu);
-    note(body,'Kontuz',form.warning_eu || form.avoid_when_eu);
-    if (form.warning_eu && form.avoid_when_eu) detail(body, 'Saihestu', form.avoid_when_eu);
-    const related = examples.filter(example => example.form_id === form.id);
-    if (related.length) {
-      const examplesGrid = node('div', null, 'grammar-example-grid');
-      related.forEach(example => renderExample(examplesGrid, example));
-      const title = node('h4', 'Forma honen adibideak');
-      body.append(title, examplesGrid);
-    }
-    card.append(body);
-    parent.append(card);
-  }
-  function renderContrast(parent, item) {
-    const box = node('div', null, 'grammar-comparison-card');
-    box.append(node('h4', item.title_eu || 'Egituren arteko kontrastea'));
-    detail(box,'Lehen aukera',item.left_explanation_eu);
-    detail(box,'Bigarren aukera',item.right_explanation_eu);
-    addText(box,item.contrast_explanation_eu);
-    if (item.wrong_use_eu || item.better_use_eu) {
-      const pair = node('div',null,'grammar-example-grid');
-      if (item.wrong_use_eu) renderExample(pair,{example_type:'bad',text_eu:item.wrong_use_eu});
-      if (item.better_use_eu) renderExample(pair,{example_type:'better',text_eu:item.better_use_eu});
-      box.append(pair);
-    }
-    parent.append(box);
-  }
-  function renderTable(parent, model) {
-    const card = node('details',null,'grammar-form grammar-table-card');
-    card.append(node('summary',model.title_eu || 'Laburpen-taula'));
-    const body = node('div',null,'grammar-form-body');
-    addText(body,model.description_eu);
-    const columns = Array.isArray(model.columns_json) ? model.columns_json : [];
-    const rows = Array.isArray(model.rows_json) ? model.rows_json : [];
-    if (columns.length && rows.length) {
-      const wrapper = node('div',null,'grammar-table-wrap');
-      const table = node('table',null,'grammar-comparison');
-      const head = node('thead');
-      const header = node('tr');
-      columns.forEach(label => {const th=node('th',label); th.scope='col';header.append(th)});
-      head.append(header);table.append(head);
-      const tbody=node('tbody');
-      rows.forEach(row => {
-        const values = Array.isArray(row) ? row : columns.map((column,index) => row?.[column] ?? row?.[index] ?? '');
-        const tr=node('tr');
-        values.slice(0,columns.length).forEach(value => tr.append(node('td',value == null ? '' : String(value))));
-        tbody.append(tr);
-      });
-      table.append(tbody);
-      wrapper.append(table);
-      body.append(wrapper);
-    }
-    card.append(body); parent.append(card);
-  }
-  function renderErrors(parent, errors) {
-    const content = section(parent, 'Ohiko nahasketak eta zuzenketa-proposamenak');
-    const grid=node('div',null,'grammar-error-list');
-    errors.forEach(e=>{
-      const item=node('div',null,'grammar-error-item');
-      if(e.wrong_eu)renderExample(item,{example_type:'bad',text_eu:e.wrong_eu});
-      if(e.correct_eu)renderExample(item,{example_type:'better',text_eu:e.correct_eu});
-      addText(item,e.explanation_eu);
-      grid.append(item);
-    });
-    content.append(grid);
+    status(rows.length ? 'Aukeratu gai bat azalpena eta adibideak ikusteko.' : 'Ez da gairik aurkitu.');
   }
   function renderDetails(entry, data) {
     $('grammarTopic').textContent = state.level + ' · ' + (entry.category_label_eu || 'Gramatika');
     $('grammarDetailTitle').textContent = entry.title_eu;
     $('grammarLead').textContent = entry.short_explanation_eu || '';
-    $('grammarVersion').textContent = 'Bertsioa ' + entry.version;
+    $('grammarVersion').textContent = entry.version ? 'Bertsioa ' + entry.version : '';
+    $('grammarBack').href = linkFor(state.level);
     const root = $('grammarDetail');
-    root.replaceChildren();
-    if(entry.metadata?.pilot_public_visibility==='pending_independent_review'){
-      root.append(node('p', entry.metadata.pilot_review_notice_eu || 'Ikasmaterial pilotua: berrikuspen akademiko independentea egin gabe.','grammar-pilot-notice'));
-    }
-    if (entry.explanation_eu) {
-      const explain=section(root,'Azalpena');
-      addText(explain,entry.explanation_eu);
-    }
-    if (entry.use_when_eu || entry.avoid_when_eu || entry.warning_eu) {
-      const usage=section(root,'Erabilera eta mugak');
-      detail(usage,'Noiz erabili',entry.use_when_eu);
-      detail(usage,'Noiz saihestu',entry.avoid_when_eu);
-      note(usage,'Kontuan hartu',entry.warning_eu);
-    }
-    if (data.sections.length) {
-      const part=section(root,'Sakontzeko azalpenak');
-      data.sections.forEach(item=>{
-        const block=node('div',null,'grammar-section-block' + (item.section_type==='warning'?' grammar-warning':''));
-        block.append(node('h4',item.title_eu));
-        addText(block,item.body_eu);
-        part.append(block);
-      });
-    }
-    if (data.forms.length) {
-      const part=section(root,'Egiturak eta erabilera zehatzak');
-      addText(part,'Aukeratu egitura bat haren funtzioa, forma eta adibideak ikusteko. Ez dira ariketak.');
-      data.forms.forEach(form=>renderForm(part,form,data.formExamples));
-    }
-    if (data.examples.length) {
-      const part=section(root,'Adibide orokorrak');
-      const grid=node('div',null,'grammar-example-grid');
-      data.examples.forEach(example=>renderExample(grid,example));
-      part.append(grid);
-    }
-    if (data.contrasts.length) {
-      const part=section(root,'Egituren arteko aldeak');
-      data.contrasts.forEach(item=>renderContrast(part,item));
-    }
-    if (data.tables.length) {
-      const part=section(root,'Laburpen-taulak');
-      data.tables.forEach(table=>renderTable(part,table));
-    }
-    if (data.errors.length) renderErrors(root,data.errors);
-    const source=node('div',null,'grammar-source');
-    source.append(node('strong','Edukia: SUSTRAIren Supabaseko gramatika-banku editoriala'));
-    source.append(node('span','SUSTRAIren irakurketa-baimendutako edukia. Gai batzuk berrikuspen akademikoaren zain daude. Ez da azterketa-erakunde baten material ofiziala.'));
-    if(entry.source_guideline)source.append(node('span','Jatorrizko erreferentzia editoriala: '+entry.source_guideline));
-    // Source provenance is optional for older editorial entries; new material stores
-    // verified link targets and the kind of claim each source supports.
-    const references = Array.isArray(entry.metadata?.sources) ? entry.metadata.sources : [];
-    const list = node('ul', null, 'grammar-source-list');
-    for (const reference of references) {
-      if (!reference || typeof reference !== 'object' || typeof reference.url !== 'string') continue;
-      let parsed;
-      try { parsed = new URL(reference.url); }
-      catch { continue; }
-      if (parsed.protocol !== 'https:') continue;
-      const li = node('li');
-      const a = node('a', reference.title || parsed.hostname);
-      a.href = parsed.href;
-      a.target = '_blank';
-      a.rel = 'noopener noreferrer';
-      li.append(a);
-      const kind = reference.source_type === 'ARAUEMAILEA' ? 'Idazkera / arauemailea'
-        : reference.source_type === 'DESKRIBAPENA' ? 'Deskribapen linguistikoa'
-        : 'Iturri linguistikoa';
-      li.append(node('span',kind,'grammar-source-type'));
-      if (typeof reference.claim === 'string' && reference.claim.trim()) li.append(node('p',reference.claim,'grammar-source-claim'));
-      list.append(li);
-    }
-    if (list.childElementCount) source.append(list);
-    root.append(source);
+    const reader = window.SustraiGrammarReader;
+    if (!reader) throw new Error('reader_missing');
+    reader.outline(root, reader.render(root, entry, data));
   }
   async function readDetails(entry) {
-    if (state.detailCache.has(entry.id)) return state.detailCache.get(entry.id);
-    const selects=[
-      [V.sections, 'section_key,title_eu,body_eu,section_type,sort_order'],
-      [V.examples, 'id,entry_id,example_type,text_eu,explanation_eu,sort_order'],
-      [V.forms, 'id,code,display_eu,form_group,function_eu,meaning_eu,formation_eu,positive_pattern_eu,negative_pattern_eu,finite_pattern_eu,non_finite_pattern_eu,use_when_eu,avoid_when_eu,warning_eu,register_label,dialect_note_eu,sort_order'],
-      [V.formExamples,'form_id,example_type,text_eu,explanation_eu,sort_order'],
-      [V.contrasts,'title_eu,left_explanation_eu,right_explanation_eu,contrast_explanation_eu,wrong_use_eu,better_use_eu,sort_order'],
-      [V.tables,'title_eu,description_eu,columns_json,rows_json,sort_order'],
-      [V.errors,'wrong_eu,correct_eu,explanation_eu,sort_order']
-    ];
-    const [sections,examples,forms,formExamples,contrasts,tables,errors] = await Promise.all(
-      selects.map(([view,columns])=>state.client.from(view).select(columns).eq('entry_id',entry.id).order('sort_order').limit(500).then(check))
-    );
-    const data={sections,examples,forms,formExamples,contrasts,tables,errors};
-    state.detailCache.set(entry.id,data);
-    return data;
+    return window.SustraiGrammarReader.load(entry, state.client);
   }
+  function detailView(enabled) {
+    $('grammarTop').classList.toggle('is-detail', enabled);
+    if (!enabled) {
+      document.body.classList.remove('is-grammar-reading');
+      $('grammarFocus').setAttribute('aria-pressed', 'false');
+      $('grammarFocus').textContent = 'Irakurketa-modua';
+    }
+  }
+  let readerSize = 18;
+  function scale(delta) {
+    readerSize = Math.max(15, Math.min(23, readerSize + delta));
+    $('grammarArticle').style.setProperty('--gr-document-size', readerSize + 'px');
+    $('grammarSmaller').disabled = readerSize <= 15;
+    $('grammarLarger').disabled = readerSize >= 23;
+  }
+  $('grammarSmaller').addEventListener('click', () => scale(-1));
+  $('grammarLarger').addEventListener('click', () => scale(1));
+  $('grammarFocus').addEventListener('click', () => {
+    const active = document.body.classList.toggle('is-grammar-reading');
+    $('grammarFocus').setAttribute('aria-pressed', String(active));
+    $('grammarFocus').textContent = active ? 'Irakurketa-modutik irten' : 'Irakurketa-modua';
+  });
+  window.addEventListener('keydown', event => {
+    if (event.key === 'Escape' && document.body.classList.contains('is-grammar-reading')) {
+      $('grammarFocus').click();
+      $('grammarFocus').focus();
+    }
+  });
   async function showEntry(code) {
     const entry=state.entries.find(e=>e.code===code);
     if (!entry) {
       $('grammarReading').hidden=true;
+      detailView(false);
       $('grammarLibraryTitle').textContent='Gaiak';
       status('Eskatutako gaia ez da aurkitu edo beste maila batekoa da.',true);
       return;
     }
     const ticket=++state.request;
     $('grammarReading').hidden=false;
-    $('grammarDetail').replaceChildren(node('p','Gaia Supabasetik kargatzen…'));
+    detailView(true);
+    $('grammarDetail').replaceChildren(node('p','Gaia kargatzen…'));
     $('grammarDetail').setAttribute('aria-busy','true');
     $('grammarTopic').textContent=state.level;
     $('grammarDetailTitle').textContent=entry.title_eu;
@@ -337,9 +172,10 @@
     state.detailCache.clear();
     setLevels(state.level);
     $('grammarReading').hidden=true;
+      detailView(false);
     $('grammarIndex').replaceChildren();
     $('grammarIndex').setAttribute('aria-busy','true');
-    status('Supabaseko gaiak kargatzen…');
+    status('Gramatika-gaiak kargatzen…');
     try {
       await cloud?.ready;
       state.client=cloud?.client?.()||null;
@@ -354,7 +190,7 @@
       if(route.code)await showEntry(route.code);
     } catch(error) {
       console.warn('GRAMATIKA katalogoa ezin da kargatu',error?.code||'network');
-      status('Ezin izan da Supabaseko edukia kargatu. Freskatu orria edo saiatu berriro.',true);
+      status('Ezin izan da edukia kargatu. Freskatu orria edo saiatu berriro.',true);
       $('grammarIndex').setAttribute('aria-busy','false');
       $('grammarEmpty').hidden=true;
     }
@@ -364,11 +200,17 @@
     if(url!==location.pathname+location.search) history.pushState(null,'',url);
     if(code) {
       await showEntry(code);
+      if (!$('grammarReading').hidden) {
+        $('grammarDetailTitle').setAttribute('tabindex','-1');
+        $('grammarDetailTitle').focus({preventScroll:true});
+      }
       $('grammarReading').scrollIntoView({behavior:'smooth',block:'start'});
     } else {
       ++state.request;
       $('grammarReading').hidden=true;
+      detailView(false);
       $('grammarTop').scrollIntoView({behavior:'smooth',block:'start'});
+      $('grammarSearch').focus({preventScroll:true});
     }
   }
   $('grammarIndex').addEventListener('click',event=>{
@@ -387,7 +229,9 @@
     const route=currentRoute();
     if(route.level!==state.level)await loadLevel();
     else if(route.code)await showEntry(route.code);
-    else {++state.request;$('grammarReading').hidden=true;}
+    else {++state.request;$('grammarReading').hidden=true;
+      detailView(false);}
   });
   void loadLevel();
 })();
+

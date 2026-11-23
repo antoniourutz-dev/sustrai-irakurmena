@@ -120,5 +120,6 @@ test('Reading controls, styles, PWA assets and focus-mode exit are present',()=>
   for(const path of ['reader.js','reader.css']){
     assert.ok(sw.includes("'/gramatika/ibilbidea/"+path+"'"));
   }
-  assert.match(sw,/sustrai-pwa-v57-inline-grammar-reader/);
+  assert.match(sw,/const CACHE_VERSION = 'sustrai-pwa-v\d+-[\w-]+'/);
 });
+

@@ -13,7 +13,9 @@
  <link rel="stylesheet" href="/areas.css?v=20261121-nav1">
  <link rel="stylesheet" href="/auth.css?v=20261117-ezabatu">
  <link rel="stylesheet" href="/hitzbira.css?v=20261117-ezabatu">
- <link rel="stylesheet" href="/gramatika/gramatika.css?v=20261123-pilot-notice">
+ <link rel="stylesheet" href="/gramatika/gramatika.css?v=20261123-learning2">
+ <link rel="stylesheet" href="/gramatika/ibilbidea/reader.css?v=20261123-learning2">
+ <link rel="stylesheet" href="/gramatika/learning.css?v=20261123-learning2">
 </head>
 <body class="has-tabbar">
  <a class="skip" href="#pageTitle">Joan edukira</a>
@@ -24,7 +26,7 @@
     <nav class="areas-breadcrumb" aria-label="Ogi-apurrak"><a href="/">Hasiera</a><span aria-hidden="true">›</span><span aria-current="page">Gramatika</span></nav>
     <span class="areas-eyebrow">02 · GRAMATIKA</span>
     <h1 id="pageTitle">Gramatika ulertu, hobeto erabiltzeko</h1>
-    <p>B2 eta C1 mailetako kontsulta-liburutegia. Azalpenak, egiturak, erabilera-ñabardurak eta adibideak, denak SUSTRAIren Supabaseko bankutik.</p>
+    <p>Ulertu ideia nagusia, aztertu egiturak eta ikusi nola erabiltzen diren. B2 eta C1 mailetako azalpenak, adibideak eta ñabardurak, zure erritmora.</p>
   </section>
   <section class="areas-section" aria-labelledby="levelTitle">
     <h2 id="levelTitle">Maila eta gaia aukeratu</h2>
@@ -33,7 +35,7 @@
       <a class="grammar-level-link" href="/gramatika/?maila=C1" data-level="C1">C1 maila</a>
       <a class="grammar-level-link" href="/gramatika/ibilbidea/">B2ko ibilbide gidatua · 31 gai</a>
     </nav>
-    <p class="grammar-disclaimer">Supabaseko irakurketa-baimena duten edukiak erakusten dira. Zenbait gai berrikuspen akademikoaren zain daude. Mailen banaketa didaktikoa da, ez HABEren, IVAPen edo HEOren gai-zerrenda ofiziala. Ariketak beste atal batean daude.</p>
+    <p class="grammar-disclaimer">Mailen banaketa didaktikoa da. Zenbait gai berrikuspen akademikoaren zain daude. Praktika gidatua ibilbidean aurkituko duzu; ariketa gehiago, Ariketak atalean.</p>
   </section>
   <section class="areas-section grammar-library" aria-labelledby="grammarLibraryTitle">
     <div class="grammar-block-heading"><h2 id="grammarLibraryTitle">Gaiak</h2><span class="grammar-count" id="grammarCount"></span></div>
@@ -41,13 +43,21 @@
       <div class="grammar-field"><label for="grammarSearch">Bilatu gramatikan</label><input id="grammarSearch" type="search" placeholder="Bilatu gaiaren izenburuan..." autocomplete="off"></div>
       <div class="grammar-field"><label for="grammarCategory">Kategoria</label><select id="grammarCategory"><option value="">Kategoria guztiak</option></select></div>
     </div>
-    <p class="areas-note" id="grammarStatus" role="status" aria-live="polite">Supabaseko gramatika-sarrerak kargatzen…</p>
+    <p class="areas-note" id="grammarStatus" role="status" aria-live="polite">Gramatika-gaiak kargatzen…</p>
     <nav class="grammar-index" id="grammarIndex" aria-label="Gramatika-sarreren aurkibidea" aria-busy="true"></nav>
     <div class="grammar-empty" id="grammarEmpty" hidden>Ez da gairik aurkitu. Aldatu iragazkia edo aukeratu beste maila bat.</div>
   </section>
   <section class="grammar-reading" id="grammarReading" aria-labelledby="grammarDetailTitle" hidden>
     <div class="grammar-reading-top"><a class="grammar-return" id="grammarBack" href="/gramatika/">← Gai guztietara</a><span class="grammar-count" id="grammarVersion"></span></div>
     <article class="grammar-article" id="grammarArticle">
+      <div class="grammar-study-toolbar" role="group" aria-label="Irakurtzeko aukerak">
+        <span>ULERTU · ALDERATU · ERABILI</span>
+        <div class="grammar-study-toolbar-actions">
+          <button type="button" class="b2-reader-tool" id="grammarSmaller" aria-label="Txikitu letra">A−</button>
+          <button type="button" class="b2-reader-tool" id="grammarLarger" aria-label="Handitu letra">A+</button>
+          <button type="button" class="b2-reader-tool" id="grammarFocus" aria-pressed="false">Irakurketa-modua</button>
+        </div>
+      </div>
       <header><span class="grammar-topic" id="grammarTopic"></span><h2 id="grammarDetailTitle"></h2><p class="grammar-lead" id="grammarLead"></p></header>
       <div id="grammarDetail" class="grammar-detail" aria-busy="false"></div>
     </article>
@@ -58,6 +68,8 @@
  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.0" defer></script>
  <script src="/auth.js?v=20261117-ezabatu" defer></script>
  <script src="/pwa.js?v=20261117-ezabatu" defer></script>
- <script defer src="/gramatika/gramatika.js?v=20261123-pilot-notice"></script>
+ <script defer src="/gramatika/ibilbidea/reader.js?v=20261123-learning2"></script>
+ <script defer src="/gramatika/gramatika.js?v=20261123-learning2"></script>
 </body>
 </html>
+

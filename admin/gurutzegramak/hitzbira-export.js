@@ -69,20 +69,22 @@
           {spacing:{after:5}}),
           paragraph([run('EUSKARA IKASTEKO PLATAFORMA',{size:10,bold:true,color:'FFFFFF'})],
             {spacing:{after:0}})],AQUA),
-        headerCell(brandRight,[paragraph([run('GURUTZEGRAMA',{size:19,bold:true,color:'FFFFFF'})],
+        headerCell(brandRight,[paragraph([run(meta.type,{size:17,bold:true,color:'FFFFFF'})],
           {alignment:AlignmentType.RIGHT,spacing:{after:0}})],AQUA)
       ]}),
       new TableRow({children:[
         headerCell(brandLeft,[paragraph([run(meta.code,{size:10,color:MUTED})],{spacing:{after:0}})]),
-        headerCell(brandRight,[paragraph([run(meta.type,{size:10,bold:true,color:AQUA})],
+        headerCell(brandRight,[paragraph([run('',{size:10})],
           {alignment:AlignmentType.RIGHT,spacing:{after:0}})])
       ]})]})]});
     const footer=new Footer({children:[paragraph([
       run('HitzBira',{size:12,color:MUTED}),run('  ·  ',{size:12,color:MUTED}),
       new TextRun({children:[PageNumber.CURRENT],font:'Arial',size:12,color:MUTED})
     ],{alignment:AlignmentType.RIGHT,spacing:{after:0}})]});
-    const size=Math.max(330,Math.min(445,Math.floor((cw-800)/p.grid_cols),
-      Math.floor(9000/p.grid_rows)));
+    // Preserve an editable table but size its cells to the *left* half of A4.
+    const leftWidth=6260,gutter=190,rightWidth=cw-leftWidth-gutter;
+    const size=Math.max(235,Math.min(380,Math.floor((leftWidth-150)/p.grid_cols),
+      Math.floor(9550/p.grid_rows)));
     const numberLine=(n)=>paragraph([run(n?String(n):'',{size:10,bold:true,color:MUTED})],{
       spacing:{before:0,after:0,line:120,lineRule:LineRuleType.EXACT}});
     const letterLine=(ch)=>paragraph([run(ch,{font:'Arial',size:18,bold:true,color:GREEN})],{
@@ -102,102 +104,90 @@
     const board=new Table({width:{size:size*p.grid_cols,type:WidthType.DXA},
       columnWidths:Array(p.grid_cols).fill(size),alignment:AlignmentType.CENTER,
       layout:TableLayoutType.FIXED,borders:none,rows});
-    const body=[
-      centered('GURUTZEGRAMA · OSASUN-HIZTEGIA',15,true,AQUA),
-      centered(meta.subject,27,true,INK),
-      centered(meta.title===meta.subject?'Gurutzegrama':meta.title,17,false,MUTED),
-      centered(meta.count+' hitz  ·  '+(meta.teacher?'Erantzunak barne':'Osatu taula definizioen laguntzaz'),15,false,MUTED),
-      paragraph([run('Osatu gurutzegrama, eta erabili jarraian ageri diren pistak.',
-        {size:16,color:INK})],{
-        shading:{fill:PALE},indent:{left:180,right:180},
-        spacing:{before:130,after:230},alignment:AlignmentType.CENTER}),
-      board,
-      paragraph([run('HORIZONTALAK  →     BERTIKALAK  ↓',{size:12,bold:true,color:MUTED})],{
-        alignment:AlignmentType.CENTER,spacing:{before:230,after:0}}),
-      paragraph([run('PISTAK',{font:'Arial',size:28,bold:true,color:AQUA})],{
-        spacing:{before:280,after:120},keepNext:true}),
-      paragraph([run(meta.subject,{size:16,bold:true,color:INK})],{
-        spacing:{before:0,after:260},keepNext:true})
-    ];
-    const clueColumns=[];
-    for(const [direction,heading] of [['H','HORIZONTALAK'],['V','BERTIKALAK']]){
-      const column=[paragraph([run(heading,{size:19,bold:true,color:AQUA})],{
-        spacing:{before:90,after:170},keepNext:true})];
-      const arr=(options.words||[]).filter(x=>x.dir===direction)
+    const right=[];
+    for(const [direction,heading] of [['H','Horizontalak'],['V','Bertikalak']]){
+      right.push(paragraph([run(heading,{size:18,bold:true,color:AQUA})],{
+        spacing:{before:direction==='H'?0:120,after:100},keepNext:true}));
+      const arr=(options.words||[]).filter(w=>w.dir===direction)
         .sort((a,b)=>a.number-b.number);
-      if(!arr.length)column.push(paragraph([run('—',{size:16,color:MUTED})]));
       for(const w of arr){
-        column.push(paragraph([
-          run(String(w.number)+'.  ',{size:17,bold:true,color:AQUA}),
-          run(w.clue,{size:17,color:INK}),
-          run('  ('+w.word.length+')',{size:14,color:MUTED})
-        ],{spacing:{before:0,after:meta.teacher?30:130},keepLines:true}));
-        if(meta.teacher)column.push(paragraph([
-          run('ERANTZUNA:  ',{size:12,bold:true,color:GREEN}),
-          run(w.word,{size:16,bold:true,color:GREEN})
-        ],{indent:{left:160},spacing:{after:150},keepLines:true}));
+        right.push(paragraph([
+          run(w.number+'. ',{size:16,bold:true,color:AQUA}),
+          run(w.clue,{size:16,color:INK}),
+          run(' ('+w.word.length+')',{size:13,color:MUTED}),
+          ...(meta.teacher?[run('  ·  '+w.word,{size:15,bold:true,color:GREEN})]:[])
+        ],{spacing:{before:0,after:95,line:220},keepLines:true}));
       }
-      clueColumns.push(column);
     }
-    const sideWidth=Math.floor(cw/2);
-    body.push(new Table({width:{size:cw,type:WidthType.DXA},
-      columnWidths:[sideWidth,cw-sideWidth],layout:TableLayoutType.FIXED,borders:none,
+    const wideCell=(width,children)=>new TableCell({
+      width:{size:width,type:WidthType.DXA},borders:four(no),
+      margins:{top:0,bottom:0,left:0,right:0},
+      verticalAlign:VerticalAlign.TOP,children
+    });
+    const layout=new Table({width:{size:cw,type:WidthType.DXA},
+      columnWidths:[leftWidth,gutter,rightWidth],
+      layout:TableLayoutType.FIXED,borders:none,
       rows:[new TableRow({children:[
-        new TableCell({width:{size:sideWidth,type:WidthType.DXA},borders:four(no),
-          margins:{top:0,bottom:0,left:0,right:225},children:clueColumns[0]}),
-        new TableCell({width:{size:cw-sideWidth,type:WidthType.DXA},borders:four(no),
-          margins:{top:0,bottom:0,left:225,right:0},children:clueColumns[1]})
-      ]})]}));
-    if(meta.teacher)body.push(paragraph([run('Irakaslearen erabilerarako: pistak eta erantzunak berrikusi banatu aurretik.',
-      {size:12,color:MUTED})],{spacing:{before:220,after:0}}));
+        wideCell(leftWidth,[board,paragraph([],{spacing:{after:0}})]),
+        wideCell(gutter,[paragraph([],{spacing:{after:0}})]),
+        wideCell(rightWidth,right)
+      ]})]});
+    const body=[
+      paragraph([run(meta.subject,{size:29,bold:true,font:'Arial',color:INK})],{
+        alignment:AlignmentType.CENTER,
+        spacing:{before:0,after:195},keepNext:true}),
+      layout
+    ];
+
     return new d.Document({
       creator:'HitzBira',title:'HitzBira · '+meta.subject,subject:meta.subject,
       description:meta.type,fonts:[],
       styles:{default:{document:{run:{font:'Arial',size:17,color:INK},
         paragraph:{spacing:{after:100}}}}},
       sections:[{properties:{page:{size:{width:11906,height:16838},
-        margin:{top:1750,bottom:950,left:685,right:685,header:340,footer:470}}},
+        margin:{top:1200,bottom:780,left:685,right:685,header:280,footer:430}}},
         headers:{default:header},footers:{default:footer},children:body}]
     });
   }
   function pdfStyles(){
     return [
       '*{box-sizing:border-box}html,body{margin:0;padding:0;background:#fff;color:#193B4C;font-family:Arial,Helvetica,sans-serif}',
-      '.hb-sheet{width:794px;height:1123px;position:relative;background:#fff;overflow:hidden;padding:0 45px 52px}',
-      '.hb-bar{height:75px;margin:0 -45px;display:flex;justify-content:space-between;align-items:center;padding:12px 45px;background:#00A6C8;color:white}',
-      '.hb-brand{font-size:29px;font-weight:900;line-height:1}.hb-brand small{display:block;font-size:9px;letter-spacing:.07em;margin-top:5px;font-weight:700}',
-      '.hb-header-kind{font-weight:800;font-size:16px;letter-spacing:.04em}',
-      '.hb-meta{display:flex;justify-content:space-between;font-size:11px;color:#60727d;padding-top:9px}',
-      '.hb-meta strong{color:#0099b8}.hb-content{padding-top:32px}',
-      '.hb-eyebrow{font-size:14px;text-transform:uppercase;text-align:center;letter-spacing:.085em;font-weight:800;color:#00A6C8;margin:0 0 13px}',
-      '.hb-subject{text-align:center;font-size:26px;line-height:1.17;font-weight:800;letter-spacing:-.02em;margin:0 0 12px;overflow-wrap:anywhere}',
-      '.hb-subtitle{text-align:center;color:#637380;font-size:14px;margin:0 0 12px}',
-      '.hb-details{text-align:center;color:#526a75;font-size:12px;margin:0 0 20px}',
-      '.hb-instruction{background:#eff8fa;text-align:center;border-left:4px solid #00A6C8;font-size:13px;line-height:1.5;padding:12px 14px;margin:0 0 26px}',
+      '.hb-sheet{width:794px;height:1123px;position:relative;overflow:hidden;background:#fff;padding:0 40px 52px}',
+      '.hb-bar{height:64px;margin:0 -40px;display:flex;justify-content:space-between;align-items:center;padding:10px 40px;background:#00A6C8;color:white}',
+      '.hb-brand{font-size:29px;font-weight:900;line-height:1}.hb-brand small{display:block;font-size:9px;letter-spacing:.05em;margin-top:4px;font-weight:700}',
+      '.hb-header-kind{font-weight:800;font-size:14px;letter-spacing:.02em}',
+      '.hb-meta{display:flex;justify-content:space-between;font-size:10px;color:#60727d;padding-top:7px}',
+      '.hb-content{padding-top:15px}',
+      '.hb-subject{text-align:center;font-size:25px;line-height:1.18;font-weight:800;color:#193B4C;margin:0 0 21px;overflow-wrap:anywhere}',
+      '.hb-work-layout{display:grid;grid-template-columns:minmax(0,53%) minmax(0,1fr);gap:18px;align-items:start}',
+      '.hb-board-side{min-width:0}',
       '.hb-board{display:grid;gap:0;width:max-content;max-width:100%;margin:0 auto}',
-      '.hb-cell{position:relative;border:1px solid #afcbd3;background:white;display:flex;align-items:center;justify-content:center;font-weight:800;color:#176A52}',
+      '.hb-cell{position:relative;border:1px solid #aac7d0;background:white;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:#176A52}',
       '.hb-cell.is-empty{border:1px solid transparent;background:white}',
-      '.hb-cell.is-solved{background:#e8f6f0}.hb-cell small{position:absolute;top:1px;left:2px;font-size:8px;line-height:1;color:#4b6978}',
-      '.hb-board-note{text-align:center;font-size:12px;margin:19px 0;color:#6a7d85}',
-      '.hb-footer{position:absolute;bottom:26px;right:45px;color:#72838c;font-size:12px}',
-      '.hb-first-heading{font-size:17px;color:#00A6C8;margin:4px 0 10px;font-weight:800}',
-      '.hb-clues-title{font-size:23px;font-weight:800;color:#00A6C8;margin:0 0 7px}.hb-clues-subject{font-size:14px;font-weight:700;margin:0 0 23px}',
-      '.hb-clues-zone{height:805px;display:grid;grid-template-columns:1fr 1fr;gap:34px;overflow:hidden}',
-      '.hb-clue-column{min-width:0;max-height:805px;overflow:hidden}',
-      '.hb-clue-column h3{font-size:15px;color:#00A6C8;margin:0 0 17px;padding-bottom:9px;border-bottom:2px solid #d9edf2}',
-      '.hb-clue{font-size:13px;line-height:1.45;color:#193B4C;margin:0 0 16px;overflow-wrap:anywhere}',
-      '.hb-clue-no{font-weight:800;color:#0096b5}.hb-clue-length{color:#667b87;font-size:11px}',
-      '.hb-answer{font-size:11px;color:#176A52;font-weight:800;margin-top:6px}',
-      '.hb-clues-footnote{position:absolute;bottom:52px;left:45px;color:#74848d;font-size:10px}'
+      '.hb-cell.is-solved{background:#e8f6f0}.hb-cell small{position:absolute;top:1px;left:2px;font-size:7px;line-height:1;color:#4b6978}',
+      '.hb-clues-side{min-width:0;overflow:hidden}',
+      '.hb-clues-side h3,.hb-clue-column h3{font-size:14px;line-height:1.25;color:#0097b5;margin:0 0 9px;font-weight:800;padding-bottom:6px;border-bottom:2px solid #d9edf2}',
+      '.hb-clues-side section+section{margin-top:15px}',
+      '.hb-clue{font-size:12px;line-height:1.34;color:#193B4C;margin:0 0 10px;overflow-wrap:anywhere}',
+      '.hb-clue-no{font-weight:800;color:#0096b5}.hb-clue-length{color:#667b87;font-size:10px}',
+      '.hb-answer{color:#176A52;font-size:11px;font-weight:800}',
+      '.hb-dense .hb-clue{font-size:11.3px;margin-bottom:7px;line-height:1.29}',
+      '.hb-dense .hb-clues-side h3{font-size:13px;margin-bottom:6px}',
+      '.hb-dense .hb-clues-side section+section{margin-top:9px}',
+      '.hb-dense .hb-answer{font-size:10px}',
+      '.hb-footer{position:absolute;bottom:22px;right:40px;color:#72838c;font-size:11px}',
+      '.hb-clues-title{font-size:22px;font-weight:800;color:#00A6C8;margin:0 0 20px}',
+      '.hb-clues-zone{height:835px;display:grid;grid-template-columns:1fr 1fr;gap:32px;overflow:hidden}',
+      '.hb-clue-column{min-width:0;max-height:835px;overflow:hidden}',
+      '.hb-clue-column h3{margin-bottom:13px}'
     ].join('\n');
   }
   function pdfShell(doc,meta,pageNumber){
-    const sheet=doc.createElement('section');sheet.className='hb-sheet';
+    const sheet=doc.createElement('section');sheet.className='hb-sheet'+(meta.count>=12?' hb-dense':'');
     sheet.innerHTML='<div class="hb-bar"><div class="hb-brand">HitzBira'+
       '<small>EUSKARA IKASTEKO PLATAFORMA</small></div>'+
-      '<div class="hb-header-kind">GURUTZEGRAMA</div></div>'+
-      '<div class="hb-meta"><span>'+escapeHtml(meta.code)+'</span><strong>'+
-        escapeHtml(meta.type)+'</strong></div>'+
+      '<div class="hb-header-kind">'+escapeHtml(meta.type)+'</div></div>'+
+      '<div class="hb-meta"><span>'+escapeHtml(meta.code)+'</span></div>'+
       '<main class="hb-content"></main><footer class="hb-footer">HitzBira&nbsp; · &nbsp;'+
       pageNumber+'</footer>';
     doc.body.append(sheet);
@@ -206,11 +196,16 @@
   function pdfBoard(doc,options,meta){
     const p=options.puzzle,sheet=pdfShell(doc,meta,1);
     const main=sheet.querySelector('.hb-content');
-    const gridSize=Math.max(19,Math.min(29,
-      Math.floor(650/p.grid_cols),Math.floor(570/p.grid_rows)));
+    main.innerHTML='<h1 class="hb-subject">'+escapeHtml(meta.subject)+'</h1>'+
+      '<div class="hb-work-layout"><div class="hb-board-side"></div>'+
+      '<aside class="hb-clues-side"></aside></div>';
+    const holder=main.querySelector('.hb-board-side');
+    const size=Math.max(13,Math.min(30,
+      Math.floor((holder.clientWidth-4)/p.grid_cols),
+      Math.floor(815/p.grid_rows)));
     const grid=doc.createElement('div');grid.className='hb-board';
-    grid.style.gridTemplateColumns='repeat('+p.grid_cols+','+gridSize+'px)';
-    grid.style.gridAutoRows=gridSize+'px';
+    grid.style.gridTemplateColumns='repeat('+p.grid_cols+','+size+'px)';
+    grid.style.gridAutoRows=size+'px';
     for(let r=0;r<p.grid_rows;r++)for(let c=0;c<p.grid_cols;c++){
       const cell=options.cells.get(r+','+c);
       const box=doc.createElement('div');
@@ -221,53 +216,38 @@
       }
       grid.append(box);
     }
-    main.innerHTML='<p class="hb-eyebrow">GURUTZEGRAMA · OSASUN-HIZTEGIA</p>'+
-      '<h1 class="hb-subject">'+escapeHtml(meta.subject)+'</h1>'+
-      '<p class="hb-subtitle">'+escapeHtml(meta.title===meta.subject?'Gurutzegrama':meta.title)+'</p>'+
-      '<p class="hb-details">'+meta.count+' hitz · '+(meta.teacher?'Erantzunak barne':'Ikaslearen ariketa')+'</p>'+
-      '<p class="hb-instruction">Osatu taulako hitzak, pistak erabiliz.</p>';
-    main.append(grid);
-    const note=doc.createElement('p');note.className='hb-board-note';
-    note.textContent='→ Horizontalak     ↓ Bertikalak';
-    main.append(note);
-    if(sheet.scrollHeight>sheet.clientHeight+1)
-      throw Error('Gurutzegrama handiegia da orrialdean sartzeko.');
+    holder.append(grid);
+    const side=main.querySelector('.hb-clues-side');
+    side.style.height=Math.max(170,Math.floor(
+      sheet.getBoundingClientRect().bottom-side.getBoundingClientRect().top-66))+'px';
     const horizontal=(options.words||[]).filter(w=>w.dir==='H').sort((a,b)=>a.number-b.number);
     const vertical=(options.words||[]).filter(w=>w.dir==='V').sort((a,b)=>a.number-b.number);
-    let a=0,b=0;
-    const available=Math.floor(sheet.getBoundingClientRect().bottom-main.getBoundingClientRect().bottom-94);
-    if(available>=200){
-      const heading=doc.createElement('h2');heading.className='hb-first-heading';
-      heading.textContent='PISTAK';
-      const zone=doc.createElement('div');zone.className='hb-clues-zone';
-      const height=available-40;
-      zone.style.height=height+'px';
-      zone.innerHTML='<section class="hb-clue-column"><h3>→ HORIZONTALAK</h3></section>'+
-        '<section class="hb-clue-column"><h3>↓ BERTIKALAK</h3></section>';
-      main.append(heading,zone);
-      const cols=zone.querySelectorAll('.hb-clue-column');
-      for(const col of cols)col.style.maxHeight=height+'px';
-      a=fillClueColumn(doc,cols[0],horizontal,0,meta);
-      b=fillClueColumn(doc,cols[1],vertical,0,meta);
-      if(!a&&!b){heading.remove();zone.remove();}
-      if(sheet.scrollHeight>sheet.clientHeight+1)
-        throw Error('Ezin izan dira pistak lehen orrialdean kokatu.');
-    }
+    const a=fillClueSection(doc,side,'Horizontalak',horizontal,0,meta);
+    const b=fillClueSection(doc,side,'Bertikalak',vertical,0,meta);
+    if(grid.scrollWidth>holder.clientWidth+1||sheet.scrollHeight>sheet.clientHeight+1)
+      throw Error('Taula ez da A4 orrian sartzen.');
     return {sheet,a,b};
   }
   function clueElement(doc,w,meta){
-    const box=doc.createElement('div');box.className='hb-clue';
-    box.innerHTML='<span class="hb-clue-no">'+w.number+'. </span>'+
+    const el=doc.createElement('p');el.className='hb-clue';
+    el.innerHTML='<span class="hb-clue-no">'+w.number+'. </span>'+
       escapeHtml(w.clue)+' <span class="hb-clue-length">('+w.word.length+')</span>'+
-      (meta.teacher?'<div class="hb-answer">ERANTZUNA: '+escapeHtml(w.word)+'</div>':'');
-    return box;
+      (meta.teacher?' <span class="hb-answer">· '+escapeHtml(w.word)+'</span>':'');
+    return el;
   }
-  function fillClueColumn(doc,column,words,pos,meta){
-    while(pos<words.length){
-      const item=clueElement(doc,words[pos],meta);column.append(item);
-      if(column.scrollHeight>column.clientHeight+1){item.remove();break;}
-      pos++;
+  function fillClueSection(doc,side,title,words,start,meta){
+    if(start>=words.length)return start;
+    const section=doc.createElement('section');
+    const heading=doc.createElement('h3');heading.textContent=title;
+    section.append(heading);
+    side.append(section);
+    let pos=start;
+    for(;pos<words.length;pos++){
+      const item=clueElement(doc,words[pos],meta);
+      section.append(item);
+      if(side.scrollHeight>side.clientHeight+1){item.remove();break;}
     }
+    if(pos===start)section.remove();
     return pos;
   }
   function pdfClues(doc,options,meta,startA=0,startB=0){
@@ -278,15 +258,22 @@
     while(a<horizontal.length||b<vertical.length){
       const sheet=pdfShell(doc,meta,pageNo++);
       const main=sheet.querySelector('.hb-content');
-      main.innerHTML='<h2 class="hb-clues-title">PISTAK</h2>'+
-        '<p class="hb-clues-subject">'+escapeHtml(meta.subject)+'</p>'+
+      main.innerHTML='<h2 class="hb-clues-title">Pistak</h2>'+
         '<div class="hb-clues-zone"><section class="hb-clue-column">'+
-        '<h3>→ HORIZONTALAK</h3></section><section class="hb-clue-column">'+
-        '<h3>↓ BERTIKALAK</h3></section></div>';
-      const cols=main.querySelectorAll('.hb-clue-column'),startA=a,startB=b;
-      a=fillClueColumn(doc,cols[0],horizontal,a,meta);
-      b=fillClueColumn(doc,cols[1],vertical,b,meta);
-      if(a===startA&&b===startB){sheet.remove();throw Error('Pista luzeegia da PDFaren orrialdean sartzeko.');}
+        '<h3>Horizontalak</h3></section><section class="hb-clue-column">'+
+        '<h3>Bertikalak</h3></section></div>';
+      const cols=main.querySelectorAll('.hb-clue-column'),startPosA=a,startPosB=b;
+      for(;a<horizontal.length;a++){
+        const item=clueElement(doc,horizontal[a],meta);cols[0].append(item);
+        if(cols[0].scrollHeight>cols[0].clientHeight+1){item.remove();break;}
+      }
+      for(;b<vertical.length;b++){
+        const item=clueElement(doc,vertical[b],meta);cols[1].append(item);
+        if(cols[1].scrollHeight>cols[1].clientHeight+1){item.remove();break;}
+      }
+      if(a===startPosA&&b===startPosB){
+        sheet.remove();throw Error('Pista luzeegia da PDF orrialdean sartzeko.');
+      }
       sheets.push(sheet);
     }
     return sheets;

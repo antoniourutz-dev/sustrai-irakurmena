@@ -257,7 +257,7 @@
     $('pathLessonMeta').textContent=readiness(u);
     const module=state.modules.find(m=>m.module_no===u.module_no);
     const micro=$('pathCurrentModule');
-    if(micro)micro.textContent='Modulua '+u.module_no+'/7 · '+(module?.title_eu||'');
+    if(micro)micro.textContent='Modulua '+u.module_no+'/'+state.modules.length+' · '+(module?.title_eu||'');
 
     $('pathLessonMeta').classList.toggle('needs-review', u.review_snapshot !== 'approved');
     $('pathLessonStatus').textContent=own(u.entry_code).reviewed_again_at?'Gerora berrikusia'
@@ -954,7 +954,7 @@
         state.client.from('smx_grammar_b2_practice_items').select('*').order('entry_code').order('item_order').limit(MAX_PATH_UNITS*ITEMS_PER_LESSON).then(check),
         state.client.from('smx_grammar_b2_diagnostic_prompts').select('*').limit(120).then(check)
       ]);
-      if(mods.length!==7 || units.length<31 || units.length>MAX_PATH_UNITS)throw new Error('Ibilbidearen egitura osatu gabe dago');
+      if(mods.length<7 || mods.length>12 || units.length<31 || units.length>MAX_PATH_UNITS)throw new Error('Ibilbidearen egitura osatu gabe dago');
       state.modules=mods;state.units=units.map(u=>({...u,pilot_active:designs.some(d=>d.entry_code===u.entry_code)}));
       state.diagnostics=new Map(diagnostics.map(d=>[d.entry_code,d]));
       state.entries=new Map(entries.map(e=>[e.code,e]));
@@ -988,6 +988,8 @@
       else openUnit(state.units[0].entry_code,false);
       const stat=$('pathGuidedCount');if(stat)stat.textContent=guidedCount()+' ikasgai gidatu';
       const total=$('pathTotalTopics');if(total)total.textContent=state.units.length+' gai';
+      const moduleCount=$('pathModuleCount');if(moduleCount)moduleCount.textContent=state.modules.length+' modulu';
+      const title=$('pathModulesTitle');if(title)title.textContent=state.modules.length+' moduluak';
       say('');
     }catch(err){
       console.warn('SUSTRAI B2 path startup',err?.code||err?.message||'network');

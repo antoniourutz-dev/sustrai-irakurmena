@@ -88,10 +88,11 @@
     const produced=state.units.filter(u=>u.pilot_active&&!!own(u.entry_code).transferred_at).length;
     const reviewed=state.units.filter(u=>u.pilot_active&&!!own(u.entry_code).reviewed_again_at).length;
     $('pathProgressText').textContent=hasAccount()
-      ? completeCount()+'/31 gai irakurrita · '+produced+'/'+guidedCount()+' ekoizpen gordeta · '+reviewed+'/'+guidedCount()+' gerora berrikusita'
-      : completeCount()+'/31 gai saio honetan · '+produced+'/'+guidedCount()+' jarduera probatuta · ez da hodeian gordetzen.';
-    $('pathProgressBar').style.width=(completeCount()/31*100).toFixed(1)+'%';
+      ? completeCount()+'/'+state.units.length+' gai irakurrita · '+produced+'/'+guidedCount()+' ekoizpen gordeta · '+reviewed+'/'+guidedCount()+' gerora berrikusita'
+      : completeCount()+'/'+state.units.length+' gai saio honetan · '+produced+'/'+guidedCount()+' jarduera probatuta · ez da hodeian gordetzen.';
+    $('pathProgressBar').style.width=(completeCount()/Math.max(1,state.units.length)*100).toFixed(1)+'%';
     $('pathProgressTrack')?.setAttribute('aria-valuenow',String(completeCount()));
+    $('pathProgressTrack')?.setAttribute('aria-valuemax',String(state.units.length));
     const next=state.units.find(u=>u.pilot_active&&own(u.entry_code).transferred_at
         && !own(u.entry_code).reviewed_again_at
         && Date.now()-new Date(own(u.entry_code).transferred_at).getTime()>=72*60*60*1000)
@@ -748,7 +749,7 @@
         const started=ownRows.filter(d=>d.read_at).length;
         const transferred=ownRows.filter(d=>d.transferred_at).length;
         const item=el('div',null,'b2-student-row');
-        item.append(el('strong',s.name||'Ikaslea'),el('span',started+'/31 gai irakurrita · '+transferred+'/'+guidedCount()+' ekoizpen gordeta'));
+        item.append(el('strong',s.name||'Ikaslea'),el('span',started+'/'+state.units.length+' gai irakurrita · '+transferred+'/'+guidedCount()+' ekoizpen gordeta'));
         const inspect=button('Ikusi ekoizpenak eta eman orientabidea',()=>{
           if(item.querySelector('.b2-teacher-student-detail')){
             item.querySelector('.b2-teacher-student-detail').remove();return;
@@ -857,7 +858,7 @@
         state.client.from('smx_grammar_b2_lesson_designs').select('*').limit(20).then(check),
         state.client.from('smx_grammar_b2_practice_items').select('*').order('item_order').limit(100).then(check)
       ]);
-      if(mods.length!==7 || units.length!==31)throw new Error('Ibilbidearen egitura osatu gabe dago');
+      if(mods.length!==7 || units.length<31 || units.length>100)throw new Error('Ibilbidearen egitura osatu gabe dago');
       state.modules=mods;state.units=units.map(u=>({...u,pilot_active:designs.some(d=>d.entry_code===u.entry_code)}));
       state.entries=new Map(entries.map(e=>[e.code,e]));
       const activeCount=state.units.filter(u=>u.pilot_active).length;
@@ -885,6 +886,7 @@
       if(target && state.entries.has(target))openUnit(target,false);
       else openUnit(state.units[0].entry_code,false);
       const stat=$('pathGuidedCount');if(stat)stat.textContent=guidedCount()+' ikasgai gidatu';
+      const total=$('pathTotalTopics');if(total)total.textContent=state.units.length+' gai';
       say('');
     }catch(err){
       console.warn('SUSTRAI B2 path startup',err?.code||err?.message||'network');

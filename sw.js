@@ -1,5 +1,5 @@
 /* SUSTRAI PWA service worker */
-const CACHE_VERSION = 'sustrai-pwa-v58-zinok-color-only-feedback';
+const CACHE_VERSION = 'sustrai-pwa-v59-gramatika-b2-37-gai';
 const SHELL = [
   '/',
   '/index.html',

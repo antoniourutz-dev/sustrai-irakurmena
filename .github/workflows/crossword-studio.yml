@@ -4,6 +4,7 @@ on:
     paths:
       - 'admin/gurutzegramak/**'
       - 'tests/crossword-studio.test.cjs'
+      - 'tests/crossword-export.test.cjs'
       - '.github/workflows/crossword-studio.yml'
   push:
     branches:
@@ -24,4 +25,4 @@ jobs:
       - name: Verify runtime
         run: node --version
       - name: Run crossword tests
-        run: node --test tests/crossword-studio.test.cjs
+        run: node --test tests/crossword-studio.test.cjs tests/crossword-export.test.cjs

@@ -11,11 +11,13 @@ const css = read('gramatika/ibilbidea/reader.css');
 const sw = read('sw.js');
 
 class MockElement {
-  constructor(tag){this.tagName=tag;this.nodes=[];this._text='';this.className='';this.id='';}
+  constructor(tag){this.tagName=tag;this.nodes=[];this._text='';this.className='';this.id='';this.attrs={};this.events={};this.open=false;}
   set textContent(value){this._text=String(value);this.nodes=[]}
   get textContent(){return this._text+this.nodes.map(n=>n.textContent||'').join('')}
   append(...nodes){this.nodes.push(...nodes)}
   replaceChildren(...nodes){this._text='';this.nodes=[];this.append(...nodes)}
+  setAttribute(key,value){this.attrs[key]=String(value)}
+  addEventListener(event,fn){this.events[event]=fn}
   get childElementCount(){return this.nodes.filter(n=>n.tagName!=='#text').length}
 }
 const doc={
@@ -117,6 +119,49 @@ test('Linguistic asterisks survive rich text formatting',()=>{
     {sections:[],examples:[],forms:[],formExamples:[],contrasts:[],tables:[],errors:[]});
   for(const marker of ['*zu ezik','*hau ezik','*nahiez gero'])assert.ok(host.textContent.includes(marker),marker);
   assert.ok(descendants(host).some(n=>n.tagName==='strong'&&n.textContent==='Kontuan hartu'));
+});
+
+const emptyData=()=>({sections:[],examples:[],forms:[],formExamples:[],contrasts:[],tables:[],errors:[]});
+const hasClass=(node,name)=>node.className.split(' ').includes(name);
+test('Discovery opens with an existing suitable example, never an incorrect example',()=>{
+  const reader=init();const host=doc.createElement('div');const data=emptyData();
+  data.examples=[{example_type:'bad',text_eu:'*Berrikusteko esaldia.',explanation_eu:'Bankuko azalpena.'}];
+  data.formExamples=[{example_type:'good',text_eu:'Beste esaldi bat.',explanation_eu:'Haren azalpena.'}];
+  reader.render(host,{id:'discovery',metadata:{}},data);
+  const scene=descendants(host).find(n=>hasClass(n,'gr-live-opening'));
+  assert.ok(scene.textContent.includes('Beste esaldi bat.'));
+  assert.ok(!scene.textContent.includes('*Berrikusteko esaldia.'));
+  assert.ok(scene.textContent.includes('Haren azalpena.'));
+  assert.ok(descendants(scene).some(n=>n.tagName==='details'&&!n.open));
+  reader.render(host,{id:'no-good-example',metadata:{}},{...emptyData(),examples:data.examples});
+  assert.ok(!descendants(host).some(n=>hasClass(n,'gr-live-opening')),'do not invent a fallback example');
+});
+
+test('Progressive forms retain all content and support expanding, closing and manual disclosure',()=>{
+  const reader=init();const host=doc.createElement('div');const data=emptyData();
+  data.forms=[{id:'a',display_eu:'A egitura',meaning_eu:'Lehen esanahia',finite_pattern_eu:'aditza + laguntzailea'},{id:'b',display_eu:'B egitura',meaning_eu:'Bigarren esanahia'}];
+  reader.render(host,{id:'forms',metadata:{}},data);
+  const all=descendants(host),cards=all.filter(n=>hasClass(n,'gr-form-disclosure'));
+  const toggle=all.find(n=>hasClass(n,'gr-expand-forms'));
+  assert.deepEqual(cards.map(c=>c.open),[true,false]);
+  assert.ok(host.textContent.includes('Lehen esanahia')&&host.textContent.includes('Bigarren esanahia'));
+  assert.ok(host.textContent.includes('aditza + laguntzailea'));
+  toggle.events.click();assert.ok(cards.every(c=>c.open));
+  cards[1].open=false;cards[1].events.toggle();assert.equal(toggle.attrs['aria-expanded'],'false');
+  toggle.events.click();assert.ok(cards.every(c=>c.open));
+  toggle.events.click();assert.ok(cards.every(c=>!c.open));
+});
+
+test('Self-check reports only the current reflection and reverses when unchecked',()=>{
+  const reader=init();const host=doc.createElement('div');reader.render(host,{id:'reflect',metadata:{}},emptyData());
+  const area=descendants(host).find(n=>hasClass(n,'gr-live-recall'));
+  const inputs=descendants(area).filter(n=>n.tagName==='input');
+  const status=descendants(area).find(n=>hasClass(n,'gr-selfcheck-status'));
+  assert.equal(inputs.length,3);
+  for(const input of inputs){input.checked=true;input.events.change()}
+  assert.match(status.textContent,/^3 \/ 3/);
+  inputs[0].checked=false;inputs[0].events.change();assert.match(status.textContent,/^2 \/ 3/);
+  assert.ok(area.textContent.includes('ez da kalifikazioa eta ez da gordetzen'));
 });
 
 test('Reading controls, styles, PWA assets and focus-mode exit are present',()=>{

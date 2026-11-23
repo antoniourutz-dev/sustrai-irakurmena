@@ -16,6 +16,7 @@
  <link rel="stylesheet" href="/gramatika/gramatika.css?v=20261123-learning2">
  <link rel="stylesheet" href="/gramatika/ibilbidea/reader.css?v=20261123-learning2">
  <link rel="stylesheet" href="/gramatika/learning.css?v=20261123-learning2">
+ <link rel="stylesheet" href="/gramatika/alive.css?v=20261123-alive1">
 </head>
 <body class="has-tabbar">
  <a class="skip" href="#pageTitle">Joan edukira</a>
@@ -25,8 +26,12 @@
   <section class="areas-hero grammar-hero" aria-labelledby="pageTitle">
     <nav class="areas-breadcrumb" aria-label="Ogi-apurrak"><a href="/">Hasiera</a><span aria-hidden="true">›</span><span aria-current="page">Gramatika</span></nav>
     <span class="areas-eyebrow">02 · GRAMATIKA</span>
-    <h1 id="pageTitle">Gramatika ulertu, hobeto erabiltzeko</h1>
-    <p>Ulertu ideia nagusia, aztertu egiturak eta ikusi nola erabiltzen diren. B2 eta C1 mailetako azalpenak, adibideak eta ñabardurak, zure erritmora.</p>
+    <div class="grammar-hero-live">
+      <div><h1 id="pageTitle">Gramatika,<br><em>bizirik.</em></h1>
+      <p>Esaldi batetik abiatu. Ñabardura bat aurkitu. Eta esan nahi duzun hori euskaraz adierazi.</p>
+      <span class="grammar-hero-invitation">Zure jakin-minak badu lekua hemen.</span></div>
+      <div class="grammar-word-art" aria-hidden="true"><span class="grammar-art-small">hitzak</span><span class="grammar-art-main">aha!</span><span class="grammar-art-hand">Orain bai.</span><span class="grammar-art-dot"></span></div>
+    </div>
   </section>
   <section class="areas-section" aria-labelledby="levelTitle">
     <h2 id="levelTitle">Maila eta gaia aukeratu</h2>
@@ -41,8 +46,9 @@
     <div class="grammar-block-heading"><h2 id="grammarLibraryTitle">Gaiak</h2><span class="grammar-count" id="grammarCount"></span></div>
     <div class="grammar-filters">
       <div class="grammar-field"><label for="grammarSearch">Bilatu gramatikan</label><input id="grammarSearch" type="search" placeholder="Bilatu gaiaren izenburuan..." autocomplete="off"></div>
-      <div class="grammar-field"><label for="grammarCategory">Kategoria</label><select id="grammarCategory"><option value="">Kategoria guztiak</option></select></div>
+      <div class="grammar-field grammar-category-field"><label for="grammarCategory">Kategoria</label><select id="grammarCategory"><option value="">Kategoria guztiak</option></select></div>
     </div>
+    <nav id="grammarCategories" class="grammar-category-rail" aria-label="Gramatika gaiaren arabera arakatu"></nav>
     <p class="areas-note" id="grammarStatus" role="status" aria-live="polite">Gramatika-gaiak kargatzen…</p>
     <nav class="grammar-index" id="grammarIndex" aria-label="Gramatika-sarreren aurkibidea" aria-busy="true"></nav>
     <div class="grammar-empty" id="grammarEmpty" hidden>Ez da gairik aurkitu. Aldatu iragazkia edo aukeratu beste maila bat.</div>
@@ -68,8 +74,8 @@
  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.0" defer></script>
  <script src="/auth.js?v=20261117-ezabatu" defer></script>
  <script src="/pwa.js?v=20261117-ezabatu" defer></script>
- <script defer src="/gramatika/ibilbidea/reader.js?v=20261123-learning2"></script>
- <script defer src="/gramatika/gramatika.js?v=20261123-learning2"></script>
+ <script defer src="/gramatika/ibilbidea/reader.js?v=20261123-alive1"></script>
+ <script defer src="/gramatika/gramatika.js?v=20261123-alive1"></script>
 </body>
 </html>
 

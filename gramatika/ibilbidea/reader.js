@@ -76,7 +76,16 @@
     const pattern=['Eraikuntza','Baiezkoa','Ezezkoa','Egitura jokatua','Egitura jokatugabea'].includes(label);
     const d=el('div',null,'gr-doc-fact'+(pattern?' gr-doc-fact-pattern':''));
     d.append(el('dt',label));
-    const dd=el('dd');prose(dd,value,'gr-doc-fact-copy');d.append(dd);root.append(d);
+    const dd=el('dd');
+    if(['Egitura jokatua','Egitura jokatugabea'].includes(label)&&String(value).includes('+')){
+      const formula=el('div',null,'gr-formula');
+      String(value).split('+').forEach((part,index)=>{
+        if(index)formula.append(el('span',' + ','gr-formula-plus'));
+        const token=el('span',null,'gr-formula-token');inline(part.trim(),token);formula.append(token);
+      });
+      dd.append(formula);
+    }else prose(dd,value,'gr-doc-fact-copy');
+    d.append(dd);root.append(d);
   }
   function example(root,item) {
     const type=['good','bad','better','contrast'].includes(item.example_type)?item.example_type:'note';
@@ -84,15 +93,23 @@
     const figure=el('figure',null,'gr-doc-example gr-doc-example-'+type);
     figure.append(el('figcaption',labels[type]));
     const quote=el('blockquote');prose(quote,item.text_eu,'gr-doc-quote-text');figure.append(quote);
-    if(item.explanation_eu)prose(figure,item.explanation_eu,'gr-doc-example-explanation');
+    if(item.explanation_eu){
+      const reason=el('details',null,'gr-example-reason');
+      reason.append(el('summary',type==='bad'?'Zer berrikusi?':'Zergatik?'));
+      prose(reason,item.explanation_eu,'gr-doc-example-explanation');figure.append(reason);
+    }
     root.append(figure);
   }
-  function form(root,item,examples) {
-    const group=el('section',null,'gr-doc-form');
-    group.append(el('h4',item.display_eu||item.code));
+  function form(root,item,examples,index=0) {
+    const group=el('details',null,'gr-doc-form gr-form-disclosure');
+    group.open=index===0;
+    const summary=el('summary');
+    summary.append(el('span',String(index+1).padStart(2,'0'),'gr-form-number'),el('span',item.display_eu||item.code,'gr-form-title'),el('span','+','gr-disclosure-sign'));
+    group.append(summary);
+    const content=el('div',null,'gr-form-panel');
     if(item.form_group){
       const label=String(item.form_group).toLocaleLowerCase('eu').replace(/_/g,' ');
-      group.append(el('span',label.charAt(0).toLocaleUpperCase('eu')+label.slice(1),'gr-doc-form-label'));
+      content.append(el('span',label.charAt(0).toLocaleUpperCase('eu')+label.slice(1),'gr-doc-form-label'));
     }
     const dl=el('dl',null,'gr-doc-facts');
     [
@@ -102,16 +119,56 @@
       ['Egitura jokatugabea',item.non_finite_pattern_eu],['Erabilera',item.use_when_eu],
       ['Erregistroa',({neutral:'Neutroa',formal:'Formala',informal:'Informala'})[item.register_label]||item.register_label],['Hizkera-aldaerak',item.dialect_note_eu]
     ].forEach(([k,v])=>fact(dl,k,v));
-    if(dl.childElementCount)group.append(dl);
-    note(group,'Kontuan hartu',item.warning_eu||item.avoid_when_eu,'warning');
-    if(item.warning_eu&&item.avoid_when_eu)note(group,'Noiz saihestu',item.avoid_when_eu);
+    if(dl.childElementCount)content.append(dl);
+    note(content,'Kontuan hartu',item.warning_eu||item.avoid_when_eu,'warning');
+    if(item.warning_eu&&item.avoid_when_eu)note(content,'Noiz saihestu',item.avoid_when_eu);
     const related=examples.filter(e=>e.form_id===item.id);
     if(related.length){
-      group.append(el('h5','Adibideak'));
+      content.append(el('h5','Adibideak'));
       const grid=el('div',null,'gr-doc-example-grid');
-      related.forEach(e=>example(grid,e));group.append(grid);
+      related.forEach(e=>example(grid,e));content.append(grid);
     }
+    group.append(content);
     root.append(group);
+    return group;
+  }
+  function opening(root,entry,data){
+    const sample=[...data.examples,...data.formExamples].find(e=>e.example_type==='good'&&e.text_eu&&e.explanation_eu);
+    if(!sample)return;
+    const scene=el('section',null,'gr-live-opening');
+    const intro=el('div',null,'gr-scene-intro');
+    intro.append(el('span','BEHATU · PENTSATU · AURKITU','gr-scene-eyebrow'),el('h3','Esaldi batetik hasi.'));
+    prose(intro,'Begiratu esaldiari. Zer deitzen dizu arreta? Pentsatu azalpena ireki aurretik.','gr-scene-prompt');
+    scene.append(intro);
+    const card=el('div',null,'gr-scene-card');
+    card.append(el('span','HITZETATIK BIZITZARA','gr-scene-stamp'));
+    const quote=el('blockquote');prose(quote,sample.text_eu,'gr-scene-quote');card.append(quote);
+    const reveal=el('details',null,'gr-scene-reveal');
+    const summary=el('summary');
+    summary.append(el('span','Azalpena aurkitu','gr-reveal-closed'),el('span','Azalpena ezkutatu','gr-reveal-open'),el('span','↗','gr-reveal-arrow'));
+    reveal.append(summary);
+    prose(reveal,sample.explanation_eu,'gr-scene-answer');card.append(reveal);scene.append(card);
+    const teacher=el('details',null,'gr-teacher-guide');
+    teacher.append(el('summary','Irakaslearen txokoa · elkarrizketa pizteko'));
+    const steps=el('ol');
+    ['Erakutsi esaldia azalpena ireki aurretik. Eskatu ikasleei zer antzeman duten azaltzeko.','Alderatu haien interpretazioak bankuko azalpenarekin. Bereizi forma, esanahia eta testuingurua.','Eskatu adibide berri bat beste egoera baterako, eta hautua arrazoitzeko.'].forEach(text=>steps.append(el('li',text)));
+    teacher.append(steps);scene.append(teacher);root.append(scene);
+  }
+  function recall(root){
+    const area=el('section',null,'gr-live-recall');
+    area.append(el('span','ORAIN, ZURE AHOTSA','gr-recall-eyebrow'),el('h3','Eraman zeure mundura.'));
+    prose(area,'Sortu esaldi bat zure bizitzako egoera baterako: lagun bati mezu bat, laneko elkarrizketa edo gaur gertatu zaizun zerbait. Ahoz ere egin dezakezu.','gr-recall-prompt');
+    const checks=[];
+    const live=el('p','0 / 3 · Zure autoegiaztapena','gr-selfcheck-status');live.setAttribute('role','status');
+    ['Ideia nagusia neure hitzekin azaldu dut.','Adibide propio bat sortu dut.','Aukeratu dudan egitura arrazoitu dut.'].forEach(text=>{
+      const label=el('label',null,'gr-selfcheck');const input=el('input');input.type='checkbox';
+      checks.push(input);input.addEventListener('change',()=>{
+        const count=checks.filter(c=>c.checked).length;
+        live.textContent=count+' / 3 · '+(count===3?'Zure hausnarketa osatuta.':'Zure autoegiaztapena');
+      });
+      label.append(input,el('span',text));area.append(label);
+    });
+    area.append(live,el('small','Saio honetako autoegiaztapena da; ez da kalifikazioa eta ez da gordetzen.'));root.append(area);
   }
   function summaryTable(root,item) {
     const block=el('section',null,'gr-doc-summary');
@@ -183,7 +240,16 @@
     if(entry.metadata?.pilot_public_visibility==='pending_independent_review'){
       root.append(el('p',entry.metadata.pilot_review_notice_eu||'Ikasmaterial pilotua: berrikuspen akademiko independentea egin gabe.','grammar-pilot-notice'));
     }
-    if(entry.explanation_eu)prose(section(root,'Azalpena',headings),entry.explanation_eu,'gr-doc-lead-prose');
+    opening(root,entry,data);
+    if(entry.explanation_eu){
+      const area=section(root,'Azalpena',headings);
+      const paragraphs=norm(entry.explanation_eu).split(/\n\s*\n/);
+      prose(area,paragraphs[0],'gr-doc-lead-prose');
+      if(paragraphs.length>1){
+        const more=el('details',null,'gr-theory-more');more.append(el('summary','Azalpen osoarekin sakondu'));
+        prose(more,paragraphs.slice(1).join('\n\n'));area.append(more);
+      }
+    }
     if(entry.use_when_eu||entry.avoid_when_eu||entry.warning_eu){
       const area=section(root,'Erabilera eta mugak',headings);
       note(area,'Noiz erabili',entry.use_when_eu);
@@ -195,13 +261,26 @@
     if(regular.length){
       const area=section(root,'Sakontzeko azalpenak',headings);
       regular.forEach(s=>{
-        const item=el('section',null,'gr-doc-subsection'+(s.section_type==='warning'?' gr-doc-subsection-warning':''));
-        item.append(el('h4',s.title_eu));prose(item,s.body_eu);area.append(item);
+        const item=el('details',null,'gr-topic-disclosure'+(s.section_type==='warning'?' gr-topic-warning':''));
+        item.append(el('summary',s.title_eu));prose(item,s.body_eu);area.append(item);
       });
     }
     if(data.forms.length){
       const area=section(root,'Egiturak eta erabilera zehatzak',headings);
-      data.forms.forEach(f=>form(area,f,data.formExamples));
+      const help=el('p','Ireki interesatzen zaizun egitura. Alderatu forma, esanahia eta adibideak.','gr-section-hint');area.append(help);
+      const toggle=el('button','Egitura guztiak zabaldu','gr-expand-forms');toggle.type='button';toggle.setAttribute('aria-expanded','false');
+      const cards=[];
+      toggle.addEventListener('click',()=>{
+        const expand=cards.some(card=>!card.open);cards.forEach(card=>{card.open=expand});
+        toggle.setAttribute('aria-expanded',String(expand));toggle.textContent=expand?'Egiturak bildu':'Egitura guztiak zabaldu';
+      });
+      area.append(toggle);
+      const update=()=>{
+        const expanded=cards.length>0&&cards.every(card=>card.open);
+        toggle.setAttribute('aria-expanded',String(expanded));toggle.textContent=expanded?'Egiturak bildu':'Egitura guztiak zabaldu';
+      };
+      data.forms.forEach((f,index)=>{const card=form(area,f,data.formExamples,index);cards.push(card);card.addEventListener('toggle',update)});
+      update();
     }
     if(data.examples.length){
       const area=section(root,'Adibideak testuinguruan',headings);
@@ -242,10 +321,7 @@
         details.append(el('summary',s.title_eu));prose(details,s.body_eu);area.append(details);
       });
     }
-    const reflection=el('details',null,'gr-doc-recall');
-    reflection.append(el('summary','Gelditu une batez · zer ulertu duzu?'));
-    prose(reflection,'Azaldu ideia nagusia zeure hitzekin. Ondoren, sortu adibide bat beste egoera baterako eta arrazoitu aukeratu duzun egitura. Zalantzarik baduzu, itzuli dagokion azalpen edo adibidera.');
-    root.append(reflection);
+    recall(root);
     sources(root,entry,headings);
     container.append(root);
     return headings;
@@ -253,7 +329,7 @@
   function outline(host,headings){
     if(headings.length<2)return;
     const menu=el('details',null,'gr-doc-outline');
-    menu.open=true;
+    menu.open=false;
     menu.append(el('summary','Gai honetan · '+headings.length+' atal'));
     const nav=el('nav',null,'gr-doc-outline-links');
     nav.setAttribute('aria-label','Gaiaren atalak');
@@ -269,7 +345,9 @@
       });
       nav.append(a);
     });
-    menu.append(nav);host.prepend(menu);
+    menu.append(nav);
+    const scene=host.querySelector('.gr-live-opening');
+    if(scene)scene.after(menu);else host.prepend(menu);
   }
   window.SustraiGrammarReader=Object.freeze({load,render,outline});
 })();

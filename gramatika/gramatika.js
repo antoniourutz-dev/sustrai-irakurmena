@@ -61,11 +61,23 @@
       category.append(opt);
     }
     if (byCode.has(current)) category.value = current;
+    const rail=$('grammarCategories');
+    if(rail){
+      const choices=[['','Guztiak'],...[...byCode].sort((a,b)=>a[1].localeCompare(b[1],'eu'))];
+      rail.replaceChildren(...choices.map(([code,label])=>{
+        const button=node('button',null,'grammar-category-chip');button.type='button';button.dataset.category=code;
+        const count=code?state.entries.filter(e=>e.category_code===code).length:state.entries.length;
+        button.append(node('span',label),node('span',count,'grammar-chip-count'));
+        button.addEventListener('click',()=>{category.value=code;renderCatalog()});return button;
+      }));
+      $('grammarTop').classList.add('has-category-rail');
+    }
   }
   function renderCatalog() {
     const grid = $('grammarIndex');
     const search = $('grammarSearch').value.trim().toLocaleLowerCase('eu');
     const filter = $('grammarCategory').value;
+    document.querySelectorAll('.grammar-category-chip').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.category===filter)));
     const rows = state.entries.filter(row =>
       (!filter || row.category_code === filter)
       && (!search || (row.title_eu + ' ' + (row.short_explanation_eu || '') + ' ' + (row.category_label_eu || '')).toLocaleLowerCase('eu').includes(search))
@@ -74,11 +86,15 @@
       const a = node('a', null, 'grammar-index-card');
       a.href = linkFor(state.level, entry.code);
       a.dataset.code = entry.code;
+      a.dataset.tone=String(index%4);
+      const top=node('span',null,'grammar-card-top');
+      const glyph=node('span',['Aa','↔','…','+'][index%4],'grammar-card-glyph');glyph.setAttribute('aria-hidden','true');
+      top.append(glyph,node('span',entry.category_label_eu||'Gramatika','grammar-card-category'));
       a.append(
-        node('span', (entry.category_label_eu || 'Gramatika') + ' · ' + String(index + 1).padStart(2, '0'), 'grammar-index-number'),
+        top,
         node('strong', entry.title_eu),
         node('span', entry.short_explanation_eu, 'grammar-index-desc'),
-        node('span', 'Azalpena irakurri →', 'grammar-index-more')
+        node('span', 'Gaia ezagutu ↗', 'grammar-index-more')
       );
       if(entry.metadata?.pilot_public_visibility==='pending_independent_review'){
         const badge=node('span','Berrikuspen akademikoaren zain · pilotua','grammar-pilot-tag');

@@ -326,10 +326,12 @@
     const design=designFor(e.code);
     if(design){
       const intro=section(body,'Ikaskuntza-helburua eta egoera');
+      intro.classList.add('b2-mission');
       addP(intro,design.why_it_matters_eu,'b2-intro');
       addP(intro,design.situation_eu,'b2-context');
       listValues(intro,design.success_indicators_eu,'b2-outcomes');
       const model=section(body,'Eredu landua · zergatik?');
+      model.classList.add('b2-story');
       const sample=el('div',null,'b2-model-card');
       sample.append(el('span','SUSTRAIren adibide originala','b2-mini-label'));
       addP(sample,design.anchor_example_eu,'b2-sample-phrase');

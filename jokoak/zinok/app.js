@@ -68,9 +68,10 @@
        const cls=!answered?'':i===q.correctIndex?' is-correct':i===choice?' is-wrong':' is-muted';
        const verdict=!answered?'':i===q.correctIndex?' · Zuzena':i===choice?' · Okerra':'';
        return '<button class="zinok-option'+cls+'" type="button" data-action="answer" data-index="'+i+'"'+
+         (verdict?' aria-label="'+esc(option+verdict)+'"':'')+
          (answered?' disabled':'')+'>'+
          '<span class="zinok-letter">'+String.fromCharCode(65+i)+'</span>'+
-         '<span>'+esc(option)+esc(verdict)+'</span></button>';
+         '<span>'+esc(option)+'</span></button>';
      }).join('')+'</div>'+
      (answered?'<span class="sr-only" role="status" aria-live="polite">'+
        (choice===q.correctIndex?'Zuzena':'Okerra')+'</span>'+

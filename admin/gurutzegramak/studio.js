@@ -7,9 +7,10 @@
   const publishable = 'sb_publishable_-K_tjkVMyqf12uuXkUxcRA_Mqx-ij-A';
   const store = 'smx_crossword_authoring';
   const engine = window.CrosswordStudioEngine;
+  const groups = window.CrosswordStudioGroups;
   const s = {cloud:null,client:null,source:null,entries:[],specialties:[],assignments:[],
     puzzle:null,selected:null,drafts:{},checked:{},answers:false,savedId:null,
-    status:'draft',library:[],owner:null,loading:false,excluded:new Set()};
+    status:'draft',library:[],owner:null,loading:false,excluded:new Set(),puzzleTopicCode:'all'};
   const text = value => String(value ?? '');
   const esc = value => text(value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[c]));
   const notify = (message,bad=false) => {
@@ -46,69 +47,70 @@
     ]);
     s.entries=entries;s.specialties=specialties;s.assignments=assignments;
     $('studioCatalogCount').textContent=entries.length+' sarrera argitaratu';
-    updateTopics();
+    renderGroups();
     notify('Hiztegia kargatuta. Arloa hautatu eta sortzen has zaitezke.');
   }
-  function updateTopics() {
-    const axis=$('studioAxis').value, topic=$('studioTopic');
-    const prev=topic.value;
-    const options=[{code:'all',label:'Osasun-hiztegi orokorra'}];
-    if(axis==='category'){
-      const categories=[...new Set(s.entries.map(w=>w.category_general).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'eu'));
-      categories.forEach(cat=>options.push({code:'category:'+cat,label:cat}));
-    } else {
-      const axisRows=s.specialties.filter(x=>x.axis===axis);
-      const roots=axisRows.filter(x=>!x.parent_code).sort((a,b)=>a.label_eu.localeCompare(b.label_eu,'eu'));
-      const added=new Set();
-      for(const parent of roots){
-        options.push({code:parent.code,label:parent.label_eu});added.add(parent.code);
-        axisRows.filter(x=>x.parent_code===parent.code).sort((a,b)=>a.label_eu.localeCompare(b.label_eu,'eu'))
-          .forEach(x=>{options.push({code:x.code,label:'↳ '+x.label_eu});added.add(x.code);});
-      }
-      axisRows.filter(x=>!added.has(x.code)).sort((a,b)=>a.label_eu.localeCompare(b.label_eu,'eu'))
-        .forEach(x=>options.push({code:x.code,label:x.label_eu}));
-    }
-    topic.replaceChildren(...options.map(x=>{
-      const option=document.createElement('option');
-      option.value=x.code;option.textContent=x.label;return option;
-    }));
-    topic.value=options.some(x=>x.code===prev)?prev:'all';
+  function selectedGroupIds(){
+    return [...$('studioGroupList').querySelectorAll('input[name="studioGroup"]:checked')].map(input=>input.value);
+  }
+  function setSelection(ids){
+    const chosen=new Set(groups.validIds(ids));
+    $('studioGroupList').querySelectorAll('input[name="studioGroup"]').forEach(input=>{
+      input.checked=chosen.has(input.value);
+    });
+    s.excluded.clear();
+    updateInventory();
+  }
+  function renderGroups(selectedIds=groups.ids()){
+    const chosen=new Set(groups.validIds(selectedIds));
+    $('studioGroupList').innerHTML=groups.GROUPS.map(g=>{
+      const count=groups.eligible(s.entries,s.assignments,[g.id],engine.candidate,{
+        phrases:$('studioPhrases').checked}).length;
+      return '<div class="studio-group-card">'+
+        '<label><input name="studioGroup" type="checkbox" value="'+esc(g.id)+'"'+
+          (chosen.has(g.id)?' checked':'')+'>'+
+        '<span class="studio-group-mark" aria-hidden="true">'+esc(g.icon)+'</span>'+
+        '<span class="studio-group-copy"><strong>'+esc(g.label)+'</strong>'+
+        '<small>'+esc(g.description)+'</small></span></label>'+
+        '<div class="studio-group-footer"><span class="studio-group-count" data-count-for="'+
+          esc(g.id)+'">'+count+' hitz</span>'+
+        '<button type="button" class="studio-only" data-only="'+esc(g.id)+
+          '" aria-label="'+esc(g.label)+' bakarrik hautatu">Hau bakarrik</button></div></div>';
+    }).join('');
     updateInventory();
   }
   function isPending(item) {
     return /BALIDATZEKE|BERRIKUSTEKE|EGIAZTATZEKE|GATAZKA|KONTRAESANA|FROGA PARTZIALA/i.test(item.editorial_state||'');
   }
   function getEligible() {
-    const topic=$('studioTopic').value, phrases=$('studioPhrases').checked;
-    let entries=s.entries.filter(x=>!s.excluded.has(x.code));
-    if(topic.startsWith('category:')) {
-      entries=entries.filter(x=>x.category_general===topic.slice(9));
-    } else if(topic!=='all'){
-      const codes=new Set(s.specialties.filter(x=>x.code===topic||x.code.startsWith(topic+'.')).map(x=>x.code));
-      const relevant=new Set(s.assignments.filter(x=>codes.has(x.specialty_code)).map(x=>x.entry_code));
-      entries=entries.filter(x=>relevant.has(x.code));
-    }
-    const seen=new Set();
-    return entries.filter(x=>{
-      const c=engine.candidate(x,{phrases});
-      if(!c||seen.has(c.word))return false;
-      seen.add(c.word);return true;
-    });
+    return groups.eligible(s.entries,s.assignments,selectedGroupIds(),engine.candidate,{
+      phrases:$('studioPhrases').checked,excluded:s.excluded});
   }
   function updateInventory(){
     if(!s.entries.length)return;
-    const pool=getEligible(),pending=pool.filter(isPending).length;
+    const chosen=selectedGroupIds(),pool=getEligible(),pending=pool.filter(isPending).length;
     const requested=Number($('studioCount').value);
-    const warning=pool.length<requested
-      ? '<span class="warning">Hitz gutxiegi; gai zabalagoa edo hitz gutxiago aukeratu.</span>'
-      : 'Gurutzegrama sortzeko hautagaiak prest.';
-    $('studioInventory').innerHTML='<strong>'+pool.length+' hitz erabilgarri</strong> · '+pending+
-      ' sarreratan berrikusteko oharrak. '+warning+
-      '<br><small>Sailkapen-loturak proposatuak dira; Oposiken argitaratutako sarrerak baino ez dira erabiltzen. Argitalpena ez da balidazio akademikoaren sinonimo.</small>';
-    $('studioGenerate').disabled=pool.length<requested;
+    $('studioSelectedSummary').textContent=chosen.length===groups.GROUPS.length
+      ? '8 multzo hautatuta · hiztegi orokorra'
+      :chosen.length+' / '+groups.GROUPS.length+' multzo hautatuta';
+    for(const g of groups.GROUPS){
+      const output=$('studioGroupList').querySelector('[data-count-for="'+g.id+'"]');
+      if(output)output.textContent=groups.eligible(s.entries,s.assignments,[g.id],engine.candidate,{
+        phrases:$('studioPhrases').checked}).length+' hitz';
+    }
+    const warning=!chosen.length
+      ? '<span class="warning">Hautatu gutxienez gai-multzo bat.</span>'
+      :pool.length<requested
+        ? '<span class="warning">Ez dago nahikoa hitz; gehitu beste gai-multzo bat edo murriztu hitz kopurua.</span>'
+        : 'Gurutzegrama sortzeko hautagaiak prest.';
+    $('studioInventory').innerHTML='<strong>'+pool.length+' hitz erabilgarri</strong> · '+
+      chosen.length+' gai-multzo · '+pending+' sarreratan berrikusteko oharrak. '+warning+
+      '<br><small>Multzoetako hitzak batzen dira, errepikapenik gabe. Espezialitate txikiak antzeko gaiekin bateratuta daude. Sailkapenak proposatuak dira; Oposikeko sarrera argitaratuak soilik.</small>';
+    $('studioGenerate').disabled=!chosen.length||pool.length<requested;
   }
   function makePuzzle() {
     if(s.loading)return;
+    if(!selectedGroupIds().length){notify('Aukeratu gutxienez gai-multzo bat.',true);return;}
     s.loading=true;$('studioGenerate').disabled=true;
     try {
       const pool=getEligible(),count=Number($('studioCount').value);
@@ -117,7 +119,7 @@
       const board=engine.generate(pool,count,{size,phrases:$('studioPhrases').checked,title:currentTitle(),
         seed:Date.now().toString()+'-'+Math.random().toString()});
       s.puzzle=board;s.selected=board.entries[0].id;s.drafts={};s.checked={};s.answers=false;
-      s.savedId=null;s.status='draft';
+      s.savedId=null;s.status='draft';s.puzzleTopicCode=groups.serialize(selectedGroupIds());
       $('studioShowAnswers').textContent='Erantzunak erakutsi';
       $('studioPreviewPanel').hidden=false;$('studioRegenerate').disabled=false;
       drawPreview();drawEditor();
@@ -246,7 +248,7 @@
     try{
       assertReviewed();notify('Gurutzegrama gordetzen…');
       const p=s.puzzle;
-      const body={created_by:s.owner,title_eu:currentTitle(),topic_code:$('studioTopic').value,
+      const body={created_by:s.owner,title_eu:currentTitle(),topic_code:s.puzzleTopicCode,
         difficulty:$('studioDifficulty').value,status:s.status,word_count:p.entries.length,
         grid_rows:p.grid_rows,grid_cols:p.grid_cols,entries:p.entries,review_note:'',
         updated_at:new Date().toISOString()};
@@ -274,7 +276,11 @@
       const summary=document.createElement('div');
       const heading=document.createElement('strong');heading.textContent=item.title_eu;
       const small=document.createElement('small');
-      small.textContent=item.word_count+' hitz · '+(item.status==='reviewed'?'Berrikusia':'Zirriborroa')+' · '+new Date(item.created_at).toLocaleDateString('eu-ES');
+      const selected=groups.deserialize(item.topic_code);
+      const label=selected.length===groups.GROUPS.length?'Osasun-hiztegi orokorra':
+        selected.map(id=>groups.GROUPS.find(g=>g.id===id)?.label||id).join(' + ');
+      small.textContent=item.word_count+' hitz · '+(item.status==='reviewed'?'Berrikusia':'Zirriborroa')+
+        ' · '+label+' · '+new Date(item.created_at).toLocaleDateString('eu-ES');
       summary.append(heading,small);
       const open=document.createElement('button');open.type='button';open.textContent='Ireki eta editatu';
       open.dataset.open=item.id;
@@ -290,12 +296,8 @@
     s.savedId=record.id;s.status=record.status;s.excluded.clear();
     $('studioTitle').value=record.title_eu;$('studioDifficulty').value=record.difficulty;
     $('studioCount').value=String(record.word_count);
-    const selectedTheme=record.topic_code;
-    if(selectedTheme.startsWith('category:'))$('studioAxis').value='category';
-    else if(selectedTheme!=='all')$('studioAxis').value=s.specialties.find(x=>x.code===selectedTheme)?.axis||'especialidad';
-    updateTopics();
-    if([...$('studioTopic').options].some(o=>o.value===selectedTheme))$('studioTopic').value=selectedTheme;
-    updateInventory();
+    s.puzzleTopicCode=record.topic_code;
+    setSelection(groups.deserialize(record.topic_code));
     $('studioShowAnswers').textContent='Erantzunak erakutsi';
     $('studioPreviewPanel').hidden=false;$('studioRegenerate').disabled=false;
     drawPreview();drawEditor();$('studioPreviewPanel').scrollIntoView({behavior:'smooth'});
@@ -316,8 +318,17 @@
   }
   function bind(){
     $('studioLogin').addEventListener('click',()=>s.cloud?.openLogin?.());
-    $('studioAxis').addEventListener('change',updateTopics);
-    $('studioTopic').addEventListener('change',()=>{s.excluded.clear();updateInventory();});
+    $('studioGroupList').addEventListener('change',event=>{
+      if(event.target.matches('input[name="studioGroup"]')){
+        s.excluded.clear();updateInventory();
+      }
+    });
+    $('studioGroupList').addEventListener('click',event=>{
+      const selected=event.target.closest('[data-only]');
+      if(selected)setSelection([selected.dataset.only]);
+    });
+    $('studioSelectAll').addEventListener('click',()=>setSelection(groups.ids()));
+    $('studioClearSelection').addEventListener('click',()=>setSelection([]));
     $('studioCount').addEventListener('change',updateInventory);
     $('studioPhrases').addEventListener('change',updateInventory);
     $('studioGenerate').addEventListener('click',makePuzzle);
@@ -385,7 +396,7 @@
     bind();
     try{
       s.cloud=window.SustraiCloud;
-      if(!s.cloud||!window.supabase||!engine)throw Error('Tresnak ezin izan dira kargatu.');
+      if(!s.cloud||!window.supabase||!engine||!groups)throw Error('Tresnak ezin izan dira kargatu.');
       await s.cloud.ready;
       s.client=s.cloud.client();
       const user=s.cloud.user();

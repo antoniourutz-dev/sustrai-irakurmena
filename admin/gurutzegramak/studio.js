@@ -58,12 +58,15 @@
       categories.forEach(cat=>options.push({code:'category:'+cat,label:cat}));
     } else {
       const axisRows=s.specialties.filter(x=>x.axis===axis);
-      axisRows.sort((a,b)=>{
-        if(!a.parent_code && b.parent_code)return -1;
-        if(a.parent_code && !b.parent_code)return 1;
-        return a.label_eu.localeCompare(b.label_eu,'eu');
-      });
-      axisRows.forEach(item=>options.push({code:item.code,label:(item.parent_code?'↳ ':'')+item.label_eu}));
+      const roots=axisRows.filter(x=>!x.parent_code).sort((a,b)=>a.label_eu.localeCompare(b.label_eu,'eu'));
+      const added=new Set();
+      for(const parent of roots){
+        options.push({code:parent.code,label:parent.label_eu});added.add(parent.code);
+        axisRows.filter(x=>x.parent_code===parent.code).sort((a,b)=>a.label_eu.localeCompare(b.label_eu,'eu'))
+          .forEach(x=>{options.push({code:x.code,label:'↳ '+x.label_eu});added.add(x.code);});
+      }
+      axisRows.filter(x=>!added.has(x.code)).sort((a,b)=>a.label_eu.localeCompare(b.label_eu,'eu'))
+        .forEach(x=>options.push({code:x.code,label:x.label_eu}));
     }
     topic.replaceChildren(...options.map(x=>{
       const option=document.createElement('option');

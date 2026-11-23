@@ -44,7 +44,7 @@
       el.tabIndex=-1;
       el.querySelector('.cx-clue-state,.cx-clue-length')?.remove();
       const length=document.createElement('span');
-      length.className='cx-clue-length';length.textContent=w.word.length;
+      length.className='cx-clue-length';length.textContent=teacher?w.word+' ('+w.word.length+')':w.word.length;
       el.append(length);
     }
     const heading=root.querySelector('.cx-status-intro').cloneNode(true);

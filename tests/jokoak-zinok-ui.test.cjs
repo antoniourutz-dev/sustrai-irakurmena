@@ -53,7 +53,12 @@ test('Markak geratzen dira Hurrengoa sakatu arte, azalpenik gabe',()=>{
  assert.match(v.root.html,/Galdera 1 \/ 10/);
  assert.match(v.root.html,/class="zinok-option is-wrong"[^>]*data-index="0"/);
  assert.match(v.root.html,/class="zinok-option is-correct"[^>]*data-index="1"/);
- assert.match(v.root.html,/Okerra/);
+ assert.match(v.root.html,/<span>okerra0<\/span><\/button>/);
+ assert.match(v.root.html,/<span>zuzena0<\/span><\/button>/);
+ assert.match(v.root.html,/aria-label="okerra0 · Okerra"/);
+ assert.match(v.root.html,/aria-label="zuzena0 · Zuzena"/);
+ assert.doesNotMatch(v.root.html,/<span>okerra0 · Okerra<\/span>/);
+ assert.doesNotMatch(v.root.html,/<span>zuzena0 · Zuzena<\/span>/);
  assert.doesNotMatch(v.root.html,/Erantzun-gakoa|Jatorrizko taldeko beste sinonimoak/);
  assert.match(v.root.html,/data-action="next">Hurrengoa/);
  v.click('answer',{index:'1'}); // Ignore an accidental second tap.
@@ -69,7 +74,10 @@ test('Erantzun zuzena berdez markatzen da, azalpenik gehitu gabe',()=>{
  v.click('answer',{index:'1'});
  assert.match(v.root.html,/class="zinok-option is-correct"[^>]*data-index="1"/);
  assert.doesNotMatch(v.root.html,/class="zinok-option is-wrong"/);
- assert.match(v.root.html,/>Zuzena</);
+ assert.match(v.root.html,/<span>zuzena0<\/span><\/button>/);
+ assert.match(v.root.html,/aria-label="zuzena0 · Zuzena"/);
+ assert.doesNotMatch(v.root.html,/<span>zuzena0 · Zuzena<\/span>/);
+ assert.match(v.root.html,/class="sr-only" role="status"/);
  assert.doesNotMatch(v.root.html,/Erantzun-gakoa/);
  v.click('next');
  assert.match(v.root.html,/Galdera 2 \/ 10/);

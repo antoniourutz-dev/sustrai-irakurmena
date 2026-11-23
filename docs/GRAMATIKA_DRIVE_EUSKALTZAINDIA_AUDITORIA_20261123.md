@@ -34,8 +34,10 @@ eta **sistema osoa gaika ez zegoela nahikoa estalita**.
 Lehen sorta sartu ondoren: 73 gramatika-fitxa (B2 40, C1 33),
 40 gai B2ko ikasketa-ibilbidean, 0 lotura hautsi, 7 modulu berdinak.
 Lehen sorta egilearen berrikuspeneko `draft` / `not_reviewed`
-egoeran dago; katalogoan `pending_independent_review` oharraz
-irakurtzeko askatu da, ez onarpen akademiko gisa.
+egoeran dago; katalogoan irakurgarri egoteko pilotu-baimen berezia dago,
+baina horrek ez du onarpen akademikorik esan nahi. Publikoko ikuspegiak
+barne-egoerari buruzko metadatuak ezkutatzen ditu, lehenago zehaztutako
+interfaze-irizpideari jarraituz; egoera Supabaseko erregistroan mantentzen da.
 
 ## 3. Dokumentu errealetan oinarritutako lehen transferentzia
 

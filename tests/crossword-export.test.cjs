@@ -79,8 +79,15 @@ test('student and teacher native Word documents contain HitzBira and only teache
     assert.match(parts['word/footer1.xml'],/HitzBira/);
     assert.ok(!Object.values(parts).some(x=>/SUSTRAI/i.test(x)),'No old brand in Word XML');
   }
-  assert.ok(!stu['word/document.xml'].includes('ERANTZUNA'));
-  assert.ok(tchr['word/document.xml'].includes('ERANTZUNA'));
-  assert.match(stu['word/document.xml'],/PISTAK/);
-  assert.match(tchr['word/document.xml'],/PISTAK/);
+  // Export must not retain the old redundant subtitle, instruction or middle legend.
+  for(const parts of [stu,tchr]){
+    assert.ok(!/GURUTZEGRAMA · OSASUN-HIZTEGIA|HORIZONTALAK  →|Osatu gurutzegrama|Osasun-hiztegia/.test(parts['word/document.xml']));
+    assert.ok(!parts['word/document.xml'].includes('PISTAK'));
+    assert.match(parts['word/document.xml'],/Horizontalak/);
+    assert.match(parts['word/document.xml'],/Bertikalak/);
+    assert.match(parts['word/document.xml'],/<w:tbl>/);
+  }
+  const solved=base.words[0].word;
+  assert.ok(!stu['word/document.xml'].includes('·  '+solved));
+  assert.ok(tchr['word/document.xml'].includes('·  '+solved));
 });

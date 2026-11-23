@@ -110,6 +110,15 @@ test('All 31 topics render their complete document without navigating to a separ
   assert.match(app,/Teoria osoa ikusi/);
 });
 
+test('Linguistic asterisks survive rich text formatting',()=>{
+  const reader=init();const host=doc.createElement('div');
+  const original='Ez erabili *zu ezik, *hau ezik edo *nahiez gero. **Kontuan hartu**.';
+  reader.render(host,{id:'linguistic-markers',explanation_eu:original,metadata:{}},
+    {sections:[],examples:[],forms:[],formExamples:[],contrasts:[],tables:[],errors:[]});
+  for(const marker of ['*zu ezik','*hau ezik','*nahiez gero'])assert.ok(host.textContent.includes(marker),marker);
+  assert.ok(descendants(host).some(n=>n.tagName==='strong'&&n.textContent==='Kontuan hartu'));
+});
+
 test('Reading controls, styles, PWA assets and focus-mode exit are present',()=>{
   assert.match(app,/setupReadingControls/);
   assert.match(app,/event\.key==='Escape'/);

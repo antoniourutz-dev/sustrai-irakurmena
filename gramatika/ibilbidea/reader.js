@@ -23,12 +23,13 @@
   const norm = value => String(value||'').replace(/\r\n?/g,'\n').replace(/\\n/g,'\n').trim();
   function inline(s,parent) {
     const value=String(s);
-    const re=/(\*\*([^*]+)\*\*|\x60([^\x60]+)\x60|\*([^*]+)\*)/g;
+    // A single asterisk is a linguistic acceptability marker; never consume it as emphasis.
+    const re=/(\*\*([^*]+)\*\*|\x60([^\x60]+)\x60)/g;
     let end=0;
     for(const m of value.matchAll(re)) {
       const i=m.index||0;
       if(i>end)parent.append(document.createTextNode(value.slice(end,i)));
-      parent.append(el(m[2]?'strong':m[3]?'code':'em',m[2]||m[3]||m[4]));
+      parent.append(el(m[2]?'strong':'code',m[2]||m[3]));
       end=i+m[0].length;
     }
     if(end<value.length)parent.append(document.createTextNode(value.slice(end)));
@@ -89,14 +90,17 @@
   function form(root,item,examples) {
     const group=el('section',null,'gr-doc-form');
     group.append(el('h4',item.display_eu||item.code));
-    if(item.form_group)group.append(el('span',item.form_group,'gr-doc-form-label'));
+    if(item.form_group){
+      const label=String(item.form_group).toLocaleLowerCase('eu').replace(/_/g,' ');
+      group.append(el('span',label.charAt(0).toLocaleUpperCase('eu')+label.slice(1),'gr-doc-form-label'));
+    }
     const dl=el('dl',null,'gr-doc-facts');
     [
       ['Funtzioa',item.function_eu],['Esanahia',item.meaning_eu],
       ['Eraikuntza',item.formation_eu],['Baiezkoa',item.positive_pattern_eu],
       ['Ezezkoa',item.negative_pattern_eu],['Egitura jokatua',item.finite_pattern_eu],
       ['Egitura jokatugabea',item.non_finite_pattern_eu],['Erabilera',item.use_when_eu],
-      ['Erregistroa',item.register_label],['Hizkera-aldaerak',item.dialect_note_eu]
+      ['Erregistroa',({neutral:'Neutroa',formal:'Formala',informal:'Informala'})[item.register_label]||item.register_label],['Hizkera-aldaerak',item.dialect_note_eu]
     ].forEach(([k,v])=>fact(dl,k,v));
     if(dl.childElementCount)group.append(dl);
     note(group,'Kontuan hartu',item.warning_eu||item.avoid_when_eu,'warning');

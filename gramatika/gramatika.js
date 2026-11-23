@@ -102,6 +102,10 @@
         node('span', entry.short_explanation_eu, 'grammar-index-desc'),
         node('span', 'Azalpena irakurri →', 'grammar-index-more')
       );
+      if(entry.metadata?.pilot_public_visibility==='pending_independent_review'){
+        const badge=node('span','Berrikuspen akademikoaren zain · pilotua','grammar-pilot-tag');
+        a.insertBefore(badge,a.lastChild);
+      }
       return a;
     }));
     grid.setAttribute('aria-busy', 'false');
@@ -206,6 +210,9 @@
     $('grammarVersion').textContent = 'Bertsioa ' + entry.version;
     const root = $('grammarDetail');
     root.replaceChildren();
+    if(entry.metadata?.pilot_public_visibility==='pending_independent_review'){
+      root.append(node('p', entry.metadata.pilot_review_notice_eu || 'Ikasmaterial pilotua: berrikuspen akademiko independentea egin gabe.','grammar-pilot-notice'));
+    }
     if (entry.explanation_eu) {
       const explain=section(root,'Azalpena');
       addText(explain,entry.explanation_eu);

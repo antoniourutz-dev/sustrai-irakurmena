@@ -1,6 +1,12 @@
 /* Export the live crossword DOM using its own styles and fonts. No game/storage writes. */
 (() => {
   'use strict';
+  function fileBase(puzzle){
+    if(!puzzle.is_authoring)return 'HitzBira-'+puzzle.play_date+'-'+puzzle.mode;
+    const slug=String(puzzle.theme_eu||'osasuna').normalize('NFD').replace(/[\\u0300-\\u036f]/g,'')
+      .toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,42)||'osasuna';
+    return 'SUSTRAI-Gurutzegrama-'+puzzle.play_date+'-'+slug;
+  }
   const BASE='/jokoak/gurutzegramak/';
   let busy=false,dependencies;
   function loadScript(src,available){
@@ -100,7 +106,7 @@
       const w=canvas.width*scale,h=canvas.height*scale;
       pdf.setProperties({title:'HitzBira · '+puzzle.play_date+' · '+(teacher?'Irakaslearen PDFa':'Ikaslearen PDFa'),author:'SUSTRAI'});
       pdf.addImage(canvas,'PNG',(210-w)/2,margin,w,h,undefined,'FAST');
-      await pdf.save('HitzBira-'+puzzle.play_date+'-'+puzzle.mode+'-'+(teacher?'irakaslea':'ikaslea')+'.pdf',{returnPromise:true});
+      await pdf.save(fileBase(puzzle)+'-'+(teacher?'irakaslea':'ikaslea')+'.pdf',{returnPromise:true});
       setStatus('PDFa deskargatu da.');
     }catch(error){
       console.error('Crossword PDF export:',error);

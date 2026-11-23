@@ -19,7 +19,7 @@
     const title=safe(p.theme_eu||'Gurutzegrama');
     const date=/^\d{4}-\d{2}-\d{2}$/.test(p.play_date||'')?p.play_date:'';
     const type=teacher?'IRAKASLEAREN GIDA':'IKASLEAREN FITXA';
-    const file='HitzBira-Gurutzegrama-'+slug(subject)+'-'+(teacher?'irakaslea':'ikaslea');
+    const file='HitzBira-Gurutzegrama-'+(date?date+'-':'')+slug(subject)+'-'+(teacher?'irakaslea':'ikaslea');
     const code='HB-GUR-'+(date?date.replace(/-/g,''):'FITXA');
     return {subject,title,date,type,file,code,teacher,count:(options.words||[]).length};
   }
@@ -115,7 +115,7 @@
       centered(meta.subject,27,true,INK),
       centered(meta.title===meta.subject?'Gurutzegrama':meta.title,17,false,MUTED),
       centered(meta.count+' hitz  ·  '+(meta.teacher?'Erantzunak barne':'Osatu taula definizioen laguntzaz'),15,false,MUTED),
-      paragraph([run('Osatu gurutzegrama, eta erabili hurrengo orrialdeetako pistak.',
+      paragraph([run('Osatu gurutzegrama, eta erabili jarraian ageri diren pistak.',
         {size:16,color:INK})],{
         shading:{fill:PALE},indent:{left:180,right:180},
         spacing:{before:130,after:230},alignment:AlignmentType.CENTER}),
@@ -123,7 +123,7 @@
       paragraph([run('HORIZONTALAK  →     BERTIKALAK  ↓',{size:12,bold:true,color:MUTED})],{
         alignment:AlignmentType.CENTER,spacing:{before:230,after:0}}),
       paragraph([run('PISTAK',{font:'HitzBiraDisplay',size:28,bold:true,color:AQUA})],{
-        pageBreakBefore:true,spacing:{before:0,after:120},keepNext:true}),
+        spacing:{before:280,after:120},keepNext:true}),
       paragraph([run(meta.subject,{size:16,bold:true,color:INK})],{
         spacing:{before:0,after:260},keepNext:true})
     ];

@@ -49,7 +49,7 @@ Arauemaileak eta gramatika **deskribatzailea** bereizi dira; arau historikoaren 
 - [ ] Beste irakurle euskaldun akademiko independente batek hiru unitateak berrikusi, bereziki *-arazi*ren argumentu-ereduak eta -n/-la subjuntiboaren erabilerak.
 - [ ] Euskaltzaindiaren Hiztegiaren **uneko** sarrerak kontsultatu `sorrarazi`, `agerrarazi` eta aldaeren kasuan; 1994ko 23. arauaren eta 2021eko Gramatikako oharren artean dagoen bilakaera dokumentatu, epaia eman aurretik.
 - [ ] Ahozko eta idatzizko benetako adibideak irakasle batek naturalitateari begira kontrastatu.
-- [ ] C1eko katalogoa mugikorrean probatu; ikaslearen ikuspuntutik testuaren irakurgarritasuna eta navigazioa baloratu.
+- [ ] C1eko katalogoa mugikorrean probatu; ikaslearen ikuspuntutik testuaren irakurgarritasuna eta nabigazioa baloratu.
 - [ ] Ez erabili `approved` edo `egiaztatua` giza berrikuspenik gabe.
 - [ ] Driveko fitxa kanonikoa aparte gordetzen bada, fitxategi-IDa/bertsioa/edukia berriz irakurri; oraingo metadatua `gordetzeko_zain` da.
 

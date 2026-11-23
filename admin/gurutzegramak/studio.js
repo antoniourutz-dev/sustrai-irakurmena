@@ -8,7 +8,7 @@
   const store = 'smx_crossword_authoring';
   const engine = window.CrosswordStudioEngine;
   const groups = window.CrosswordStudioGroups;
-  const s = {cloud:null,client:null,source:null,entries:[],specialties:[],assignments:[],
+  const s = {cloud:null,client:null,source:null,entries:[],assignments:[],
     puzzle:null,selected:null,drafts:{},checked:{},answers:false,savedId:null,
     status:'draft',library:[],owner:null,loading:false,excluded:new Set(),puzzleTopicCode:'all'};
   const text = value => String(value ?? '');
@@ -40,15 +40,14 @@
   }
   async function fetchCatalog() {
     notify('Oposikeko argitaratutako hiztegia kargatzen…');
-    const [entries,specialties,assignments]=await Promise.all([
+    const [entries,assignments]=await Promise.all([
       all('osasun_entries','code,lemma_eu,definition_eu,meaning_es,category_general,editorial_state,entry_type',{status:'published'}),
-      all('osasun_specialties','code,label_eu,label_es,parent_code,axis,kind,active',{active:true}),
       all('osasun_entry_specialties','entry_code,specialty_code,review_state',{review:'suggested'})
     ]);
-    s.entries=entries;s.specialties=specialties;s.assignments=assignments;
+    s.entries=entries;s.assignments=assignments;
     $('studioCatalogCount').textContent=entries.length+' sarrera argitaratu';
     renderGroups();
-    notify('Hiztegia kargatuta. Arloa hautatu eta sortzen has zaitezke.');
+    notify('Hiztegia kargatuta. Gai-multzo bat edo batzuk aukeratu.');
   }
   function selectedGroupIds(){
     return [...$('studioGroupList').querySelectorAll('input[name="studioGroup"]:checked')].map(input=>input.value);

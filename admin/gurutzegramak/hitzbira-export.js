@@ -279,14 +279,17 @@
       const style=doc.createElement('style');style.textContent=pdfStyles();doc.head.append(style);
       const pages=[pdfBoard(doc,options,meta),...pdfClues(doc,options,meta)];
       await doc.fonts.ready;
-      await new Promise(resolve=>iframe.contentWindow.requestAnimationFrame(
-        ()=>iframe.contentWindow.requestAnimationFrame(resolve)));
       const pdf=new window.jspdf.jsPDF({orientation:'portrait',unit:'mm',format:'a4',compress:true});
       pdf.setProperties({title:'HitzBira · '+meta.subject,author:'HitzBira',subject:meta.type});
       for(let i=0;i<pages.length;i++){
+        // Render each sheet at the top of the isolated document; otherwise html2canvas
+        // can crop pages that happen to be below the iframe's first viewport.
+        doc.body.replaceChildren(pages[i]);
+        await new Promise(resolve=>iframe.contentWindow.requestAnimationFrame(
+          ()=>iframe.contentWindow.requestAnimationFrame(resolve)));
         if(i)pdf.addPage();
         const canvas=await window.html2canvas(pages[i],{scale:2,backgroundColor:'#FFFFFF',
-          width:794,height:1123,windowWidth:794,windowHeight:1123,logging:false});
+          width:794,height:1123,windowWidth:794,windowHeight:1123,scrollX:0,scrollY:0,logging:false});
         pdf.addImage(canvas,'PNG',0,0,210,297,undefined,'FAST');
       }
       await pdf.save(meta.file+'.pdf',{returnPromise:true});

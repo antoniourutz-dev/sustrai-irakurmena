@@ -9,7 +9,7 @@
   const engine = window.CrosswordStudioEngine;
   const s = {cloud:null,client:null,source:null,entries:[],specialties:[],assignments:[],
     puzzle:null,selected:null,drafts:{},checked:{},answers:false,savedId:null,
-    status:'draft',library:[],owner:null,loading:false};
+    status:'draft',library:[],owner:null,loading:false,excluded:new Set()};
   const text = value => String(value ?? '');
   const esc = value => text(value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[c]));
   const notify = (message,bad=false) => {
@@ -75,7 +75,7 @@
   }
   function getEligible() {
     const topic=$('studioTopic').value, phrases=$('studioPhrases').checked;
-    let entries=s.entries;
+    let entries=s.entries.filter(x=>!s.excluded.has(x.code));
     if(topic.startsWith('category:')) {
       entries=entries.filter(x=>x.category_general===topic.slice(9));
     } else if(topic!=='all'){
@@ -213,7 +213,8 @@
     $('studioClueEditor').innerHTML=ordered.map(w=>
       '<div class="studio-editor-row"><div><label for="clue-'+esc(w.id)+'">'+w.number+
       '. '+(w.dir==='H'?'Horizontala':'Bertikala')+' · '+esc(w.original||w.word)+'</label>'+
-      '<small>'+esc(w.source)+'<br>'+esc(w.editorial_state||'Argitalpen-egoera kontsultatu gabe')+'</small></div>'+
+      '<small>'+esc(w.source)+'<br>'+esc(w.editorial_state||'Argitalpen-egoera kontsultatu gabe')+'</small>'+ 
+      '<button type="button" class="studio-button studio-replace" data-exclude="'+esc(w.id)+'">Hitz hau ordeztu</button></div>'+
       '<textarea id="clue-'+esc(w.id)+'" data-clue="'+esc(w.id)+'" rows="2" maxlength="450">'+esc(w.clue)+'</textarea></div>'
     ).join('');
   }
@@ -281,8 +282,15 @@
       play_date:new Date(record.created_at).toISOString().slice(0,10),mode:'ikasi',theme_eu:record.title_eu};
     try{engine.validate(puzzle);}catch(error){notify('Gordetako taula hondatuta dago: '+error.message,true);return;}
     s.puzzle=puzzle;s.selected=puzzle.entries[0].id;s.drafts={};s.checked={};s.answers=false;
-    s.savedId=record.id;s.status=record.status;
+    s.savedId=record.id;s.status=record.status;s.excluded.clear();
     $('studioTitle').value=record.title_eu;$('studioDifficulty').value=record.difficulty;
+    $('studioCount').value=String(record.word_count);
+    const selectedTheme=record.topic_code;
+    if(selectedTheme.startsWith('category:'))$('studioAxis').value='category';
+    else if(selectedTheme!=='all')$('studioAxis').value=s.specialties.find(x=>x.code===selectedTheme)?.axis||'especialidad';
+    updateTopics();
+    if([...$('studioTopic').options].some(o=>o.value===selectedTheme))$('studioTopic').value=selectedTheme;
+    updateInventory();
     $('studioShowAnswers').textContent='Erantzunak erakutsi';
     $('studioPreviewPanel').hidden=false;$('studioRegenerate').disabled=false;
     drawPreview();drawEditor();$('studioPreviewPanel').scrollIntoView({behavior:'smooth'});
@@ -294,7 +302,7 @@
     const cells=cellMap();
     const root=$('studioWorkspace');
     const teacher=action.endsWith('teacher');
-    const options={root,teacher,puzzle:{...s.puzzle,theme_eu:currentTitle()},
+    const options={root,teacher,puzzle:{...s.puzzle,theme_eu:currentTitle(),is_authoring:true},
       words:s.puzzle.entries.map(w=>({...w})),cells};
     if(action.startsWith('pdf-'))window.CrosswordPDF?.download(options);
     else window.CrosswordWord?.download(options);
@@ -302,7 +310,7 @@
   function bind(){
     $('studioLogin').addEventListener('click',()=>s.cloud?.openLogin?.());
     $('studioAxis').addEventListener('change',updateTopics);
-    $('studioTopic').addEventListener('change',updateInventory);
+    $('studioTopic').addEventListener('change',()=>{s.excluded.clear();updateInventory();});
     $('studioCount').addEventListener('change',updateInventory);
     $('studioPhrases').addEventListener('change',updateInventory);
     $('studioGenerate').addEventListener('click',makePuzzle);
@@ -343,6 +351,12 @@
     });
     $('studioPreviewRoot').addEventListener('keydown',event=>{
       if(event.key==='Enter'&&event.target.id==='studioSolveInput'){event.preventDefault();solve();}
+    });
+    $('studioClueEditor').addEventListener('click',event=>{
+      const excluded=event.target.closest('[data-exclude]');
+      if(!excluded)return;
+      s.excluded.add(excluded.dataset.exclude);
+      makePuzzle();
     });
     $('studioClueEditor').addEventListener('input',event=>{
       const field=event.target.closest('[data-clue]');if(!field)return;

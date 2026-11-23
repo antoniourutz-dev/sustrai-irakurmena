@@ -28,10 +28,16 @@ jobs:
         env:
           HB_EXPORT_FIXTURES: '1'
         run: node --test tests/crossword-studio.test.cjs tests/crossword-export.test.cjs
-      - name: Upload sample Word documents for visual QA
+      - name: Include browser assets for PDF visual QA
+        run: |
+          cp admin/gurutzegramak/hitzbira-export.js tests/export-fixtures/
+          cp admin/gurutzegramak/crossword-engine.js tests/export-fixtures/
+          cp jokoak/gurutzegramak/vendor/html2canvas-1.4.1.min.js tests/export-fixtures/
+          cp jokoak/gurutzegramak/vendor/jspdf-4.2.1.umd.min.js tests/export-fixtures/
+      - name: Upload sample exports and browser assets for visual QA
         if: success()
         uses: actions/upload-artifact@v4
         with:
-          name: hitzbira-crossword-word-samples
-          path: tests/export-fixtures/*.docx
+          name: hitzbira-crossword-print-qa
+          path: tests/export-fixtures/*
           if-no-files-found: error

@@ -1,6 +1,12 @@
 /* Native, editable DOCX: real table cells and paragraphs, never a screenshot. */
 (() => {
   'use strict';
+  function fileBase(puzzle){
+    if(!puzzle.is_authoring)return 'HitzBira-'+puzzle.play_date+'-'+puzzle.mode;
+    const slug=String(puzzle.theme_eu||'osasuna').normalize('NFD').replace(/[\\u0300-\\u036f]/g,'')
+      .toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,42)||'osasuna';
+    return 'SUSTRAI-Gurutzegrama-'+puzzle.play_date+'-'+slug;
+  }
   let library,busy=false;
   function ready(){
     if(window.docx)return Promise.resolve(window.docx);
@@ -94,7 +100,7 @@
       const [d,embeddedFonts]=await Promise.all([ready(),fonts()]);
       const blob=await d.Packer.toBlob(build(options,d,embeddedFonts));
       const url=URL.createObjectURL(blob),a=document.createElement('a');
-      a.href=url;a.download='HitzBira-'+puzzle.play_date+'-'+puzzle.mode+'-'+(teacher?'irakaslea':'ikaslea')+'.docx';
+      a.href=url;a.download=fileBase(puzzle)+'-'+(teacher?'irakaslea':'ikaslea')+'.docx';
       document.body.append(a);a.click();a.remove();
       setTimeout(()=>URL.revokeObjectURL(url),30000);
       status('Word editagarria deskargatu da.');

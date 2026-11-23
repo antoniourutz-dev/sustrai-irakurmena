@@ -127,24 +127,35 @@
       paragraph([run(meta.subject,{size:16,bold:true,color:INK})],{
         spacing:{before:0,after:260},keepNext:true})
     ];
+    const clueColumns=[];
     for(const [direction,heading] of [['H','HORIZONTALAK'],['V','BERTIKALAK']]){
-      body.push(paragraph([run(heading,{size:19,bold:true,color:AQUA})],{
-        spacing:{before:170,after:180},keepNext:true}));
+      const column=[paragraph([run(heading,{size:19,bold:true,color:AQUA})],{
+        spacing:{before:90,after:170},keepNext:true})];
       const arr=(options.words||[]).filter(x=>x.dir===direction)
         .sort((a,b)=>a.number-b.number);
-      if(!arr.length)body.push(paragraph([run('—',{size:16,color:MUTED})]));
+      if(!arr.length)column.push(paragraph([run('—',{size:16,color:MUTED})]));
       for(const w of arr){
-        body.push(paragraph([
+        column.push(paragraph([
           run(String(w.number)+'.  ',{size:17,bold:true,color:AQUA}),
           run(w.clue,{size:17,color:INK}),
           run('  ('+w.word.length+')',{size:14,color:MUTED})
-        ],{spacing:{before:0,after:meta.teacher?35:150},keepLines:true}));
-        if(meta.teacher)body.push(paragraph([
+        ],{spacing:{before:0,after:meta.teacher?30:130},keepLines:true}));
+        if(meta.teacher)column.push(paragraph([
           run('ERANTZUNA:  ',{size:12,bold:true,color:GREEN}),
           run(w.word,{size:16,bold:true,color:GREEN})
-        ],{indent:{left:230},spacing:{after:175},keepLines:true}));
+        ],{indent:{left:160},spacing:{after:150},keepLines:true}));
       }
+      clueColumns.push(column);
     }
+    const sideWidth=Math.floor(cw/2);
+    body.push(new Table({width:{size:cw,type:WidthType.DXA},
+      columnWidths:[sideWidth,cw-sideWidth],layout:TableLayoutType.FIXED,borders:none,
+      rows:[new TableRow({children:[
+        new TableCell({width:{size:sideWidth,type:WidthType.DXA},borders:four(no),
+          margins:{top:0,bottom:0,left:0,right:225},children:clueColumns[0]}),
+        new TableCell({width:{size:cw-sideWidth,type:WidthType.DXA},borders:four(no),
+          margins:{top:0,bottom:0,left:225,right:0},children:clueColumns[1]})
+      ]})]}));
     if(meta.teacher)body.push(paragraph([run('Irakaslearen erabilerarako: pistak eta erantzunak berrikusi banatu aurretik.',
       {size:12,color:MUTED})],{spacing:{before:220,after:0}}));
     return new d.Document({

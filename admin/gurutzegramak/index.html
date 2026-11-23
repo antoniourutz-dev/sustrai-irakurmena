@@ -8,7 +8,7 @@
 <link rel="stylesheet" href="/theme.css?v=20261123-cxstudio1">
 <link rel="stylesheet" href="/auth.css?v=20261117-ezabatu">
 <link rel="stylesheet" href="/jokoak/gurutzegramak/crossword.css?v=20261123-word1">
-<link rel="stylesheet" href="/admin/gurutzegramak/studio.css?v=20261123-cxstudio1">
+<link rel="stylesheet" href="/admin/gurutzegramak/studio.css?v=20261123-cxstudio2">
 </head>
 <body class="has-tabbar cx-page">
 <a class="skip" href="#pageTitle">Edukira joan</a>
@@ -36,13 +36,21 @@
   <section class="studio-panel">
    <div class="studio-section-title"><div><p class="studio-kicker">01 · HAUTAKETA</p><h2>Hautatu hiztegia</h2></div>
    <span class="studio-pill" id="studioCatalogCount">Kargatzen…</span></div>
+   <fieldset class="studio-group-picker" aria-describedby="studioGroupHelp">
+    <legend>Gai-multzoak aukeratu</legend>
+    <div class="studio-group-top">
+     <div><strong id="studioSelectedSummary">Multzoak kargatzen…</strong>
+      <p id="studioGroupHelp">Espezialitate txikiak multzo zabaletan bildu ditugu. Multzo bat edo hainbat markatu ditzakezu.</p></div>
+     <div class="studio-group-controls">
+      <button type="button" class="studio-button" id="studioSelectAll">Guztiak hautatu</button>
+      <button type="button" class="studio-button" id="studioClearSelection">Hautaketa garbitu</button>
+     </div>
+    </div>
+    <div class="studio-group-list" id="studioGroupList" role="group" aria-label="Osasun-gai multzoak">
+     <p class="studio-muted">Gaiak kargatzen…</p>
+    </div>
+   </fieldset>
    <div class="studio-config">
-    <label>Arloa
-     <select id="studioAxis"><option value="especialidad">Espezialitateak</option><option value="ambito">Orokorrak eta zeharkakoak</option><option value="category">Hiztegi-kategoria orokorrak</option></select>
-    </label>
-    <label>Gaia
-     <select id="studioTopic"><option value="all">Osasun-hiztegi orokorra</option></select>
-    </label>
     <label>Hitz kopurua
      <select id="studioCount"><option value="8">8 hitz</option><option value="10" selected>10 hitz</option><option value="12">12 hitz</option><option value="15">15 hitz</option></select>
     </label>
@@ -96,5 +104,6 @@
 <script src="/admin/gurutzegramak/crossword-engine.js?v=20261123-cxstudio1" defer></script>
 <script src="/jokoak/gurutzegramak/crossword-pdf.js?v=20261123-author1" defer></script>
 <script src="/jokoak/gurutzegramak/crossword-word.js?v=20261123-author1" defer></script>
-<script src="/admin/gurutzegramak/studio.js?v=20261123-cxstudio1" defer></script>
+<script src="/admin/gurutzegramak/studio-groups.js?v=20261123-cxstudio2" defer></script>
+<script src="/admin/gurutzegramak/studio.js?v=20261123-cxstudio2" defer></script>
 </body></html>

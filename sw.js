@@ -1,5 +1,5 @@
 /* SUSTRAI PWA service worker */
-const CACHE_VERSION = 'sustrai-pwa-v63-b2-complete-practice-load';
+const CACHE_VERSION = 'sustrai-pwa-v64-b2-nine-modules';
 const SHELL = [
   '/',
   '/index.html',

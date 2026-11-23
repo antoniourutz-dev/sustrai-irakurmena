@@ -147,6 +147,15 @@
 @media(prefers-reduced-motion:reduce){.cx-mode-card{transition:none}.cx-mode-card:hover{transform:none}}
 
 /* Dated crossword selector and compact personal-history board */
+.cx-pdf-actions{display:flex;align-items:center;flex-wrap:wrap;gap:10px;margin:0 0 18px}
+.cx-pdf-status{font-size:13px;color:var(--s-muted)}
+/* Only the paper margin/viewport changes; the component keeps its own visual rules. */
+.cx-pdf-body{margin:0;padding:0;background:white}
+.cx-pdf-sheet{padding:20px;width:100%;box-sizing:border-box;background:white;print-color-adjust:exact;-webkit-print-color-adjust:exact}
+.cx-pdf-sheet>.cx-status-intro{margin-bottom:20px}
+.cx-pdf-sheet .cx-grid-scroll{overflow:visible}
+.cx-pdf-sheet .cx-cell,.cx-pdf-sheet .cx-clue{pointer-events:none;transition:none}
+
 .cx-previous{margin-top:24px;border-top:1px solid var(--s-line);padding-top:21px}
 .cx-previous h3{font:800 18px/1.3 var(--s-font-display);margin:0 0 11px}
 .cx-previous-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:9px}

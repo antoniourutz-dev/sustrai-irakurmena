@@ -89,6 +89,31 @@ Probak: JS sintaxia, hitzen bakartasuna eta posizioa, 13 gurutzaketen letra-bate
 
 **Emaitza lehiakorrak ez dira zerbitzarian egiaztatzen:** marka pertsonalak dira, ez ikasleen arteko sailkapen publikoko emaitzak.
 
+## PDF deskarga · 2026-11-23
+
+- Partida bakoitzean: **Ikaslearen PDFa** (gelaxka hutsak eta pista guztiak) eta
+  **Irakaslearen PDFa** (letra zuzenak, aplikazioko ebatzitako gelaxken estilo berdearekin).
+- `crossword-pdf.js` fitxategiak pantailako `.cx-layout` benetan klonatzen du, bere CSS,
+  letra-tipo, sare, zenbaki eta pista-zutabearekin. Ez dago PDFerako bigarren taula-marrazkilarrik.
+- Hautaketa, erabiltzailearen zirriborroak, pistaz argitutako letrak, akats-koloreak eta
+  kontrol interaktiboak kopiatik kentzen dira. Jatorrizko partida eta biltegiratzea ez dira aldatzen.
+- Mahaigaineko konposizio egonkorra erabiltzen da mugikorretik ere; irudi osoa A4
+  orri batean sartzen da, proportzioak mantenduta eta gutxienez 10 mm-ko marjinekin.
+- PDFa bereizmen handiko irudia da (3×): itxura eta letra-tipoak gordetzen ditu,
+  baina testua ez da hautagarria. Ez da daturik zerbitzu batera bidaltzen.
+- html2canvas 1.4.1 eta jsPDF 4.2.1 bertsio finkoak autoostatuta daude `vendor/` direktorioan,
+  MIT lizentziekin. PWA cacheak hiru fitxategi berriak ere gordetzen ditu.
+- Dagoeneko jokorako eskuratutako eguneko datuak bakarrik erabiltzen dira. Ez dago
+  etorkizuneko taulen kontsultarik, RLS aldaketarik, eduki berririk edo onespen akademiko berririk.
+
+Proba: `node tests/crossword-pdf.browser.cjs` (Playwright behar da; instalatutako Edge
+erabiltzeko, `BROWSER_CHANNEL=msedge`). Bi moduak, bi PDFak, 1440/320 px, partida
+erdizka, A4 orri bakarra, errore ondoko garbiketa eta berriz saiatzea egiaztatzen ditu,
+Supabaseko benetako bankua GitHubera kopiatu gabe.
+
+Benetako eguneko bi taulen lau PDFak 2026-11-23an sortu eta A4an bisualki berrikusi
+dira Edge/Chromiumen. Safari/iOS eta Firefoxeko egiaztapena egiteke dago.
+
 ### Etorkizuneko edizioa
 Egun gehiagorako taulak sortu/argitaratu aurretik:
 1. Jatorrizko osasun_entries eta haien editorial_state egiaztatu.

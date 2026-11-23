@@ -397,6 +397,9 @@
       '<h2>'+escapeHtml(activePuzzle?.theme_eu||'Osasuna')+' · '+escapeHtml(dateDisplay(activePuzzle?.play_date||dailyDate))+'</h2>'+
       '<p>'+(competitive?'Azkar jokatu, baina ez asmatu itsu-itsuan. Pista bakoitzak kostua dauka.':
       'Hitzak osatu eta azalpenekin ikasi. Pistak libre dituzu.')+'</p></div>'+counters+'</div>'+
+      '<div class="cx-pdf-actions"><button class="cx-button secondary" type="button" data-action="pdf-student">Ikaslearen PDFa</button>'+
+      '<button class="cx-button secondary" type="button" data-action="pdf-teacher">Irakaslearen PDFa</button>'+
+      '<span class="cx-pdf-status" role="status" aria-live="polite"></span></div>'+
       '<div class="cx-layout"><section class="cx-board-card" aria-label="Gurutzegramaren taula">'+
       '<div class="cx-board-top"><div><p class="cx-overline">EGUNEKO TAULA · '+escapeHtml(state.mode.toUpperCase())+'</p>'+
       '<h2>Gurutzegrama</h2><p class="cx-board-note">Hautatu gelaxka edo eskuineko pista, eta idatzi hitza.</p></div>'+
@@ -521,6 +524,11 @@
       render();return;
     }
     if(state.phase==='setup')return;
+    if(action==='pdf-student'||action==='pdf-teacher'){
+      window.CrosswordPDF?.download({root,teacher:action==='pdf-teacher',
+        puzzle:activePuzzle,cells:new Map(grid),words:WORDS.map(w=>({...w}))});
+      return;
+    }
     if(el.dataset.word){setActive(el.dataset.word,true);return;}
     if(el.dataset.cell) {
       const cell=grid.get(el.dataset.cell);

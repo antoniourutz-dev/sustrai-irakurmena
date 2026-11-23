@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="eu">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#11132B">
+<title>Gurutzegramen sortzailea · HitzBira</title>
+<link rel="icon" type="image/svg+xml" href="/icons/icon.svg">
+<link rel="stylesheet" href="/theme.css?v=20261123-cxstudio1">
+<link rel="stylesheet" href="/auth.css?v=20261117-ezabatu">
+<link rel="stylesheet" href="/jokoak/gurutzegramak/crossword.css?v=20261123-word1">
+<link rel="stylesheet" href="/admin/gurutzegramak/studio.css?v=20261123-cxstudio2">
+</head>
+<body class="has-tabbar cx-page">
+<a class="skip" href="#pageTitle">Edukira joan</a>
+<header class="site-header">
+<a class="site-brand" href="/"><span class="site-brand-mark" aria-hidden="true">✦</span><span class="site-brand-name">hitz<b>bira</b></span></a>
+<nav class="site-nav" aria-label="Atal nagusiak">
+<a href="/">Hasiera</a><a href="/azterketak/">Azterketak</a><a href="/gramatika/">Gramatika</a>
+<a href="/ariketak/">Ariketak</a><a href="/jokoak/">Jokoak</a><a href="/admin/" aria-current="page">Administrazioa</a>
+</nav>
+</header>
+<main class="studio-main">
+ <div class="studio-breadcrumb"><a href="/admin/">Administrazioa</a><span>/</span> Gurutzegramak</div>
+ <section class="studio-hero">
+  <div><p class="studio-kicker">IRAKAS-MATERIALAK · ADMINISTRATZAILEA</p>
+   <h1 id="pageTitle">Gurutzegramen <em>sortzailea.</em></h1>
+   <p>Oposikeko osasun-hiztegia erabiliz sortu, berrikusi eta esportatu ikasleentzako ariketak eta irakaslearen erantzun-orriak.</p>
+  </div><span class="studio-symbol" aria-hidden="true">▦</span>
+ </section>
+ <p id="studioStatus" class="studio-status" role="status" aria-live="polite">Saioa egiaztatzen…</p>
+ <section id="studioRestricted" class="studio-panel" hidden>
+   <h2>Sarbide mugatua</h2><p>Gurutzegramen sortzailea administratzaileei soilik dagokie. Hasi saioa baimendutako kontuarekin.</p>
+   <button id="studioLogin" class="studio-button" type="button">Saioa hasi</button>
+ </section>
+ <div id="studioWorkspace" hidden>
+  <section class="studio-panel">
+   <div class="studio-section-title"><div><p class="studio-kicker">01 · HAUTAKETA</p><h2>Hautatu hiztegia</h2></div>
+   <span class="studio-pill" id="studioCatalogCount">Kargatzen…</span></div>
+   <fieldset class="studio-group-picker" aria-describedby="studioGroupHelp">
+    <legend>Gai-multzoak aukeratu</legend>
+    <div class="studio-group-top">
+     <div><strong id="studioSelectedSummary">Multzoak kargatzen…</strong>
+      <p id="studioGroupHelp">Espezialitate txikiak multzo zabaletan bildu ditugu. Multzo bat edo hainbat markatu ditzakezu.</p></div>
+     <div class="studio-group-controls">
+      <button type="button" class="studio-button" id="studioSelectAll">Guztiak hautatu</button>
+      <button type="button" class="studio-button" id="studioClearSelection">Hautaketa garbitu</button>
+     </div>
+    </div>
+    <div class="studio-group-list" id="studioGroupList" role="group" aria-label="Osasun-gai multzoak">
+     <p class="studio-muted">Gaiak kargatzen…</p>
+    </div>
+   </fieldset>
+   <div class="studio-config">
+    <label>Hitz kopurua
+     <select id="studioCount"><option value="8">8 hitz</option><option value="10" selected>10 hitz</option><option value="12">12 hitz</option><option value="15">15 hitz</option></select>
+    </label>
+    <label>Zailtasuna
+     <select id="studioDifficulty"><option value="oinarrizkoa">Oinarrizkoa</option><option value="ertaina" selected>Ertaina</option><option value="aurreratua">Aurreratua</option></select>
+    </label>
+    <label class="studio-wide">Izenburua
+     <input id="studioTitle" maxlength="160" value="Osasun-hiztegia" placeholder="Gurutzegramaren izenburua">
+    </label>
+    <label class="studio-check"><input id="studioPhrases" type="checkbox"> Hitz elkartuak eta esamoldeak onartu (tarterik gabe)</label>
+   </div>
+   <div id="studioInventory" class="studio-inventory">Aukeratu gaia, hitz erabilgarriak ikusteko.</div>
+   <div class="studio-actions"><button class="studio-button studio-primary" id="studioGenerate" type="button">✦ Gurutzegrama sortu</button>
+   <button class="studio-button" id="studioRegenerate" type="button" disabled>Beste banaketa bat</button></div>
+  </section>
+  <section id="studioPreviewPanel" class="studio-panel" hidden>
+   <div class="studio-section-title"><div><p class="studio-kicker">02 · BERRIKUSI ETA PROBATU</p><h2>Taula eta pistak</h2></div>
+    <span class="studio-pill" id="studioPuzzleStats"></span></div>
+   <p class="studio-muted">Pistak zuzen daitezke. Erantzunak probatu edo irakaslearen bertsioa ikusi; ikaslearen esportazioak hutsik mantentzen dira.</p>
+   <div class="studio-actions">
+    <button type="button" class="studio-button" id="studioShowAnswers">Erantzunak erakutsi</button>
+    <button type="button" class="studio-button" id="studioResetAnswers">Saiakera garbitu</button>
+    <button type="button" class="studio-button" id="studioReview">Berrikusia markatu</button>
+    <button type="button" class="studio-button studio-primary" id="studioSave">Zirriborroa gorde</button>
+   </div>
+   <div id="studioPreviewRoot"></div>
+   <div class="studio-actions studio-downloads">
+     <button type="button" class="studio-button" data-action="pdf-student">Ikaslearen PDFa</button>
+     <button type="button" class="studio-button" data-action="word-student">Ikaslearen Worda</button>
+     <button type="button" class="studio-button" data-action="pdf-teacher">Irakaslearen PDFa</button>
+     <button type="button" class="studio-button" data-action="word-teacher">Irakaslearen Worda</button>
+     <span class="cx-pdf-status" role="status" aria-live="polite"></span>
+     <span class="cx-word-status" role="status" aria-live="polite"></span>
+   </div>
+   <details class="studio-editor" open>
+     <summary>Hitzak eta pistak editatu</summary>
+     <div id="studioClueEditor"></div>
+     <p class="studio-muted">Hitzak aldatzeko, taula berriro sortu. Pista bat editatzeak ez du Oposikeko jatorrizko definizioa aldatzen.</p>
+   </details>
+  </section>
+  <section class="studio-panel">
+   <div class="studio-section-title"><div><p class="studio-kicker">03 · LIBURUTEGIA</p><h2>Gordetako gurutzegramak</h2></div>
+    <button class="studio-button" id="studioRefresh" type="button">Eguneratu</button></div>
+   <div id="studioLibrary" class="studio-library"><p class="studio-muted">Oraindik ez dago gordetako gurutzegramarik.</p></div>
+  </section>
+ </div>
+</main>
+<footer class="studio-footer">SUSTRAI · Ariketa didaktiko originalak · Oposikeko argitaratutako sarrerak; sailkapenak berrikustekoak izan daitezke</footer>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.0" defer></script>
+<script src="/auth.js?v=20261117-ezabatu" defer></script>
+<script src="/admin/gurutzegramak/crossword-engine.js?v=20261123-cxstudio1" defer></script>
+<script src="/jokoak/gurutzegramak/crossword-pdf.js?v=20261123-author1" defer></script>
+<script src="/jokoak/gurutzegramak/crossword-word.js?v=20261123-author1" defer></script>
+<script src="/admin/gurutzegramak/studio-groups.js?v=20261123-cxstudio2" defer></script>
+<script src="/admin/gurutzegramak/hitzbira-export.js?v=20261123-hbexport1" defer></script>
+<script src="/admin/gurutzegramak/studio.js?v=20261123-hbexport1" defer></script>
+</body></html>

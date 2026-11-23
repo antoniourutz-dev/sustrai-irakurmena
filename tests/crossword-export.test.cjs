@@ -56,8 +56,21 @@ test('stable HitzBira filenames and multiple educational topics',()=>{
 });
 test('student and teacher native Word documents contain HitzBira and only teacher solutions',async()=>{
   const base=puzzleOptions(false);
-  const stu=xmlEntries(await docx.Packer.toBuffer(exportModule.buildWord(base,docx,[])));
-  const tchr=xmlEntries(await docx.Packer.toBuffer(exportModule.buildWord({...base,teacher:true},docx,[])));
+  const fonts=['sans','display'].map(kind=>({
+    name:kind==='sans'?'HitzBiraSans':'HitzBiraDisplay',
+    data:Uint8Array.from(Buffer.from(fs.readFileSync(
+      require('node:path').join(__dirname,'../fonts/hitzbira-word-'+kind+'.ttf.b64'),'utf8').trim(),'base64'))
+  }));
+  const studentBuffer=await docx.Packer.toBuffer(exportModule.buildWord(base,docx,fonts));
+  const teacherBuffer=await docx.Packer.toBuffer(exportModule.buildWord({...base,teacher:true},docx,fonts));
+  if(process.env.HB_EXPORT_FIXTURES==='1'){
+    const path=require('node:path').join(__dirname,'.artifacts');
+    fs.mkdirSync(path,{recursive:true});
+    fs.writeFileSync(require('node:path').join(path,'HitzBira-gurutzegrama-ikaslea.docx'),studentBuffer);
+    fs.writeFileSync(require('node:path').join(path,'HitzBira-gurutzegrama-irakaslea.docx'),teacherBuffer);
+  }
+  const stu=xmlEntries(studentBuffer);
+  const tchr=xmlEntries(teacherBuffer);
   for(const parts of [stu,tchr]){
     assert.match(parts['word/header1.xml'],/HitzBira/);
     assert.match(parts['word/header1.xml'],/EUSKARA IKASTEKO PLATAFORMA/);

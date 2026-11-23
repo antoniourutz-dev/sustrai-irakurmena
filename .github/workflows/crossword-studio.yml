@@ -1,0 +1,27 @@
+name: Crossword studio tests
+on:
+  pull_request:
+    paths:
+      - 'admin/gurutzegramak/**'
+      - 'tests/crossword-studio.test.cjs'
+      - '.github/workflows/crossword-studio.yml'
+  push:
+    branches:
+      - feature/admin-crossword-studio-20261123
+    paths:
+      - 'admin/gurutzegramak/**'
+      - 'tests/crossword-studio.test.cjs'
+permissions:
+  contents: read
+jobs:
+  crossword-engine:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c # v4.2.2
+        with:
+          persist-credentials: false
+      - name: Verify runtime
+        run: node --version
+      - name: Run crossword tests
+        run: node --test tests/crossword-studio.test.cjs

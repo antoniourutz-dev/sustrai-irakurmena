@@ -3,7 +3,7 @@
   'use strict';
   function fileBase(puzzle){
     if(!puzzle.is_authoring)return 'HitzBira-'+puzzle.play_date+'-'+puzzle.mode;
-    const slug=String(puzzle.theme_eu||'osasuna').normalize('NFD').replace(/[\\u0300-\\u036f]/g,'')
+    const slug=String(puzzle.theme_eu||'osasuna').normalize('NFD').replace(/\p{M}/gu,'')
       .toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,42)||'osasuna';
     return 'SUSTRAI-Gurutzegrama-'+puzzle.play_date+'-'+slug;
   }

@@ -56,15 +56,17 @@
         children:[run(title,{bold:true,size:17,color:colors.primary})],spacing:{before:180,after:130},keepNext:true}));
       for(const w of [...words].filter(w=>w.dir===dir).sort((a,b)=>a.number-b.number))
         clueParagraphs.push(para('',{children:[run(w.number+'. ',{bold:true,color:colors.primary}),
-          run(w.clue),run(' ('+w.word.length+')',{size:14,color:colors.muted})],
+          run(w.clue),run(' ('+w.word.length+')',{size:14,color:colors.muted}),
+          ...(teacher?[run('  '+w.word,{size:15,bold:true,color:colors.green}),run(' · '+w.source,{size:11,color:colors.muted})]:[])],
           spacing:{before:0,after:140,line:230},keepLines:true}));
     }
     const containerCell=(width,children)=>new TableCell({width:{size:width,type:WidthType.DXA},
       margins:{top:120,bottom:120,left:100,right:100},borders:edges(none),children});
+    const boardLabel=puzzle.is_authoring?'OSASUN GURUTZEGRAMA':'EGUNEKO TAULA '+puzzle.mode.toUpperCase();
     const layout=new Table({width:{size:contentWidth,type:WidthType.DXA},
       columnWidths:[leftWidth,gutter,rightWidth],layout:TableLayoutType.FIXED,borders:noBorders,
       rows:[new TableRow({children:[containerCell(leftWidth,[
-        para('EGUNEKO TAULA '+puzzle.mode.toUpperCase(),{children:[run('EGUNEKO TAULA '+puzzle.mode.toUpperCase(),{size:13,bold:true,color:colors.primary})]}),
+        para(boardLabel,{children:[run(boardLabel,{size:13,bold:true,color:colors.primary})]}),
         para('Gurutzegrama',{children:[run('Gurutzegrama',{font:'HitzBiraDisplay',size:25,bold:true})]}),
         para('Osatu hitz gurutzatuak, definizioen laguntzaz.',{children:[run('Osatu hitz gurutzatuak, definizioen laguntzaz.',{size:15,color:colors.muted})],spacing:{after:180}}),
         board,small('')]),containerCell(gutter,[small('')]),containerCell(rightWidth,clueParagraphs)]})]});

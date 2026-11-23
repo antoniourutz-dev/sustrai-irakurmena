@@ -177,6 +177,7 @@
       '.hb-cell.is-solved{background:#e8f6f0}.hb-cell small{position:absolute;top:1px;left:2px;font-size:8px;line-height:1;color:#4b6978}',
       '.hb-board-note{text-align:center;font-size:12px;margin:19px 0;color:#6a7d85}',
       '.hb-footer{position:absolute;bottom:26px;right:45px;color:#72838c;font-size:12px}',
+      '.hb-first-heading{font-size:17px;color:#00A6C8;margin:4px 0 10px;font-weight:800}',
       '.hb-clues-title{font-size:23px;font-weight:800;color:#00A6C8;margin:0 0 7px}.hb-clues-subject{font-size:14px;font-weight:700;margin:0 0 23px}',
       '.hb-clues-zone{height:805px;display:grid;grid-template-columns:1fr 1fr;gap:34px;overflow:hidden}',
       '.hb-clue-column{min-width:0;max-height:805px;overflow:hidden}',
@@ -221,14 +222,35 @@
       '<h1 class="hb-subject">'+escapeHtml(meta.subject)+'</h1>'+
       '<p class="hb-subtitle">'+escapeHtml(meta.title===meta.subject?'Gurutzegrama':meta.title)+'</p>'+
       '<p class="hb-details">'+meta.count+' hitz · '+(meta.teacher?'Erantzunak barne':'Ikaslearen ariketa')+'</p>'+
-      '<p class="hb-instruction">Osatu taulako hitzak. Pistak hurrengo orrialdeetan aurkituko dituzu.</p>';
+      '<p class="hb-instruction">Osatu taulako hitzak, pistak erabiliz.</p>';
     main.append(grid);
     const note=doc.createElement('p');note.className='hb-board-note';
     note.textContent='→ Horizontalak     ↓ Bertikalak';
     main.append(note);
     if(sheet.scrollHeight>sheet.clientHeight+1)
       throw Error('Gurutzegrama handiegia da orrialdean sartzeko.');
-    return sheet;
+    const horizontal=(options.words||[]).filter(w=>w.dir==='H').sort((a,b)=>a.number-b.number);
+    const vertical=(options.words||[]).filter(w=>w.dir==='V').sort((a,b)=>a.number-b.number);
+    let a=0,b=0;
+    const available=Math.floor(sheet.getBoundingClientRect().bottom-main.getBoundingClientRect().bottom-94);
+    if(available>=200){
+      const heading=doc.createElement('h2');heading.className='hb-first-heading';
+      heading.textContent='PISTAK';
+      const zone=doc.createElement('div');zone.className='hb-clues-zone';
+      const height=available-40;
+      zone.style.height=height+'px';
+      zone.innerHTML='<section class="hb-clue-column"><h3>→ HORIZONTALAK</h3></section>'+
+        '<section class="hb-clue-column"><h3>↓ BERTIKALAK</h3></section>';
+      main.append(heading,zone);
+      const cols=zone.querySelectorAll('.hb-clue-column');
+      for(const col of cols)col.style.maxHeight=height+'px';
+      a=fillClueColumn(doc,cols[0],horizontal,0,meta);
+      b=fillClueColumn(doc,cols[1],vertical,0,meta);
+      if(!a&&!b){heading.remove();zone.remove();}
+      if(sheet.scrollHeight>sheet.clientHeight+1)
+        throw Error('Ezin izan dira pistak lehen orrialdean kokatu.');
+    }
+    return {sheet,a,b};
   }
   function clueElement(doc,w,meta){
     const box=doc.createElement('div');box.className='hb-clue';
@@ -237,10 +259,18 @@
       (meta.teacher?'<div class="hb-answer">ERANTZUNA: '+escapeHtml(w.word)+'</div>':'');
     return box;
   }
-  function pdfClues(doc,options,meta){
+  function fillClueColumn(doc,column,words,pos,meta){
+    while(pos<words.length){
+      const item=clueElement(doc,words[pos],meta);column.append(item);
+      if(column.scrollHeight>column.clientHeight+1){item.remove();break;}
+      pos++;
+    }
+    return pos;
+  }
+  function pdfClues(doc,options,meta,startA=0,startB=0){
     const horizontal=(options.words||[]).filter(w=>w.dir==='H').sort((a,b)=>a.number-b.number);
     const vertical=(options.words||[]).filter(w=>w.dir==='V').sort((a,b)=>a.number-b.number);
-    let a=0,b=0,pageNo=2;
+    let a=startA,b=startB,pageNo=2;
     const sheets=[];
     while(a<horizontal.length||b<vertical.length){
       const sheet=pdfShell(doc,meta,pageNo++);
@@ -251,18 +281,8 @@
         '<h3>→ HORIZONTALAK</h3></section><section class="hb-clue-column">'+
         '<h3>↓ BERTIKALAK</h3></section></div>';
       const cols=main.querySelectorAll('.hb-clue-column'),startA=a,startB=b;
-      function fill(column,words,pos){
-        while(pos<words.length){
-          const item=clueElement(doc,words[pos],meta);column.append(item);
-          if(column.scrollHeight>column.clientHeight+1){
-            item.remove();break;
-          }
-          pos++;
-        }
-        return pos;
-      }
-      a=fill(cols[0],horizontal,a);
-      b=fill(cols[1],vertical,b);
+      a=fillClueColumn(doc,cols[0],horizontal,a,meta);
+      b=fillClueColumn(doc,cols[1],vertical,b,meta);
       if(a===startA&&b===startB){sheet.remove();throw Error('Pista luzeegia da PDFaren orrialdean sartzeko.');}
       sheets.push(sheet);
     }
@@ -277,7 +297,8 @@
     try{
       const doc=iframe.contentDocument;doc.documentElement.lang='eu';
       const style=doc.createElement('style');style.textContent=pdfStyles();doc.head.append(style);
-      const pages=[pdfBoard(doc,options,meta),...pdfClues(doc,options,meta)];
+      const first=pdfBoard(doc,options,meta);
+      const pages=[first.sheet,...pdfClues(doc,options,meta,first.a,first.b)];
       await doc.fonts.ready;
       const pdf=new window.jspdf.jsPDF({orientation:'portrait',unit:'mm',format:'a4',compress:true});
       pdf.setProperties({title:'HitzBira · '+meta.subject,author:'HitzBira',subject:meta.type});

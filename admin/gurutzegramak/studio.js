@@ -25,6 +25,8 @@
     const rows=[];
     for(let from=0;from<10000;from+=1000){
       let q=s.source.from(table).select(columns).range(from,from+999);
+      if(table==='osasun_entry_specialties')q=q.order('entry_code',{ascending:true}).order('specialty_code',{ascending:true});
+      else q=q.order('code',{ascending:true});
       if(opts.status)q=q.eq('status',opts.status);
       if(opts.active!==undefined)q=q.eq('active',opts.active);
       if(opts.review)q=q.eq('review_state',opts.review);

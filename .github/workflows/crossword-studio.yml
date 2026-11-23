@@ -33,5 +33,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: hitzbira-crossword-word-samples
-          path: tests/.artifacts/*.docx
+          path: tests/export-fixtures/*.docx
           if-no-files-found: error

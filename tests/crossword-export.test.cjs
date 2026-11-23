@@ -2,7 +2,10 @@
 const test=require('node:test');
 const assert=require('node:assert/strict');
 const zlib=require('node:zlib');
-const docx=require('../jokoak/gurutzegramak/vendor/docx-9.6.1.js');
+const fs=require('node:fs');
+const vm=require('node:vm');
+const vendor=require.resolve('../jokoak/gurutzegramak/vendor/docx-9.6.1.js');
+const docx=vm.runInThisContext('(function(){'+fs.readFileSync(vendor,'utf8')+';return docx;})()', {filename:vendor});
 const engine=require('../admin/gurutzegramak/crossword-engine.js');
 const exportModule=require('../admin/gurutzegramak/hitzbira-export.js');
 

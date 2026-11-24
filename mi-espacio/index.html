@@ -73,6 +73,39 @@
     <div id="myWorks" class="work-list"></div>
   </section>
 
+  <section id="pilotFeedback" class="space-block account" aria-labelledby="pilotFeedbackTitle" hidden>
+    <details>
+      <summary><h2 id="pilotFeedbackTitle">Zure iritzia</h2><span class="account-mail">HitzBira hobetzen lagundu</span></summary>
+      <form id="pilotFeedbackForm" class="account-form">
+        <p class="space-note">Nahi duzunean, kontatu zer gustatu zaizun edo zer hobetuko zenukeen. Zure ekarpena borondatezkoa da eta ez du zure ikaskuntza-emaitzetan eraginik.</p>
+        <label for="pilotFeedbackArea">Zeri buruz?</label>
+        <select id="pilotFeedbackArea" name="area" class="space-btn" style="width:100%;max-width:24rem">
+          <option value="orokorra">Orokorrean</option>
+          <option value="gramatika">Gramatika</option>
+          <option value="ariketak">Ariketak</option>
+          <option value="azterketak">Azterketak</option>
+          <option value="jokoak">Jokoak</option>
+          <option value="nire_espazioa">Nire espazioa</option>
+          <option value="bestelakoa">Bestelakoa</option>
+        </select>
+        <label for="pilotFeedbackComment">Zure iritzia</label>
+        <textarea id="pilotFeedbackComment" name="comment" rows="4" required minlength="10" maxlength="2000" style="display:block;width:100%;max-width:100%;resize:vertical;padding:12px;border:1px solid var(--s-line-strong);border-radius:var(--s-r-md);background:var(--s-surface);color:var(--s-ink);font:inherit" placeholder="Zer gustatu zaizu? Zer aldatuko zenuke?"></textarea>
+        <p class="space-note">Ez sartu datu pertsonalik. HitzBirako arduradunek zure ekarpena berrikusiko dute.</p>
+        <label for="pilotFeedbackRating">Balorazio orokorra (aukerakoa)</label>
+        <select id="pilotFeedbackRating" name="rating" class="space-btn" style="width:100%;max-width:24rem">
+          <option value="">Baloratu gabe</option>
+          <option value="1">1 · Oso txarra</option>
+          <option value="2">2 · Txarra</option>
+          <option value="3">3 · Erdipurdi</option>
+          <option value="4">4 · Ona</option>
+          <option value="5">5 · Oso ona</option>
+        </select>
+        <div class="account-actions"><button id="pilotFeedbackSubmit" type="submit" class="space-btn primary">Bidali iritzia</button></div>
+        <p id="pilotFeedbackStatus" class="space-note" role="status" aria-live="polite"></p>
+      </form>
+    </details>
+  </section>
+
   <section id="signedIn" class="space-block account" aria-labelledby="accountTitle" hidden>
     <details>
       <summary><h2 id="accountTitle">Kontua eta datuak</h2><span id="identity" class="account-mail"></span></summary>
@@ -102,5 +135,6 @@
 <script src="/progress-kit.js?v=20261117-ezabatu" defer></script>
 <script src="/mi-espacio/app.js?v=20261117-ezabatu" defer></script>
 <script src="/pwa.js?v=20261117-ezabatu" defer></script>
+<script src="/mi-espacio/pilot-feedback.js?v=20261124-iritzia" defer></script>
 </body>
 </html>

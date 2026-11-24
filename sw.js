@@ -1,10 +1,15 @@
 /* SUSTRAI PWA service worker */
-const CACHE_VERSION = 'sustrai-pwa-v67-crossword-word';
+const CACHE_VERSION = 'sustrai-pwa-v68-hitzdrop-pilot';
 const SHELL = [
   '/',
   '/index.html',
   '/jokoak/',
   '/jokoak/index.html',
+  '/jokoak/hitzdrop/',
+  '/jokoak/hitzdrop/index.html',
+  '/jokoak/hitzdrop/style.css',
+  '/jokoak/hitzdrop/catalog.js',
+  '/jokoak/hitzdrop/app.js',
   '/jokoak/gurutzegramak/',
   '/jokoak/gurutzegramak/index.html',
   '/jokoak/gurutzegramak/crossword.css',
@@ -182,6 +187,7 @@ self.addEventListener('fetch', (event) => {
           if (cached) return cached;
           if (url.pathname.startsWith('/ivap/')) return caches.match('/ivap/index.html');
           if (url.pathname.startsWith('/habe/')) return caches.match('/habe/index.html');
+          if (url.pathname.startsWith('/jokoak/hitzdrop/')) return caches.match('/jokoak/hitzdrop/index.html');
           if (url.pathname.startsWith('/jokoak/gurutzegramak/')) return caches.match('/jokoak/gurutzegramak/index.html');
           if (url.pathname.startsWith('/azterketak/')) return caches.match('/azterketak/index.html');
           if (url.pathname.startsWith('/gramatika/ibilbidea/')) return caches.match('/gramatika/ibilbidea/index.html');

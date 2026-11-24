@@ -353,7 +353,7 @@ Promise.resolve(window.SustraiCloud?.ready).then(()=>source.load(window.SustraiC
  sourceOrigin=result.origin;
  if(phase==='intro'){configureCatalog(result.entries);generateBoard();hud();}
  $('hdSource').textContent=sourceOrigin==='supabase-results'
-   ?'Lexikoako '+result.matches+' hitz baliatu dira. Loturak pilotuan.'
+   ?'Pilotuko '+result.entries.length+' hitzetatik '+result.matches+' bankuan aurkitu dira. Loturak berrikusteko.'
    :'Pilotuko hitz-zerrenda erabilgarri; Supabaseko egiaztapena ez dago aktibo.';
 }).catch(()=>{
  $('hdSource').textContent='Pilotuko hitz-zerrenda erabilgarri (konexiorik gabe).';

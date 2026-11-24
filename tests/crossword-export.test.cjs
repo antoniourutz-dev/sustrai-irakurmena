@@ -86,6 +86,12 @@ test('student and teacher native Word documents contain HitzBira and only teache
     assert.match(parts['word/document.xml'],/Horizontalak/);
     assert.match(parts['word/document.xml'],/Bertikalak/);
     assert.match(parts['word/document.xml'],/<w:tbl>/);
+    const body=parts['word/document.xml'];
+    // The uploaded 1-page model places the full-width grid before both clue groups.
+    assert.ok(body.indexOf('<w:tbl>')<body.indexOf('Horizontalak'));
+    assert.ok(body.indexOf('Horizontalak')<body.indexOf('Bertikalak'));
+    assert.ok(!body.includes('hb-work-layout'));
+
   }
   const solved=base.words[0].word;
   assert.ok(!stu['word/document.xml'].includes('·  '+solved));

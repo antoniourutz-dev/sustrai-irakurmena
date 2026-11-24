@@ -8,12 +8,12 @@ const $=id=>document.getElementById(id);
 const field=$('hdBoard'),arena=$('hdArena');
 const W=5,H=6,GAP=6,DURATION=180,KEY='sustrai-jokoak-hitzdrop-v1';
 const missions={moves:12,words:8,prefixes:3};
-let entries=source.candidates.slice(),lookup=new Map(),tokenPool=[];
+let entries=[],lookup=new Map(),tokenPool={roots:[],prefixes:[],suffixes:[]},catalogReady=false;
 let board=[],slots=[],unit=46,pitch=52,id=0;
 let phase='intro',busy=false,selected=-1,clock=null,seconds=DURATION,clockStarted=false;
 let hits=0,score=0,combo=0,prefixHits=0,seen=new Set(),last=null,hints=5,shuffles=3;
 let epoch=0,drag=null,suppress=false,sound=false,audio=null,goalsCelebrated=false;
-let sourceOrigin='pilot-fallback';
+let sourceOrigin='loading';
 const pick=items=>items[Math.floor(Math.random()*items.length)];
 const wait=ms=>new Promise(done=>setTimeout(done,ms));
 const coords=n=>({row:Math.floor(n/W),column:n%W});
@@ -23,16 +23,16 @@ const typeOf=w=>w.startsWith('-')?'suffix':w.endsWith('-')?'prefix':'root';
 function configureCatalog(items) {
  entries=items;
  lookup=new Map();
- const roots=new Set(),affixes=new Set();
+ const roots=new Set(),prefixes=new Set(),suffixes=new Set();
  for(const item of entries) {
    const key=[item.left,item.right].sort().join('|');
    lookup.set(key,item);
    roots.add(item.type==='prefix'?item.right:item.left);
-   affixes.add(item.type==='prefix'?item.left:item.right);
+   if(item.type==='prefix')prefixes.add(item.left);
+   else suffixes.add(item.right);
  }
- tokenPool=[...roots].map(word=>({word,weight:4})).concat([...affixes].map(word=>({word,weight:2})));
+ tokenPool={roots:[...roots],prefixes:[...prefixes],suffixes:[...suffixes]};
 }
-configureCatalog(entries);
 function findMatch(a,b) {
  if(!a||!b||a.type===b.type)return null;
  return lookup.get([a.word,b.word].sort().join('|'))||null;
@@ -48,10 +48,10 @@ function matches() {
  return out;
 }
 function weightedWord() {
- const total=tokenPool.reduce((s,x)=>s+x.weight,0);
- let n=Math.random()*total;
- for(const x of tokenPool) if((n-=x.weight)<0)return x.word;
- return tokenPool[0]?.word||'ARGI';
+ const roll=Math.random();
+ // Affixes must have real visual presence; root vocabulary is far larger.
+ const list=roll<.50?tokenPool.roots:roll<.75?tokenPool.suffixes:tokenPool.prefixes;
+ return pick(list.length?list:tokenPool.roots);
 }
 function create(word,r,c,falling=false) {
  const element=document.createElement('button');element.type='button';
@@ -89,13 +89,18 @@ function ensureChoices() {
  for(const m of available) {reserved.add(m.a);reserved.add(m.b);}
  const counts={prefix:available.filter(x=>x.rec.type==='prefix').length,suffix:available.filter(x=>x.rec.type==='suffix').length};
  for(const kind of ['prefix','suffix']) {
-   const pool=entries.filter(e=>e.type===kind&&(!seen.has(e.result)||entries.length<10));
+   const pool=entries.filter(e=>e.type===kind&&!seen.has(e.result));
    const fallback=entries.filter(e=>e.type===kind);
    while(counts[kind]<target[kind]) {
      const candidates=[];
      for(let i=0;i<W*H-1;i++) if(i%W!==W-1&&!reserved.has(i)&&!reserved.has(i+1))candidates.push(i);
      if(!candidates.length)break;
-     const i=pick(candidates),recipe=pick(pool.length?pool:fallback);
+     const i=pick(candidates);
+     // Diversify visible affixes instead of over-repeating -TU and DES-.
+     const source=pool.length?pool:fallback;
+     const allAffixes=[...new Set(source.map(e=>kind==='prefix'?e.left:e.right))];
+     const selectedAffix=pick(allAffixes);
+     const recipe=pick(source.filter(e=>(kind==='prefix'?e.left:e.right)===selectedAffix));
      if(!recipe)break;
      relabel(board[i],recipe.left);
      relabel(board[i+1],recipe.right);
@@ -249,6 +254,7 @@ function pause(){
  showOverlay('⏸','ATSEDENALDIA','Partida geldituta dago. Jarraitzeko prest zaudenean, sakatu botoia.','▶ JARRAITU');hud();
 }
 function start(){
+ if(!catalogReady){window.location.reload();return;}
  if(phase==='paused') {phase='playing';$('hdOverlay').hidden=true;if(hits||selected>=0)startClock();hud();return;}
  epoch++;stopClock();
  phase='playing';busy=false;selected=-1;seconds=DURATION;clockStarted=false;score=0;hits=0;combo=0;prefixHits=0;
@@ -272,7 +278,7 @@ async function combine(a,b) {
  if(rec.type==='prefix')prefixHits++;
  const points=100+(combo-1)*35+(rec.type==='prefix'?50:0)+(fresh?40:0);
  score+=points;last=rec;hud();playSound(480+combo*85);
- showMessage('✦ '+rec.result+' · '+rec.gloss+' · +'+points+' puntu','good');
+ showMessage('✦ '+rec.result+(rec.gloss?' · '+rec.gloss:'')+' · +'+points+' puntu','good');
  floatPoints(a,b,points);
  const one=board[a],two=board[b];effect(one);effect(two);
  arena.classList.remove('flash');void arena.offsetWidth;arena.classList.add('flash');
@@ -315,7 +321,7 @@ function shuffle(){
 for(let i=0;i<W*H;i++){
  const slot=document.createElement('span');slot.className='hd-slot';field.appendChild(slot);slots.push(slot);
 }
-generateBoard();hud();
+hud();
 const observer=typeof ResizeObserver==='function'?new ResizeObserver(measure):null;
 if(observer)observer.observe(field);
 else window.addEventListener('resize',measure);
@@ -346,16 +352,25 @@ $('hdPause').addEventListener('click',pause);
 $('hdHint').addEventListener('click',hint);
 $('hdShuffle').addEventListener('click',shuffle);
 $('hdSound').addEventListener('click',()=>{sound=!sound;hud();if(sound)playSound(600);});
-showOverlay('💎','HITZAK SORTU!','Hautatu elkarren ondoko oinarria eta aurrizki edo atzizki bat. 3 minutu, hainbat erronka, eta hitz berriak!','▶ JOLASTU');
-// Read only existing Supabase sources. The relation map remains a curated pilot, not an automatic morphology engine.
-Promise.resolve(window.SustraiCloud?.ready).then(()=>source.load(window.SustraiCloud)).then(result=>{
- if(!result)return;
- sourceOrigin=result.origin;
- if(phase==='intro'){configureCatalog(result.entries);generateBoard();hud();}
- $('hdSource').textContent=sourceOrigin==='supabase-results'
-   ?'Pilotuko '+result.entries.length+' hitzetatik '+result.matches+' bankuan aurkitu dira. Loturak berrikusteko.'
-   :'Pilotuko hitz-zerrenda erabilgarri; Supabaseko egiaztapena ez dago aktibo.';
-}).catch(()=>{
- $('hdSource').textContent='Pilotuko hitz-zerrenda erabilgarri (konexiorik gabe).';
+showOverlay('📚','HIZTEGIA KARGATZEN','Supabase Lexikoako hitzak eta eratorpen-hautagaiak prestatzen…','KARGATZEN...');
+$('hdStart').disabled=true;
+$('hdSource').textContent='Lexikoa iturrien zain.';
+Promise.resolve(window.SustraiCloud?.ready)
+.then(()=>source.load(window.SustraiCloud))
+.then(result=>{
+  if(!result || !Array.isArray(result.entries))throw new Error('Ez dago hitz nahikorik');
+  sourceOrigin=result.origin;
+  configureCatalog(result.entries);
+  generateBoard();hud();catalogReady=true;
+  $('hdStart').disabled=false;
+  $('hdSource').textContent=(sourceOrigin==='supabase-cache'?'Azken Lexikoa deskarga: ':'Supabase Lexikoa: ')+
+    result.wordCount+' lema eta '+result.entries.length+' eratorpen-hautagai ('+
+    result.prefixCount+' aurrizki, '+result.suffixCount+' atzizki). Loturak berrikusteko.';
+  showOverlay('💎','HITZAK SORTU!','Supabaseko hitzekin jokatuko duzu. Hautatu elkarren ondoko oinarria eta afixua. 3 minutu dituzu!','▶ JOLASTU');
+})
+.catch(error=>{
+  catalogReady=false;$('hdStart').disabled=false;
+  $('hdSource').textContent='Lexikoako hitzak ezin izan dira kargatu. Ez da zerrenda asmaturik erabili.';
+  showOverlay('⚠️','HIZTEGIA EZIN KARGATU','Saiatu berriro sare-konexioarekin. '+String(error?.message||'Errorea').slice(0,150),'↻ BERRIRO SAIATU');
 });
 })();

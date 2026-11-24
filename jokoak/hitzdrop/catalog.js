@@ -64,16 +64,18 @@
         if (!evidence.has(key))
           evidence.set(key,{ definitionEu: row.definizioa_eu || '', gloss: '', reviewFlag: true });
       }
-      const entries=candidates.filter(x=>evidence.has(normalize(x.result))).map(x=>{
+      const entries=candidates.map(x=>{
         const item=evidence.get(normalize(x.result));
-        return { ...x, recordedInBank:true,
+        return item ? { ...x, recordedInBank:true,
           definitionEu:String(item.definitionEu || '').slice(0,180),
           gloss:item.gloss || x.gloss,
-          reviewFlag:item.reviewFlag };
+          reviewFlag:item.reviewFlag } : { ...x };
       });
-      if (entries.filter(x=>x.type==='prefix').length<4 || entries.filter(x=>x.type==='suffix').length<6)
-        return { entries: candidates.slice(), origin:'pilot-fallback',matches:evidence.size };
-      return { entries, origin:'supabase-results', matches:entries.length };
+      const matched=entries.filter(x=>x.recordedInBank);
+      if (matched.filter(x=>x.type==='prefix').length<4 || matched.filter(x=>x.type==='suffix').length<6)
+        return { entries: candidates.slice(), origin:'pilot-fallback',matches:matched.length };
+      // Keep the small editorial pilot even when one lemma has not yet been indexed.
+      return { entries, origin:'supabase-results', matches:matched.length };
     } catch {
       return { entries:candidates.slice(), origin:'pilot-fallback', matches:0 };
     }

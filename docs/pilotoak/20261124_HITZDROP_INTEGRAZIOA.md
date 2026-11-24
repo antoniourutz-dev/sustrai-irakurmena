@@ -15,10 +15,10 @@ Ez ordezkatu dagoen gurutzegrama, TEUSK, ZINOK edo MINTZAKATS.
 - Sesioaren puntuazioa entretenimendurako da, ez hizkuntza-gaitasunaren edo azterketa ofizialaren neurketa.
 
 ## Lexikoa eta jatorria
-- jokoak/hitzdrop/catalog.js-ko harremanak **hautagai editorialak** dira; ez dira forma guztien eratorpen-arau automatikotzat hartu.
-- Supabase Lexikoa (lexiko_sarrerak, sustrai_aditz_definizioak) soilik **irakurtzen** da, lehendik dauden lemen eta azalpenen bidez hautagaiak aberasteko eta emaitza-lemaren agerpena egiaztatzeko.
-- Lema bankuan egoteak **ez du** automatikoki eratorpen-lotura onartzen. Halako onarpena iturri akademikoarekin eta berrikuspenarekin egin behar da.
-- Datuen kontsultak huts egiten badu, pilotuko zerrenda itxiarekin jolastu ahal da; interfazeko iturria aldatu egiten da.
+- jokoak/hitzdrop/catalog.js-ek ez du hitz-bikote finkorik gordetzen. Supabaseko hitzak deskargatu eta afixo ezagunen segmentazioz **eratorpen-hautagaiak** kalkulatzen ditu. Segmentazioak ez du eratorpenaren zuzentasuna automatikoki frogatzen.
+- Supabase Lexikoa (lexiko_sarrerak, sustrai_aditz_definizioak, lexical_words/lexical_groups eta lexiko_entries) **irakurri soilik** egiten da. Oinarriak eta emaitza-formak biak iturrien barruan egon behar dira. Etiketa editorial murriztaileak iragazten dira. 13 atzizki eta 5 aurrizki grafiko bilatzen dira pilotu honetan.
+- Lema bankuan egoteak **ez du** automatikoki eratorpen-lotura onartzen. Katalogoko harreman berriek needs_morphological_review egoera dute; hau ez da ikasleentzako zuzenketa akademiko ofiziala. Halako onarpena iturri akademikoarekin eta berrikuspenarekin egin behar da.
+- Datuen kontsultak huts egiten badu, aurreko Supabase deskargaren 7 eguneko cache lokala erabiltzen da, baldin badago. Lehen aldiz konexiorik gabe ezin da jolastu; ez da zerrenda finko artifizialik erakusten.
 - Ez da SQL migraketarik, RLS aldaketarik, service_role erabilerarik edo ikasleen eduki pribatuen esportaziorik egin.
 - Jokoaren marka pertsonala SustraiCloud.storage bidez gordetzeko saiakera egiten da; gonbidatuen kasuan tokiko biltegiratzea erabiltzen da.
 - Ez dago ranking publiko/konpetitiborik: bezeroan kalkulatutako puntuazioak ezin dira fidagarritasun egiaztagiritzat hartu.
@@ -26,6 +26,10 @@ Ez ordezkatu dagoen gurutzegrama, TEUSK, ZINOK edo MINTZAKATS.
 ## QA egiteko (ez baliozkotzat jo probatu gabe)
 - [ ] /jokoak/-tik sartu, eta lehengo lau jokoen estekak probatu.
 - [ ] Jokoa saiorik gabe hasi eta amaitu; Supabase erabilgarri dagoen/ez dagoen bi egoerak.
+- [ ] Zenbat lema eta zenbat eratorpen-hautagai deskargatu diren benetan begiratu, baita aurrizkien eta atzizkien kopuruak ere.
+- [ ] 1.000 errenkadako API muga gainditzeko orrialdekatzea egiaztatu; ez utzi erregistroak galduta.
+- [ ] Erabili ezineko hitzak (ez_erabili_jokoan, ez argitaratu) kanpoan geratzen direla frogatu.
+- [ ] Hautagaien artean hitz homografoak, zatiketa okerrak eta eratorpen desegokiak banaka aztertu.
 - [ ] Hasi jokoa: lehen klikaren ondoren erlojuak aurrera egin behar du.
 - [ ] Bi pieza egoki elkartu; biak desagertu eta berriak **erori** behar dira.
 - [ ] Piezak erortzeak ez du bere kabuz puntu, hitz edo aurrizki-zenbaketarik handitu behar.

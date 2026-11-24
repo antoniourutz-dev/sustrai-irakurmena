@@ -102,7 +102,7 @@
       if(!client)throw new Error('Supabase konexioa ez dago prest');
       const [lex,verb,lexical,groups,entries]=await Promise.all([
         pages(client,'lexiko_sarrerak','id,lema,kategoria,glosa_es,definizio_didaktikoa_eu',q=>q.eq('berrikusi_behar_da',false)),
-        pages(client,'sustrai_aditz_definizioak','id,aditza,definizioa_eu,argitalpen_egoera',null),
+        pages(client,'sustrai_aditz_definizioak','id,aditza,definizioa_eu,argitalpen_egoera',q=>q.not('argitalpen_egoera','ilike','%EZ ARGITARATU%')),
         pages(client,'lexical_words','id,group_id,word',q=>q.eq('is_active',true).eq('status','egokia')),
         pages(client,'lexical_groups','id',q=>q.eq('is_active',true).in('review_status',['reviewed_safe','reviewed_context_needed','reviewed_register_sensitive'])),
         pages(client,'lexiko_entries','id,lemma_eu,entry_type,meaning_es',q=>q.eq('status','published'))

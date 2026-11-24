@@ -1,5 +1,5 @@
 /* SUSTRAI PWA service worker */
-const CACHE_VERSION = 'sustrai-pwa-v68-hitzdrop-pilot';
+const CACHE_VERSION = 'sustrai-pwa-v69-hitzdrop-lexikoa';
 const SHELL = [
   '/',
   '/index.html',

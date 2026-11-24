@@ -119,3 +119,32 @@ test('15-word student and teacher Word worksheets keep every clue and answer',as
     }
   }
 });
+test('reference-length 12-clue A4 Word export keeps full descriptions and teacher solutions',async()=>{
+  const sample=puzzleOptions(false,12);
+  const descriptions=[
+    'Bihotzaren jarduera eta erritmoa zehazten dituen prozesu fisiologikoaren azalpen zabala, aldaketa posibleak kontuan hartuta.',
+    'Gorputzeko ehunen funtzioa aztertzeko erabiltzen den adierazle klinikoaren definizio didaktikoa.',
+    'Osasun egoera aztertzerakoan profesionalek balioesten duten prozesu baten ezaugarri orokorren deskribapena.',
+    'Odolaren eta organismoaren arteko harremanari buruzko fenomeno baten definizio zehatza, testuinguru medikoan.',
+    'Pazientearen egoera fisiologikoari buruzko neurketa baten azalpena, beharrezko irizpideak aipatuz.',
+    'Diagnostiko prozesu batean baliatzen den kontzeptuaren azalpena, hainbat egoeratan duen erabilera bereiziz.',
+    'Gorputzeko atal baten zeregin nagusia azaltzen duen definizio zabala, funtzionamenduaren ikuspegitik.',
+    'Tratamendu edo zainketa batean ager daitekeen egoera baten azalpena, dagokion interpretazioarekin.',
+    'Osasun profesionalen jardunean ohikoa den prozedura baten deskribapen didaktiko argi eta zehatza.',
+    'Analisi kliniko batean aztertu beharreko elementuaren definizioa eta haren aplikazio nagusiak.',
+    'Organismoaren jarduera ezagutzeko erabiltzen den kontzeptu baten azalpen zehatza eta ulergarria.',
+    'Gorputzeko sistema batek besteekin duen lotura azaltzen duen oinarrizko kontzeptu klinikoa.'
+  ];
+  sample.words.forEach((w,i)=>w.clue=descriptions[i]);
+  for(const teacher of [false,true]){
+    const data=await docx.Packer.toBuffer(exportModule.buildWord({...sample,teacher},docx,[]));
+    const parts=xmlEntries(data);
+    for(const text of descriptions)assert.ok(parts['word/document.xml'].includes(text));
+    if(process.env.HB_EXPORT_FIXTURES==='1'){
+      const dir=require('node:path').join(__dirname,'export-fixtures');
+      fs.mkdirSync(dir,{recursive:true});
+      fs.writeFileSync(require('node:path').join(dir,
+        'HitzBira-modelo-12-'+(teacher?'irakaslea':'ikaslea')+'.docx'),data);
+    }
+  }
+});

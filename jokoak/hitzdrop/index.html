@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="eu">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#101b37">
+<meta name="description" content="HITZ-DROP: osatu euskarazko hitzak oinarriak, aurrizkiak eta atzizkiak elkartuz. Hiru minutuko arcade jokoa.">
+<title>HITZ-DROP · Jokoak · HitzBira</title>
+<link rel="icon" type="image/svg+xml" href="/icons/icon.svg">
+<link rel="stylesheet" href="/theme.css?v=20261124-hd1">
+<link rel="stylesheet" href="/areas.css?v=20261124-hd1">
+<link rel="stylesheet" href="/auth.css?v=20261117-ezabatu">
+<link rel="stylesheet" href="/jokoak/hitzdrop/style.css?v=20261124-hd1">
+</head>
+<body class="has-tabbar">
+<a class="skip" href="#pageTitle">Joan edukira</a>
+<header class="site-header">
+<a class="site-brand" href="/" aria-label="HitzBira hasiera"><span class="site-brand-mark" aria-hidden="true">✦</span><span class="site-brand-name">hitz<b>bira</b></span></a>
+<nav class="site-nav" aria-label="Atal nagusiak">
+<a href="/">Hasiera</a><a href="/azterketak/">Azterketak</a><a href="/gramatika/">Gramatika</a><a href="/ariketak/">Ariketak</a><a href="/jokoak/" aria-current="page">Jokoak</a><a href="/mi-espacio/">Nire espazioa</a>
+</nav>
+</header>
+<main class="areas-main hd-page">
+<div class="areas-breadcrumb"><a href="/jokoak/">Jokoak</a><span aria-hidden="true">›</span><span>HITZ-DROP</span></div>
+<h1 class="hd-sr" id="pageTitle">HITZ-DROP · Hitzen jokoa</h1>
+<section class="hd-game" aria-label="HITZ-DROP jokoa">
+  <div class="hd-game-head">
+    <div><div class="hd-brand">HITZ <span>✦</span> DROP</div><div class="hd-kicker">SUSTRAI ARCADE · HITZAK SORTU</div></div>
+    <span class="hd-level">🌱 HASIERAKO MAILA</span>
+  </div>
+  <div class="hd-stats">
+    <div class="hd-stat"><small>DENBORA</small><strong id="hdTime">03:00</strong></div>
+    <div class="hd-stat"><small>PUNTUAK</small><strong id="hdScore">0</strong></div>
+    <div class="hd-stat"><small>KONBOA</small><strong id="hdCombo">×1</strong></div>
+    <div class="hd-stat"><small>HITZAK</small><strong id="hdMoves">0</strong></div>
+  </div>
+  <div class="hd-layout">
+    <section class="hd-playfield" id="hdArena" aria-label="Hitzak osatzeko taula">
+      <div class="hd-board-head"><b>✧ HITZEN TAULA</b><span>5 × 6</span></div>
+      <div class="hd-board" id="hdBoard" aria-label="Aukeratu elkarren ondoko bi pieza"></div>
+      <div class="hd-feedback" id="hdFeedback" role="status" aria-live="polite">Aukeratu oinarri bat eta alboko aurrizki edo atzizki bat.</div>
+      <div class="hd-tools">
+        <button type="button" id="hdHint" class="hd-tool">✧ PISTA <span id="hdHintsLeft">5</span></button>
+        <button type="button" id="hdShuffle" class="hd-tool">⇄ NAHASTU <span id="hdShufflesLeft">3</span></button>
+        <button type="button" id="hdPause" class="hd-tool">Ⅱ GELDITU</button>
+        <button type="button" id="hdSound" class="hd-tool" aria-pressed="false">♫ SOINUA</button>
+      </div>
+      <div id="hdOverlay" class="hd-overlay">
+        <div id="hdOverlayIcon" class="hd-overlay-icon">💎</div>
+        <h2 id="hdOverlayTitle">HITZAK SORTU!</h2>
+        <p id="hdOverlayDesc">Aukeratu elkarren ondoko bi pieza. Hiru minutu dituzu hitzak sortzeko. Ez dago presarik lehenengo jokaldian!</p>
+        <button type="button" id="hdStart" class="hd-start">▶ JOLASTU</button>
+      </div>
+    </section>
+    <aside class="hd-side">
+      <section class="hd-panel">
+        <h2>🎯 HIRU ERRONKA</h2>
+        <div class="hd-goal"><div><span>Konbinazioak</span><b id="hdGoalMoves">0 / 12</b></div><div class="hd-track"><i id="hdBarMoves"></i></div></div>
+        <div class="hd-goal"><div><span>Hitz desberdinak</span><b id="hdGoalWords">0 / 8</b></div><div class="hd-track"><i id="hdBarWords"></i></div></div>
+        <div class="hd-goal"><div><span>Aurrizkiak</span><b id="hdGoalPrefixes">0 / 3</b></div><div class="hd-track"><i id="hdBarPrefixes"></i></div></div>
+        <p class="hd-note">Erronkak osatuta ere, jolasten jarrai dezakezu denbora amaitu arte.</p>
+      </section>
+      <section class="hd-panel">
+        <h2>🌱 HITZ-BILDUMA</h2>
+        <div class="hd-collection" id="hdCollection"><span class="hd-note">Aurkitutako hitzak hemen agertuko dira.</span></div>
+      </section>
+      <section class="hd-panel">
+        <h2>✨ AZKEN HITZA</h2>
+        <div class="hd-lastword" id="hdLastWord">—</div>
+        <div class="hd-definition" id="hdDefinition">Hitza osatzean, esanahia ikusiko duzu.</div>
+        <div class="hd-legend"><span><i class="hd-teal"></i>Oinarria</span><span><i class="hd-violet"></i>Atzizkia</span><span><i class="hd-amber"></i>Aurrizkia</span></div>
+      </section>
+      <section class="hd-panel hd-best-panel"><h2>🏆 ZURE MARKA</h2><strong id="hdBest">0 puntu</strong><p class="hd-note" id="hdSource">Hiztegia prestatzen...</p></section>
+    </aside>
+  </div>
+  <p class="hd-smallprint">Joko-puntuak ez dira hizkuntza-gaitasunaren ebaluazio ofiziala. Bankuko hitzak berrerabili dira; deribazio-loturak pilotuan berrikusteko daude.</p>
+</section>
+</main>
+<footer class="areas-footer">HitzBira · SUSTRAI · Prestakuntza didaktikoa, ez egiaztapen ofiziala</footer>
+<nav class="tabbar" aria-label="Atal nagusiak">
+<a href="/"><span class="tabbar-icon" aria-hidden="true">⌂</span><span>Hasiera</span></a>
+<a href="/azterketak/"><span class="tabbar-icon" aria-hidden="true">◉</span><span>Azterketak</span></a>
+<a href="/gramatika/"><span class="tabbar-icon" aria-hidden="true">▤</span><span>Gramatika</span></a>
+<a href="/ariketak/"><span class="tabbar-icon" aria-hidden="true">☑</span><span>Ariketak</span></a>
+<a href="/jokoak/" aria-current="page"><span class="tabbar-icon" aria-hidden="true">✦</span><span>Jokoak</span></a>
+<a href="/mi-espacio/"><span class="tabbar-icon" aria-hidden="true">♙</span><span>Nire espazioa</span></a>
+</nav>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.0" defer></script>
+<script src="/auth.js?v=20261117-ezabatu" defer></script>
+<script src="/jokoak/hitzdrop/catalog.js?v=20261124-hd1" defer></script>
+<script src="/jokoak/hitzdrop/app.js?v=20261124-hd1" defer></script>
+<script src="/pwa.js?v=20261117-ezabatu" defer></script>
+</body>
+</html>

@@ -94,8 +94,8 @@ test('student and teacher native Word documents contain HitzBira and only teache
 
   }
   const solved=base.words[0].word;
-  assert.ok(!stu['word/document.xml'].includes('·  '+solved));
-  assert.ok(tchr['word/document.xml'].includes('·  '+solved));
+  assert.ok(!stu['word/document.xml'].includes('· '+solved));
+  assert.ok(tchr['word/document.xml'].includes('· '+solved));
 });
 
 test('15-word student and teacher Word worksheets keep every clue and answer',async()=>{
@@ -109,7 +109,7 @@ test('15-word student and teacher Word worksheets keep every clue and answer',as
     for(const word of sample.words){
       // Source clues are copied faithfully; no selected term is silently dropped.
       assert.ok(xml.includes(word.clue),'Missing clue '+word.id);
-      if(teacher)assert.ok(xml.includes('·  '+word.word),'Missing teacher solution '+word.id);
+      if(teacher)assert.ok(xml.includes('· '+word.word),'Missing teacher solution '+word.id);
     }
     if(process.env.HB_EXPORT_FIXTURES==='1'){
       const path=require('node:path').join(__dirname,'export-fixtures');

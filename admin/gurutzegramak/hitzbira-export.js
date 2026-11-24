@@ -81,63 +81,61 @@
       run('HitzBira',{size:12,color:MUTED}),run('  ·  ',{size:12,color:MUTED}),
       new TextRun({children:[PageNumber.CURRENT],font:'Arial',size:12,color:MUTED})
     ],{alignment:AlignmentType.RIGHT,spacing:{after:0}})]});
-    // Preserve an editable table but size its cells to the *left* half of A4.
-    const leftWidth=6260,gutter=190,rightWidth=cw-leftWidth-gutter;
-    const size=Math.max(235,Math.min(380,Math.floor((leftWidth-150)/p.grid_cols),
-      Math.floor(9550/p.grid_rows)));
-    const numberLine=(n)=>paragraph([run(n?String(n):'',{size:10,bold:true,color:MUTED})],{
-      spacing:{before:0,after:0,line:120,lineRule:LineRuleType.EXACT}});
-    const letterLine=(ch)=>paragraph([run(ch,{font:'Arial',size:18,bold:true,color:GREEN})],{
-      alignment:AlignmentType.CENTER,spacing:{before:0,after:0,line:205,lineRule:LineRuleType.EXACT}});
+    // Reference model: a wide board above full-width horizontal and vertical clues.
+    // Each square remains a real editable Word table cell.
+    const clueChars=(options.words||[]).reduce((n,w)=>n+safe(w.clue).length,0);
+    const boardHeightLimit=Math.max(6900,9600-Math.max(0,(options.words||[]).length-10)*200-
+      Math.max(0,clueChars-680)*2);
+    const size=Math.min(515,Math.floor((cw-160)/p.grid_cols),
+      Math.floor(boardHeightLimit/p.grid_rows));
+    if(size<285)throw Error('Gurutzegramaren lauki-sarea handiegia da Wordeko A4rako.');
+    const numLine=Math.max(95,Math.min(133,Math.floor(size*0.28)));
+    const glyphLine=Math.max(120,Math.min(220,Math.floor(size*0.48)));
+    const numberLine=n=>new Paragraph({children:[run(n?String(n):'',
+      {size:12,bold:true,color:MUTED})],
+      spacing:{before:0,after:0,line:numLine,lineRule:LineRuleType.EXACT}});
+    const letterLine=ch=>new Paragraph({children:[run(ch,{
+      font:'Arial',size:Math.min(22,Math.max(15,Math.floor(size/20))),bold:true,
+      color:GREEN})],alignment:AlignmentType.CENTER,
+      spacing:{before:0,after:0,line:glyphLine,lineRule:LineRuleType.EXACT}});
     const rows=Array.from({length:p.grid_rows},(_,r)=>new TableRow({
-      cantSplit:true,height:{value:size,rule:HeightRule.ATLEAST},
+      cantSplit:true,height:{value:size,rule:HeightRule.EXACT},
       children:Array.from({length:p.grid_cols},(_,c)=>{
         const value=options.cells.get(r+','+c),active=!!value;
-        return new TableCell({width:{size,type:WidthType.DXA},borders:four(active?border:no),
-          margins:{top:0,bottom:0,left:16,right:16},
+        return new TableCell({
+          width:{size,type:WidthType.DXA},borders:four(active?border:no),
+          margins:{top:0,bottom:0,left:19,right:19},
           shading:{fill:active&&meta.teacher?'E8F6F0':'FFFFFF'},
-          verticalAlign:VerticalAlign.CENTER,
-          children:[numberLine(value?.number||''),letterLine(active&&meta.teacher?value.letter:'')]
+          verticalAlign:VerticalAlign.TOP,
+          children:[numberLine(value?.number||''),
+            letterLine(active&&meta.teacher?value.letter:'')]
         });
       })
     }));
     const board=new Table({width:{size:size*p.grid_cols,type:WidthType.DXA},
-      columnWidths:Array(p.grid_cols).fill(size),alignment:AlignmentType.CENTER,
-      layout:TableLayoutType.FIXED,borders:none,rows});
-    const right=[];
+      columnWidths:Array(p.grid_cols).fill(size),
+      alignment:AlignmentType.CENTER,layout:TableLayoutType.FIXED,
+      borders:none,rows});
+    const body=[
+      paragraph([run(meta.subject,{size:30,bold:true,color:INK})],{
+        alignment:AlignmentType.CENTER,
+        spacing:{before:0,after:120},keepNext:true}),
+      board
+    ];
     for(const [direction,heading] of [['H','Horizontalak'],['V','Bertikalak']]){
-      right.push(paragraph([run(heading,{size:18,bold:true,color:AQUA})],{
-        spacing:{before:direction==='H'?0:120,after:100},keepNext:true}));
-      const arr=(options.words||[]).filter(w=>w.dir===direction)
-        .sort((a,b)=>a.number-b.number);
-      for(const w of arr){
-        right.push(paragraph([
-          run(w.number+'. ',{size:16,bold:true,color:AQUA}),
-          run(w.clue,{size:16,color:INK}),
-          run(' ('+w.word.length+')',{size:13,color:MUTED}),
-          ...(meta.teacher?[run('  ·  '+w.word,{size:15,bold:true,color:GREEN})]:[])
-        ],{spacing:{before:0,after:95,line:220},keepLines:true}));
+      body.push(paragraph([run(heading,{size:19,bold:true,color:AQUA})],{
+        spacing:{before:direction==='H'?85:120,after:45},keepNext:true}));
+      const entries=(options.words||[]).filter(w=>w.dir===direction)
+        .sort((x,y)=>x.number-y.number);
+      for(const w of entries){
+        body.push(paragraph([
+          run(w.number+'. ',{size:17,bold:true,color:AQUA}),
+          run(w.clue,{size:17,color:INK}),
+          run(' ('+w.word.length+')',{size:15,color:MUTED}),
+          ...(meta.teacher?[run(' · '+w.word,{size:16,bold:true,color:GREEN})]:[])
+        ],{spacing:{before:0,after:50,line:207},keepLines:true}));
       }
     }
-    const wideCell=(width,children)=>new TableCell({
-      width:{size:width,type:WidthType.DXA},borders:four(no),
-      margins:{top:0,bottom:0,left:0,right:0},
-      verticalAlign:VerticalAlign.TOP,children
-    });
-    const layout=new Table({width:{size:cw,type:WidthType.DXA},
-      columnWidths:[leftWidth,gutter,rightWidth],
-      layout:TableLayoutType.FIXED,borders:none,
-      rows:[new TableRow({children:[
-        wideCell(leftWidth,[board,paragraph([],{spacing:{after:0}})]),
-        wideCell(gutter,[paragraph([],{spacing:{after:0}})]),
-        wideCell(rightWidth,right)
-      ]})]});
-    const body=[
-      paragraph([run(meta.subject,{size:29,bold:true,font:'Arial',color:INK})],{
-        alignment:AlignmentType.CENTER,
-        spacing:{before:0,after:195},keepNext:true}),
-      layout
-    ];
 
     return new d.Document({
       creator:'HitzBira',title:'HitzBira · '+meta.subject,subject:meta.subject,
@@ -145,7 +143,7 @@
       styles:{default:{document:{run:{font:'Arial',size:17,color:INK},
         paragraph:{spacing:{after:100}}}}},
       sections:[{properties:{page:{size:{width:11906,height:16838},
-        margin:{top:1200,bottom:780,left:685,right:685,header:280,footer:430}}},
+        margin:{top:1200,bottom:560,left:685,right:685,header:250,footer:340}}},
         headers:{default:header},footers:{default:footer},children:body}]
     });
   }

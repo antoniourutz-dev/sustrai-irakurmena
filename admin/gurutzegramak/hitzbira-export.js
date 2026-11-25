@@ -49,7 +49,7 @@
     const {Paragraph,TextRun,Table,TableRow,TableCell,WidthType,BorderStyle,
       TableLayoutType,AlignmentType,VerticalAlign,HeightRule,LineRuleType,Header,Footer,PageNumber}=d;
     const no={style:BorderStyle.NIL,size:0,color:'FFFFFF'};
-    const border={style:BorderStyle.SINGLE,size:5,color:'C8DFE6'};
+    const border={style:BorderStyle.SINGLE,size:9,color:'B7CCD5'};
     const four=b=>({top:b,bottom:b,left:b,right:b});
     const none={...four(no),insideHorizontal:no,insideVertical:no};
     const run=(v,props={})=>new TextRun({text:safe(v),font:'Arial',size:19,color:INK,...props});
@@ -158,7 +158,7 @@
       '.hb-content{padding-top:9px}',
       '.hb-subject{text-align:center;font-size:23px;line-height:1.18;font-weight:800;color:#193B4C;margin:3px 0 12px;overflow-wrap:anywhere}',
       '.hb-board{display:grid;width:max-content;max-width:100%;margin:0 auto;gap:0}',
-      '.hb-cell{position:relative;border:1px solid #cedfe6;background:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#176A52}',
+      '.hb-cell{position:relative;border:1.8px solid #b7ccd5;background:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#176A52}',
       '.hb-cell.is-empty{border-color:transparent;background:#fff}',
       '.hb-cell.is-solved{background:#e8f6f0}.hb-cell small{position:absolute;top:1px;left:2px;line-height:1;font-size:9px;font-weight:800;color:#536a7a}',
       '.hb-clues{margin-top:11px}',

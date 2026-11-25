@@ -148,3 +148,13 @@ test('reference-length 12-clue A4 Word export keeps full descriptions and teache
     }
   }
 });
+
+test('crossword export borders stay visible on printed A4 sheets',async()=>{
+  const source=fs.readFileSync(require('node:path').join(__dirname,'../admin/gurutzegramak/hitzbira-export.js'),'utf8');
+  assert.match(source,/border:1\.8px solid #b7ccd5/);
+  const sample=puzzleOptions(false,10);
+  const doc=exportModule.buildWord(sample,docx,[]);
+  const xml=xmlEntries(await docx.Packer.toBuffer(doc))['word/document.xml'];
+  assert.match(xml,/B7CCD5/);
+  assert.match(xml,/w:sz="9"/);
+});
